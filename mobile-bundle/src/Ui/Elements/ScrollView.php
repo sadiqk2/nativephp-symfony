@@ -18,4 +18,14 @@ final class ScrollView extends Element
 
         return $el;
     }
+
+    /**
+     * overflow=2 (scroll). Without it a scroll_view lays out like a plain column and
+     * silently does not scroll — found by inventorying upstream's defaults rather than
+     * by reading them, which is why the exhaustive comparison test below exists.
+     */
+    protected function layoutDefaults(): array
+    {
+        return ['overflow' => 2];
+    }
 }

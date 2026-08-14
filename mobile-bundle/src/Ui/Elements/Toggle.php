@@ -18,12 +18,23 @@ final class Toggle extends Element
 
     private ?string $changeMethod = null;
 
-    public static function make(bool $value = false): self
+    /** @param bool|null $value Omitted when null — see TextInput::make(). */
+    public static function make(?bool $value = null): self
     {
         $el = new self();
-        $el->toggleProps['value'] = $value;
+
+        if (null !== $value) {
+            $el->toggleProps['value'] = $value;
+        }
 
         return $el;
+    }
+
+    public function value(bool $value): self
+    {
+        $this->toggleProps['value'] = $value;
+
+        return $this;
     }
 
     public function label(string $label): self

@@ -29,7 +29,7 @@ final class NativeUiAuthoringTest extends TestCase
         // The alternative — emitting an unrecognised type — gives a screen with a
         // missing region and no error anywhere.
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageMatches('/Unknown native element type "flexbox". Available: column, row/');
+        $this->expectExceptionMessageMatches('/Unknown native element type "flexbox"\. Available: .*\bcolumn\b.*\brow\b/');
 
         (new ElementFactory())->create('flexbox');
     }

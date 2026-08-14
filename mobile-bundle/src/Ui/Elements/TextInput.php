@@ -23,12 +23,29 @@ final class TextInput extends Element
 
     private ?string $changeMethod = null;
 
-    public static function make(string $value = ''): self
+    /**
+     * @param string|null $value Omitted entirely when null, rather than sent as an
+     *                           empty string. Upstream's make() takes no argument, so
+     *                           an unconditional value prop makes an otherwise
+     *                           identical node diverge — and it feeds the content hash,
+     *                           so the divergence propagates to every ancestor.
+     */
+    public static function make(?string $value = null): self
     {
         $el = new self();
-        $el->inputProps['value'] = $value;
+
+        if (null !== $value) {
+            $el->inputProps['value'] = $value;
+        }
 
         return $el;
+    }
+
+    public function value(string $value): self
+    {
+        $this->inputProps['value'] = $value;
+
+        return $this;
     }
 
     public function placeholder(string $placeholder): self

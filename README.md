@@ -13,7 +13,7 @@ full API, packaged into a distributable app that has been built *and run*.
 | | |
 |---|---|
 | **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 116 runtime endpoints, all 44 events, 235 tests. Verified by a running packaged app. |
-| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and native-UI element trees byte-identical to upstream's. 76 tests. Verified by tests, **not** by a device. |
+| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and native-UI element trees byte-identical to upstream's across all 36 element types. 103 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
 

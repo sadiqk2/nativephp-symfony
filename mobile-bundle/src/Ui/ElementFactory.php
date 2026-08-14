@@ -24,19 +24,45 @@ final class ElementFactory
     public function __construct(array $extra = [])
     {
         $this->types = [
-            'column' => Elements\Column::class,
-            'row' => Elements\Row::class,
-            'stack' => Elements\Stack::class,
-            'scroll_view' => Elements\ScrollView::class,
-            'spacer' => Elements\Spacer::class,
-            'divider' => Elements\Divider::class,
-            'text' => Elements\Text::class,
+            'activity_indicator' => Elements\ActivityIndicator::class,
+            'bottom_bar' => Elements\BottomBar::class,
+            'bottom_nav' => Elements\BottomNav::class,
+            'bottom_nav_item' => Elements\BottomNavItem::class,
+            'bottom_sheet' => Elements\BottomSheet::class,
             'button' => Elements\Button::class,
+            'canvas' => Elements\Canvas::class,
+            'circle' => Elements\Circle::class,
+            'column' => Elements\Column::class,
+            'divider' => Elements\Divider::class,
+            'gesture_area' => Elements\GestureArea::class,
+            'icon' => Elements\Icon::class,
             'image' => Elements\Image::class,
+            'lazy_grid' => Elements\LazyGrid::class,
+            'line' => Elements\Line::class,
+            'native_root_stack' => Elements\NativeRootStack::class,
+            'native_root_tabs' => Elements\NativeRootTabs::class,
+            'pressable' => Elements\Pressable::class,
+            'rect' => Elements\Rect::class,
+            'refreshable' => Elements\Refreshable::class,
+            'row' => Elements\Row::class,
+            'scroll_view' => Elements\ScrollView::class,
+            'search_item' => Elements\SearchItem::class,
+            'side_nav' => Elements\SideNav::class,
+            'side_nav_group' => Elements\SideNavGroup::class,
+            'side_nav_header' => Elements\SideNavHeader::class,
+            'side_nav_item' => Elements\SideNavItem::class,
+            'spacer' => Elements\Spacer::class,
+            'stack' => Elements\Stack::class,
+            'tab_accessory' => Elements\TabAccessory::class,
+            'text' => Elements\Text::class,
             'text_input' => Elements\TextInput::class,
             'toggle' => Elements\Toggle::class,
-            'pressable' => Elements\Pressable::class,
-            'activity_indicator' => Elements\ActivityIndicator::class,
+            'top_bar' => Elements\TopBar::class,
+            'top_bar_action' => Elements\TopBarAction::class,
+            'top_bar_title' => Elements\TopBarTitle::class,
+            // Fab is not a wire type of its own: upstream emits `pressable` for it, so
+            // it is reachable as a class but not by name. Aliasing it here would make
+            // native('pressable') ambiguous for no gain.
             ...$extra,
         ];
     }
@@ -87,24 +113,36 @@ final class ElementFactory
             'text' => Elements\Text::make((string) ($options['text'] ?? '')),
             'button' => Elements\Button::make((string) ($options['label'] ?? '')),
             'image' => Elements\Image::make((string) ($options['source'] ?? '')),
-            'text_input' => Elements\TextInput::make((string) ($options['value'] ?? '')),
-            'toggle' => Elements\Toggle::make((bool) ($options['value'] ?? false)),
+            // Null, not a cast default: passing '' or false would emit a value prop the
+            // caller never asked for.
+            'text_input' => Elements\TextInput::make(isset($options['value']) ? (string) $options['value'] : null),
+            'toggle' => Elements\Toggle::make(isset($options['value']) ? (bool) $options['value'] : null),
+            'icon' => Elements\Icon::make((string) ($options['name'] ?? '')),
             default => $class::make(...$children),
         };
 
-        // Container types took their children through make(); the rest may still have
-        // them, and a text element with children is a template bug worth surfacing.
-        if ([] !== $children && !$element instanceof Elements\Column
-            && !$element instanceof Elements\Row
-            && !$element instanceof Elements\Stack
-            && !$element instanceof Elements\ScrollView
-            && !$element instanceof Elements\Spacer
-            && !$element instanceof Elements\Pressable
-        ) {
+        // Container types already took their children through make(); anything else
+        // needs them attached. Decided from make()'s signature rather than a
+        // hand-kept list, so adding an element cannot silently miss this.
+        if ([] !== $children && !$this->takesChildrenInMake($class)) {
             $element->child(...$children);
         }
 
         return $this->applyProps($element, $type, $options);
+    }
+
+    /** @param class-string<Element> $class */
+    private function takesChildrenInMake(string $class): bool
+    {
+        static $cache = [];
+
+        if (isset($cache[$class])) {
+            return $cache[$class];
+        }
+
+        $parameters = (new \ReflectionMethod($class, 'make'))->getParameters();
+
+        return $cache[$class] = [] !== $parameters && $parameters[0]->isVariadic();
     }
 
     /** @param array<string, mixed> $options */
@@ -117,7 +155,13 @@ final class ElementFactory
                 continue;
             }
 
-            if (\in_array($name, ['text', 'label', 'source', 'value'], true)) {
+            // Consumed by the constructor above. `label` is the exception: it is a
+            // constructor argument for a button and an ordinary prop on nav items,
+            // so it is only skipped where make() already took it.
+            if (\in_array($name, ['text', 'source', 'value'], true)
+                || ('label' === $name && 'button' === $type)
+                || ('name' === $name && 'icon' === $type)
+            ) {
                 continue;
             }
 

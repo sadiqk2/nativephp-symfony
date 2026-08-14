@@ -139,8 +139,11 @@ navigation keys. That comparison caught three things a careful reading had got w
 they are written up in [`../NATIVE-UI-CONTRACT.md`](../NATIVE-UI-CONTRACT.md).
 
 What is implemented: the tree builder with the identity, Merkle-hash and reuse rules,
-a callback registry, 13 of 37 element types, a factory, the Twig extension, and a
-publisher that keeps the diff state between frames. What is not: the Tailwind-subset
+a callback registry, **all 36 wire types** (37 element classes — `Fab` shares
+`pressable`), a factory, the Twig extension, and a publisher that keeps the diff state
+between frames. Every type is byte-compared against upstream's equivalent, and the test
+also fails on an *invented* type, since one the renderers do not know produces a missing
+region on the device and no error anywhere. What is not: the Tailwind-subset
 style parser, `Route::native` equivalents, and a component lifecycle — that last being
 the real design question, since Symfony has nothing Livewire-shaped to borrow.
 
@@ -155,7 +158,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 | `Runtime/ResponseEmitter` | a raw HTTP message on stdout, header-injection safe |
 | `Runtime/MobileRuntimePatcher` | retargets the hosts' hardcoded bootstrap paths |
 | `Resources/bootstrap/` | `native.php`, `persistent.php`, `dispatch.php`, `console.php` |
-| `Ui/` | the native element tree: builder, registry, 13 elements, factory, publisher |
+| `Ui/` | the native element tree: builder, registry, 37 elements, factory, publisher |
 | `Ui/Twig/` | `native()` for authoring trees from templates |
 
 `native.php` pays for the autoloader and container per request; `persistent.php` plus
@@ -167,8 +170,9 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 composer install && vendor/bin/phpunit
 ```
 
-76 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
-collector. `BridgeCoverageTest` parses the upstream sources and fails if a native
+103 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
+collector, and `UiElementCoverageTest` does it per type — which is how two missing
+defaults were found (`ScrollView`'s `overflow=2` and `Circle`'s `border_radius=9999`). `BridgeCoverageTest` parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. `MobileRuntimeTest` drives
 a real Symfony kernel through the persistent runtime and proves state does not leak
 between requests and that a throwing controller is contained rather than fatal.
