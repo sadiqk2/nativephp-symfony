@@ -74,6 +74,16 @@ use Native\Symfony\Mobile\Ui\Element;
  * `__navigate` callbacks are recognised so a navigating element still renders and
  * dispatches, but they are delivered to the {@see onNavigate} hook and this class does
  * nothing else with them.
+ *
+ * Upstream's `SharedValue` is also *not* part of this: it is a handle to a numeric
+ * value that lives on the native side and is mutated on the UI thread by gestures, so
+ * its per-frame values never cross into PHP and it has nothing to do with component
+ * state or the callback round trip. It belongs with the element and style layers.
+ *
+ * Also absent, and deliberately: an event bus between components. Upstream bubbles
+ * `emit()` up the ancestor chain, which is real machinery with real ordering rules;
+ * until something needs it, a child telling a parent something can be a prop holding a
+ * callable, and half-building the bus would only make the eventual design harder.
  */
 abstract class NativeComponent
 {
@@ -373,6 +383,11 @@ abstract class NativeComponent
      * error anywhere — the single most annoying failure mode this path has. The
      * allowlist check in {@see dispatch()} remains the authoritative one.
      *
+     * Argument *counts* are deliberately not checked here. How many values a call ends
+     * up with depends on the event type, which is not known until the interaction
+     * arrives — so a check at this point would either always pass or reject valid
+     * bindings. It belongs at dispatch, and lives there.
+     *
      * @throws CallbackRefused
      */
     final public function assertCallbacksDispatchable(): void
@@ -386,25 +401,7 @@ abstract class NativeComponent
                 continue;
             }
 
-            $method = ComponentActions::resolve($this, $expression);
-
-            // Required parameters that no literal fills must be fillable by the event
-            // payload; a press carries none, so this catches `->onPress('tag')` on
-            // `tag(string $name)` at first paint instead of on first tap.
-            $available = \count($expression->arguments)
-                + ComponentActions::eventArgumentSlots($method, \count($expression->arguments));
-
-            if ($available < $method->getNumberOfRequiredParameters()) {
-                throw new CallbackRefused(sprintf(
-                    'Callback "%s" on %s cannot satisfy %s::%s(): %d argument(s) available, %d required.',
-                    $expression->raw,
-                    static::class,
-                    $method->getDeclaringClass()->getShortName(),
-                    $method->getName(),
-                    $available,
-                    $method->getNumberOfRequiredParameters(),
-                ));
-            }
+            ComponentActions::resolve($this, $expression);
         }
 
         foreach ($this->nativeChildren as $child) {

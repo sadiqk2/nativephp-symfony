@@ -1,12 +1,12 @@
 # Upstream patches — prepared, not submitted
 
-Nine patches, ready to become pull requests. **Nothing here has been submitted.** They
+Ten patches, ready to become pull requests. **Nothing here has been submitted.** They
 are prepared so that opening the PRs is a decision rather than a project.
 
 | | repo | base |
 |---|---|---|
 | `0001`–`0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` |
-| `0008`, `0009` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` |
+| `0008`–`0010` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` |
 
 Every patch applies cleanly to a clean tree, individually and as a series — verified with
 `git apply --check`. `0001` typechecks clean under the project's own `tsc`. `0008` is
@@ -119,6 +119,33 @@ empty captures so an omitted segment reads as absent rather than blank.
 
 Found by porting `BootPlanner.matches()` and testing the port against upstream.
 
+## `0010` — the callback expression parser corrupts and drops arguments
+
+`CallbackRegistry::parse()` converts single-quoted argument literals to JSON with
+`str_replace("'", '"')` — every apostrophe, whatever its role — and then degrades any
+decode failure to `$args ?? []`. Three distinct silent failures, all verified against
+upstream's own code:
+
+```
+                       BEFORE                        AFTER
+save('hello')          ["hello"]        ✓            ["hello"]     ✓
+save("don't")          []               ✗ dropped    ["don't"]     ✓
+rename('it\'s fine')   ["it\"s fine"]   ✗ CORRUPTED  ["it's fine"] ✓
+setName('O'Brien')     []               ✗ silent     [] + logged   ✓
+```
+
+The third is the one that matters: no error, no empty result — the handler runs with a
+value the author never wrote. `it's fine` becomes `it"s fine`. If that is a name on its way
+to a database, it is corrupted with nothing to indicate it.
+
+The fix tracks which quote actually opened the current string, so an apostrophe inside a
+double-quoted literal is data rather than a delimiter, and `\'` inside a single-quoted one
+becomes a bare apostrophe rather than a double quote.
+
+`args` stays `[]` on a genuine parse failure rather than becoming null, because callers
+spread it (`NativeComponent.php:3316`, `:3371`) and a null would be a TypeError —
+tightening that contract deserves its own change. But the failure is no longer silent.
+
 ## Suggested order
 
 Submit the small fixes first. They are independently valuable, quick to review, and they
@@ -130,8 +157,8 @@ establish that the effort is serious before anything larger is proposed.
 4. `0007` — metadata.
 5. `0001` — last, once the others have landed.
 
-`0008` and `0009` are independent of the above and of each other; both are in a different
-repository.
+`0008`, `0009` and `0010` are independent of the above and of each other; all three are in
+a different repository.
 
 ## What is deliberately not here
 

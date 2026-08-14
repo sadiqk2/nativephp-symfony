@@ -123,13 +123,17 @@ final class ComponentActions
     public static function eventArgumentSlots(\ReflectionMethod $method, int $literalCount): int
     {
         $parameters = $method->getParameters();
-        $next = $parameters[$literalCount] ?? null;
+        $slots = 0;
 
-        if (null === $next || $next->isVariadic()) {
-            return 0;
+        for ($i = $literalCount; $i < \count($parameters); ++$i) {
+            if ($parameters[$i]->isVariadic()) {
+                break;
+            }
+
+            ++$slots;
         }
 
-        return \count($parameters) - $literalCount;
+        return $slots;
     }
 
     /**

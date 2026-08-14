@@ -138,6 +138,25 @@ framework dependencies — and byte-compares trees, content hashes, callback ids
 navigation keys. That comparison caught three things a careful reading had got wrong;
 they are written up in [`../NATIVE-UI-CONTRACT.md`](../NATIVE-UI-CONTRACT.md).
 
+Screens are declared with `#[NativeScreen('/items/{id}')]` and rendered by components:
+
+```php
+final class Counter extends NativeComponent
+{
+    private int $count = 0;
+
+    #[NativeAction]
+    public function increment(): void { $this->count++; }
+
+    public function render(): Element { /* … */ }
+}
+```
+
+State is ordinary typed properties — no serialisation, no rehydration, because the PHP
+process is long-lived. **Only `#[NativeAction]` methods are callable from the device**, and
+an id arriving from the native side is only ever a lookup key: it never becomes a method
+name.
+
 What is implemented: the tree builder with the identity, Merkle-hash and reuse rules,
 a callback registry, **all 36 wire types** (37 element classes — `Fab` shares
 `pressable`), a factory, the Twig extension, and a publisher that keeps the diff state
@@ -160,6 +179,8 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 | `Resources/bootstrap/` | `native.php`, `persistent.php`, `dispatch.php`, `console.php` |
 | `Ui/` | the native element tree: builder, registry, 37 elements, factory, publisher |
 | `Ui/Twig/` | `native()` for authoring trees from templates |
+| `Ui/Routing/` | `#[NativeScreen]`, the BootPlanner-compatible matcher, manifest export |
+| `Ui/Component/` | `NativeComponent`, `ComponentScreen`, and the four-layer callback guard |
 
 `native.php` pays for the autoloader and container per request; `persistent.php` plus
 `dispatch.php` pay once. Prefer the persistent pair wherever the host supports it.
@@ -170,7 +191,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 composer install && vendor/bin/phpunit
 ```
 
-103 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
+204 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
 collector, and `UiElementCoverageTest` does it per type — which is how two missing
 defaults were found (`ScrollView`'s `overflow=2` and `Circle`'s `border_radius=9999`). `BridgeCoverageTest` parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. `MobileRuntimeTest` drives
