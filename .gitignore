@@ -11,3 +11,5 @@ node_modules/
 
 # Build output
 dist/
+/mobile-bundle/vendor/
+/mobile-bundle/.phpunit.cache/
