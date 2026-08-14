@@ -157,6 +157,17 @@ process is long-lived. **Only `#[NativeAction]` methods are callable from the de
 an id arriving from the native side is only ever a lookup key: it never becomes a method
 name.
 
+Styling uses the same Tailwind-subset classes:
+
+```php
+Elements\Column::make(...)->layout($styles->parse('flex-1 p-4 gap-2'));
+```
+
+`StyleParser` reproduces upstream's output **byte-identically** — verified against 684
+tokens and 1,336 class strings extracted from `super-native`, plus a 48,849-parse
+differential sweep against upstream's own parser. The only intentional divergence is a
+bug fix (see `../upstream-patches/` `0008`).
+
 What is implemented: the tree builder with the identity, Merkle-hash and reuse rules,
 a callback registry, **all 36 wire types** (37 element classes — `Fab` shares
 `pressable`), a factory, the Twig extension, and a publisher that keeps the diff state
@@ -181,6 +192,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 | `Ui/Twig/` | `native()` for authoring trees from templates |
 | `Ui/Routing/` | `#[NativeScreen]`, the BootPlanner-compatible matcher, manifest export |
 | `Ui/Component/` | `NativeComponent`, `ComponentScreen`, and the four-layer callback guard |
+| `Ui/Style/` | the Tailwind-subset parser — 100% parity with upstream across 684 tokens |
 
 `native.php` pays for the autoloader and container per request; `persistent.php` plus
 `dispatch.php` pay once. Prefer the persistent pair wherever the host supports it.
@@ -191,7 +203,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 composer install && vendor/bin/phpunit
 ```
 
-204 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
+236 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
 collector, and `UiElementCoverageTest` does it per type — which is how two missing
 defaults were found (`ScrollView`'s `overflow=2` and `Circle`'s `border_radius=9999`). `BridgeCoverageTest` parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. `MobileRuntimeTest` drives
