@@ -226,13 +226,35 @@ native_screens:
 It is not registered by the bundle, deliberately: an app that already puts `#[Route]` next
 to `#[NativeScreen]` needs nothing from it.
 
-Rendering is behind a seam. `NativeScreenResponder` turns a path into a published frame, but
-it needs a `ScreenRendererInterface` implementation — routing's job ends at "this path is
-screen X with these parameters", and turning X into an element tree is the component
-lifecycle's job. The bundle registers the responder with `nullOnInvalid()` on the renderer,
-so **if you have not registered a `ScreenRendererInterface` implementation, do not fetch
-`NativeScreenResponder`** — its own constructor requires one. Either register a renderer, or
-use `ComponentScreenFactory` directly:
+Rendering is behind a seam, and the bundle fills it. `NativeScreenResponder` turns a path
+into a published frame by asking a `ScreenRendererInterface` for the root element — routing's
+job ends at "this path is screen X with these parameters", and turning X into an element tree
+is the component lifecycle's job. `ComponentScreenRenderer` is that implementation, aliased to
+the interface, so a `#[NativeScreen]` component works with no glue:
+
+```php
+$frame = $responder->respond('/counter');                                  // first paint
+$id    = $responder->callbacks()->idFor('increment');                      // what the device sends back
+$renderer->dispatch('/counter', InteractionEvent::press($id));             // tap
+$frame = $responder->republish();                                          // repaint, as a delta
+```
+
+Two things it does that are easy to get wrong and silent when wrong: it keeps the *same*
+component instance across frames of one screen (re-instantiating per frame gives a screen
+whose state resets on every tap), and it binds that component to the registry the responder
+handed it (a registry of its own makes every incoming callback id miss). Navigating away and
+back is a new visit and does start fresh; call `forget($pattern)` when a screen closes so its
+component is unmounted rather than held for the life of the app.
+
+A screen with constructor dependencies just needs to be a service — the bundle autoconfigures
+every `NativeComponent` with the `native.screen` tag, and the renderer resolves the class
+through that locator. A screen with no dependencies needs no registration at all. Route
+parameters are handed over only if the screen declares `withRouteParameters(array $params)`.
+
+To render something other than a component — a Twig template, a controller action — implement
+`ScreenRendererInterface` yourself and override the alias in your own configuration, which is
+loaded after the bundle's. `ComponentScreenFactory` remains available for driving a screen
+directly, without routing:
 
 ```php
 use Native\Symfony\Mobile\Ui\Component\ComponentScreenFactory;

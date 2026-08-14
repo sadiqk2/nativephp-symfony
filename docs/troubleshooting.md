@@ -450,12 +450,25 @@ rebound: reusing one throws.
 5. The requested path matches none of the declared patterns — check you used Laravel
    placeholder syntax (`{id}`, `{id?}`), which is what the device matches.
 
+### A `#[NativeScreen]` renders, but its state resets on every tap
+
+The screen is being re-instantiated per frame rather than kept alive. `ComponentScreenRenderer`
+caches one instance per route pattern for exactly this reason, so this points at a custom
+`ScreenRendererInterface` that builds a fresh component in `renderScreen()`. State lives in
+ordinary properties, so a new instance is a new screen — and nothing logs it.
+
+The same shape with the opposite symptom: if taps do nothing at all, the component was bound
+to a registry it created itself instead of the one `renderScreen()` was handed. The id the
+device sends back was minted by the previous frame and only resolves in the registry that
+holds it, so the lookup misses silently.
+
 ### `NativeScreenResponder` cannot be instantiated
 
-It requires a `ScreenRendererInterface`, and the bundle wires that argument with
-`nullOnInvalid()` — so fetching the service in an app that has registered no renderer fails on
-its constructor's type. Register a renderer implementation, or use `ComponentScreenFactory`
-directly and do not touch the responder.
+Only reachable now if the alias has been overridden with something that does not resolve — the
+bundle aliases `ScreenRendererInterface` to `ComponentScreenRenderer`, and the responder's
+renderer argument is wired `nullOnInvalid()`. If you overrode it, check your service is
+registered and public enough to be aliased; otherwise the responder throws a `LogicException`
+naming the interface at the point a native screen is actually requested.
 
 ### `theme-*` classes produce no colour, or `ios:` classes vanish
 

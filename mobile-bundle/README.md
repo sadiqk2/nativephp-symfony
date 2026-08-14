@@ -5,7 +5,7 @@ Build iOS and Android applications with Symfony, on NativePHP's mobile runtime.
 Status: **the WebView render path is implemented, and the native-UI wire format is
 implemented and verified.** All **54 native bridge methods** are wrapped, the SAPI
 shim and persistent runtime are in place, element trees are byte-identical to
-upstream's, and 304 tests cover it.
+upstream's, and 318 tests cover it.
 
 > **Verified by tests, not by a device.** Unlike the desktop bundle — whose claim is
 > backed by a screenshot of a running packaged app — nothing here has run on a phone
@@ -196,7 +196,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 | `Ui/` | the native element tree: builder, registry, 37 elements, factory, publisher |
 | `Ui/Twig/` | `native()` for authoring trees from templates |
 | `Ui/Routing/` | `#[NativeScreen]`, the BootPlanner-compatible matcher, manifest export |
-| `Ui/Component/` | `NativeComponent`, `ComponentScreen`, and the four-layer callback guard |
+| `Ui/Component/` | `NativeComponent`, `ComponentScreen`, `ComponentScreenRenderer` (routing → components), and the four-layer callback guard |
 | `Ui/Style/` | the Tailwind-subset parser — 100% parity with upstream across 684 tokens |
 
 `native.php` pays for the autoloader and container per request; `persistent.php` plus
@@ -208,7 +208,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 composer install && vendor/bin/phpunit
 ```
 
-304 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
+318 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
 collector, and `UiElementCoverageTest` does it per type — which is how two missing
 defaults were found (`ScrollView`'s `overflow=2` and `Circle`'s `border_radius=9999`). `BridgeCoverageTest` parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. `MobileRuntimeTest` drives

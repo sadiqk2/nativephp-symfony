@@ -12,8 +12,8 @@ full API, packaged into a distributable app that has been built *and run*.
 
 | | |
 |---|---|
-| **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 116 runtime endpoints, all 44 events, 298 tests. Verified by a running packaged app. |
-| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 304 tests. Verified by tests, **not** by a device. |
+| **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 116 runtime endpoints, all 44 events, 305 tests. Verified by a running packaged app. |
+| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 318 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
 | [`upstream-patches/`](upstream-patches/README.md) | Seven patches against `NativePHP/desktop`, ready to become PRs. **Not submitted.** All apply cleanly; the big one typechecks. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |

@@ -14,6 +14,8 @@ use Native\Symfony\Mobile\Runtime\ResponseEmitter;
 use Native\Symfony\Mobile\Ui\ElementFactory;
 use Native\Symfony\Mobile\Ui\ElementPublisher;
 use Native\Symfony\Mobile\Ui\Component\ComponentScreenFactory;
+use Native\Symfony\Mobile\Ui\Component\ComponentScreenRenderer;
+use Native\Symfony\Mobile\Ui\Component\NativeComponent;
 use Native\Symfony\Mobile\Ui\Routing\NativeRouteManifest;
 use Native\Symfony\Mobile\Ui\Routing\NativeRouteRegistry;
 use Native\Symfony\Mobile\Ui\Routing\NativeScreenAttributeLoader;
@@ -29,6 +31,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 final class NativeMobileBundle extends AbstractBundle
 {
@@ -90,6 +93,18 @@ final class NativeMobileBundle extends AbstractBundle
                     )
                 ->end()
             ->end();
+    }
+
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+
+        // Screens registered as services become reachable by class name through the
+        // renderer's locator, so a screen with constructor dependencies works without the
+        // app wiring anything. A screen with none needs no registration at all — the
+        // renderer instantiates it directly.
+        $container->registerForAutoconfiguration(NativeComponent::class)
+            ->addTag('native.screen');
     }
 
     /** @param array<string, mixed> $config */
@@ -183,6 +198,19 @@ final class NativeMobileBundle extends AbstractBundle
         // device and never reproduces in a test.
         $services->set(ComponentScreenFactory::class)
             ->args([service(ElementPublisher::class)])
+            ->public();
+
+        // The join between routing and components. Both halves existed and nothing
+        // connected them, so every app had to write this itself.
+        //
+        // Aliased rather than registered directly as the interface so an app that wants a
+        // different renderer — a Twig-rendered or controller-driven screen — can override
+        // the alias in its own configuration, which is loaded after this.
+        $services->set(ComponentScreenRenderer::class)
+            ->args([tagged_locator('native.screen')])
+            ->public();
+
+        $services->alias(ScreenRendererInterface::class, ComponentScreenRenderer::class)
             ->public();
 
         // --- native UI (the element-tree path) --------------------------------

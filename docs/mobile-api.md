@@ -313,7 +313,25 @@ final class Counter extends NativeComponent
 - A component instance can be bound to exactly one screen. Reusing one throws, because the
   reuse would carry state and children across invisibly.
 
-Driving a screen:
+Driving a screen through routing — what a device does, and what the bundle wires by default:
+
+```php
+// ScreenRendererInterface is aliased to ComponentScreenRenderer, so this needs no glue.
+$frame = $responder->respond('/counter');                        // first paint
+$id    = $responder->callbacks()->idFor('increment');            // expression → id
+$renderer->dispatch('/counter', InteractionEvent::press($id));   // false = nothing mounted
+$frame = $responder->republish();                                // repaint, as a delta
+$renderer->forget('/counter');                                   // navigating away
+```
+
+The renderer keeps one component instance per route pattern, and binds it to the registry the
+responder handed it. Both matter and both fail silently otherwise: a per-frame instance gives a
+screen whose state resets on every tap, and a self-made registry gives one whose buttons do
+nothing. A screen with constructor dependencies is resolved from the container — every
+`NativeComponent` is autoconfigured with the `native.screen` tag — and route parameters reach a
+screen that declares `withRouteParameters(array $params)`.
+
+Driving one directly, without routing:
 
 ```php
 $screen = $factory->open(new Counter());          // ComponentScreenFactory
