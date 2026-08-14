@@ -160,7 +160,68 @@ reproduce it.
 
 ---
 
-## 5. Callbacks
+## 4d. The styling pipeline
+
+A class string does not reach the wire directly. It goes through a canonical
+intermediate vocabulary, which is what resolves the naming inconsistency in §4c:
+
+```
+"flex-1 px-3 bg-slate-900 text-2xl"
+        │
+        ▼  TailwindParser::parse()  →  a flat camelCase map
+{ flexGrow: 1, flexShrink: 1, flexBasis: 0, paddingLeft: 12, paddingRight: 12,
+  bg: '#0F172A', fontSize: 24 }
+        │
+        ├─▶ Element::applyAttributes()                → element-specific props (fontSize)
+        ├─▶ NativeElementCollector::applyLayout()     → layout, via element setters
+        ├─▶ NativeElementCollector::applyStyle()      → style
+        ├─▶ NativeElementCollector::applyElementProps()
+        └─▶ buildDarkProps() / mergeDarkProps()       → `dark:` variants as dark_* props
+```
+
+So the parser emits **camelCase** (`flexGrow`), and `applyLayout` dispatches each key
+through an element *setter* (`->fillWidth()`, `->width()`, `->flexDirection()`) whose
+implementation writes the **snake_case** wire name into `$layout`. The translation lives
+in the setters, not in a lookup table — which is why grepping for a key map finds
+nothing.
+
+Measured outputs, from running upstream's parser standalone (only `Illuminate\Support\Facades\Log`
+needs stubbing):
+
+| classes | parser output |
+|---|---|
+| `flex-1` | `{flexGrow: 1, flexShrink: 1, flexBasis: 0}` |
+| `p-4` | `{padding: 16}` |
+| `px-2 py-3` | `{paddingLeft: 8, paddingRight: 8, paddingTop: 12, paddingBottom: 12}` |
+| `gap-2` | `{gap: 8}` |
+| `bg-slate-900` | `{bg: '#0F172A'}` |
+| `text-white` | `{color: '#FFFFFF'}` |
+| `text-2xl font-bold` | `{fontSize: 24, fontWeight: 6}` |
+| `rounded-lg` | `{borderRadius: 8}` |
+| `items-center justify-between` | `{alignItems: 1, justifyContent: 3}` |
+| `w-full h-12` | `{fillWidth: true, height: 48}` |
+| `opacity-50` | `{opacity: 0.5}` |
+| `shadow-md` | `{elevation: 6}` |
+| `border border-slate-700` | `{borderWidth: 1, borderColor: '#334155'}` |
+
+Note the scale: Tailwind's spacing unit is 4px (`p-4` → 16), enums arrive as **integers**
+(`alignItems: 1`), shadows become `elevation`, and `w-full` becomes a boolean `fillWidth`
+rather than a width value.
+
+### A decision, not a task
+
+`TailwindParser` is 1,407 lines. Reproducing it is not like the tree builder, where the
+rules were short enough to reimplement and verify. Two options, and they are a judgement
+call rather than an engineering one:
+
+- **Reimplement**, verified the same way — run both parsers over a corpus of class strings
+  and diff. Costly, but no dependency on someone else's internals.
+- **Reuse it.** `mobile-air` is MIT, the class needs one stub to run standalone, and the
+  mapping is a specification more than an implementation. Cheaper, but it means tracking
+  upstream's changes and taking a dependency on a commercial product's internals.
+
+Either way the corpus diff is the mechanism that keeps it honest. What should *not* happen
+is a partial hand-written subset that silently disagrees on `p-3.5` or `bg-slate-850`.
 
 `CallbackRegistry::register(string $expression, ?string $kind): int` returns an integer id
 derived as in §4b. The node carries the id; the native side sends it back on interaction; PHP looks
