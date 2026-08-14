@@ -307,6 +307,58 @@ and only the producer is new.
 
 ---
 
+## 7b. Native routing and the manifest
+
+Which paths boot into the native runloop is decided on the device, from a manifest the
+CLI bakes in. Getting this wrong strands a screen: the native side boots it and PHP
+cannot serve it, or the reverse. Seven behaviours matter, all established by porting
+`BootPlanner.matches()` line by line and testing the port against it.
+
+**1. `{param?}` makes the entire remaining tail optional, not just itself.** `matches()`
+short-circuits on the *first* missing segment:
+
+```kotlin
+else -> return isOptional || (i until p.size).all { … }
+```
+
+So `/items/{a?}/edit` matches `/items`, and `/items/{a?}/{b}` matches `/items` — a
+*required* `{b}` is skippable if an optional segment precedes it. This contradicts
+BootPlanner's own doc comment ("optional trailing matches"), and it makes the `all()`
+branch **dead code**: a required first-missing segment fails that same test anyway. True
+on both platforms. Whether the code or the comment is wrong is upstream's call, which is
+why this is written down rather than patched.
+
+**2. Optional segments were never resolvable in PHP at all** — see patch `0009` in
+`upstream-patches/`. `NativeRouter::resolve()` builds its regex with
+`preg_replace('/\{(\w+)\}/', …)`, and `\w` does not match `?`, so a `{slug?}`
+placeholder survived literally and the pattern could only match the string `"{slug?}"`.
+Verified: `/posts/{slug?}` matched neither `/posts/hello` nor `/posts`. Meanwhile
+BootPlanner matches both, so such a screen booted natively and then resolved to nothing.
+
+**3. The same list has two different key names.** `native_routes` in the baked
+`bundle_meta.json`; `routes` in the runtime dump. Both readers depend on their own.
+
+**4. The runtime dump is honoured only when its `version` string-equals the baked one** —
+and iOS reads both with `as? String`, so a JSON *number* version fails the cast, compares
+as `""`, and the dump is silently ignored. An empty version is equally dangerous, since it
+equals the missing-key fallback.
+
+**5. The platforms diverge on a missing `bundle_meta.json`.** Kotlin tolerates it and can
+boot `NATIVE_DIRECT` from the runtime dump alone; Swift's `plan()` guards and returns
+`.webLegacy`. **So `native_routes` must always be baked** — never treat the dump as the
+only source.
+
+**6. The dump path is fixed** at `storage/framework/native_routes.json`, under
+`app_storage/persisted_data/` on Android and Application Support on iOS. Upstream relies
+on Laravel's `storage/framework` already existing; a Symfony app has no such directory, and
+a failed write leaves the device on a stale baked list with nothing logged.
+
+**7. Matching is segment-wise with empty segments dropped**, so `/items//42` matches
+`/items/{id}` and leading or trailing slashes are insignificant — but a trailing slash does
+miss upstream's exact-match fast path and falls through to the pattern scan.
+
+---
+
 ## 8. Caveats
 
 The format is verified against upstream's own PHP implementation, which is a real check —

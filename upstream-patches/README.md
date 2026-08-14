@@ -1,12 +1,12 @@
 # Upstream patches — prepared, not submitted
 
-Eight patches, ready to become pull requests. **Nothing here has been submitted.** They
+Nine patches, ready to become pull requests. **Nothing here has been submitted.** They
 are prepared so that opening the PRs is a decision rather than a project.
 
 | | repo | base |
 |---|---|---|
 | `0001`–`0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` |
-| `0008` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` |
+| `0008`, `0009` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` |
 
 Every patch applies cleanly to a clean tree, individually and as a series — verified with
 `git apply --check`. `0001` typechecks clean under the project's own `tsc`. `0008` is
@@ -95,6 +95,30 @@ overrules an explicit one, and the outcome no longer depends on class order.
 Found by extracting every class string from `super-native` (1,336 distinct strings, 684
 distinct tokens) and running upstream's parser over all of them.
 
+## `0009` — optional route segments were never resolvable in PHP
+
+`NativeRouter::resolve()` builds its pattern regex with
+`preg_replace('/\{(\w+)\}/', '(?P<$1>[^/]+)', $pattern)`. `\w` does not match `?`, so a
+`{slug?}` placeholder survives into the regex literally and the pattern can only ever match
+the string `"{slug?}"`.
+
+Verified against upstream's own code:
+
+```
+                    BEFORE                        AFTER
+/items/42           params {id: 42}   ✓           params {id: 42}      ✓
+/posts/hello        NULL              ✗           params {slug: hello} ✓
+/posts              NULL              ✗           params {}            ✓
+   (routes: /items/{id}, /posts/{slug?})
+```
+
+`BootPlanner` on both platforms matches these patterns happily, so **a route using the
+documented `{param?}` syntax booted into the native runloop and then resolved to no screen
+at all.** The fix handles the optional form first, consuming its leading slash, and drops
+empty captures so an omitted segment reads as absent rather than blank.
+
+Found by porting `BootPlanner.matches()` and testing the port against upstream.
+
 ## Suggested order
 
 Submit the small fixes first. They are independently valuable, quick to review, and they
@@ -106,7 +130,7 @@ establish that the effort is serious before anything larger is proposed.
 4. `0007` — metadata.
 5. `0001` — last, once the others have landed.
 
-`0008` is independent of all of the above and can go whenever; it is a different
+`0008` and `0009` are independent of the above and of each other; both are in a different
 repository.
 
 ## What is deliberately not here
