@@ -18,6 +18,21 @@ full API, packaged into a distributable app that has been built *and run*.
 | [`upstream-patches/`](upstream-patches/README.md) | Seven patches against `NativePHP/desktop`, ready to become PRs. **Not submitted.** All apply cleanly; the big one typechecks. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
 
+## Using it
+
+**[`docs/`](docs/README.md) is the documentation for building an application with this.**
+Getting started for [desktop](docs/getting-started-desktop.md) and
+[mobile](docs/getting-started-mobile.md), an API reference by area for
+[desktop](docs/desktop-api.md) and [mobile](docs/mobile-api.md),
+[recipes](docs/recipes.md), [testing](docs/testing.md), and a symptom-first
+[troubleshooting](docs/troubleshooting.md) page — which is the one to read first, because this
+runtime's usual failure mode is silence rather than an error.
+
+Everything below is about the port itself: the specification it implements, the analysis
+behind it, and the record of building it. [`docs/README.md`](docs/README.md) sorts every
+document in the repository into current reference, historical record, and
+for-people-working-on-the-port.
+
 ## The documents, in reading order
 
 0. **[ARCHITECTURE.md](ARCHITECTURE.md)** — how desktop and mobile differ, what the two
@@ -31,9 +46,10 @@ full API, packaged into a distributable app that has been built *and run*.
 3. **[CONTRACT.md](CONTRACT.md)** — the wire protocol. All 116 endpoints with request and
    response shapes, all 44 events with payload shapes, the environment contract, and the
    seven things the runtime requires of any PHP app.
-4. **[SPIKE-RESULTS.md](SPIKE-RESULTS.md)** — M1: proving it possible at all.
-5. **[M2-RESULTS.md](M2-RESULTS.md)** — the bundle.
-6. **[M3-RESULTS.md](M3-RESULTS.md)** — the build pipeline.
+4. **[SPIKE-RESULTS.md](SPIKE-RESULTS.md)** — M1: proving it possible at all. *Historical
+   record, not reference.*
+5. **[M2-RESULTS.md](M2-RESULTS.md)** — the bundle. *Historical record.*
+6. **[M3-RESULTS.md](M3-RESULTS.md)** — the build pipeline. *Historical record.*
 7. **[MOBILE-ANALYSIS.md](MOBILE-ANALYSIS.md)** — mobile, and a correction to an earlier
    conclusion that was wrong.
 8. **[NATIVE-UI-CONTRACT.md](NATIVE-UI-CONTRACT.md)** — the native-UI wire format: the

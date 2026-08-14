@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Mobile\Ui;
 
+use Native\Symfony\Mobile\Ui\Style\StyleApplier;
+
 /**
  * Builds elements from a type string.
  *
@@ -20,8 +22,12 @@ final class ElementFactory
     /** @var array<string, class-string<Element>> */
     private array $types;
 
-    /** @param array<string, class-string<Element>> $extra Additional or overriding types */
-    public function __construct(array $extra = [])
+    /**
+     * @param array<string, class-string<Element>> $extra  Additional or overriding types
+     * @param StyleApplier|null                    $styles Enables the `class` option.
+     *        Optional so the factory stays usable without the style layer.
+     */
+    public function __construct(array $extra = [], private readonly ?StyleApplier $styles = null)
     {
         $this->types = [
             'activity_indicator' => Elements\ActivityIndicator::class,
@@ -151,7 +157,7 @@ final class ElementFactory
         foreach ($options as $name => $value) {
             // Shared keys are handled by applyShared; the constructor keys are
             // already consumed.
-            if (\in_array($name, ['key', 'ref', 'onPress', 'onLongPress', 'layout', 'style', 'navigate'], true)) {
+            if (\in_array($name, ['key', 'ref', 'onPress', 'onLongPress', 'layout', 'style', 'navigate', 'class'], true)) {
                 continue;
             }
 
@@ -200,6 +206,19 @@ final class ElementFactory
 
         if (isset($options['navigate']) && \is_array($options['navigate'])) {
             $element->navigate($options['navigate']);
+        }
+
+        // Applied before the explicit layout/style options so a hand-written value wins
+        // over a class, which is the precedence every CSS-adjacent system uses.
+        if (isset($options['class']) && \is_string($options['class'])) {
+            if (null === $this->styles) {
+                throw new \LogicException(
+                    'The `class` option needs a StyleApplier. The bundle wires one; a '.
+                    'hand-built ElementFactory has to be given one.',
+                );
+            }
+
+            $this->styles->applyClasses($element, $options['class']);
         }
 
         if (isset($options['layout']) && \is_array($options['layout'])) {

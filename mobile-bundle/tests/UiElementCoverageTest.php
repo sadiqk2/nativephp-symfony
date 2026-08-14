@@ -7,6 +7,7 @@ namespace Native\Symfony\Mobile\Tests;
 use Native\Symfony\Mobile\Ui\CallbackRegistry;
 use Native\Symfony\Mobile\Ui\Element;
 use Native\Symfony\Mobile\Ui\ElementFactory;
+use Native\Symfony\Mobile\Ui\Elements;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -71,6 +72,47 @@ final class UiElementCoverageTest extends TestCase
         );
 
         self::assertSame($theirs['_hash'], $mine['_hash'], sprintf('Content hash for "%s" diverges.', $type));
+    }
+
+    /**
+     * Bare elements have no props, so the per-type comparison above could not catch a
+     * divergent prop *name*. It did not: this bundle emitted `fontSize` where the wire
+     * wants `font_size`, and a renderer silently ignores an unrecognised key — so the
+     * text would simply have rendered at the default size on a device, with nothing to
+     * indicate why.
+     */
+    public function testElementPropNamesMatchUpstream(): void
+    {
+        if (!self::loadUpstream()) {
+            self::markTestSkipped('Upstream mobile sources not available.');
+        }
+
+        $n = 1;
+        $mine = Elements\Text::make('hi')
+            ->fontSize(24)
+            ->fontWeight(6)
+            ->color('#FFFFFF')
+            ->textAlign(2)
+            ->maxLines(3)
+            ->toArray(new CallbackRegistry(), $n);
+
+        $theirsElement = \Native\Mobile\Edge\Elements\Text::make('hi');
+        $theirsElement->applyAttributes([
+            'fontSize' => 24,
+            'fontWeight' => 6,
+            'color' => '#FFFFFF',
+            'textAlign' => 2,
+            'maxLines' => 3,
+        ]);
+        $m = 1;
+        $theirs = $theirsElement->toArray(new \Native\Mobile\Edge\CallbackRegistry(), $m);
+
+        self::assertSame(
+            array_keys($theirs['props']),
+            array_keys($mine['props']),
+            'Prop names diverge from the wire format; a renderer ignores keys it does not know.',
+        );
+        self::assertSame($theirs['props'], $mine['props']);
     }
 
     /** @return iterable<string, array{string, string}> */

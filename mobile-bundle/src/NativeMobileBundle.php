@@ -19,6 +19,7 @@ use Native\Symfony\Mobile\Ui\Routing\NativeRouteRegistry;
 use Native\Symfony\Mobile\Ui\Routing\NativeScreenAttributeLoader;
 use Native\Symfony\Mobile\Ui\Routing\NativeScreenResponder;
 use Native\Symfony\Mobile\Ui\Routing\ScreenRendererInterface;
+use Native\Symfony\Mobile\Ui\Style\StyleApplier;
 use Native\Symfony\Mobile\Ui\Style\StyleParser;
 use Native\Symfony\Mobile\Ui\Style\ThemeColorResolverInterface;
 use Native\Symfony\Mobile\Ui\Twig\NativeUiExtension;
@@ -145,6 +146,13 @@ final class NativeMobileBundle extends AbstractBundle
             ])
             ->public();
 
+        // Without the applier the parser is decorative: it emits a camelCase
+        // intermediate vocabulary, and camelCase keys on the wire are silently ignored by
+        // every renderer.
+        $services->set(StyleApplier::class)
+            ->args([service(StyleParser::class)])
+            ->public();
+
         // --- native UI: routing ------------------------------------------------
         $services->set(NativeRouteRegistry::class)->public();
 
@@ -180,12 +188,18 @@ final class NativeMobileBundle extends AbstractBundle
         // --- native UI (the element-tree path) --------------------------------
         // Registered unconditionally: an app on the WebView path simply never
         // publishes a frame, and the services cost nothing unused.
-        $services->set(ElementFactory::class)->args([[]])->public();
+        $services->set(ElementFactory::class)
+            ->args([[], service(StyleApplier::class)])
+            ->public();
         $services->set(ElementPublisher::class)->public();
 
         if (class_exists(\Twig\Extension\AbstractExtension::class)) {
             $services->set(NativeUiExtension::class)
-                ->args([service(ElementFactory::class)])
+                ->args([
+                    service(ElementFactory::class),
+                    service(ElementPublisher::class),
+                    service(StyleApplier::class),
+                ])
                 ->tag('twig.extension');
         }
 

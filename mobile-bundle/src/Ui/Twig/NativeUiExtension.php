@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Mobile\Ui\Twig;
 
+use Native\Symfony\Mobile\Ui\CallbackRegistry;
 use Native\Symfony\Mobile\Ui\Element;
 use Native\Symfony\Mobile\Ui\ElementFactory;
+use Native\Symfony\Mobile\Ui\ElementPublisher;
+use Native\Symfony\Mobile\Ui\Style\StyleApplier;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
 
@@ -30,16 +33,47 @@ use Twig\TwigFunction;
  */
 final class NativeUiExtension extends AbstractExtension
 {
-    public function __construct(private readonly ElementFactory $factory)
-    {
+    public function __construct(
+        private readonly ElementFactory $factory,
+        private readonly ?ElementPublisher $publisher = null,
+        private readonly ?StyleApplier $styles = null,
+    ) {
     }
 
     public function getFunctions(): array
     {
         return [
             new TwigFunction('native', $this->native(...)),
+            new TwigFunction('native_publish', $this->publish(...)),
             new TwigFunction('native_types', $this->factory->types(...)),
         ];
+    }
+
+    /**
+     * Publish a frame from a template.
+     *
+     * A screen template renders no markup: it builds a tree and hands it to the runtime.
+     * Returning void rather than a string is what makes `{% do native_publish(...) %}`
+     * the natural spelling — a function returning JSON would only be exercising Twig's
+     * autoescaping.
+     *
+     * The registry is per-publish unless one is passed. That is right for a template used
+     * as a whole screen and wrong for one re-rendered on an interaction, where the incoming
+     * callback id has to resolve against the registry that minted it — so a lifecycle
+     * passes its own.
+     *
+     * @return array<string, mixed> The published tree, so a test can assert on it
+     */
+    public function publish(Element $root, ?CallbackRegistry $callbacks = null): array
+    {
+        if (null === $this->publisher) {
+            throw new \LogicException(
+                'native_publish() needs an ElementPublisher. It is registered by the bundle; '.
+                'a hand-built extension has to be given one.',
+            );
+        }
+
+        return $this->publisher->publish($root, $callbacks ?? new CallbackRegistry());
     }
 
     /**

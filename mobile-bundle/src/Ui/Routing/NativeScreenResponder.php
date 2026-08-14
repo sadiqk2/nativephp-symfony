@@ -36,9 +36,16 @@ final class NativeScreenResponder
 
     private ?CallbackRegistry $callbacks = null;
 
+    /**
+     * @param ScreenRendererInterface|null $renderer Null when the application has
+     *        registered none — an app using only the WebView path never needs one, and
+     *        making this required would stop that app's container compiling at all.
+     *        Serving a native screen without one throws instead, at the point where the
+     *        omission actually matters.
+     */
     public function __construct(
         private readonly NativeRouteRegistry $routes,
-        private readonly ScreenRendererInterface $renderer,
+        private readonly ?ScreenRendererInterface $renderer,
         private readonly ElementPublisher $publisher,
     ) {
     }
@@ -130,8 +137,22 @@ final class NativeScreenResponder
         \assert(null !== $this->current && null !== $this->callbacks);
 
         return $this->publisher->publish(
-            $this->renderer->renderScreen($this->current, $this->callbacks),
+            $this->requireRenderer()->renderScreen($this->current, $this->callbacks),
             $this->callbacks,
         );
+    }
+
+    private function requireRenderer(): ScreenRendererInterface
+    {
+        if (null === $this->renderer) {
+            throw new \LogicException(sprintf(
+                'A native screen was requested but no %s is registered. Implement it on a service '.
+                '— the container autowires it — or remove the #[NativeScreen] attributes if this '.
+                'application only uses the WebView path.',
+                ScreenRendererInterface::class,
+            ));
+        }
+
+        return $this->renderer;
     }
 }

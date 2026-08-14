@@ -8,6 +8,8 @@ use Native\Symfony\Mobile\Ui\CallbackRegistry;
 use Native\Symfony\Mobile\Ui\Element;
 use Native\Symfony\Mobile\Ui\ElementFactory;
 use Native\Symfony\Mobile\Ui\ElementPublisher;
+use Native\Symfony\Mobile\Ui\Elements;
+use Native\Symfony\Mobile\Ui\Style\StyleApplier;
 use Native\Symfony\Mobile\Ui\Twig\NativeUiExtension;
 use PHPUnit\Framework\TestCase;
 use Twig\Environment;
@@ -111,7 +113,10 @@ final class NativeUiAuthoringTest extends TestCase
         self::assertSame(['gap' => 8], $tree['layout']);
         self::assertCount(3, $tree['children']);
         self::assertSame('Hello from Twig', $tree['children'][0]['props']['text']);
-        self::assertSame(24, $tree['children'][0]['props']['fontSize']);
+        // The option is named fontSize (the setter's name); the wire key is font_size, and
+        // the wire type is float — upstream's attribute path casts, and the content hash is
+        // a serialize() so 24 and 24.0 are different frames.
+        self::assertSame(24.0, $tree['children'][0]['props']['font_size']);
         self::assertSame('Tap me', $tree['children'][1]['props']['label']);
         self::assertSame('save', $registry->expression($tree['children'][1]['on_press']));
         // The spacer's default survives authoring.
@@ -140,6 +145,58 @@ final class NativeUiAuthoringTest extends TestCase
             ->toArray($registry, $nextId);
 
         self::assertCount(1, $node['children']);
+    }
+
+    public function testAClassOptionReachesTheWireUnderItsWireNames(): void
+    {
+        // The spelling a template actually reaches for, and the one the README documented
+        // before it worked. camelCase keys here would be silently ignored on the device.
+        $factory = new ElementFactory([], new StyleApplier());
+        $registry = new CallbackRegistry();
+        $nextId = 1;
+
+        $node = $factory->create('column', ['class' => 'flex-1 gap-2 bg-slate-900'])
+            ->toArray($registry, $nextId);
+
+        self::assertSame(1, $node['layout']['flex_grow']);
+        self::assertSame(8, $node['layout']['gap']);
+        self::assertSame('#0F172A', $node['style']['bg_color']);
+    }
+
+    public function testAnExplicitLayoutOptionBeatsAClass(): void
+    {
+        $factory = new ElementFactory([], new StyleApplier());
+        $registry = new CallbackRegistry();
+        $nextId = 1;
+
+        $node = $factory->create('column', ['class' => 'gap-2', 'layout' => ['gap' => 99]])
+            ->toArray($registry, $nextId);
+
+        self::assertSame(99, $node['layout']['gap']);
+    }
+
+    public function testNativePublishPublishesAFrameFromATemplate(): void
+    {
+        $publisher = new ElementPublisher();
+        $factory = new ElementFactory();
+        $extension = new NativeUiExtension($factory, $publisher);
+
+        $twig = new Environment(new ArrayLoader([
+            'screen' => "{% do native_publish(native('column', {}, [native('text', {text: 'Hi'})])) %}",
+        ]));
+        $twig->addExtension($extension);
+
+        self::assertSame('', trim($twig->render('screen')));
+        self::assertSame('column', $publisher->lastFrame()['type']);
+        self::assertSame('Hi', $publisher->lastFrame()['children'][0]['props']['text']);
+    }
+
+    public function testNativePublishWithoutAPublisherSaysSo(): void
+    {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessageMatches('/needs an ElementPublisher/');
+
+        (new NativeUiExtension(new ElementFactory()))->publish(Elements\Column::make());
     }
 
     public function testThePublisherCapturesFramesWhenTheExtensionIsAbsent(): void
