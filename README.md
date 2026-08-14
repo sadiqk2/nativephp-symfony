@@ -15,6 +15,7 @@ full API, packaged into a distributable app that has been built *and run*.
 | **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 116 runtime endpoints, all 44 events, 235 tests. Verified by a running packaged app. |
 | **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and native-UI element trees byte-identical to upstream's across all 36 element types. 103 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
+| [`upstream-patches/`](upstream-patches/README.md) | Seven patches against `NativePHP/desktop`, ready to become PRs. **Not submitted.** All apply cleanly; the big one typechecks. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
 
 ## The documents, in reading order
@@ -65,8 +66,10 @@ rendering-engine port. See [MOBILE-ANALYSIS.md](MOBILE-ANALYSIS.md).
 M0 (contract), M1 (spike), M2 (bundle), M3 (build pipeline) and M5 (mobile WebView)
 are done.
 
-Left: proposing the manifest change upstream, along with nine independent bug fixes found
-while building this — each worth submitting on its own merits. Prior art is
+Left: submitting the upstream work. The patches are **written and verified** in
+[`upstream-patches/`](upstream-patches/README.md) — the manifest change that makes the
+runtime framework-agnostic, plus six independent bug fixes, each worth submitting on its
+own merits. Prior art is
 [NativePHP discussion #504](https://github.com/NativePHP/laravel/discussions/504).
 
 ## Licence

@@ -1,0 +1,18 @@
+diff --git a/resources/electron/electron-plugin/src/server/api/window.ts b/resources/electron/electron-plugin/src/server/api/window.ts
+index 63ea220..b5710bf 100644
+--- a/resources/electron/electron-plugin/src/server/api/window.ts
++++ b/resources/electron/electron-plugin/src/server/api/window.ts
+@@ -405,7 +405,12 @@ router.post('/open', (req, res) => {
+     window.loadURL(url);
+ 
+     window.webContents.on('dom-ready', () => {
+-        window.webContents.setZoomFactor(parseFloat(zoomFactor));
++        // parseFloat(undefined) is NaN, and setZoomFactor(NaN) renders the page at an
++        // absurd zoom. Laravel's Window always serialises a default so this never
++        // surfaced there; any other client hits it on the first window it opens.
++        const zoom = parseFloat(zoomFactor);
++
++        window.webContents.setZoomFactor(Number.isFinite(zoom) && zoom > 0 ? zoom : 1);
+     });
+ 
+     if (preventLeaveDomain || preventLeavePage) {

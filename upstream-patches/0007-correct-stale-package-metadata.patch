@@ -1,0 +1,22 @@
+diff --git a/composer.json b/composer.json
+index 5590f48..a947277 100644
+--- a/composer.json
++++ b/composer.json
+@@ -7,7 +7,7 @@
+         "desktop",
+         "nativephp-laravel"
+     ],
+-    "homepage": "https://github.com/nativephp/laravel",
++    "homepage": "https://github.com/NativePHP/desktop",
+     "license": "MIT",
+     "funding": [
+         {
+@@ -110,7 +110,7 @@
+                 "Shell": "Native\\Desktop\\Facades\\Shell",
+                 "System": "Native\\Desktop\\Facades\\System",
+                 "Window": "Native\\Desktop\\Facades\\Window",
+-                "Updater": "Native\\Electron\\Facades\\Updater"
++                "Updater": "Native\\Desktop\\Drivers\\Electron\\Facades\\Updater"
+             }
+         }
+     },

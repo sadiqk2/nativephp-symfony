@@ -1,0 +1,17 @@
+diff --git a/resources/electron/electron-plugin/src/server/api/shell.ts b/resources/electron/electron-plugin/src/server/api/shell.ts
+index 7be4b7d..9f86254 100644
+--- a/resources/electron/electron-plugin/src/server/api/shell.ts
++++ b/resources/electron/electron-plugin/src/server/api/shell.ts
+@@ -42,8 +42,10 @@ router.delete('/trash-item', async (req, res) => {
+         await shell.trashItem(path);
+ 
+         res.sendStatus(200);
+-    } catch {
+-        res.status(400).json();
++    } catch (e) {
++        // res.json() with no argument is rejected by express, turning a handled
++        // failure into an unhandled one.
++        res.status(400).json({ error: e instanceof Error ? e.message : String(e) });
+     }
+ });
+ 

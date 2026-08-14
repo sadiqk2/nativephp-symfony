@@ -241,7 +241,7 @@ The `super-native` / `kitchen-sink` equivalent: Twig + Turbo/Stimulus, exercisin
 API group. This is what convinces Symfony devs the thing is real, and it doubles as the
 integration test suite.
 
-### M4 — upstream path to `nativephp/core`
+### M4 — upstream path to `nativephp/core` — patches written, **not submitted** (`upstream-patches/`)
 
 Only attempt this *with M1–M3 in hand*. Sequence of small, individually-reviewable PRs
 against `NativePHP/desktop`:

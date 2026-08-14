@@ -1,0 +1,23 @@
+diff --git a/src/Http/Controllers/CreateSecurityCookieController.php b/src/Http/Controllers/CreateSecurityCookieController.php
+index 6736ca2..46588c8 100644
+--- a/src/Http/Controllers/CreateSecurityCookieController.php
++++ b/src/Http/Controllers/CreateSecurityCookieController.php
+@@ -8,11 +8,16 @@ class CreateSecurityCookieController
+ {
+     public function __invoke(Request $request)
+     {
+-        abort_if($request->input('secret') !== config('native-php.secret'), 403);
++        // Was config('native-php.secret'), a namespace that does not exist — the only
++        // config files are nativephp.php and nativephp-internal.php. The guard
++        // therefore compared user input against null, passing only when no secret was
++        // sent, and then issued a cookie with a null value. This is also the one route
++        // PreventRegularBrowserAccess deliberately lets through unauthenticated.
++        abort_if($request->input('secret') !== config('nativephp-internal.secret'), 403);
+ 
+         return redirect('/')->cookie(cookie(
+             name: '_php_native',
+-            value: config('native-php.secret'),
++            value: config('nativephp-internal.secret'),
+             domain: 'localhost',
+             httpOnly: true,
+         ));

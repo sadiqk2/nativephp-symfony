@@ -1,0 +1,262 @@
+diff --git a/resources/electron/electron-plugin/src/server/api/childProcess.ts b/resources/electron/electron-plugin/src/server/api/childProcess.ts
+index 36c74e6..e406d0d 100644
+--- a/resources/electron/electron-plugin/src/server/api/childProcess.ts
++++ b/resources/electron/electron-plugin/src/server/api/childProcess.ts
+@@ -3,7 +3,7 @@ import express from 'express';
+ import killSync from 'kill-sync';
+ import { join } from 'path';
+ import { fileURLToPath } from 'url';
+-import { getAppPath, getDefaultEnvironmentVariables, getDefaultPhpIniSettings, runningSecureBuild } from '../php.js';
++import { getAppPath, getDefaultEnvironmentVariables, getDefaultPhpIniSettings, getManifest, runningSecureBuild } from '../php.js';
+ import state from '../state.js';
+ import { notifyLaravel } from '../utils.js';
+ 
+@@ -171,7 +171,7 @@ function startPhpProcess(settings) {
+         })
+         .flat();
+ 
+-    if (settings.cmd[0] === 'artisan' && runningSecureBuild()) {
++    if (settings.cmd[0] === getManifest().cli && runningSecureBuild()) {
+         settings.cmd.unshift(join(getAppPath(), 'build', '__nativephp_app_bundle'));
+     }
+ 
+diff --git a/resources/electron/electron-plugin/src/server/php.ts b/resources/electron/electron-plugin/src/server/php.ts
+index 3bd3779..7864a98 100644
+--- a/resources/electron/electron-plugin/src/server/php.ts
++++ b/resources/electron/electron-plugin/src/server/php.ts
+@@ -27,6 +27,97 @@ mkdirpSync(join(storagePath, 'framework', 'sessions'));
+ mkdirpSync(join(storagePath, 'framework', 'views'));
+ mkdirpSync(join(storagePath, 'framework', 'testing'));
+ 
++/**
++ * The app's framework-specific entry points and paths.
++ *
++ * Every value here was previously a hardcoded Laravel string literal, which meant
++ * the runtime could only host a Laravel application. Reading them from a manifest
++ * keeps Laravel working byte-identically — the defaults below are exactly the old
++ * values — while letting another framework declare its own.
++ *
++ * A manifest lives at `nativephp.json` in the app root. The `extra.nativephp.manifest`
++ * convention is already used by nativephp/mobile-ui, so this follows it rather than
++ * inventing a second mechanism.
++ */
++interface AppManifest {
++    /** CLI entry point, relative to the app root. */
++    cli: string;
++    /** Router script for `php -S`, relative to the app root. */
++    router: string;
++    /** Document root for the dev server, relative to the app root. */
++    docroot: string;
++    /** Environment names passed as APP_ENV in development and production. */
++    env: { dev: string; prod: string };
++    /** Optional lifecycle commands, skipped when absent. */
++    lifecycle: { optimize?: string[]; migrate?: string[]; schedule?: string[] };
++    /** Directories that must exist and be writable under userData. */
++    writableDirs: string[];
++    /** Directory copied from the app into userData on first run, if present. */
++    seedDir?: string;
++    /** Cache-path environment variables set for a secure build. */
++    cacheEnv: Record<string, string>;
++}
++
++const laravelManifest: AppManifest = {
++    cli: 'artisan',
++    router: 'vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php',
++    docroot: 'public',
++    env: { dev: 'local', prod: 'production' },
++    lifecycle: {
++        optimize: ['optimize'],
++        migrate: ['migrate', '--force'],
++        schedule: ['schedule:run'],
++    },
++    writableDirs: [
++        'storage/logs',
++        'storage/framework/cache',
++        'storage/framework/sessions',
++        'storage/framework/views',
++        'storage/framework/testing',
++        'bootstrap/cache',
++    ],
++    seedDir: 'storage',
++    cacheEnv: {
++        APP_SERVICES_CACHE: 'services.php',
++        APP_PACKAGES_CACHE: 'packages.php',
++        APP_CONFIG_CACHE: 'config.php',
++        APP_ROUTES_CACHE: 'routes-v7.php',
++        APP_EVENTS_CACHE: 'events.php',
++    },
++};
++
++let cachedManifest: AppManifest | null = null;
++
++function getManifest(): AppManifest {
++    if (cachedManifest) {
++        return cachedManifest;
++    }
++
++    const manifestPath = join(getAppPath(), 'nativephp.json');
++
++    if (!existsSync(manifestPath)) {
++        // No manifest: a Laravel app, unchanged.
++        return (cachedManifest = laravelManifest);
++    }
++
++    try {
++        const declared = JSON.parse(readFileSync(manifestPath, 'utf8'));
++
++        return (cachedManifest = {
++            ...laravelManifest,
++            ...declared,
++            env: { ...laravelManifest.env, ...(declared.env ?? {}) },
++            lifecycle: { ...laravelManifest.lifecycle, ...(declared.lifecycle ?? {}) },
++            cacheEnv: { ...laravelManifest.cacheEnv, ...(declared.cacheEnv ?? {}) },
++        });
++    } catch (e) {
++        // A malformed manifest must not silently fall back to Laravel's paths — the
++        // app would boot into the wrong router and 404 every route with no clue why.
++        console.error(`Could not parse ${manifestPath}:`, e);
++        throw e;
++    }
++}
++
+ function runningSecureBuild() {
+     return existsSync(join(getAppPath(), 'build', '__nativephp_app_bundle')) && process.env.NODE_ENV !== 'development';
+ }
+@@ -150,7 +241,7 @@ async function retrievePhpIniSettings() {
+         env,
+     };
+ 
+-    const command = ['artisan', 'native:php-ini'];
++    const command = [getManifest().cli, 'native:php-ini'];
+ 
+     if (runningSecureBuild()) {
+         command.unshift(join(appPath, 'build', '__nativephp_app_bundle'));
+@@ -171,7 +262,7 @@ async function retrieveNativePHPConfig() {
+         env,
+     };
+ 
+-    const command = ['artisan', 'native:config'];
++    const command = [getManifest().cli, 'native:config'];
+ 
+     if (runningSecureBuild()) {
+         command.unshift(join(appPath, 'build', '__nativephp_app_bundle'));
+@@ -181,7 +272,7 @@ async function retrieveNativePHPConfig() {
+ }
+ 
+ function callPhp(args, options, phpIniSettings = {}) {
+-    if (args[0] === 'artisan' && runningSecureBuild()) {
++    if (args[0] === getManifest().cli && runningSecureBuild()) {
+         args.unshift(join(getAppPath(), 'build', '__nativephp_app_bundle'));
+     }
+ 
+@@ -205,7 +296,7 @@ function callPhp(args, options, phpIniSettings = {}) {
+ }
+ 
+ function callPhpSync(args, options, phpIniSettings = {}) {
+-    if (args[0] === 'artisan' && runningSecureBuild()) {
++    if (args[0] === getManifest().cli && runningSecureBuild()) {
+         args.unshift(join(getAppPath(), 'build', '__nativephp_app_bundle'));
+     }
+ 
+@@ -260,7 +351,14 @@ function ensureAppFoldersAreAvailable() {
+     if (!existsSync(storagePath) || process.env.NODE_ENV === 'development') {
+         const appPath = getAppPath();
+         console.log('App path:', appPath);
+-        copySync(join(appPath, 'storage'), storagePath);
++        const seedDir = getManifest().seedDir;
++        const seedPath = seedDir ? join(appPath, seedDir) : null;
++
++        // Guarded: fs-extra throws on a missing source, so an app without this
++        // directory previously died here — before the PHP server even started.
++        if (seedPath && existsSync(seedPath)) {
++            copySync(seedPath, storagePath);
++        }
+     }
+     // }
+ 
+@@ -283,7 +381,13 @@ function startScheduler(secret, apiPort, phpIniSettings = {}) {
+         env,
+     };
+ 
+-    return callPhp(['artisan', 'schedule:run'], phpOptions, phpIniSettings);
++    const schedule = getManifest().lifecycle.schedule;
++
++    if (!schedule) {
++        return null;
++    }
++
++    return callPhp([getManifest().cli, ...schedule], phpOptions, phpIniSettings);
+ }
+ 
+ function getPath(name: string) {
+@@ -330,7 +434,7 @@ interface EnvironmentVariables {
+ function getDefaultEnvironmentVariables(secret?: string, apiPort?: number): EnvironmentVariables {
+     // Base variables with string values (no null values)
+     const variables: EnvironmentVariables = {
+-        APP_ENV: process.env.NODE_ENV === 'development' ? 'local' : 'production',
++        APP_ENV: process.env.NODE_ENV === 'development' ? getManifest().env.dev : getManifest().env.prod,
+         APP_DEBUG: process.env.NODE_ENV === 'development' ? 'true' : 'false',
+         LARAVEL_STORAGE_PATH: storagePath,
+         NATIVEPHP_RUNNING: 'true',
+@@ -359,11 +463,9 @@ function getDefaultEnvironmentVariables(secret?: string, apiPort?: number): Envi
+ 
+     // Only add cache paths if in production mode
+     if (runningSecureBuild()) {
+-        variables.APP_SERVICES_CACHE = join(bootstrapCache, 'services.php'); // Should be present and writable
+-        variables.APP_PACKAGES_CACHE = join(bootstrapCache, 'packages.php'); // Should be present and writable
+-        variables.APP_CONFIG_CACHE = join(bootstrapCache, 'config.php');
+-        variables.APP_ROUTES_CACHE = join(bootstrapCache, 'routes-v7.php');
+-        variables.APP_EVENTS_CACHE = join(bootstrapCache, 'events.php');
++        for (const [key, file] of Object.entries(getManifest().cacheEnv)) {
++            variables[key] = join(bootstrapCache, file);
++        }
+         // variables.VIEW_COMPILED_PATH; // TODO: keep those in the phar file if we can.
+     }
+ 
+@@ -422,7 +524,7 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+     if (shouldOptimize()) {
+         console.log('Caching view and routes...');
+ 
+-        const result = callPhpSync(['artisan', 'optimize'], phpOptions, phpIniSettings);
++        const result = callPhpSync([getManifest().cli, ...getManifest().lifecycle.optimize!], phpOptions, phpIniSettings);
+ 
+         if (result.status !== 0) {
+             console.error('Failed to cache view and routes:', result.stderr.toString());
+@@ -439,7 +541,7 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+             console.log('Database path:', databaseFile);
+         }
+ 
+-        const result = callPhpSync(['artisan', 'migrate', '--force'], phpOptions, phpIniSettings);
++        const result = callPhpSync([getManifest().cli, ...getManifest().lifecycle.migrate!], phpOptions, phpIniSettings);
+ 
+         if (result.status !== 0) {
+             console.error('Failed to migrate database:', result.stderr.toString());
+@@ -460,18 +562,8 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+         serverPath = join(appPath, 'build', '__nativephp_app_bundle');
+     } else {
+         console.log('* * * Running from source * * *');
+-        serverPath = join(
+-            appPath,
+-            'vendor',
+-            'laravel',
+-            'framework',
+-            'src',
+-            'Illuminate',
+-            'Foundation',
+-            'resources',
+-            'server.php',
+-        );
+-        cwd = join(appPath, 'public');
++        serverPath = join(appPath, getManifest().router);
++        cwd = join(appPath, getManifest().docroot);
+     }
+ 
+     console.log('Starting PHP server...');
+@@ -534,6 +626,7 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+ 
+ export {
+     getAppPath,
++    getManifest,
+     getDefaultEnvironmentVariables,
+     getDefaultPhpIniSettings,
+     retrieveNativePHPConfig,

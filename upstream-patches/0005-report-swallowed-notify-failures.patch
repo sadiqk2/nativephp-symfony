@@ -1,0 +1,20 @@
+diff --git a/resources/electron/electron-plugin/src/server/utils.ts b/resources/electron/electron-plugin/src/server/utils.ts
+index 97c771a..8beb6fd 100644
+--- a/resources/electron/electron-plugin/src/server/utils.ts
++++ b/resources/electron/electron-plugin/src/server/utils.ts
+@@ -23,8 +23,13 @@ export async function notifyLaravel(endpoint: string, payload = {}) {
+                 'X-NativePHP-Secret': state.randomSecret,
+             },
+         });
+-    } catch {
+-        //
++    } catch (e) {
++        // Previously swallowed entirely, which made a crashed, 500ing or 403ing PHP
++        // app indistinguishable from a healthy one. Behind SHELL_VERBOSITY so normal
++        // runs stay quiet.
++        if (parseInt(process.env.SHELL_VERBOSITY) > 0) {
++            console.error(`notifyLaravel('${endpoint}') failed:`, e instanceof Error ? e.message : e);
++        }
+     }
+ }
+ 
