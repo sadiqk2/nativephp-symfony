@@ -20,6 +20,9 @@ full API, packaged into a distributable app that has been built *and run*.
 
 ## The documents, in reading order
 
+0. **[ARCHITECTURE.md](ARCHITECTURE.md)** — how desktop and mobile differ, what the two
+   bundles do and don't share, the three verification techniques used throughout, and a
+   collected list of the traps. Read this first if you only read one.
 1. **[PLAN.md](PLAN.md)** — what NativePHP actually is, where Laravel leaks, and the
    roadmap. Start here.
 2. **[ANALYSIS.md](ANALYSIS.md)** — the deep dive: the exact boot sequence, a per-directory
