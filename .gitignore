@@ -1,0 +1,13 @@
+# Generated demo application — recreate it with spike/README.md
+/spike/app/
+
+# Upstream reference clones — shallow, read-only, cloned on demand
+/upstream/
+
+# Composer / npm
+/bundle/vendor/
+/bundle/.phpunit.cache/
+node_modules/
+
+# Build output
+dist/

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>NativePHP for Symfony</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 15px/1.5 -apple-system, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 2.5rem;
+         background: #0f172a; color: #e2e8f0; }
+  h1 { margin: 0 0 .25rem; font-size: 1.6rem; letter-spacing: -.01em; }
+  .sub { color: #94a3b8; margin: 0 0 2rem; }
+  .badge { display: inline-block; padding: .2rem .6rem; border-radius: 999px; font-size: .78rem;
+           background: #14532d; color: #86efac; }
+  .badge.off { background: #7f1d1d; color: #fecaca; }
+  table { border-collapse: collapse; margin: 1rem 0 2rem; font-size: .88rem; }
+  td { padding: .3rem .9rem .3rem 0; }
+  td:first-child { color: #94a3b8; }
+  a.btn { display: inline-block; margin: 0 .5rem .5rem 0; padding: .5rem .9rem; border-radius: 8px;
+          background: #1e293b; color: #e2e8f0; text-decoration: none; border: 1px solid #334155; }
+  a.btn:hover { background: #334155; }
+  #events { margin-top: 1.5rem; font-family: ui-monospace, monospace; font-size: .8rem;
+            color: #7dd3fc; white-space: pre-wrap; }
+  .err { color: #fca5a5; }
+</style>
+</head>
+<body>
+  <h1>NativePHP for Symfony</h1>
+  <p class="sub">
+    Symfony {{ symfony }} on PHP {{ php }} —
+    {% if inRuntime %}
+      <span class="badge">inside the NativePHP runtime</span>
+    {% else %}
+      <span class="badge off">plain web request</span>
+    {% endif %}
+  </p>
+
+  {% if error %}
+    <p class="err">window/get failed: {{ error }}</p>
+  {% else %}
+    <table>
+      <tr><td>window id</td><td>{{ window.id ?? '—' }}</td></tr>
+      <tr><td>size</td><td>{{ window.width ?? '?' }} × {{ window.height ?? '?' }}</td></tr>
+      <tr><td>position</td><td>{{ window.x ?? '?' }}, {{ window.y ?? '?' }}</td></tr>
+      <tr><td>title</td><td>{{ window.title ?? '—' }}</td></tr>
+      <tr><td>focused</td><td>{{ window.focused is defined ? (window.focused ? 'yes' : 'no') : '—' }}</td></tr>
+    </table>
+  {% endif %}
+
+  <a class="btn" href="{{ path('resize', {width: 700, height: 500}) }}">Resize 700×500</a>
+  <a class="btn" href="{{ path('resize', {width: 1100, height: 800}) }}">Resize 1100×800</a>
+  <a class="btn" href="{{ path('retitle') }}">Retitle window</a>
+
+  <div id="events">waiting for native events…</div>
+
+  <script>
+    // Channel C. window.Native comes from the runtime's preload script and is
+    // entirely framework-agnostic — no Livewire, no bridge shim, nothing
+    // Laravel-specific. It works in a Twig page as-is.
+    const log = (line) => {
+      const el = document.getElementById('events');
+      el.textContent = line + '\n' + el.textContent;
+    };
+
+    if (window.Native) {
+      log('window.Native present — listening');
+      Native.on('Native\\Desktop\\Events\\Windows\\WindowResized', (p) => log('WindowResized ' + JSON.stringify(p)));
+      Native.on('Native\\Desktop\\Events\\Windows\\WindowFocused', (p) => log('WindowFocused ' + JSON.stringify(p)));
+      Native.on('Native\\Desktop\\Events\\Windows\\WindowBlurred', (p) => log('WindowBlurred ' + JSON.stringify(p)));
+    } else {
+      log('window.Native missing — not running under the runtime');
+    }
+  </script>
+</body>
+</html>
