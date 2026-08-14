@@ -353,6 +353,12 @@ only source.
 on Laravel's `storage/framework` already existing; a Symfony app has no such directory, and
 a failed write leaves the device on a stale baked list with nothing logged.
 
+**7b. A `dark:` prefix on a theme token inverts it.** A theme token resolves its own dark
+companion, and the `dark:` wrapper nests that companion a level deeper than the merge lifts
+— so the light hex ends up in the dark slot and the dark one is unreachable. See patch
+`0011`. Worth knowing even once patched, because any second implementation of the variant
+logic will make the same mistake.
+
 **7. Matching is segment-wise with empty segments dropped**, so `/items//42` matches
 `/items/{id}` and leading or trailing slashes are insignificant — but a trailing slash does
 miss upstream's exact-match fast path and falls through to the pattern scan.

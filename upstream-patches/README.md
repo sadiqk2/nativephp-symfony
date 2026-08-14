@@ -1,12 +1,12 @@
 # Upstream patches — prepared, not submitted
 
-Ten patches, ready to become pull requests. **Nothing here has been submitted.** They
+Eleven patches, ready to become pull requests. **Nothing here has been submitted.** They
 are prepared so that opening the PRs is a decision rather than a project.
 
 | | repo | base |
 |---|---|---|
 | `0001`–`0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` |
-| `0008`–`0010` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` |
+| `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` |
 
 Every patch applies cleanly to a clean tree, individually and as a series — verified with
 `git apply --check`. `0001` typechecks clean under the project's own `tsc`. `0008` is
@@ -146,6 +146,26 @@ becomes a bare apostrophe rather than a double quote.
 spread it (`NativeComponent.php:3316`, `:3371`) and a null would be a TypeError —
 tightening that contract deserves its own change. But the failure is no longer silent.
 
+## `0011` — `dark:` buries a theme token's dark value
+
+A theme token already resolves its own dark companion, so wrapping it in the `dark:`
+variant nested that companion a level deeper — where `parse()`'s merge never lifts it —
+and left the **light** hex in the dark slot:
+
+```
+                        BEFORE                                  AFTER
+bg-theme-surface        {bg:#FFF, dark:{bg:#000}}      ✓        unchanged            ✓
+dark:bg-theme-surface   {dark:{bg:#FFF, dark:{bg:#000}}} ✗      {dark:{bg:#000}}     ✓
+```
+
+So `dark:bg-theme-surface` rendered **white in dark mode** — the opposite of what it asks
+for — and dropped the light-mode value entirely. Asking for a theme token under `dark:`
+can only mean its dark-mode form, so the fix promotes the companion instead of nesting it.
+
+Present in upstream's own demo: `super-native` uses `android:dark:bg-theme-surface-variant`.
+
+`0008` and `0011` both touch `TailwindParser.php` and apply together cleanly.
+
 ## Suggested order
 
 Submit the small fixes first. They are independently valuable, quick to review, and they
@@ -157,8 +177,8 @@ establish that the effort is serious before anything larger is proposed.
 4. `0007` — metadata.
 5. `0001` — last, once the others have landed.
 
-`0008`, `0009` and `0010` are independent of the above and of each other; all three are in
-a different repository.
+`0008`–`0011` are independent of the above; all four are in a different repository.
+`0008` and `0011` touch the same file but do not conflict.
 
 ## What is deliberately not here
 
