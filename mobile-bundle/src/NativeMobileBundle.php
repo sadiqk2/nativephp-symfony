@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Native\Symfony\Mobile;
 
 use Native\Symfony\Mobile\Api;
+use Native\Symfony\Mobile\Build;
 use Native\Symfony\Mobile\Bridge\Bridge;
 use Native\Symfony\Mobile\Bridge\BridgeInterface;
 use Native\Symfony\Mobile\Bridge\FakeBridge;
@@ -41,7 +42,28 @@ final class NativeMobileBundle extends AbstractBundle
                     ->info('Bundle identifier / Android application id.')
                 ->end()
                 ->scalarNode('name')->defaultValue('App')->end()
-                ->scalarNode('version')->defaultValue('1.0.0')->end()
+                ->scalarNode('version')
+                    ->defaultValue('1.0.0')
+                    ->cannotBeEmpty()
+                    ->info(
+                        'Must be a non-empty string. YAML `version: 1.0` is a float and the '.
+                        'container coerces it to "1" — and the hosts compare this by string '.
+                        'equality, so a coerced value silently disables the runtime route dump. '.
+                        'Quote it.'
+                    )
+                    // Rejected rather than coerced. By the time this runs, PHP has already
+                    // parsed `1.0` as a float and lost the difference between 1.0 and 1 —
+                    // so any normalisation here would silently pick one, which is the bug
+                    // rather than the fix. Better to make the author write what they mean.
+                    ->validate()
+                        ->ifTrue(static fn (mixed $v): bool => !\is_string($v))
+                        ->thenInvalid(
+                            'native_mobile.version must be a quoted string, got %s. The hosts '.
+                            'compare it by string equality, and an unquoted 1.0 reaches the '.
+                            'container as "1" — which silently disables the runtime route dump.'
+                        )
+                    ->end()
+                ->end()
                 ->booleanNode('fake_bridge')
                     ->defaultFalse()
                     ->info(
@@ -130,8 +152,10 @@ final class NativeMobileBundle extends AbstractBundle
             ->args([service(NativeRouteRegistry::class)])
             ->public();
 
+        // The version is a constructor argument, not config the manifest reads for itself:
+        // it has to be a non-empty string or the device silently ignores the runtime dump.
         $services->set(NativeRouteManifest::class)
-            ->args([service(NativeRouteRegistry::class)])
+            ->args([service(NativeRouteRegistry::class), '%native_mobile.version%'])
             ->public();
 
         // Needs a renderer, which the component layer provides. nullOnInvalid so an app
@@ -175,6 +199,42 @@ final class NativeMobileBundle extends AbstractBundle
 
         $services->set(Command\DoctorCommand::class)
             ->args(['%kernel.project_dir%', service(BridgeInterface::class)])
+            ->tag('console.command');
+
+        // --- build tooling -----------------------------------------------------
+        // Toolchain reads the environment once, at construction, through a factory rather
+        // than getenv() inside the class: detection has to be testable without mutating
+        // the process environment.
+        $services->set(Build\Toolchain::class)->factory([Build\Toolchain::class, 'fromEnvironment']);
+        $services->set(Build\BundleMetaWriter::class);
+        $services->set(Build\ProcessRunner::class);
+        $services->alias(Build\CommandRunnerInterface::class, Build\ProcessRunner::class);
+
+        $services->set(Command\MobileManifestCommand::class)
+            ->args([
+                '%kernel.project_dir%',
+                service(NativeRouteManifest::class),
+                service(Build\BundleMetaWriter::class),
+            ])
+            ->tag('console.command');
+
+        $services->set(Command\MobileRunCommand::class)
+            ->args([
+                '%kernel.project_dir%',
+                '%native_mobile.app_id%',
+                service(Build\Toolchain::class),
+                service(Build\CommandRunnerInterface::class),
+            ])
+            ->tag('console.command');
+
+        $services->set(Command\MobileBuildCommand::class)
+            ->args([
+                '%kernel.project_dir%',
+                '%native_mobile.version%',
+                service(NativeRouteManifest::class),
+                service(Build\Toolchain::class),
+                service(Build\CommandRunnerInterface::class),
+            ])
             ->tag('console.command');
     }
 }

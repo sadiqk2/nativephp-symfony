@@ -153,6 +153,12 @@ to an explicit value. `Spacer` is the canonical case — `['flex_grow' => 1]`, s
 dropped in bare. Missing this made an otherwise byte-identical tree diverge at the root,
 because the default feeds the content hash.
 
+**A `dark:` prefix on a theme token inverts it.** A theme token resolves its own dark
+companion, and the `dark:` wrapper nests that companion a level deeper than the merge lifts
+— so the light hex ends up in the dark slot and the dark one is unreachable. See patch
+`0011`. Worth knowing even once patched, because any second implementation of the variant
+logic will make the same mistake independently.
+
 And note the two conventions living side by side: **layout keys are snake_case**
 (`flex_grow`) while **element props are camelCase** (`fontSize`, `maxLines`). That is
 upstream's inconsistency, not a transcription error, and a reimplementation has to
@@ -310,9 +316,10 @@ and only the producer is new.
 ## 7b. Native routing and the manifest
 
 Which paths boot into the native runloop is decided on the device, from a manifest the
-CLI bakes in. Getting this wrong strands a screen: the native side boots it and PHP
-cannot serve it, or the reverse. Seven behaviours matter, all established by porting
-`BootPlanner.matches()` line by line and testing the port against it.
+CLI bakes in. Getting this wrong strands a screen: the native side boots it and PHP cannot
+serve it, or the reverse. Eight behaviours matter — established by porting
+`BootPlanner.matches()` line by line and testing the port against it, then by writing the
+build pipeline that produces the manifest.
 
 **1. `{param?}` makes the entire remaining tail optional, not just itself.** `matches()`
 short-circuits on the *first* missing segment:
@@ -338,10 +345,22 @@ BootPlanner matches both, so such a screen booted natively and then resolved to 
 **3. The same list has two different key names.** `native_routes` in the baked
 `bundle_meta.json`; `routes` in the runtime dump. Both readers depend on their own.
 
-**4. The runtime dump is honoured only when its `version` string-equals the baked one** —
-and iOS reads both with `as? String`, so a JSON *number* version fails the cast, compares
-as `""`, and the dump is silently ignored. An empty version is equally dangerous, since it
-equals the missing-key fallback.
+**4. The runtime dump is honoured only when its `version` string-equals the baked one —
+and the platforms disagree about what counts as a string.** iOS reads both with
+`as? String`, so a JSON *number* fails the cast and compares as `""`. Android's
+`optString("version")` coerces the same number to a string and matches.
+
+So a numeric version does not fail symmetrically: **Android honours the runtime dump while
+iOS ignores it, and the two platforms boot different route lists from the same build.**
+That is considerably worse than a shared failure, and it is why `native_mobile.version`
+rejects a non-string rather than coercing one — by the time PHP has parsed `1.0` as a float
+the difference between `1.0` and `1` is already gone, so normalising would just pick one
+silently.
+
+An empty version is equally dangerous, since it equals the missing-key fallback.
+
+Related, on the write side: `version_code` is read by Kotlin (via `.toString()`) and by no
+Swift source at all, so it is Android-only.
 
 **5. The platforms diverge on a missing `bundle_meta.json`.** Kotlin tolerates it and can
 boot `NATIVE_DIRECT` from the runtime dump alone; Swift's `plan()` guards and returns
@@ -353,11 +372,12 @@ only source.
 on Laravel's `storage/framework` already existing; a Symfony app has no such directory, and
 a failed write leaves the device on a stale baked list with nothing logged.
 
-**7b. A `dark:` prefix on a theme token inverts it.** A theme token resolves its own dark
-companion, and the `dark:` wrapper nests that companion a level deeper than the merge lifts
-— so the light hex ends up in the dark slot and the dark one is unreachable. See patch
-`0011`. Worth knowing even once patched, because any second implementation of the variant
-logic will make the same mistake.
+**6b. The staged `.env` must carry both version keys, or every cold boot re-extracts the
+app.** iOS's `AppUpdateManager.getVersionFromZip()` prefers `NATIVEPHP_APP_VERSION` plus
+`NATIVEPHP_APP_VERSION_CODE` from the staged `.env` over the `.version` file. A missing code
+yields `…b0` where the metadata says `…b1`, the versions compare unequal, and the app
+re-extracts hundreds of megabytes on launch — the exact trap Android's own comment
+documents, but reached from the write side.
 
 **7. Matching is segment-wise with empty segments dropped**, so `/items//42` matches
 `/items/{id}` and leading or trailing slashes are insignificant — but a trailing slash does

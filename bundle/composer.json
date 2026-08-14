@@ -30,8 +30,9 @@
         "symfony/framework-bundle": "^7.0|^8.0"
     },
     "suggest": {
-        "symfony/twig-bundle": "To render the application's UI",
-        "symfony/monolog-bundle": "To forward application logs into the runtime's devtools console"
+        "phpunit/phpunit": "To use the testing kit in src/Testing (FakeRuntime, RuntimeExpectations)",
+        "symfony/monolog-bundle": "To forward application logs into the runtime's devtools console",
+        "symfony/twig-bundle": "To render the application's UI"
     },
     "autoload": {
         "psr-4": {
