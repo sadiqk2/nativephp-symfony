@@ -4,6 +4,14 @@ The protocol between PHP and the SwiftUI / Jetpack Compose renderers, extracted 
 `NativePHP/mobile-air`. This is what a Twig front end would have to produce — the
 foundation for M6, the `super-native` equivalent.
 
+**Verified, not just read.** `mobile-bundle/` now contains a second implementation of
+this format, and `UiWireFormatTest` byte-compares its output against upstream's own
+collector — trees, content hashes, callback ids and navigation keys. Upstream's `Edge`
+classes have no framework dependencies (their only mentions of Blade are in comments),
+so they load through a stub autoloader and run standalone. Three of the details below
+were wrong in the first draft of this document and the comparison test is what caught
+them; they are marked ⚠.
+
 The headline: **the format is framework-neutral.** It is a JSON tree with content
 hashes. Blade appears nowhere in it. The 17,316 LOC of `src/Edge/` is the *authoring*
 layer — a Blade tag precompiler, a Tailwind-subset parser, element classes, a component
@@ -81,8 +89,9 @@ used. An unkeyed list that reorders will reuse the wrong nodes.
 
 ## 4. Diffing — Merkle hashes and reuse markers
 
-`_hash` is `xxh3` over `[type, layout, style, props, on_press, on_long_press, ref,
-childHashes]`. Because child hashes are folded in, an unchanged subtree has an unchanged
+`_hash` is `xxh3` over a **`serialize()`** of `[type, layout, style, props, on_press,
+on_long_press, ref, childHashes]` — in that order. Both the order and the PHP types are
+part of the format, since `serialize()` encodes them. Because child hashes are folded in, an unchanged subtree has an unchanged
 root hash.
 
 When the caller maintains a `lastNodeHashes` map across frames and a node's hash is
@@ -106,11 +115,55 @@ Two notes from the upstream source, both worth carrying into any reimplementatio
 
 ---
 
+## 4b. ⚠ Id derivation — FNV-1a, and two different masks
+
+The first draft of this document said "a hash", and a reimplementation using md5 produced
+ids that diverged silently. Both id spaces use **FNV-1a 32-bit**:
+
+```php
+$hash = 0x811C9DC5;                              // offset basis
+foreach (bytes) { $hash ^= $byte; $hash = ($hash * 0x01000193) & 0xFFFFFFFF; }
+return 0 === $hash ? 1 : $hash;                  // 0 means "unset" natively
+```
+
+And they mask differently, which matters:
+
+| | mask | why |
+|---|---|---|
+| **Node ids** (`deriveNodeIdFromKeyPath`) | full 32 bits | travel as unsigned |
+| **Callback ids** (`CallbackRegistry::deriveId`) | `& 0x7FFFFFFF` (31 bits) | Kotlin reads them as a signed `Int`; a full-u32 id wraps negative on the round trip and resolution misses **silently** |
+
+Collisions in both are resolved by rehashing `$input . "\x00" . $salt`, salt from 1. A
+registry scope, when set, is joined to the expression with `\x1F` — a separator that
+cannot occur in an expression, so two scopes cannot collide by concatenation.
+
+---
+
+## 4c. ⚠ Layout defaults, and two naming conventions
+
+The base element exposes `layoutDefaults()` and `styleDefaults()`, merged **under**
+whatever the author set:
+
+```php
+public function getLayout(): array { return array_merge($this->layoutDefaults(), $this->layout); }
+```
+
+A default has to appear in the emitted layout for the renderer to apply it, but must lose
+to an explicit value. `Spacer` is the canonical case — `['flex_grow' => 1]`, so it works
+dropped in bare. Missing this made an otherwise byte-identical tree diverge at the root,
+because the default feeds the content hash.
+
+And note the two conventions living side by side: **layout keys are snake_case**
+(`flex_grow`) while **element props are camelCase** (`fontSize`, `maxLines`). That is
+upstream's inconsistency, not a transcription error, and a reimplementation has to
+reproduce it.
+
+---
+
 ## 5. Callbacks
 
-`CallbackRegistry::register(string $expression, ?string $kind): int` returns an **integer
-id** derived from a hash of the expression, rehashed with a salt on collision (roughly 1
-in 2³¹). The node carries the id; the native side sends it back on interaction; PHP looks
+`CallbackRegistry::register(string $expression, ?string $kind): int` returns an integer id
+derived as in §4b. The node carries the id; the native side sends it back on interaction; PHP looks
 up the expression and runs it.
 
 Navigation is content-addressed instead: `registerNavigation(array $config)` returns
@@ -169,16 +222,20 @@ Not a port of `src/Edge/`. A second producer of this format:
    equivalent of a Livewire-style component, so this is the most open design question,
    and the place to look hardest for prior art before inventing anything.
 
-### Where to start
+### Progress
 
-Not with code. Two things first:
+Items 1 and 4 are **done and verified**: `mobile-bundle/src/Ui/` contains the tree
+builder, the element base with the identity, hashing and defaults rules, a callback
+registry, 13 element types and an `ElementPublisher` wrapping the four extension
+functions. `UiWireFormatTest` proves the output is byte-identical to upstream's.
 
-- **Pin the format by testing against it.** Build a tree in PHP, publish it, and assert
-  the JSON matches what upstream's own collector produces for an equivalent Blade
-  template. Byte-comparison against a real implementation is the only way to know this
-  document is right, and it is cheap.
-- **Answer the licence question.** M6 is a large investment and NativePHP Mobile is a
-  commercial product. That has to be settled before, not after.
+That leaves the authoring layer (2), the style parser (3), routing (5) and the component
+lifecycle (6) — of which the lifecycle is the real design question, since Symfony has no
+Livewire-shaped equivalent to borrow from.
+
+Also still open, and more important than any of them: **the licence question.** M6 is a
+large investment and NativePHP Mobile is a commercial product. That should be settled
+before more is built, not after.
 
 ### Honest assessment
 
@@ -191,8 +248,9 @@ and only the producer is new.
 
 ## 8. Caveats
 
-Everything here is read out of `mobile-air` at the commit in `upstream/`, and none of it
-is verified against a running device — this environment has no Xcode or Android SDK. The
+The format is verified against upstream's own PHP implementation, which is a real check —
+but **not** against a running device. This environment has no Xcode or Android SDK, so
+whether the Kotlin and Swift renderers accept these trees in practice is still untested. The
 format is also internal: unlike the desktop HTTP API, which is stable enough that
 upstream's own client depends on it across versions, `_hash`, `flags` and the id rules
 are implementation details that upstream is free to change. Any Twig front end should
