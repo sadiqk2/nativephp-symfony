@@ -94,6 +94,9 @@ final class InstallCommand extends Command
             $io->text('Router already present; leaving it alone.');
         }
 
+        $io->section('Registering the runtime routes');
+        $this->installRoutes($fs, $io, (bool) $input->getOption('force'));
+
         if ($input->getOption('skip-npm')) {
             $io->success('Runtime installed and patched. Skipped npm.');
 
@@ -115,6 +118,57 @@ final class InstallCommand extends Command
         $io->success('Runtime installed. Start it with: bin/console native:run');
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * The import for the runtime's two endpoints.
+     *
+     * A Symfony bundle cannot register routes for itself, so this file is what makes
+     * `/_native/api/booted` and `/_native/api/events` exist. Omitting it is the worst
+     * failure the install has: the app boots, the window opens, and nothing ever appears —
+     * `/booted` 404s, so `AppBootstrapper::boot()` is never called, and the 404 is logged
+     * by Electron rather than by the app. It cost real time to diagnose once, which is why
+     * the installer now writes it rather than documenting it.
+     *
+     * Only ever created, never rewritten without `--force`: an existing file may have been
+     * edited (a route prefix, a condition), and silently reverting that would be worse
+     * than leaving it.
+     */
+    private function installRoutes(Filesystem $fs, SymfonyStyle $io, bool $force): void
+    {
+        $path = $this->projectDir.'/config/routes/native_desktop.yaml';
+
+        if (is_file($path) && !$force) {
+            $io->text('Routes import already present; leaving it alone.');
+
+            return;
+        }
+
+        // No config/routes/ means this is not a Flex-style application skeleton — a
+        // single-file kernel, say. Guessing where its routes live would write a file
+        // nothing loads, which looks like success and is not.
+        if (!is_dir(\dirname($path))) {
+            $io->warning([
+                'No config/routes/ directory, so the routes import was not written.',
+                'Register these two routes yourself, or the app will boot and show nothing:',
+                '  resource: \'@NativeDesktopBundle/src/Resources/config/routes.php\' (type: php)',
+            ]);
+
+            return;
+        }
+
+        $fs->dumpFile($path, <<<'YAML'
+            # The two endpoints the runtime POSTs to: /_native/api/booted and
+            # /_native/api/events. A Symfony bundle cannot register routes for itself, so this
+            # import is what makes them exist — without it the app boots and then nothing ever
+            # appears, because /booted 404s and AppBootstrapper::boot() is never called.
+            native_desktop:
+                resource: '@NativeDesktopBundle/src/Resources/config/routes.php'
+                type: php
+
+            YAML);
+
+        $io->text(sprintf('Wrote %s', $path));
     }
 
     /** @param list<string> $args */

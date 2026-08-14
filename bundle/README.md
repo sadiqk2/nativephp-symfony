@@ -4,7 +4,7 @@ Build desktop applications with Symfony, on NativePHP's Electron runtime.
 
 Status: **M3 complete.** All **116 runtime endpoints** and all **44 events** are
 implemented, and `native:build` produces a distributable app that has been **built and
-run** — see `../M3-RESULTS.md`. 298 tests.
+run** — see `../M3-RESULTS.md`. 305 tests.
 
 Not done yet: installer targets beyond `--dir`, and code signing (the env plumbing is
 there, untested without real credentials).
@@ -64,14 +64,19 @@ that already reads a `nativephp.json` — so once the upstream manifest change l
 Then implement `Native\Symfony\Contract\AppBootstrapper` on any service. The bundle
 autoconfigures and aliases it — no wiring needed.
 
-Routes are not auto-registered (Symfony bundles cannot). Add:
+Routes cannot be auto-registered (Symfony bundles cannot register their own), so
+`native:install` writes the import for you:
 
 ```yaml
-# config/routes/native_desktop.yaml
+# config/routes/native_desktop.yaml — written by native:install
 native_desktop:
     resource: '@NativeDesktopBundle/src/Resources/config/routes.php'
     type: php
 ```
+
+It only ever creates the file, never rewrites an edited one without `--force`, and warns
+instead of guessing if there is no `config/routes/`. Without this import the app boots into
+a window that shows nothing, because `/booted` 404s and `boot()` is never called.
 
 ## Configuration
 
@@ -177,7 +182,7 @@ is created, which is why calling it from `boot()` is safe even though the runtim
 composer install && vendor/bin/phpunit
 ```
 
-298 tests, 636 assertions. `ContractCoverageTest` parses the runtime's own express
+305 tests, 660 assertions. `ContractCoverageTest` parses the runtime's own express
 routers and fails if an endpoint goes uncovered or an event name goes unmapped, so
 upstream drift breaks the suite rather than surfacing a release later.
 

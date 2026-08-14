@@ -25,11 +25,15 @@ return [
 ];
 ```
 
-## 2. Import the bundle's routes — this is not automatic
+## 2. Import the bundle's routes
+
+`native:install` (step 4) writes this file for you, so you can skip ahead — it is documented
+here because it is worth knowing what it does and why, and because an application that is not
+Flex-shaped has to write it by hand.
 
 Symfony bundles cannot register routes on their own. The runtime posts to two fixed paths,
-`/_native/api/booted` and `/_native/api/events`, and until you import them your app will
-boot into a window that never opens and receive no events:
+`/_native/api/booted` and `/_native/api/events`, and until they are imported the app boots
+into a window that never opens and receives no events:
 
 ```yaml
 # config/routes/native_desktop.yaml
@@ -37,6 +41,10 @@ native_desktop:
     resource: '@NativeDesktopBundle/src/Resources/config/routes.php'
     type: php
 ```
+
+The installer only ever creates this file; it will not rewrite one you have edited unless you
+pass `--force`, and if there is no `config/routes/` directory it warns rather than writing
+somewhere nothing loads.
 
 Verify with `bin/console debug:router | grep _native` — you want
 `native_desktop_booted` and `native_desktop_events`.
