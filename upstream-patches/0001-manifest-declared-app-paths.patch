@@ -21,20 +21,43 @@ index 36c74e6..e406d0d 100644
      }
  
 diff --git a/resources/electron/electron-plugin/src/server/php.ts b/resources/electron/electron-plugin/src/server/php.ts
-index 3bd3779..7864a98 100644
+index 3bd3779..8d1a092 100644
 --- a/resources/electron/electron-plugin/src/server/php.ts
 +++ b/resources/electron/electron-plugin/src/server/php.ts
-@@ -27,6 +27,97 @@ mkdirpSync(join(storagePath, 'framework', 'sessions'));
- mkdirpSync(join(storagePath, 'framework', 'views'));
- mkdirpSync(join(storagePath, 'framework', 'testing'));
+@@ -20,12 +20,130 @@ const databaseFile = join(databasePath, 'database.sqlite');
+ const bootstrapCache = join(app.getPath('userData'), 'bootstrap', 'cache');
+ const argumentEnv = getArgumentEnv();
  
+-mkdirpSync(bootstrapCache);
+-mkdirpSync(join(storagePath, 'logs'));
+-mkdirpSync(join(storagePath, 'framework', 'cache'));
+-mkdirpSync(join(storagePath, 'framework', 'sessions'));
+-mkdirpSync(join(storagePath, 'framework', 'views'));
+-mkdirpSync(join(storagePath, 'framework', 'testing'));
++// Deferred until first use: getManifest() needs getAppPath(), which is not resolvable
++// at module load. The previous unconditional block created Laravel's directories for
++// every app, whatever framework it was running.
++let writableDirsEnsured = false;
++
++function ensureWritableDirs() {
++    if (writableDirsEnsured) {
++        return;
++    }
++
++    for (const dir of getManifest().writableDirs) {
++        mkdirpSync(join(app.getPath('userData'), dir));
++    }
++
++    writableDirsEnsured = true;
++}
++
 +/**
 + * The app's framework-specific entry points and paths.
 + *
-+ * Every value here was previously a hardcoded Laravel string literal, which meant
-+ * the runtime could only host a Laravel application. Reading them from a manifest
-+ * keeps Laravel working byte-identically — the defaults below are exactly the old
-+ * values — while letting another framework declare its own.
++ * Every value here was previously a hardcoded Laravel string literal, which meant the
++ * runtime could only host a Laravel application. Reading them from a manifest keeps
++ * Laravel working byte-identically — the defaults below are exactly the old values —
++ * while letting another framework declare its own.
 + *
 + * A manifest lives at `nativephp.json` in the app root. The `extra.nativephp.manifest`
 + * convention is already used by nativephp/mobile-ui, so this follows it rather than
@@ -49,13 +72,26 @@ index 3bd3779..7864a98 100644
 +    docroot: string;
 +    /** Environment names passed as APP_ENV in development and production. */
 +    env: { dev: string; prod: string };
-+    /** Optional lifecycle commands, skipped when absent. */
-+    lifecycle: { optimize?: string[]; migrate?: string[]; schedule?: string[] };
-+    /** Directories that must exist and be writable under userData. */
++    /**
++     * Optional lifecycle commands. A null or absent entry is skipped — not every
++     * framework has an equivalent, and a missing one must not be fatal.
++     */
++    lifecycle: {
++        optimize?: string[] | null;
++        migrate?: string[] | null;
++        schedule?: string[] | null;
++    };
++    /**
++     * Directories to create under userData before the app boots, relative to it.
++     * These are the paths the framework expects to be writable at runtime.
++     */
 +    writableDirs: string[];
-+    /** Directory copied from the app into userData on first run, if present. */
-+    seedDir?: string;
-+    /** Cache-path environment variables set for a secure build. */
++    /**
++     * Directory copied from the app into userData on first run. Null for a framework
++     * that ships no seed data.
++     */
++    seedDir: string | null;
++    /** Cache-path environment variables set for a secure build, relative to userData. */
 +    cacheEnv: Record<string, string>;
 +}
 +
@@ -69,6 +105,8 @@ index 3bd3779..7864a98 100644
 +        migrate: ['migrate', '--force'],
 +        schedule: ['schedule:run'],
 +    },
++    // Relative to userData — these are the directories the code below actually creates,
++    // which is not the same as the app-relative paths it copies from.
 +    writableDirs: [
 +        'storage/logs',
 +        'storage/framework/cache',
@@ -101,28 +139,29 @@ index 3bd3779..7864a98 100644
 +        return (cachedManifest = laravelManifest);
 +    }
 +
-+    try {
-+        const declared = JSON.parse(readFileSync(manifestPath, 'utf8'));
++    let declared: Partial<AppManifest>;
 +
-+        return (cachedManifest = {
-+            ...laravelManifest,
-+            ...declared,
-+            env: { ...laravelManifest.env, ...(declared.env ?? {}) },
-+            lifecycle: { ...laravelManifest.lifecycle, ...(declared.lifecycle ?? {}) },
-+            cacheEnv: { ...laravelManifest.cacheEnv, ...(declared.cacheEnv ?? {}) },
-+        });
++    try {
++        declared = JSON.parse(readFileSync(manifestPath, 'utf8'));
 +    } catch (e) {
-+        // A malformed manifest must not silently fall back to Laravel's paths — the
-+        // app would boot into the wrong router and 404 every route with no clue why.
++        // A malformed manifest must not silently fall back to Laravel's paths — the app
++        // would boot into the wrong router and 404 every route with no clue why.
 +        console.error(`Could not parse ${manifestPath}:`, e);
 +        throw e;
 +    }
-+}
 +
++    // Shallow, top-level merge only. A declared key is authoritative, so `"seedDir": null`
++    // and `"cacheEnv": {}` mean *none* rather than "inherit Laravel's". Merging the nested
++    // objects would make "none" inexpressible for exactly the keys a non-Laravel app most
++    // needs to switch off.
++    cachedManifest = { ...laravelManifest, ...declared };
++
++    return cachedManifest;
++}
+ 
  function runningSecureBuild() {
      return existsSync(join(getAppPath(), 'build', '__nativephp_app_bundle')) && process.env.NODE_ENV !== 'development';
- }
-@@ -150,7 +241,7 @@ async function retrievePhpIniSettings() {
+@@ -150,7 +268,7 @@ async function retrievePhpIniSettings() {
          env,
      };
  
@@ -131,7 +170,7 @@ index 3bd3779..7864a98 100644
  
      if (runningSecureBuild()) {
          command.unshift(join(appPath, 'build', '__nativephp_app_bundle'));
-@@ -171,7 +262,7 @@ async function retrieveNativePHPConfig() {
+@@ -171,7 +289,7 @@ async function retrieveNativePHPConfig() {
          env,
      };
  
@@ -140,7 +179,7 @@ index 3bd3779..7864a98 100644
  
      if (runningSecureBuild()) {
          command.unshift(join(appPath, 'build', '__nativephp_app_bundle'));
-@@ -181,7 +272,7 @@ async function retrieveNativePHPConfig() {
+@@ -181,7 +299,7 @@ async function retrieveNativePHPConfig() {
  }
  
  function callPhp(args, options, phpIniSettings = {}) {
@@ -149,7 +188,7 @@ index 3bd3779..7864a98 100644
          args.unshift(join(getAppPath(), 'build', '__nativephp_app_bundle'));
      }
  
-@@ -205,7 +296,7 @@ function callPhp(args, options, phpIniSettings = {}) {
+@@ -205,7 +323,7 @@ function callPhp(args, options, phpIniSettings = {}) {
  }
  
  function callPhpSync(args, options, phpIniSettings = {}) {
@@ -158,7 +197,16 @@ index 3bd3779..7864a98 100644
          args.unshift(join(getAppPath(), 'build', '__nativephp_app_bundle'));
      }
  
-@@ -260,7 +351,14 @@ function ensureAppFoldersAreAvailable() {
+@@ -253,6 +371,8 @@ function getAppPath() {
+ }
+ 
+ function ensureAppFoldersAreAvailable() {
++    ensureWritableDirs();
++
+     // if (!runningSecureBuild()) {
+     console.log('Copying storage folder...');
+     console.log('Storage path:', storagePath);
+@@ -260,7 +380,14 @@ function ensureAppFoldersAreAvailable() {
      if (!existsSync(storagePath) || process.env.NODE_ENV === 'development') {
          const appPath = getAppPath();
          console.log('App path:', appPath);
@@ -166,15 +214,15 @@ index 3bd3779..7864a98 100644
 +        const seedDir = getManifest().seedDir;
 +        const seedPath = seedDir ? join(appPath, seedDir) : null;
 +
-+        // Guarded: fs-extra throws on a missing source, so an app without this
-+        // directory previously died here — before the PHP server even started.
++        // Guarded: fs-extra throws on a missing source, so an app without this directory
++        // previously died here — before the PHP server started.
 +        if (seedPath && existsSync(seedPath)) {
 +            copySync(seedPath, storagePath);
 +        }
      }
      // }
  
-@@ -283,7 +381,13 @@ function startScheduler(secret, apiPort, phpIniSettings = {}) {
+@@ -283,7 +410,13 @@ function startScheduler(secret, apiPort, phpIniSettings = {}) {
          env,
      };
  
@@ -189,7 +237,7 @@ index 3bd3779..7864a98 100644
  }
  
  function getPath(name: string) {
-@@ -330,7 +434,7 @@ interface EnvironmentVariables {
+@@ -330,7 +463,7 @@ interface EnvironmentVariables {
  function getDefaultEnvironmentVariables(secret?: string, apiPort?: number): EnvironmentVariables {
      // Base variables with string values (no null values)
      const variables: EnvironmentVariables = {
@@ -198,7 +246,7 @@ index 3bd3779..7864a98 100644
          APP_DEBUG: process.env.NODE_ENV === 'development' ? 'true' : 'false',
          LARAVEL_STORAGE_PATH: storagePath,
          NATIVEPHP_RUNNING: 'true',
-@@ -359,11 +463,9 @@ function getDefaultEnvironmentVariables(secret?: string, apiPort?: number): Envi
+@@ -359,11 +492,9 @@ function getDefaultEnvironmentVariables(secret?: string, apiPort?: number): Envi
  
      // Only add cache paths if in production mode
      if (runningSecureBuild()) {
@@ -213,25 +261,41 @@ index 3bd3779..7864a98 100644
          // variables.VIEW_COMPILED_PATH; // TODO: keep those in the phar file if we can.
      }
  
-@@ -422,7 +524,7 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
-     if (shouldOptimize()) {
+@@ -419,10 +550,12 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+     }
+ 
+     // Cache the project
+-    if (shouldOptimize()) {
++    const optimize = getManifest().lifecycle.optimize;
++
++    if (shouldOptimize() && optimize) {
          console.log('Caching view and routes...');
  
 -        const result = callPhpSync(['artisan', 'optimize'], phpOptions, phpIniSettings);
-+        const result = callPhpSync([getManifest().cli, ...getManifest().lifecycle.optimize!], phpOptions, phpIniSettings);
++        const result = callPhpSync([getManifest().cli, ...optimize], phpOptions, phpIniSettings);
  
          if (result.status !== 0) {
              console.error('Failed to cache view and routes:', result.stderr.toString());
-@@ -439,7 +541,7 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+@@ -432,14 +565,16 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+     }
+ 
+     // Migrate the database
+-    if (shouldMigrateDatabase(store)) {
++    const migrate = getManifest().lifecycle.migrate;
++
++    if (shouldMigrateDatabase(store) && migrate) {
+         console.log('Migrating database...');
+ 
+         if (parseInt(process.env.SHELL_VERBOSITY) > 0) {
              console.log('Database path:', databaseFile);
          }
  
 -        const result = callPhpSync(['artisan', 'migrate', '--force'], phpOptions, phpIniSettings);
-+        const result = callPhpSync([getManifest().cli, ...getManifest().lifecycle.migrate!], phpOptions, phpIniSettings);
++        const result = callPhpSync([getManifest().cli, ...migrate], phpOptions, phpIniSettings);
  
          if (result.status !== 0) {
              console.error('Failed to migrate database:', result.stderr.toString());
-@@ -460,18 +562,8 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+@@ -460,18 +595,8 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
          serverPath = join(appPath, 'build', '__nativephp_app_bundle');
      } else {
          console.log('* * * Running from source * * *');
@@ -252,7 +316,7 @@ index 3bd3779..7864a98 100644
      }
  
      console.log('Starting PHP server...');
-@@ -534,6 +626,7 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
+@@ -534,6 +659,7 @@ async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult>
  
  export {
      getAppPath,

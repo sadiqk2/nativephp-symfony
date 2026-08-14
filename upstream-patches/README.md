@@ -34,7 +34,7 @@ values in `php.ts` with values read from an optional `nativephp.json`:
 | `docroot` | `public` |
 | `env.dev` / `env.prod` | `local` / `production` |
 | `lifecycle.optimize` / `.migrate` / `.schedule` | `optimize`, `migrate --force`, `schedule:run` |
-| `writableDirs` | `storage/framework/*`, `storage/logs`, `bootstrap/cache` |
+| `writableDirs` | `storage/framework/*`, `storage/logs`, `bootstrap/cache` (relative to userData) |
 | `seedDir` | `storage` |
 | `cacheEnv` | the five `APP_*_CACHE` keys |
 
@@ -51,6 +51,31 @@ non-Laravel app and was found by running one:
   check that it exists, producing a silently failing process per minute.
 - A malformed manifest throws rather than falling back. Falling back to Laravel's paths
   would boot the app into the wrong router and 404 every route with no clue why.
+
+### Revised after a second implementation was written against it
+
+Emitting a Symfony manifest from the adapter found four problems in the first draft of
+this patch, all now fixed. Worth recording, because they are the kind that only surface
+when something other than Laravel tries to use the interface:
+
+- **`optimize` and `migrate` were not actually optional.** They were spread with a
+  non-null assertion (`...lifecycle.optimize!`), so declaring `null` — or omitting them,
+  which the type permitted — became `...null` and threw inside `serveApp()`, *before the
+  PHP server started*. Only `schedule` was guarded. All three now are.
+- **`writableDirs` was dead.** It was in the interface and the defaults, but nothing read
+  it: the `mkdirpSync` calls ran unconditionally at module load, creating Laravel's
+  directories for every app whatever framework it was running. Its declared values did not
+  even match what the code created. It is now what drives those calls, deferred to first
+  use because `getManifest()` needs `getAppPath()`, which is not resolvable at module load.
+- **Nested merging made "none" inexpressible.** Deep-merging `cacheEnv` meant a declared
+  `{}` still inherited Laravel's five keys, and there was no way to say "this framework has
+  no seed directory". The merge is now top-level only, so a declared key is authoritative.
+- **`seedDir` was typed `string`,** which could not express "none" at all; it is now
+  `string | null`.
+
+`LARAVEL_STORAGE_PATH` is deliberately left alone — it is the one remaining Laravel-named
+value in the environment contract, and renaming it would be a breaking change for anything
+reading it.
 
 ### Why this is worth taking even without a second framework
 

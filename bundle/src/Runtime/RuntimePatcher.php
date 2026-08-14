@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Runtime;
 
+use Native\Symfony\Manifest\ManifestSupport;
+use Native\Symfony\Manifest\ManifestSupportDetector;
+
 /**
  * Rewrites the eight places NativePHP's Electron runtime assumes Laravel.
  *
@@ -17,17 +20,29 @@ namespace Native\Symfony\Runtime;
  * nativephp/electron/ directory, and the runtime prefers that copy over the
  * vendored one whenever a package.json exists there. Upstream is untouched.
  *
+ * A runtime that reads `nativephp.json` needs none of this, and patching it would
+ * be worse than useless — the strict hunks no longer match, so it would abort an
+ * install that had nothing wrong with it. Such a runtime is detected and left
+ * alone; see ManifestSupport for why an inconclusive detection still patches.
+ *
  * Idempotent — re-running detects already-applied hunks.
  */
 final class RuntimePatcher
 {
+    private readonly ManifestSupportDetector $detector;
+
     public function __construct(
         private readonly string $cli = 'bin/console',
         private readonly string $router = 'nativephp-router.php',
         private readonly string $devEnv = 'dev',
         private readonly string $prodEnv = 'prod',
         private readonly string $scheduleCommand = 'native:schedule-tick',
+        ?ManifestSupportDetector $detector = null,
     ) {
+        // Defaulted rather than required: the detector is a pure filesystem sniff
+        // with no collaborators, and every existing caller constructs this class
+        // with nothing but strings.
+        $this->detector = $detector ?? new ManifestSupportDetector();
     }
 
     /**
@@ -41,6 +56,15 @@ final class RuntimePatcher
 
         if (!is_dir($server)) {
             throw PatchFailed::notARuntime($electronProjectPath);
+        }
+
+        if (ManifestSupport::Supported === $this->detector->detect($electronProjectPath)) {
+            // Nothing to rewrite — but the app now *must* ship the manifest, because
+            // this runtime resolves Laravel's paths whenever it cannot find one.
+            return [
+                'Runtime reads nativephp.json; skipped all patches.',
+                'Run "bin/console native:manifest" to write it — without it this runtime uses Laravel\'s paths.',
+            ];
         }
 
         return [

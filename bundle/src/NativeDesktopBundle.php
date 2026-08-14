@@ -10,6 +10,7 @@ use Native\Symfony\Client\Client;
 use Native\Symfony\Command\BuildCommand;
 use Native\Symfony\Command\ConfigCommand;
 use Native\Symfony\Command\InstallCommand;
+use Native\Symfony\Command\ManifestCommand;
 use Native\Symfony\Command\PhpIniCommand;
 use Native\Symfony\Command\RunCommand;
 use Native\Symfony\Command\ScheduleTickCommand;
@@ -23,6 +24,9 @@ use Native\Symfony\EventBridge\BroadcastingDispatcher;
 use Native\Symfony\EventBridge\EventFactory;
 use Native\Symfony\EventBridge\RuntimeBroadcaster;
 use Native\Symfony\Http\BootedController;
+use Native\Symfony\Manifest\Manifest;
+use Native\Symfony\Manifest\ManifestSupportDetector;
+use Native\Symfony\Manifest\ManifestWriter;
 use Native\Symfony\Menu\MenuManager;
 use Native\Symfony\MenuBar\MenuBarManager;
 use Native\Symfony\Notification\NotificationManager;
@@ -42,6 +46,9 @@ use Native\Symfony\System\DebugLogger;
 use Native\Symfony\System\ProgressBar;
 use Native\Symfony\System\RuntimeInfo;
 use Native\Symfony\System\SystemManager;
+use Native\Symfony\Testing\FakeRuntime;
+use Native\Symfony\Testing\RuntimeEventSimulator;
+use Native\Symfony\Testing\RuntimeExpectations;
 use Native\Symfony\Updater\UpdaterManager;
 use Native\Symfony\Window\UrlResolver;
 use Native\Symfony\Window\WindowManager;
@@ -207,6 +214,14 @@ final class NativeDesktopBundle extends AbstractBundle
                         ->end()
                     ->end()
                 ->end()
+                ->booleanNode('testing')
+                    ->defaultFalse()
+                    ->info(
+                        'Replace the runtime transport with Testing\FakeRuntime, which records calls '.
+                        'and answers with whatever a test scripted. Set it in config/packages/test/ '.
+                        'only — with this on, nothing reaches a real runtime.'
+                    )
+                ->end()
                 ->booleanNode('block_browser_access')
                     ->defaultTrue()
                     ->info(
@@ -245,6 +260,31 @@ final class NativeDesktopBundle extends AbstractBundle
             ->tag('monolog.logger', ['channel' => 'native']);
 
         $services->alias(ClientInterface::class, Client::class)->public();
+
+        // --- testing ----------------------------------------------------------
+        // Re-points the transport alias, and nothing else: every manager, every
+        // controller and the event bridge stay exactly as they are in production,
+        // so a functional test exercises the real payload building against a
+        // runtime that records instead of one that has to be running.
+        if ($config['testing'] ?? false) {
+            $services->set(FakeRuntime::class)
+                ->factory([FakeRuntime::class, 'available'])
+                ->public();
+
+            $services->alias(ClientInterface::class, FakeRuntime::class)->public();
+
+            $services->set(RuntimeEventSimulator::class)
+                ->args([service('event_dispatcher'), service(EventFactory::class)])
+                ->public();
+
+            // Assertions need PHPUnit; the fake and the simulator do not. Keep the
+            // container bootable in a test environment that runs another framework.
+            if (class_exists(\PHPUnit\Framework\Assert::class)) {
+                $services->set(RuntimeExpectations::class)
+                    ->args([service(FakeRuntime::class)])
+                    ->public();
+            }
+        }
 
         // --- APIs -------------------------------------------------------------
         $services->set(UrlResolver::class)
@@ -370,7 +410,30 @@ final class NativeDesktopBundle extends AbstractBundle
 
         $services->set(ScheduleTickCommand::class)->tag('console.command');
 
-        $services->set(RuntimePatcher::class);
+        // --- runtime manifest -------------------------------------------------
+        // All defaults: every value is a property of Symfony itself, not of the
+        // application, so there is nothing here for an app to configure. The one
+        // exception a real app hits — no Doctrine Migrations — is a decorator or
+        // an explicit service definition away.
+        $services->set(Manifest::class);
+        $services->set(ManifestSupportDetector::class);
+
+        $services->set(ManifestWriter::class)
+            ->args(['%kernel.project_dir%', service(Manifest::class)]);
+
+        $services->set(ManifestCommand::class)
+            ->args([
+                service(ManifestWriter::class),
+                service(Manifest::class),
+                service(ManifestSupportDetector::class),
+                '%kernel.project_dir%',
+            ])
+            ->tag('console.command');
+
+        $services->set(RuntimePatcher::class)
+            // Named, because everything before it in the constructor is a
+            // defaulted string.
+            ->arg('$detector', service(ManifestSupportDetector::class));
 
         $services->set(InstallCommand::class)
             ->args(['%kernel.project_dir%', service(RuntimePatcher::class)])
