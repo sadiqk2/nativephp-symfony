@@ -11,8 +11,9 @@ use Native\Symfony\Mobile\Api\Dialog;
 use Native\Symfony\Mobile\Api\SecureStorage;
 use Native\Symfony\Mobile\Bridge\BridgeInterface;
 use Native\Symfony\Mobile\Bridge\FakeBridge;
-use Native\Symfony\Mobile\Ui\Component\ComponentScreenFactory;
-use Native\Symfony\Mobile\Ui\Style\StyleParser;
+use Native\Symfony\Mobile\Ui\Component\ComponentScreenRenderer;
+use Native\Symfony\Mobile\Ui\Component\InteractionEvent;
+use Native\Symfony\Mobile\Ui\Routing\NativeScreenResponder;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,8 +38,6 @@ final class MobileController extends AbstractController
     public function __construct(
         private readonly BridgeInterface $bridge,
         private readonly ScreenCatalog $screens,
-        private readonly ComponentScreenFactory $componentScreens,
-        private readonly StyleParser $styles,
     ) {
     }
 
@@ -104,59 +103,68 @@ final class MobileController extends AbstractController
     public function profile(): Response
     {
         return $this->render('mobile/profile.html.twig', [
-            // Parsed here rather than in the template: the Tailwind subset is the
-            // same one upstream uses, and the parser reproduces its output
-            // byte-for-byte across 684 tokens.
-            'card' => $this->styles->parse('flex-1 p-4 gap-3 bg-white rounded-xl'),
-            'muted' => $this->styles->parse('gap-1'),
+            // Class strings, not parsed output. The template hands them to the `class`
+            // option, which routes them through StyleApplier — the piece that knows
+            // `bg` belongs in the style bucket and `flexGrow` on the wire is `flex_grow`.
+            // Parsing here and passing the result as `layout` published camelCase keys
+            // and a colour in the layout bucket: accepted, and silently ignored by every
+            // renderer.
+            'card' => 'flex-1 p-4 gap-3 bg-white rounded-xl',
+            'muted' => 'gap-1',
         ]);
     }
 
     /**
-     * A stateful component: state, an action, and a re-render that reuses what did
-     * not change.
+     * A stateful component reached the way a device reaches it: through routing.
      *
-     * On a device the `ComponentScreen` is held by the runloop for as long as the
-     * screen is visible, and `$count` simply stays where it is. In a browser there is
-     * no runloop and each request is a fresh process, so the taps are *replayed* to
-     * reach frame N — which is a demonstration of the frame cycle, not a simulation
-     * of the device's lifetime. The distinction matters and is stated on the page too.
+     * This is the whole native-UI path in one action — `#[NativeScreen('/counter')]` is
+     * matched by the same matcher that runs on device before PHP exists, the screen class
+     * is built by the container (so it can have dependencies), the component renders, an
+     * interaction id comes back, and the next frame is a delta against the last one.
+     *
+     * On a device the runloop holds this for as long as the screen is visible and `$count`
+     * simply stays where it is. In a browser there is no runloop and each request is a
+     * fresh process, so the taps are *replayed* to reach frame N — a demonstration of the
+     * frame cycle, not a simulation of the device's lifetime. The page says so too.
      */
     #[Route('/mobile/counter', name: 'mobile_counter', methods: ['GET'])]
-    public function counter(Request $request): Response
-    {
+    public function counter(
+        Request $request,
+        NativeScreenResponder $responder,
+        ComponentScreenRenderer $renderer,
+    ): Response {
         $taps = min(20, max(0, $request->query->getInt('taps')));
 
-        $screen = $this->componentScreens->open(new CounterScreen($this->styles));
+        // Loads the #[NativeScreen] attributes into the route registry. On a device this
+        // happens once at boot; here it is idempotent and cheap.
+        $this->screens->all();
 
-        $frames = [$screen->frame()];
+        $frames = [$responder->respond('/counter')];
 
-        // The id the device would send back for this expression. It is a content
-        // hash, so it is stable across frames — and it is only ever used as a lookup
-        // key: the string 'increment' comes out of *our* registry, never off the wire.
-        $incrementId = $screen->callbackId('increment');
+        // The id the device would send back for this expression. It is a content hash, so
+        // it is stable across frames — and it is only ever used as a lookup key: the
+        // string 'increment' comes out of *our* registry, never off the wire.
+        $incrementId = $responder->callbacks()?->idFor('increment');
 
         for ($tap = 0; $tap < $taps && null !== $incrementId; ++$tap) {
-            // Exactly the shape the native layer delivers. A null back would mean the
-            // id belongs to no live component — routine on a device, where a stale
-            // frame can still be on screen, and a bug here.
-            $frame = $screen->handle(['callback_id' => $incrementId, 'type' => 0]);
-
-            if (null === $frame) {
+            // False back would mean no component is mounted for this pattern — routine on
+            // a device, where a stale frame can still be on screen, and a bug here.
+            if (!$renderer->dispatch('/counter', InteractionEvent::press($incrementId))) {
                 break;
             }
 
-            $frames[] = $frame;
+            $frames[] = $responder->republish();
         }
 
-        $root = $screen->root();
+        $root = $renderer->mounted('/counter');
         \assert($root instanceof CounterScreen);
+        $count = $root->count();
 
-        $screen->close();
+        $renderer->forget('/counter');
 
         return $this->render('mobile/counter.html.twig', [
             'taps' => $taps,
-            'count' => $root->count(),
+            'count' => $count,
             'incrementId' => $incrementId,
             'firstFrame' => $frames[0],
             'lastFrame' => $frames[\count($frames) - 1],

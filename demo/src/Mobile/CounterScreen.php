@@ -9,7 +9,7 @@ use Native\Symfony\Mobile\Ui\Component\NativeComponent;
 use Native\Symfony\Mobile\Ui\Element;
 use Native\Symfony\Mobile\Ui\Elements;
 use Native\Symfony\Mobile\Ui\Routing\NativeScreen;
-use Native\Symfony\Mobile\Ui\Style\StyleParser;
+use Native\Symfony\Mobile\Ui\Style\StyleApplier;
 
 /**
  * A native screen: SwiftUI on iOS, Jetpack Compose on Android. No WebView, no HTML.
@@ -40,7 +40,7 @@ final class CounterScreen extends NativeComponent
 
     private array $history = [];
 
-    public function __construct(private readonly StyleParser $styles)
+    public function __construct(private readonly StyleApplier $styles)
     {
     }
 
@@ -76,6 +76,12 @@ final class CounterScreen extends NativeComponent
 
     protected function render(): Element
     {
+        $buttons = Elements\Row::make(
+            Elements\Button::make('+1')->onPress('increment'),
+            Elements\Button::make('+10')->onPress('addMany(10)'),
+        );
+        $this->styles->applyClasses($buttons, 'gap-3');
+
         $rows = [
             // These three nodes hash the same on every frame, so a re-render publishes
             // them as reuse markers (`flags: 1`) rather than repainting them. That is
@@ -83,10 +89,7 @@ final class CounterScreen extends NativeComponent
             Elements\Text::make('Taps')->fontSize(13)->color('#64748b'),
             Elements\Text::make((string) $this->count)->fontSize(48)->fontWeight('bold'),
 
-            Elements\Row::make(
-                Elements\Button::make('+1')->onPress('increment'),
-                Elements\Button::make('+10')->onPress('addMany(10)'),
-            )->layout($this->styles->parse('gap-3')),
+            $buttons,
 
             Elements\Divider::make(),
             Elements\Text::make('History')->fontSize(13)->color('#64748b'),
@@ -98,8 +101,16 @@ final class CounterScreen extends NativeComponent
 
         $rows[] = Elements\Spacer::make();
 
-        return Elements\Column::make(...$rows)
-            ->layout($this->styles->parse('flex-1 p-4 gap-2'));
+        $column = Elements\Column::make(...$rows);
+
+        // Through the applier, never `->layout($parser->parse(...))`. The parser emits a
+        // camelCase intermediate vocabulary (`flexGrow`) and the wire wants snake_case
+        // (`flex_grow`); putting parser output straight on a node is accepted, published,
+        // and then silently ignored by every renderer — the classes appear to do nothing
+        // and there is no error anywhere. This screen had exactly that bug.
+        $this->styles->applyClasses($column, 'flex-1 p-4 gap-2');
+
+        return $column;
     }
 
     private function bump(int $by): void

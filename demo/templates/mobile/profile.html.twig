@@ -23,18 +23,18 @@
    the registry that minted it.
 #}
 {% set tree = native_publish(
-    native('column', {layout: card}, [
+    native('column', {class: card}, [
         native('text', {text: 'Ada Lovelace', fontSize: 22, fontWeight: 'bold'}),
         native('text', {text: 'ada@example.com', fontSize: 14, color: '#64748b'}),
 
         native('divider'),
 
         native('row', {layout: {gap: 12}}, [
-            native('column', {layout: muted}, [
+            native('column', {class: muted}, [
                 native('text', {text: 'Notes', fontSize: 12, color: '#64748b'}),
                 native('text', {text: '12', fontSize: 20, fontWeight: 'bold'}),
             ]),
-            native('column', {layout: muted}, [
+            native('column', {class: muted}, [
                 native('text', {text: 'Synced', fontSize: 12, color: '#64748b'}),
                 native('text', {text: '2 min ago', fontSize: 20, fontWeight: 'bold'}),
             ]),
@@ -61,7 +61,7 @@
         <div class="card">
             <h2>The template</h2>
             <pre>{% verbatim %}{% set tree = native_publish(
-    native('column', {layout: card}, [
+    native('column', {class: 'flex-1 p-4 gap-3 bg-white rounded-xl'}, [
         native('text', {text: 'Ada Lovelace', fontSize: 22, fontWeight: 'bold'}),
         native('text', {text: 'ada@example.com', fontSize: 14, color: '#64748b'}),
         native('divider'),
@@ -72,9 +72,15 @@
     ])
 ) %}{% endverbatim %}</pre>
             <p class="dim" style="font-size:.8rem;margin:.6rem 0 0">
-                Styling uses the same Tailwind subset as upstream —
-                <code>flex-1 p-4 gap-3 bg-white rounded-xl</code> was parsed in the
-                controller and passed in as <code>card</code>. The parser reproduces
+                Styling uses the same Tailwind subset as upstream, through the
+                <code>class</code> option — <em>not</em> by parsing in the controller and
+                passing the result as <code>layout</code>. The parser emits a camelCase
+                intermediate vocabulary and splits across three wire buckets, so
+                <code>{layout: parsed}</code> publishes <code>flexGrow</code> where the
+                renderer wants <code>flex_grow</code> and puts <code>bg</code> in the layout
+                bucket instead of the style one: accepted, published, silently ignored.
+                <code>class</code> routes through <code>StyleApplier</code>, which is the
+                piece that knows where each key belongs. The parser itself reproduces
                 upstream's output byte-for-byte across 684 tokens; the only intentional
                 divergence is a bug fix.
             </p>

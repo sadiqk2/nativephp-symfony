@@ -44,6 +44,11 @@ broadcasts; **Export…** opens a native save sheet.
 
 ![Notes](shot-notes.png)
 
+Exporting one opens a real GTK save sheet, with the app's own default filename and
+button label — and holds the runtime's main thread until it is answered:
+
+![The native save dialog](shot-dialog.png)
+
 **Jobs** (`/jobs`) — child processes. A PHP one-liner and the app's own
 `app:report` console command, both spawned by the runtime with its PHP binary and its
 whole `NATIVEPHP_*` environment. Their stdout arrives as events, in PHP *and* in the
@@ -163,12 +168,12 @@ The full `_smoke` output from that run:
 
 ```json
 {
-  "runtime":  {"pid": 67, "platform": "linux", "arch": "x64", "uptime": 12.3},
+  "runtime":  {"pid": 67, "platform": "linux", "arch": "x64", "uptime": 12.36},
   "windows":  {"ids": ["main", "inspector"], "main_size": "1180x827", "main_title": "Deskpad"},
-  "clipboard":{"wrote": "deskpad-30695cea", "read": "deskpad-30695cea"},
+  "clipboard":{"wrote": "deskpad-7c647923", "read": "deskpad-7c647923"},
   "settings": {"read": "probe", "after_forget": "gone"},
   "notes":    {"saved": "Written by the smoke run", "total": 1},
-  "notification": {"reference": "1786730980084.wm5xyc5"},
+  "notification": {"reference": "1786731436629.kznc3e1"},
   "child_process": {"alias": "smoke", "pid_on_start": null},
   "system":   {"theme": "system", "can_encrypt": false},
   "power":    {"idle_state": "active", "on_battery": false},
@@ -225,24 +230,34 @@ instead of one.
 
 `spike/app` is left where it is — it is what `../SPIKE-RESULTS.md` refers to.
 
-## What the bundles could do better
+## What building this changed in the bundles
 
-Found while building this. **Neither is a bug**, and neither was changed from here.
+Three things the demo found. All three were fixed in the bundles rather than worked
+around here, which is the point of building a real application against them.
 
-1. **A `#[NativeScreen]` component cannot be rendered by the bundle's own responder
-   without app glue.** `NativeScreenResponder` resolves a path to a screen class and
-   then asks a `ScreenRendererInterface` for an element — and nothing in the bundle
-   implements that interface, while `ComponentScreenFactory` sits next door doing
-   almost exactly the job. The seam is deliberate and the reasoning in the docblock is
-   sound, but the result is that the two halves of the native-UI path do not join up
-   out of the box. A `ComponentScreenRenderer` in the bundle would close it.
+1. **The two halves of the native-UI path did not join up.**
+   `NativeScreenResponder` resolved a path to a screen class and then asked a
+   `ScreenRendererInterface` for an element — and nothing implemented that interface,
+   while `ComponentScreenFactory` sat next door doing almost exactly the job. So a
+   `#[NativeScreen]` component needed app glue, and this demo wrote some. The mobile
+   bundle now ships `ComponentScreenRenderer`, aliased to the interface, and
+   `/mobile/counter` goes through the routed path instead.
 
-2. **`native:install` writes `public/nativephp-router.php` but the routes import is
-   manual.** The command already edits the application (the router script), so the one
-   remaining hand-edit — `config/routes/native_desktop.yaml` — could be written the same
-   way, or at least printed as a next step. Forgetting it produces an app that boots and
-   then shows nothing at all, because `/booted` 404s and `boot()` never runs; that is a
-   confusing first five minutes for something the installer knows how to fix.
+2. **`native:install` left the routes import as a manual step.** The command already
+   edited the application (the router script), and forgetting the one remaining hand-edit
+   produced an app that boots and then shows nothing at all — `/booted` 404s, so `boot()`
+   never runs. It now writes `config/routes/native_desktop.yaml` itself, refuses to
+   overwrite an edited one without `--force`, and warns rather than guessing when there is
+   no `config/routes/`.
+
+3. **This demo was itself piping parser output straight onto nodes.** Both the counter
+   screen and the profile template did `layout: styles.parse(...)`, which publishes
+   `flexGrow` where the wire wants `flex_grow` and puts `bg` in the layout bucket instead
+   of the style one — accepted, published, and then silently ignored by every renderer, so
+   `flex-1`, `gap-*` and `bg-white` were doing nothing. Both now go through
+   `StyleApplier`: the screen calls `applyClasses()`, the template uses the `class` option.
+   Worth recording as the exact mistake the applier exists to prevent, made by the person
+   who wrote the applier.
 
 ## Layout
 
@@ -256,7 +271,7 @@ src/Command/ReportCommand.php     something for a child process to run
 src/Mobile/                       a native screen component and the screen catalog
 templates/                        base + four screens + three mobile screens
 config/packages/native_*.yaml     both bundles configured
-config/routes/native_desktop.yaml the required routes import
+config/routes/native_desktop.yaml the routes import (written by native:install)
 run.sh                            headless boot, drive, screenshot
 nativephp/                        the patched runtime (gitignored, ~900MB)
 shot-*.png                        captured from a real run
