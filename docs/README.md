@@ -74,20 +74,23 @@ Every "worth knowing" in the pages above traces back to one of these three.
 
 ## Known drift in older documents
 
-Caught while writing these docs, against the source at the time:
+Everything the first pass of these docs found wrong has since been fixed in code, not
+papered over — the list is kept because *how* each was found is the useful part.
 
-- `mobile-bundle/README.md` shows a Twig `native_publish(...)` call. There is no such Twig
-  function — `NativeUiExtension` registers `native()` and `native_types()` only. Publish
-  through `ElementPublisher::publish()`.
-- `mobile-bundle/README.md`'s closing paragraph says the style parser, `Route::native`
-  equivalents and a component lifecycle are "not implemented". All three are, and the same
-  README describes them earlier.
-- `mobile-bundle/README.md` shows `Column::make(...)->layout($styles->parse('flex-1 p-4 gap-2'))`.
-  `StyleParser` emits the canonical camelCase vocabulary, and no applier translating it into
-  wire keys exists yet — see
-  [the style note](mobile-api.md#styling) and
-  [the troubleshooting entry](troubleshooting.md#my-parsed-styles-have-no-effect-on-the-device).
-- `bundle/README.md`'s install instructions do not mention `native:manifest`, which now exists
-  and is the alternative to patching.
-- Test counts in the package READMEs and the root README disagree with each other (222 / 235 /
-  236 / 76 appear in different places). Trust `vendor/bin/phpunit`.
+| Was wrong | Now |
+|---|---|
+| `native_publish()` was documented and never registered | Registered; returns void, so `{% do native_publish(...) %}` is the spelling |
+| Parsed styles never reached the wire — the documented `->layout($parser->parse(...))` put camelCase keys where the renderers read snake_case | `StyleApplier` dispatches them, or use the `class` option |
+| Element props were camelCase (`fontSize`), `text_align` was a string, `font_size` an int | All match the wire; a test now compares an element *with* props, which is how these surfaced |
+| `NativeScreenResponder` typed its renderer non-nullable while DI wired it `nullOnInvalid` — a `TypeError` for any app enabling the bundle | Nullable, with a guard naming the interface to implement |
+| The install flow predated `native:manifest` | Documented, and patching is skipped when the runtime is manifest-aware |
+| Test counts contradicted each other across three READMEs | Read from the suites |
+
+Two caveats that are *not* drift and will not be fixed:
+
+- **Mobile is verified by tests, not on a device.** There is no Xcode or Android SDK in
+  the environment this was built in. Desktop's claims are backed by a running packaged
+  app; mobile's are not, and no amount of test coverage changes that.
+- **`SPIKE-RESULTS.md`, `M2-RESULTS.md` and `M3-RESULTS.md` are a journal.** They record
+  what was true at a milestone, including conclusions later corrected. Read them for the
+  reasoning, not the API.

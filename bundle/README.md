@@ -4,7 +4,7 @@ Build desktop applications with Symfony, on NativePHP's Electron runtime.
 
 Status: **M3 complete.** All **116 runtime endpoints** and all **44 events** are
 implemented, and `native:build` produces a distributable app that has been **built and
-run** — see `../M3-RESULTS.md`. 235 tests.
+run** — see `../M3-RESULTS.md`. 298 tests.
 
 Not done yet: installer targets beyond `--dir`, and code signing (the env plumbing is
 there, untested without real credentials).
@@ -53,8 +53,13 @@ composer require native-symfony/desktop-bundle
 git clone --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop
 bin/console native:install --source=/tmp/np-desktop/resources/electron
 
+bin/console native:manifest   # declare the app's paths for the runtime
 bin/console native:run
 ```
+
+`native:install` patches the runtime, and skips it automatically when it detects one
+that already reads a `nativephp.json` — so once the upstream manifest change lands,
+`native:manifest` is the whole story and nothing is patched.
 
 Then implement `Native\Symfony\Contract\AppBootstrapper` on any service. The bundle
 autoconfigures and aliases it — no wiring needed.
@@ -172,7 +177,7 @@ is created, which is why calling it from `boot()` is safe even though the runtim
 composer install && vendor/bin/phpunit
 ```
 
-222 tests, 400 assertions. `ContractCoverageTest` parses the runtime's own express
+298 tests, 636 assertions. `ContractCoverageTest` parses the runtime's own express
 routers and fails if an endpoint goes uncovered or an event name goes unmapped, so
 upstream drift breaks the suite rather than surfacing a release later.
 

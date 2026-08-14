@@ -5,7 +5,7 @@ Build iOS and Android applications with Symfony, on NativePHP's mobile runtime.
 Status: **the WebView render path is implemented, and the native-UI wire format is
 implemented and verified.** All **54 native bridge methods** are wrapped, the SAPI
 shim and persistent runtime are in place, element trees are byte-identical to
-upstream's, and 76 tests cover it.
+upstream's, and 304 tests cover it.
 
 > **Verified by tests, not by a device.** Unlike the desktop bundle — whose claim is
 > backed by a screenshot of a running packaged app — nothing here has run on a phone
@@ -160,7 +160,12 @@ name.
 Styling uses the same Tailwind-subset classes:
 
 ```php
-Elements\Column::make(...)->layout($styles->parse('flex-1 p-4 gap-2'));
+// StyleApplier, not ->layout($parser->parse(...)): the parser emits a camelCase
+// intermediate vocabulary, and camelCase keys on the wire are silently ignored.
+$styles->applyClasses($column, 'flex-1 p-4 gap-2');
+
+// Or, from a template, the `class` option:
+//   native('column', {class: 'flex-1 p-4 gap-2'})
 ```
 
 `StyleParser` reproduces upstream's output **byte-identically** — verified against 684
@@ -203,7 +208,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 composer install && vendor/bin/phpunit
 ```
 
-236 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
+304 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
 collector, and `UiElementCoverageTest` does it per type — which is how two missing
 defaults were found (`ScrollView`'s `overflow=2` and `Circle`'s `border_radius=9999`). `BridgeCoverageTest` parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. `MobileRuntimeTest` drives
