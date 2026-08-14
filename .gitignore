@@ -13,3 +13,8 @@ node_modules/
 dist/
 /mobile-bundle/vendor/
 /mobile-bundle/.phpunit.cache/
+
+# Demo app — generated. `demo/README.md` reconstructs it.
+/demo/vendor/
+/demo/var/
+/demo/nativephp/

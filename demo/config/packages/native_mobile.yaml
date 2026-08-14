@@ -1,0 +1,16 @@
+native_mobile:
+    name: 'Deskpad'
+    app_id: com.example.deskpad
+    version: '1.0.0'
+
+    # nativephp_call() is a compiled extension that only exists inside a packaged
+    # iOS/Android app. Off a device the bridge is unavailable and every call
+    # returns null, which makes a demo indistinguishable from a broken one — so
+    # the recording fake is swapped in and the mobile screens show what was
+    # actually called. This is the honest position for this environment: there is
+    # no Xcode and no Android SDK here, so nothing mobile is device-verified.
+    fake_bridge: true
+
+    # ios | android | ~. Null drops every ios:/android: style variant rather than
+    # guessing one, which is right off a device and wrong on one.
+    platform: ~

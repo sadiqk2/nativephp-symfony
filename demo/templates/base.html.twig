@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Deskpad{% endblock %}</title>
+    {# Inlined rather than built: this app has no asset pipeline on purpose. Adding
+       one would be the demo's biggest file and would demonstrate nothing about the
+       runtime. #}
+    <style>{{ include('_style.css.twig') }}</style>
+</head>
+<body class="{% block bodyClass %}{% endblock %}">
+{% block chrome %}
+<nav>
+    <div class="brand">Deskpad
+        {# A Twig global (see config/packages/twig.yaml), so every page reports this
+           whether or not its controller thought about it. #}
+        <span class="tag {{ native_runtime.isAvailable ? 'ok' : 'off' }}">
+            {{- native_runtime.isAvailable ? 'runtime connected' : 'plain browser' -}}
+        </span>
+    </div>
+    <a href="{{ path('dashboard') }}" class="{{ app.request.pathInfo == '/' ? 'on' : '' }}">Dashboard</a>
+    <a href="{{ path('notes') }}" class="{{ app.request.pathInfo starts with '/notes' ? 'on' : '' }}">Notes</a>
+    <a href="{{ path('jobs') }}" class="{{ app.request.pathInfo starts with '/jobs' ? 'on' : '' }}">Jobs</a>
+    <a href="{{ path('mobile') }}" class="{{ app.request.pathInfo starts with '/mobile' ? 'on' : '' }}">Mobile</a>
+    <div class="spacer"></div>
+    <div class="hint">{% block hint %}{% endblock %}</div>
+</nav>
+{% endblock %}
+
+<main>
+    {% block body %}{% endblock %}
+</main>
+
+{% block events %}
+<section class="feed">
+    <h2>Runtime events <small>window.Native.on</small></h2>
+    <ol id="feed"><li class="dim">listening…</li></ol>
+</section>
+
+<script>
+    // The renderer half of the reverse channel. Every event the runtime pushes to
+    // PHP is pushed to every window at the same time, so the same names work here
+    // and in an #[AsEventListener]. Anything that has to touch state belongs in the
+    // PHP listener; this is chrome.
+    (function () {
+        const feed = document.getElementById('feed');
+        let count = 0;
+
+        function log(name, payload) {
+            if (count === 0) feed.innerHTML = '';
+            const li = document.createElement('li');
+            li.innerHTML = '<code>' + name + '</code> <span class="dim">'
+                + (payload === undefined ? '' : JSON.stringify(payload)) + '</span>';
+            feed.prepend(li);
+            if (++count > 40) feed.lastElementChild.remove();
+        }
+
+        if (!window.Native) {
+            feed.innerHTML = '<li class="dim">window.Native is missing — this page is not in a native window.</li>';
+            return;
+        }
+
+        // The runtime's own events, under their PHP class names.
+        [
+            'Windows\\WindowShown', 'Windows\\WindowFocused', 'Windows\\WindowBlurred',
+            'Windows\\WindowResized', 'Windows\\WindowClosed',
+            'Settings\\SettingChanged',
+            'ChildProcess\\ProcessSpawned', 'ChildProcess\\MessageReceived',
+            'ChildProcess\\ErrorReceived', 'ChildProcess\\ProcessExited',
+            'Notifications\\NotificationClicked', 'Notifications\\NotificationClosed',
+        ].forEach(function (name) {
+            Native.on('Native\\Desktop\\Events\\' + name, function (payload) {
+                log(name.split('\\').pop(), payload);
+            });
+        });
+
+        // And one of ours: dispatched in PHP, forwarded to every window because the
+        // event class implements BroadcastsToRuntime. Save a note in the other window
+        // and watch it arrive here.
+        Native.on('App\\Event\\NoteSaved', function (payload) {
+            log('NoteSaved', payload);
+            document.querySelectorAll('[data-live-notes]').forEach(function (el) {
+                el.textContent = payload.total;
+                el.classList.add('flash');
+            });
+        });
+    })();
+</script>
+{% endblock %}
+</body>
+</html>

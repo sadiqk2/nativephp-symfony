@@ -1,0 +1,64 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Notes{% endblock %}
+{% block hint %}window <code>{{ windowId ?? '?' }}</code>{% endblock %}
+
+{% block body %}
+    <h1>Notes</h1>
+    <p class="lede">
+        Stored in the runtime's own settings store — electron-store, a JSON file under
+        the platform's userData directory. A desktop app gets durable per-user
+        persistence without a database, and this is it.
+    </p>
+
+    {% if flash %}<p class="flash-msg">{{ flash }}</p>{% endif %}
+
+    <div class="grid">
+        <div class="card">
+            <h2>New note</h2>
+            <form method="post" action="{{ path('note_create') }}">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" autocomplete="off"
+                       {% if focusForm %}autofocus{% endif %}>
+                <label for="body">Body</label>
+                <textarea id="body" name="body"></textarea>
+                <div class="row" style="margin-top:.7rem">
+                    <button class="primary" type="submit">Save</button>
+                    <span class="dim" style="font-size:.78rem">
+                        Saving notifies, persists and broadcasts.
+                    </span>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Stored <small>{{ notes|length }} note{{ notes|length == 1 ? '' : 's' }}</small></h2>
+
+            {% for note in notes %}
+                <div class="note">
+                    <h3>{{ note.title }}</h3>
+                    <p>{{ note.body ?: '(no body)' }}</p>
+                    <div class="row">
+                        <form method="post" action="{{ path('note_copy', {id: note.id}) }}">
+                            <button title="clipboard/write, then clipboard/read to check">Copy</button>
+                        </form>
+                        <form method="post" action="{{ path('note_export', {id: note.id}) }}">
+                            {# Opens a native save sheet. It blocks the runtime's main
+                               thread until answered, which is why no automated run
+                               touches this button. #}
+                            <button title="Native save dialog — blocks until answered">Export…</button>
+                        </form>
+                        <form method="post" action="{{ path('note_delete', {id: note.id}) }}">
+                            <button class="danger">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <p class="dim">
+                    Nothing yet. Use the form, or the menu item <em>Notes → Seed three
+                    notes</em>, which does the same thing from an event handler.
+                </p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Dashboard{% endblock %}
+{% block hint %}⌘/Ctrl+N new note · ⌘/Ctrl+I inspector{% endblock %}
+
+{% block body %}
+    <h1>Deskpad</h1>
+    <p class="lede">
+        A Symfony app in a native window. Everything on this page is a live call over
+        localhost HTTP to the Electron process — no snapshot, no mock. The two bundles
+        are installed side by side, which is also the point.
+    </p>
+
+    {% if not available %}
+        <div class="card" style="margin-bottom:1rem">
+            <strong>No runtime.</strong>
+            <span class="dim">
+                NATIVEPHP_API_URL is unset, so this page is being served outside the app.
+                Everything still renders; the values below are simply not available.
+                Start it with <code>bin/console native:run</code>.
+            </span>
+        </div>
+    {% endif %}
+
+    <div class="grid">
+        <div class="card">
+            <h2>This window</h2>
+            <table>
+                <tr>
+                    <td class="k">_windowId</td>
+                    {# The runtime appends ?_windowId=… to every navigation it performs.
+                       Read from the Referer first, the URL second — a form POST carries it
+                       in its Referer and not in its own URL. #}
+                    <td><code>{{ windowId ?? '— (not a runtime navigation)' }}</code></td>
+                </tr>
+                {% if window %}
+                    <tr><td class="k">size</td><td>{{ window.width }} × {{ window.height }}</td></tr>
+                    <tr><td class="k">position</td><td>{{ window.x }}, {{ window.y }}</td></tr>
+                    <tr><td class="k">title</td><td>{{ window.title }}</td></tr>
+                    <tr><td class="k">focused</td><td>{{ window.focused ? 'yes' : 'no' }}</td></tr>
+                    <tr><td class="k">always on top</td><td>{{ window.alwaysOnTop ? 'yes' : 'no' }}</td></tr>
+                {% endif %}
+                <tr>
+                    <td class="k">open windows</td>
+                    <td>
+                        {% for w in windows %}<code>{{ w.id }}</code>{% if not loop.last %}, {% endif %}{% else %}—{% endfor %}
+                    </td>
+                </tr>
+                <tr><td class="k">notes stored</td><td><span data-live-notes>{{ noteCount }}</span></td></tr>
+            </table>
+
+            <div class="row" style="margin-top:.9rem">
+                <form method="post" action="{{ path('inspector_open') }}">
+                    <button class="primary">Open second window</button>
+                </form>
+                <form method="post" action="{{ path('inspector_close') }}">
+                    <button>Close it</button>
+                </form>
+            </div>
+            <p class="dim" style="font-size:.78rem;margin:.6rem 0 0">
+                Both windows are pages in one PHP server. <code>window/open</code> is
+                idempotent by id, so a second click focuses the window it already made.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Runtime</h2>
+            <table>
+                {% for key, value in facts %}
+                    <tr><td class="k">{{ key }}</td><td>{{ value }}</td></tr>
+                {% else %}
+                    <tr><td class="dim">Not connected to a runtime.</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Try it</h2>
+            <p class="dim" style="margin:0 0 .7rem;font-size:.85rem">
+                The application menu is built in <code>Bootstrapper::boot()</code> and every
+                item that does something carries an event name;
+                <code>MenuActionListener</code> is where the doing happens.
+            </p>
+            <table>
+                <tr><td class="k">Notes → New note</td><td>navigates this window</td></tr>
+                <tr><td class="k">Notes → Copy latest</td><td>writes the clipboard, then notifies</td></tr>
+                <tr><td class="k">Notes → Seed three notes</td><td>writes the settings store, broadcasts to both windows</td></tr>
+                <tr><td class="k">Window → Open inspector</td><td>opens the second window</td></tr>
+                <tr><td class="k">Right-click</td><td>context menu, same mechanism</td></tr>
+                <tr><td class="k">⌘/Ctrl+Shift+N</td><td>global shortcut — works unfocused</td></tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}

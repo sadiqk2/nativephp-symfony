@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Mobile / component{% endblock %}
+{% block hint %}state, an action, subtree reuse{% endblock %}
+
+{% block body %}
+    <h1>A stateful native screen</h1>
+    <p class="lede">
+        <code>App\Mobile\CounterScreen</code> is a <code>#[NativeScreen]</code> with a
+        typed property for state and one <code>#[NativeAction]</code> the device may call.
+        On a device the screen object is held by the runloop for as long as it is visible
+        and <code>$count</code> simply stays where it is — the PHP process is long-lived,
+        so there is nothing to serialise and nothing to rehydrate.
+    </p>
+
+    <div class="card" style="margin-bottom:1rem">
+        <div class="row">
+            <span class="big">{{ count }}</span>
+            <span class="dim">after {{ taps }} tap{{ taps == 1 ? '' : 's' }}, {{ frameCount }} frame{{ frameCount == 1 ? '' : 's' }}</span>
+            <div class="spacer" style="flex:1"></div>
+            <a class="btn" href="{{ path('mobile_counter', {taps: taps + 1}) }}">Tap once more</a>
+            <a class="btn" href="{{ path('mobile_counter', {taps: taps + 5}) }}">Five more</a>
+            <a class="btn" href="{{ path('mobile_counter') }}">Reset</a>
+        </div>
+        <p class="dim" style="font-size:.8rem;margin:.7rem 0 0">
+            <strong>Being precise about what this page is.</strong> A browser request is a
+            fresh PHP process, so the taps are <em>replayed</em> to reach this frame:
+            <code>frame()</code>, then <code>handle()</code> once per tap. That demonstrates
+            the frame cycle honestly, but it is not the device's lifetime — on a device the
+            handles arrive minutes apart into the same live object.
+        </p>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>First frame</h2>
+            <pre>{{ firstFrame|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+        </div>
+        <div class="card">
+            <h2>Frame after {{ taps }} tap{{ taps == 1 ? '' : 's' }}</h2>
+            <pre>{{ lastFrame|json_encode(constant('JSON_PRETTY_PRINT')) }}</pre>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+        <h2>What to look for</h2>
+        <table>
+            <tr>
+                <td class="k">callback id</td>
+                <td>
+                    <code>{{ incrementId ?? 'none' }}</code> — the id
+                    <code>increment</code> was registered under. It is a content hash of the
+                    expression within its scope, so it is stable across frames and two
+                    screens with a <code>save</code> handler cannot collide.
+                </td>
+            </tr>
+            <tr>
+                <td class="k"><code>flags: 1</code></td>
+                <td>
+                    A reuse marker. The publisher keeps the previous frame's node hashes, so
+                    a re-render that changed one label republishes one node and marks the
+                    rest unchanged. Without that state, every frame is a full repaint.
+                </td>
+            </tr>
+            <tr>
+                <td class="k">no handler names</td>
+                <td>
+                    The payload carries ids, never method names. <code>reset()</code> on the
+                    component is public and deliberately has no
+                    <code>#[NativeAction]</code>: it cannot be reached from the device.
+                </td>
+            </tr>
+        </table>
+    </div>
+{% endblock %}

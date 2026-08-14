@@ -1,0 +1,80 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Mobile{% endblock %}
+{% block hint %}not device-verified{% endblock %}
+
+{% block body %}
+    <h1>The mobile half</h1>
+    <p class="lede">
+        Desktop is two processes talking over a socket. Mobile is one process with PHP
+        compiled into it, and its API is an extension function — <code>nativephp_call()</code> —
+        that exists only inside a packaged iOS or Android app.
+    </p>
+
+    <div class="card" style="margin-bottom:1rem">
+        <strong>Read this before believing anything below.</strong>
+        <p class="dim" style="margin:.4rem 0 0;font-size:.86rem">
+            There is no Xcode and no Android SDK in this environment, so none of these
+            screens has run on a device. The bridge is the recording fake the bundle
+            ships ({{ fake ? 'active' : 'inactive' }} — <code>native_mobile.fake_bridge</code>),
+            and what these pages show is <em>what would be sent</em>. The element trees are
+            byte-compared against upstream's own collector in the bundle's test suite, so
+            the wire format is verified; the device is not. Desktop, by contrast, is
+            verified by a screenshot of a running app.
+        </p>
+    </div>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Two render paths</h2>
+            <table>
+                <tr>
+                    <td class="k"><a href="{{ path('mobile_device') }}">WebView</a></td>
+                    <td>
+                        Ordinary Twig in a WebView, native APIs by injection. An app that
+                        declares no native screens takes this path by construction — both
+                        platforms' <code>BootPlanner</code> falls back to it when the
+                        manifest is empty.
+                    </td>
+                </tr>
+                <tr>
+                    <td class="k"><a href="{{ path('mobile_profile') }}">Native UI</a></td>
+                    <td>
+                        An element tree authored with the <code>native()</code> Twig
+                        function, rendered as SwiftUI and Jetpack Compose. No HTML
+                        involved at all.
+                    </td>
+                </tr>
+                <tr>
+                    <td class="k"><a href="{{ path('mobile_counter') }}">Component</a></td>
+                    <td>
+                        A <code>#[NativeScreen]</code> with state, an action and subtree
+                        reuse between frames.
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Declared native screens</h2>
+            <p class="dim" style="margin:0 0 .6rem;font-size:.82rem">
+                This list is the manifest. It is copied verbatim into the app bundle and
+                matched on device, which is why the paths use Laravel's placeholder syntax
+                and why <code>App\Mobile\ScreenCatalog</code> names its screens instead of
+                scanning for them: a build-time list shorter than the runtime list does not
+                fail, it silently boots those screens into a WebView.
+            </p>
+            <table>
+                <tr><th class="k">pattern</th><th>screen</th></tr>
+                {% for pattern, route in screens %}
+                    <tr>
+                        <td class="k"><code>{{ pattern }}</code></td>
+                        <td><code>{{ route.screen|split('\\')|last }}</code></td>
+                    </tr>
+                {% else %}
+                    <tr><td class="dim">None declared.</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Mobile / native UI{% endblock %}
+{% block hint %}SwiftUI &amp; Compose, from Twig{% endblock %}
+
+{#
+   A native screen, authored in a template.
+
+   `native(type, options, children)` is the whole authoring surface — one generic
+   function rather than 37 element-specific ones, because the type is data and the
+   template language should not have to know 37 names.
+
+   Upstream's Blade equivalent is a tag precompiler that rewrites `<native:*>` tags into
+   collector calls, specifically to *bypass* Blade's component lifecycle for speed. Twig
+   needs none of that: its functions are already calls, so there is nothing to compile
+   around.
+
+   `native_publish()` sends the frame. Off a device there is nothing to send it to, so the
+   publisher captures the tree and returns it — which is the only reason a native screen can
+   be looked at in a browser at all. It takes an optional callback registry; a template used
+   as a whole screen wants the default, and a component lifecycle re-rendering on an
+   interaction has to pass its own, because the id arriving from the device only resolves in
+   the registry that minted it.
+#}
+{% set tree = native_publish(
+    native('column', {layout: card}, [
+        native('text', {text: 'Ada Lovelace', fontSize: 22, fontWeight: 'bold'}),
+        native('text', {text: 'ada@example.com', fontSize: 14, color: '#64748b'}),
+
+        native('divider'),
+
+        native('row', {layout: {gap: 12}}, [
+            native('column', {layout: muted}, [
+                native('text', {text: 'Notes', fontSize: 12, color: '#64748b'}),
+                native('text', {text: '12', fontSize: 20, fontWeight: 'bold'}),
+            ]),
+            native('column', {layout: muted}, [
+                native('text', {text: 'Synced', fontSize: 12, color: '#64748b'}),
+                native('text', {text: '2 min ago', fontSize: 20, fontWeight: 'bold'}),
+            ]),
+        ]),
+
+        native('toggle', {value: true, label: 'Sync over cellular', onChange: 'toggleSync'}),
+
+        native('spacer'),
+
+        native('button', {label: 'Sign out', variant: 'destructive', onPress: 'signOut'}),
+    ])
+) %}
+
+{% block body %}
+    <h1>Native UI, authored in Twig</h1>
+    <p class="lede">
+        No HTML and no WebView: the tree below is the wire format the SwiftUI and Jetpack
+        Compose renderers consume directly. The bundle's <code>UiWireFormatTest</code>
+        byte-compares trees like this one against upstream's own collector, so the shape
+        is verified even though the device is not.
+    </p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>The template</h2>
+            <pre>{% verbatim %}{% set tree = native_publish(
+    native('column', {layout: card}, [
+        native('text', {text: 'Ada Lovelace', fontSize: 22, fontWeight: 'bold'}),
+        native('text', {text: 'ada@example.com', fontSize: 14, color: '#64748b'}),
+        native('divider'),
+        native('row', {layout: {gap: 12}}, [ … ]),
+        native('toggle', {value: true, label: 'Sync over cellular', onChange: 'toggleSync'}),
+        native('spacer'),
+        native('button', {label: 'Sign out', variant: 'destructive', onPress: 'signOut'}),
+    ])
+) %}{% endverbatim %}</pre>
+            <p class="dim" style="font-size:.8rem;margin:.6rem 0 0">
+                Styling uses the same Tailwind subset as upstream —
+                <code>flex-1 p-4 gap-3 bg-white rounded-xl</code> was parsed in the
+                controller and passed in as <code>card</code>. The parser reproduces
+                upstream's output byte-for-byte across 684 tokens; the only intentional
+                divergence is a bug fix.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>What goes on the wire</h2>
+            <pre>{{ tree|json_encode(constant('JSON_PRETTY_PRINT') b-or constant('JSON_UNESCAPED_SLASHES')) }}</pre>
+            <p class="dim" style="font-size:.8rem;margin:.6rem 0 0">
+                <code>onPress</code> handlers are gone from the payload: each became a
+                numeric callback id, derived by hashing the expression within its scope.
+                The device sends the id back and it is used for exactly one thing — a
+                lookup. Nothing from the device ever becomes a method name.
+            </p>
+        </div>
+    </div>
+{% endblock %}

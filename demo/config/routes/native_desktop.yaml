@@ -1,0 +1,7 @@
+# The two endpoints the runtime POSTs to: /_native/api/booted and
+# /_native/api/events. Symfony bundles cannot register routes themselves, so this
+# import is a required install step — without it the app boots and then nothing
+# ever appears, because /booted 404s and AppBootstrapper::boot() is never called.
+native_desktop:
+    resource: '@NativeDesktopBundle/src/Resources/config/routes.php'
+    type: php

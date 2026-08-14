@@ -1,0 +1,13 @@
+twig:
+    file_name_pattern: '*.twig'
+
+    globals:
+        # Available in every template, so no controller has to remember to pass it:
+        # is this process talking to a runtime at all? Pages are expected to render
+        # either way — a native app you cannot open in a browser is a native app you
+        # cannot develop.
+        native_runtime: '@Native\Symfony\Contract\ClientInterface'
+
+when@test:
+    twig:
+        strict_variables: true

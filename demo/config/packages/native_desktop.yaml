@@ -1,0 +1,19 @@
+native_desktop:
+    name: 'Deskpad'
+    app_id: com.example.deskpad
+    version: '1.0.0'
+    author: 'NativePHP for Symfony'
+    description: 'A small notes app, built to exercise the desktop bundle end to end'
+
+    # The runtime spawns one `php -S` process per window and passes these on the
+    # command line. 512M is generous for a demo; the point is that it works.
+    php_ini:
+        memory_limit: 512M
+
+    # Menu items and global shortcuts arrive as caller-named events. Only the
+    # namespaces listed here are ever instantiated as classes; anything else
+    # becomes a NativeEvent carrying the payload as data. This app's own named
+    # events all live under App\Event\, and they are dispatched by *us*, not by
+    # the runtime — so nothing needs to be allowed here, and nothing is.
+    events:
+        allowed_namespaces: []

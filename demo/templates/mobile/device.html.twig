@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Mobile / WebView{% endblock %}
+{% block hint %}recorded, not executed{% endblock %}
+
+{% block body %}
+    <h1>The WebView path</h1>
+    <p class="lede">
+        For most of a Symfony app, "mobile" means exactly this: a controller, a template,
+        and the native APIs injected like any other service. Nothing about the app is
+        unusual — the sixteen API services are the only new thing in the file.
+    </p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Device</h2>
+            <table>
+                {% for key, value in info %}
+                    <tr><td class="k">{{ key }}</td><td>{{ value }}</td></tr>
+                {% else %}
+                    <tr><td class="dim">The bridge returned nothing.</td></tr>
+                {% endfor %}
+                {% for key, value in battery %}
+                    <tr><td class="k">battery {{ key }}</td><td>{{ value is same as(true) ? 'yes' : (value is same as(false) ? 'no' : value) }}</td></tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>Secure storage</h2>
+            <table>
+                <tr><td class="k">wrote</td><td><code>session_token</code></td></tr>
+                <tr><td class="k">read back</td><td><code>{{ token ?? 'null' }}</code></td></tr>
+            </table>
+            <p class="dim" style="font-size:.8rem;margin-top:.6rem">
+                Keychain on iOS, EncryptedSharedPreferences on Android. A dot in the key is
+                <em>not</em> part of the key — the same dot-path behaviour the desktop
+                settings store has, and the same surprise.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>A dispatch is not an outcome</h2>
+            <p class="dim" style="font-size:.85rem;margin:0 0 .6rem">
+                <code>Dialog::toast()</code> returned
+                <strong>{{ toasted ? 'true' : 'false' }}</strong> — meaning the toast was
+                <em>presented</em>, not that anyone saw it. Camera, biometrics, media pickers
+                and the payment sheet are the same shape: they return once the UI is up and
+                the real answer arrives later as an event. The bundle puts those on
+                <code>dispatch()</code> rather than <code>call()</code> so the distinction is
+                visible in the type instead of only in the docs.
+            </p>
+        </div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+        <h2>What actually crossed the bridge <small>FakeBridge::$calls</small></h2>
+        <table>
+            <tr><th class="k">#</th><th class="k">method</th><th>payload</th></tr>
+            {% for call in calls %}
+                <tr>
+                    <td class="k">{{ loop.index }}</td>
+                    <td class="k"><code>{{ call.method }}</code></td>
+                    <td><code>{{ call.payload|json_encode }}</code></td>
+                </tr>
+            {% endfor %}
+        </table>
+        <p class="dim" style="font-size:.8rem;margin-top:.6rem">
+            On a device each row is one <code>nativephp_call()</code> into the host process —
+            same address space, no HTTP, no shared secret, because there is no boundary to
+            cross. The names are the contract, and the bundle's
+            <code>BridgeCoverageTest</code> parses upstream's sources to prove all 54 of them
+            are wrapped.
+        </p>
+    </div>
+{% endblock %}

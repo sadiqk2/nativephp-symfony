@@ -1,0 +1,63 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Inspector{% endblock %}
+
+{# The second window is a different page in the same PHP server, so it gets its own
+   navigation rather than the main window's. #}
+{% block chrome %}
+    <nav>
+        <div class="brand">Inspector
+            <span class="tag {{ native_runtime.isAvailable ? 'ok' : 'off' }}">
+                {{- native_runtime.isAvailable ? 'runtime connected' : 'plain browser' -}}
+            </span>
+        </div>
+        <div class="spacer"></div>
+        <div class="hint">a second window, same app</div>
+    </nav>
+{% endblock %}
+
+{% block body %}
+    <h1>Two windows, one app</h1>
+    <p class="lede">
+        There is one <code>php -S</code> process and one Symfony kernel behind both
+        windows. What tells them apart is the <code>_windowId</code> the runtime appends
+        to every navigation it performs — so this page and the dashboard call the same
+        helper and get different answers.
+    </p>
+
+    <div class="card" style="margin-bottom:1rem">
+        <table>
+            <tr>
+                <td class="k">_windowId here</td>
+                <td><code>{{ windowId ?? '—' }}</code></td>
+            </tr>
+            <tr>
+                <td class="k">notes stored</td>
+                <td><span class="big" data-live-notes>{{ noteCount }}</span></td>
+            </tr>
+        </table>
+        <p class="dim" style="font-size:.8rem;margin:.5rem 0 0">
+            That count updates without a reload. Save a note in the main window: the
+            controller dispatches <code>App\Event\NoteSaved</code>, the bundle's decorated
+            dispatcher forwards anything implementing <code>BroadcastsToRuntime</code> to
+            the runtime, and the runtime fans it out to every renderer.
+        </p>
+    </div>
+
+    <div class="card">
+        <h2>Every open window <small>window/all</small></h2>
+        <table>
+            <tr><th class="k">id</th><th class="k">size</th><th class="k">focused</th><th>url</th></tr>
+            {% for w in windows %}
+                <tr>
+                    <td class="k"><code>{{ w.id }}</code></td>
+                    <td class="k">{{ w.width }}×{{ w.height }}</td>
+                    <td class="k">{{ w.focused ? 'yes' : 'no' }}</td>
+                    <td><code>{{ w.url|slice(0, 60) }}</code></td>
+                </tr>
+            {% else %}
+                <tr><td class="dim">Not connected to a runtime.</td></tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

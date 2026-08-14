@@ -1,0 +1,72 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — Jobs{% endblock %}
+{% block hint %}stdout arrives as events{% endblock %}
+
+{% block body %}
+    <h1>Background jobs</h1>
+    <p class="lede">
+        A desktop app does not have a queue worker; it has child processes. The runtime
+        spawns them, keeps them, and streams their output back as events — to PHP and to
+        every window at once. Start one and watch the feed at the bottom of this window.
+    </p>
+
+    <div class="grid">
+        <div class="card">
+            <h2>Start something</h2>
+            <div class="row">
+                <form method="post" action="{{ path('job_counter') }}">
+                    <button class="primary">Run a PHP one-liner</button>
+                </form>
+                <form method="post" action="{{ path('job_report') }}">
+                    <button>Run <code>app:report</code></button>
+                </form>
+            </div>
+            <p class="dim" style="font-size:.8rem;margin-top:.8rem">
+                Both use the runtime's own PHP binary with the whole
+                <code>NATIVEPHP_*</code> environment injected, so a child can call back
+                into the runtime as a peer. The second is this app's own console command —
+                <code>console()</code> is <code>php()</code> with <code>bin/console</code>
+                prepended, and the reason the bundle has to know the CLI's name at all.
+            </p>
+        </div>
+
+        <div class="card">
+            <h2>Known to the runtime</h2>
+            {% if processes is empty %}
+                <p class="dim">
+                    No child processes. The runtime forgets a non-persistent one shortly
+                    after it exits.
+                </p>
+            {% else %}
+                <table>
+                    <tr><th class="k">alias</th><th class="k">pid</th><th>cmd</th></tr>
+                    {% for process in processes %}
+                        <tr>
+                            <td class="k"><code>{{ process.alias }}</code></td>
+                            <td class="k">{{ process.pid ?? '—' }}</td>
+                            <td>
+                                <code>{{ process.cmd|join(' ')|slice(0, 70) }}{{ process.cmd|join(' ')|length > 70 ? '…' }}</code>
+                                <form method="post" action="{{ path('job_stop', {alias: process.alias}) }}"
+                                      style="display:inline">
+                                    <button class="danger" style="padding:.1rem .4rem;font-size:.75rem">stop</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h2>Why the flush matters</h2>
+            <p class="dim" style="font-size:.85rem;margin:0">
+                A child's stdout is a pipe, not a terminal, so PHP buffers it — and the
+                runtime would deliver one <code>MessageReceived</code> at the end instead of
+                one per line as they happen. <code>App\Command\ReportCommand</code> calls
+                <code>flush()</code> for exactly that reason. Every desktop app that shows
+                progress hits this once.
+            </p>
+        </div>
+    </div>
+{% endblock %}

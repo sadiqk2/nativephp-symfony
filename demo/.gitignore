@@ -1,0 +1,16 @@
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> the Electron runtime ###
+# Installed, patched and npm-installed per app by `native:install` — ~900MB, and
+# reproducible from the upstream clone, so it is not committed.
+/nativephp/
+###< the Electron runtime ###

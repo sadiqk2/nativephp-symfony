@@ -1,0 +1,150 @@
+:root {
+    color-scheme: light dark;
+    --bg: #0b1220;
+    --panel: #111c31;
+    --panel-2: #16243d;
+    --line: #22344f;
+    --ink: #e6edf7;
+    --dim: #8ea0bd;
+    --accent: #7dd3fc;
+    --good: #86efac;
+    --bad: #fca5a5;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font: 14px/1.55 -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100vh;
+}
+
+nav {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .55rem .9rem;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    /* The window has no chrome of its own to lean on beyond the title bar, so the
+       app supplies its own affordances. */
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+nav .brand { font-weight: 650; margin-right: .8rem; letter-spacing: -.01em; }
+nav a {
+    color: var(--dim);
+    text-decoration: none;
+    padding: .3rem .6rem;
+    border-radius: 7px;
+}
+nav a:hover { background: var(--panel-2); color: var(--ink); }
+nav a.on { background: var(--panel-2); color: var(--ink); }
+nav .spacer { flex: 1; }
+nav .hint { color: var(--dim); font-size: .78rem; }
+
+.tag {
+    font-size: .68rem;
+    padding: .12rem .45rem;
+    border-radius: 999px;
+    vertical-align: middle;
+    margin-left: .3rem;
+    font-weight: 500;
+}
+.tag.ok { background: #14532d; color: var(--good); }
+.tag.off { background: #7f1d1d; color: var(--bad); }
+
+main { padding: 1.4rem 1.6rem 1rem; }
+
+h1 { font-size: 1.25rem; margin: 0 0 .2rem; letter-spacing: -.01em; }
+h2 { font-size: .82rem; text-transform: uppercase; letter-spacing: .06em; color: var(--dim); margin: 0 0 .6rem; }
+h2 small { text-transform: none; letter-spacing: 0; font-weight: 400; opacity: .7; }
+p.lede { color: var(--dim); margin: 0 0 1.2rem; max-width: 62ch; }
+
+.grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: .9rem 1rem 1rem;
+}
+
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+td, th { text-align: left; padding: .26rem .6rem .26rem 0; vertical-align: top; }
+th { color: var(--dim); font-weight: 500; }
+td.k, th.k { color: var(--dim); white-space: nowrap; width: 1%; }
+tr + tr td { border-top: 1px solid rgba(255,255,255,.04); }
+
+code, pre { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .8rem; }
+pre {
+    background: #0a1120;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    padding: .7rem .8rem;
+    overflow-x: auto;
+    max-height: 22rem;
+    color: #c9d7ec;
+}
+
+button, .btn {
+    font: inherit;
+    color: var(--ink);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: .38rem .75rem;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+button:hover, .btn:hover { border-color: var(--accent); }
+button.primary { background: #1d4ed8; border-color: #2563eb; }
+button.danger:hover { border-color: var(--bad); }
+.row { display: flex; gap: .4rem; flex-wrap: wrap; align-items: center; }
+
+input[type=text], textarea {
+    font: inherit;
+    width: 100%;
+    color: var(--ink);
+    background: #0a1120;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: .45rem .6rem;
+}
+textarea { min-height: 5.5rem; resize: vertical; }
+label { display: block; font-size: .78rem; color: var(--dim); margin: .6rem 0 .2rem; }
+
+.flash-msg {
+    background: #14532d;
+    color: var(--good);
+    border-radius: 8px;
+    padding: .4rem .7rem;
+    margin: 0 0 1rem;
+    font-size: .85rem;
+}
+
+.note { border-top: 1px solid var(--line); padding: .7rem 0; }
+.note:first-of-type { border-top: 0; }
+.note h3 { margin: 0 0 .15rem; font-size: .95rem; }
+.note p { margin: 0 0 .5rem; color: var(--dim); white-space: pre-wrap; font-size: .85rem; }
+
+.feed {
+    border-top: 1px solid var(--line);
+    background: var(--panel);
+    padding: .7rem 1.6rem 1rem;
+    max-height: 32vh;
+    overflow-y: auto;
+}
+.feed ol { list-style: none; margin: 0; padding: 0; font-family: ui-monospace, monospace; font-size: .76rem; }
+.feed li { padding: .1rem 0; }
+.feed code { color: var(--accent); }
+.dim { color: var(--dim); }
+.big { font-size: 2rem; font-weight: 650; letter-spacing: -.02em; }
+.flash { animation: flash .9s ease-out; }
+@keyframes flash { from { color: var(--good); } to { color: inherit; } }
