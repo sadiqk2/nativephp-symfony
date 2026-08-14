@@ -28,8 +28,13 @@ namespace Native\Symfony\Mobile\Ui\Routing;
  *    are therefore insignificant, and `/items//42` matches `/items/{id}`.
  *  - A `{param}` segment matches *any* single non-empty segment. There are no requirements,
  *    no regex, no type coercion — `/items/{id}` matches `/items/not-a-number`.
- *  - `{param?}` is optional, but only usefully as a trailing run: the pattern matches a
- *    short path only when *every* remaining segment is optional.
+ *  - `{param?}` is optional, and **one optional segment makes the whole remaining tail
+ *    optional** — required placeholders and literal segments included. `/items/{a?}/edit`
+ *    matches `/items`. That contradicts BootPlanner's own doc comment ("optional trailing
+ *    matches") but it is what the code does, on both platforms: the short-path branch
+ *    short-circuits on `isOptional` before it ever evaluates the "all remaining are optional"
+ *    test, which makes that test dead code. Do not declare required segments after an
+ *    optional one; the resolved screen would be mounted without them.
  *  - A path with extra segments never matches: the final segment-count equality check is
  *    what rejects `/items/42/edit` against `/items/{id}`.
  *  - A pattern is not anchored to a route parameter's name in any way, so two patterns can
@@ -41,10 +46,10 @@ final class NativeRouteMatcher
     /**
      * Does `$path` match this Laravel-style URI `$pattern`?
      *
-     * Deliberately a faithful transcription of BootPlanner.matches(). The `$isOptional ||`
-     * in the short-path branch is redundant upstream (the `all()` that follows already
-     * covers segment `i`) and it is kept here anyway — a port that "tidies" the original is
-     * a port that has to be re-verified against a device.
+     * Deliberately a faithful transcription of BootPlanner.matches(), including the
+     * `$isOptional` short-circuit that swallows the loop below it. Simplifying this to what
+     * upstream's doc comment describes would be a behaviour change PHP could not see and a
+     * device would.
      */
     public static function matches(string $pattern, string $path): bool
     {
@@ -67,12 +72,14 @@ final class NativeRouteMatcher
                 continue;
             }
 
-            // Path ran out. The pattern can still match, but only if nothing required is
-            // left in it.
+            // Path ran out. Upstream accepts immediately when *this* segment is optional,
+            // without looking at what follows it — see the class docblock.
             if ($isOptional) {
                 return true;
             }
 
+            // Unreachable in practice (a required $seg fails at $j === $i), kept because it is
+            // in the original and a future upstream fix to the line above would revive it.
             for ($j = $i; $j < $pCount; ++$j) {
                 if (!str_starts_with($p[$j], '{') || !str_ends_with($p[$j], '?}')) {
                     return false;
