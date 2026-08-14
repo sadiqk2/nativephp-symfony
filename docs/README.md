@@ -85,6 +85,9 @@ papered over — the list is kept because *how* each was found is the useful par
 | `NativeScreenResponder` typed its renderer non-nullable while DI wired it `nullOnInvalid` — a `TypeError` for any app enabling the bundle | Nullable, with a guard naming the interface to implement |
 | The install flow predated `native:manifest` | Documented, and patching is skipped when the runtime is manifest-aware |
 | Test counts contradicted each other across three READMEs | Read from the suites |
+| Nothing implemented `ScreenRendererInterface`, so a `#[NativeScreen]` component needed application glue — the two halves of the native-UI path did not join up | `ComponentScreenRenderer` ships, aliased to the interface; override the alias for a different renderer |
+| The routes import was a manual step, and forgetting it gave an app that boots and shows nothing | `native:install` writes it, and warns rather than guessing when there is no `config/routes/` |
+| The demo itself did `layout: $parser->parse(...)` on two pages — the very mistake row three above records | Both go through `StyleApplier` now; found by reading a published frame, not by a test |
 
 Two caveats that are *not* drift and will not be fixed:
 
