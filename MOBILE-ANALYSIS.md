@@ -174,10 +174,15 @@ front end for the same element protocol:
   `mobile-air`, 60+ in `mobile-ui`. Nothing needs rewriting there, which is the one piece of
   good news about M6.
 
-The right first step for M6 is not code: it is to pin down the **element-tree wire format**
-the renderers consume, the same way `CONTRACT.md` pinned down the HTTP API. If that format is
-stable and documented, a Twig front end becomes an independent, incremental project instead of
-a 17k-LOC fork.
+The right first step for M6 was not code but pinning down the **element-tree wire format**
+the renderers consume, the same way `CONTRACT.md` pinned down the HTTP API.
+
+**That is now done — see [`NATIVE-UI-CONTRACT.md`](NATIVE-UI-CONTRACT.md).** The format is a
+JSON tree of `{id, type, _hash, layout?, style?, props?, on_press?, children?}`, published
+through its own extension functions (`nativephp_element_{init,reset,publish,shutdown}`), with
+Merkle content hashes and reuse markers for diffing, and callbacks crossing as integer ids.
+Blade appears nowhere in it: the 17,316 LOC is the *authoring* layer, and the renderers
+consume this protocol without caring what produced the tree.
 
 ---
 

@@ -32,6 +32,9 @@ full API, packaged into a distributable app that has been built *and run*.
 6. **[M3-RESULTS.md](M3-RESULTS.md)** — the build pipeline.
 7. **[MOBILE-ANALYSIS.md](MOBILE-ANALYSIS.md)** — mobile, and a correction to an earlier
    conclusion that was wrong.
+8. **[NATIVE-UI-CONTRACT.md](NATIVE-UI-CONTRACT.md)** — the native-UI wire format: the
+   protocol the SwiftUI and Compose renderers consume, and what a Twig front end
+   (the `super-native` equivalent) would have to produce.
 
 ## The short version
 
@@ -57,7 +60,7 @@ rendering-engine port. See [MOBILE-ANALYSIS.md](MOBILE-ANALYSIS.md).
 |---|---|
 | **Desktop** | Done and proven end-to-end, including a packaged app that has been built and run. |
 | **Mobile — WebView path** | Implemented and tested. No device verification yet; this environment has no Xcode or Android SDK. |
-| **Mobile — native UI** | Not started. The `super-native` equivalent: a Twig front end for the native element tree. Scoped in `MOBILE-ANALYSIS.md` §5. |
+| **Mobile — native UI** | Not started, but no longer unscoped: the wire format is documented in `NATIVE-UI-CONTRACT.md`. The renderers are reusable as-is; only the tree *producer* is new. |
 
 M0 (contract), M1 (spike), M2 (bundle), M3 (build pipeline) and M5 (mobile WebView)
 are done.
