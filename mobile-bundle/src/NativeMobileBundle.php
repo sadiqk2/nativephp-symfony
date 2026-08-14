@@ -10,6 +10,9 @@ use Native\Symfony\Mobile\Bridge\BridgeInterface;
 use Native\Symfony\Mobile\Bridge\FakeBridge;
 use Native\Symfony\Mobile\Runtime\MobileRuntimePatcher;
 use Native\Symfony\Mobile\Runtime\ResponseEmitter;
+use Native\Symfony\Mobile\Ui\ElementFactory;
+use Native\Symfony\Mobile\Ui\ElementPublisher;
+use Native\Symfony\Mobile\Ui\Twig\NativeUiExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
@@ -91,6 +94,18 @@ final class NativeMobileBundle extends AbstractBundle
             Api\System::class,
         ] as $api) {
             $services->set($api)->args([service(BridgeInterface::class)])->public();
+        }
+
+        // --- native UI (the element-tree path) --------------------------------
+        // Registered unconditionally: an app on the WebView path simply never
+        // publishes a frame, and the services cost nothing unused.
+        $services->set(ElementFactory::class)->args([[]])->public();
+        $services->set(ElementPublisher::class)->public();
+
+        if (class_exists(\Twig\Extension\AbstractExtension::class)) {
+            $services->set(NativeUiExtension::class)
+                ->args([service(ElementFactory::class)])
+                ->tag('twig.extension');
         }
 
         // --- runtime ----------------------------------------------------------

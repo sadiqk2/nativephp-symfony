@@ -2,9 +2,10 @@
 
 Build iOS and Android applications with Symfony, on NativePHP's mobile runtime.
 
-Status: **the WebView render path is implemented.** All **54 native bridge methods**
-are wrapped, the SAPI shim and persistent runtime are in place, and 55 tests cover
-them.
+Status: **the WebView render path is implemented, and the native-UI wire format is
+implemented and verified.** All **54 native bridge methods** are wrapped, the SAPI
+shim and persistent runtime are in place, element trees are byte-identical to
+upstream's, and 76 tests cover it.
 
 > **Verified by tests, not by a device.** Unlike the desktop bundle — whose claim is
 > backed by a screenshot of a running packaged app — nothing here has run on a phone
@@ -114,6 +115,35 @@ visible in the type.
 **Dots in a `SecureStorage` key are not part of the key** — the same dot-prop
 behaviour the desktop bundle documents for settings.
 
+## Native UI from Twig
+
+The second render path. `Ui/` produces the element tree the SwiftUI and Jetpack
+Compose renderers consume — the `super-native` equivalent, authored from Twig:
+
+```twig
+{% do native_publish(native('column', {layout: {gap: 8}}, [
+    native('text',   {text: 'Hello', fontSize: 24}),
+    native('button', {label: 'Tap me', onPress: 'save'}),
+    native('spacer'),
+])) %}
+```
+
+Upstream's Blade equivalent is a tag precompiler that rewrites `<native:*>` tags into
+collector calls specifically to *bypass* Blade's component lifecycle for speed. Twig
+needs none of that: its functions are already calls.
+
+**Verified against upstream, not just modelled on it.** `UiWireFormatTest` loads
+upstream's own collector through a stub autoloader — its `Edge` classes have no
+framework dependencies — and byte-compares trees, content hashes, callback ids and
+navigation keys. That comparison caught three things a careful reading had got wrong;
+they are written up in [`../NATIVE-UI-CONTRACT.md`](../NATIVE-UI-CONTRACT.md).
+
+What is implemented: the tree builder with the identity, Merkle-hash and reuse rules,
+a callback registry, 13 of 37 element types, a factory, the Twig extension, and a
+publisher that keeps the diff state between frames. What is not: the Tailwind-subset
+style parser, `Route::native` equivalents, and a component lifecycle — that last being
+the real design question, since Symfony has nothing Livewire-shaped to borrow.
+
 ## Architecture
 
 | | |
@@ -125,6 +155,8 @@ behaviour the desktop bundle documents for settings.
 | `Runtime/ResponseEmitter` | a raw HTTP message on stdout, header-injection safe |
 | `Runtime/MobileRuntimePatcher` | retargets the hosts' hardcoded bootstrap paths |
 | `Resources/bootstrap/` | `native.php`, `persistent.php`, `dispatch.php`, `console.php` |
+| `Ui/` | the native element tree: builder, registry, 13 elements, factory, publisher |
+| `Ui/Twig/` | `native()` for authoring trees from templates |
 
 `native.php` pays for the autoloader and container per request; `persistent.php` plus
 `dispatch.php` pay once. Prefer the persistent pair wherever the host supports it.
@@ -135,7 +167,8 @@ behaviour the desktop bundle documents for settings.
 composer install && vendor/bin/phpunit
 ```
 
-55 tests. `BridgeCoverageTest` parses the upstream sources and fails if a native
+76 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
+collector. `BridgeCoverageTest` parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. `MobileRuntimeTest` drives
 a real Symfony kernel through the persistent runtime and proves state does not leak
 between requests and that a throwing controller is contained rather than fatal.

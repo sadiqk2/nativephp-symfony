@@ -13,7 +13,7 @@ full API, packaged into a distributable app that has been built *and run*.
 | | |
 |---|---|
 | **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 116 runtime endpoints, all 44 events, 235 tests. Verified by a running packaged app. |
-| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, 55 tests. Verified by tests, **not** by a device. |
+| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and native-UI element trees byte-identical to upstream's. 76 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
 
@@ -60,7 +60,7 @@ rendering-engine port. See [MOBILE-ANALYSIS.md](MOBILE-ANALYSIS.md).
 |---|---|
 | **Desktop** | Done and proven end-to-end, including a packaged app that has been built and run. |
 | **Mobile — WebView path** | Implemented and tested. No device verification yet; this environment has no Xcode or Android SDK. |
-| **Mobile — native UI** | Not started, but no longer unscoped: the wire format is documented in `NATIVE-UI-CONTRACT.md`. The renderers are reusable as-is; only the tree *producer* is new. |
+| **Mobile — native UI** | Under way. The wire format is implemented and **byte-verified** against upstream's collector, authored from Twig. Remaining: the style parser, native routing, and a component lifecycle. |
 
 M0 (contract), M1 (spike), M2 (bundle), M3 (build pipeline) and M5 (mobile WebView)
 are done.

@@ -1,7 +1,14 @@
 {
     "name": "native-symfony/mobile-bundle",
     "description": "Build iOS and Android applications with Symfony, on NativePHP's mobile runtime",
-    "keywords": ["symfony", "mobile", "ios", "android", "nativephp", "bundle"],
+    "keywords": [
+        "symfony",
+        "mobile",
+        "ios",
+        "android",
+        "nativephp",
+        "bundle"
+    ],
     "license": "MIT",
     "type": "symfony-bundle",
     "version": "0.1.0",
@@ -18,7 +25,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0|^12.0",
-        "symfony/framework-bundle": "^7.0|^8.0"
+        "symfony/framework-bundle": "^7.0|^8.0",
+        "twig/twig": "^3.0"
     },
     "autoload": {
         "psr-4": {
@@ -33,5 +41,9 @@
     "config": {
         "sort-packages": true
     },
-    "minimum-stability": "stable"
+    "minimum-stability": "stable",
+    "suggest": {
+        "twig/twig": "To author native element trees from Twig templates (the native-UI path)",
+        "symfony/twig-bundle": "To render the application UI in the WebView path"
+    }
 }
