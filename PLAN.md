@@ -12,6 +12,7 @@ Prior art: [NativePHP/laravel discussion #504](https://github.com/NativePHP/lara
 > **`SPIKE-RESULTS.md`** is the working proof, with the findings that only running it revealed.
 > **`M2-RESULTS.md`** covers the bundle, **`M3-RESULTS.md`** the build pipeline, and
 > `bundle/README.md` is the package's own documentation.
+> **`MOBILE-ANALYSIS.md`** covers mobile — and corrects §2.3 and §10's verdict on it.
 
 ---
 
@@ -256,10 +257,25 @@ against `NativePHP/desktop`:
    service provider stay exactly where they are.
 4. `nativephp/symfony` declares `nativephp/core` and drops its duplicated contracts.
 
-### M5 — mobile (not before M4 lands)
+### M5 — mobile, WebView path — **reprioritised, see `MOBILE-ANALYSIS.md`**
 
-Blade→native rendering for Twig is a project in its own right. Revisit only if desktop
-has traction, and check the license situation first.
+The original entry here said Blade→native rendering was a project in its own right and
+mobile should wait. That is still true of the *native-UI* path, and false of mobile as a
+whole: `BootPlanner` on both platforms falls back to a WebView whenever an app registers no
+`Route::native` patterns, and `NATIVEPHP_BOOT_MODE=web` forces it. Twig in a WebView needs
+no Edge port at all.
+
+So mobile splits in two:
+
+- **M5 — WebView path.** A ~100-line Symfony SAPI shim replacing `bootstrap/*/native.php`,
+  a patcher for three hardcoded bootstrap paths in the copied Android/iOS projects, and PHP
+  wrappers for the 54 `nativephp_call` methods. Tractable now.
+- **M6 — native UI for Twig**, the `super-native` equivalent. Genuinely large, but the
+  Kotlin and Swift renderers are reusable as-is; the first step is pinning down the
+  element-tree wire format the way `CONTRACT.md` pinned down the HTTP API.
+
+Licensing still needs reading before anything mobile ships publicly — unlike desktop,
+NativePHP Mobile is a commercial product.
 
 ---
 

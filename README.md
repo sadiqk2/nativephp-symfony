@@ -29,6 +29,8 @@ full API, packaged into a distributable app that has been built *and run*.
 4. **[SPIKE-RESULTS.md](SPIKE-RESULTS.md)** — M1: proving it possible at all.
 5. **[M2-RESULTS.md](M2-RESULTS.md)** — the bundle.
 6. **[M3-RESULTS.md](M3-RESULTS.md)** — the build pipeline.
+7. **[MOBILE-ANALYSIS.md](MOBILE-ANALYSIS.md)** — mobile, and a correction to an earlier
+   conclusion that was wrong.
 
 ## The short version
 
@@ -41,10 +43,12 @@ Electron project into the application's own directory, and the runtime prefers t
 so each app patches its own, idempotently, and the proper fix upstream is a small
 behaviour-preserving manifest PR.
 
-Mobile is a different story and deliberately out of scope: its UI is a native element tree
-driven from Blade, and that rendering engine is 17,316 LOC — 32% of the mobile codebase —
-with 32 of its 92 files importing Blade directly. Desktop needed ~6,000 LOC and **zero** UI
-work, because a Symfony app in a WebView is already a Symfony app.
+Mobile splits in two, and an earlier version of this README got it wrong by pricing the
+whole thing at the cost of the harder half. Its native-UI engine really is 17,316 LOC coupled
+to Blade — but it is **optional**: both platforms' `BootPlanner` falls back to a WebView
+whenever an app registers no native routes, and `NATIVEPHP_BOOT_MODE=web` forces it. So a
+Symfony mobile app needs a ~100-line SAPI shim and wrappers for 54 bridge methods, not a
+rendering-engine port. See [MOBILE-ANALYSIS.md](MOBILE-ANALYSIS.md).
 
 ## Status
 

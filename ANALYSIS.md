@@ -475,7 +475,19 @@ the framework-agnosticism refactor.
 
 ---
 
-## 10. Mobile — why it is a different order of magnitude
+## 10. Mobile — a correction
+
+> **This section is superseded by `MOBILE-ANALYSIS.md`.** The numbers below are accurate but
+> the conclusion drawn from them was wrong: the Blade-coupled rendering engine is **optional**,
+> not mandatory. `BootPlanner` on both platforms falls back to a WebView path whenever an app
+> registers no `Route::native` patterns, and `NATIVEPHP_BOOT_MODE=web` forces it explicitly. A
+> Symfony mobile app therefore needs **none** of the 17,316 lines described here — it needs a
+> ~100-line SAPI shim and wrappers for 54 bridge methods.
+>
+> I measured the hard path and treated it as the only path. Kept below as written, because the
+> Edge figures still price the *native-UI* project (M6) correctly.
+
+### The original assessment — why native UI is a different order of magnitude
 
 Numbers, so this is not a matter of taste:
 
