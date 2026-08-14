@@ -257,7 +257,7 @@ against `NativePHP/desktop`:
    service provider stay exactly where they are.
 4. `nativephp/symfony` declares `nativephp/core` and drops its duplicated contracts.
 
-### M5 — mobile, WebView path — **reprioritised, see `MOBILE-ANALYSIS.md`**
+### M5 — mobile, WebView path — ✅ DONE (see `mobile-bundle/README.md`)
 
 The original entry here said Blade→native rendering was a project in its own right and
 mobile should wait. That is still true of the *native-UI* path, and false of mobile as a
@@ -267,12 +267,14 @@ no Edge port at all.
 
 So mobile splits in two:
 
-- **M5 — WebView path.** A ~100-line Symfony SAPI shim replacing `bootstrap/*/native.php`,
-  a patcher for three hardcoded bootstrap paths in the copied Android/iOS projects, and PHP
-  wrappers for the 54 `nativephp_call` methods. Tractable now.
-- **M6 — native UI for Twig**, the `super-native` equivalent. Genuinely large, but the
-  Kotlin and Swift renderers are reusable as-is; the first step is pinning down the
-  element-tree wire format the way `CONTRACT.md` pinned down the HTTP API.
+- **M5 — WebView path. Done.** `mobile-bundle/` ships the SAPI shim, the persistent
+  runtime, a patcher for the three hardcoded bootstrap paths, and wrappers for all 54
+  `nativephp_call` methods. 55 tests — but **no device verification**, which is a weaker
+  standard of evidence than desktop's and is flagged wherever mobile is described.
+- **M6 — native UI for Twig**, the `super-native` equivalent. Still the largest remaining
+  piece, but now scoped rather than guessed: the wire format is documented in
+  `NATIVE-UI-CONTRACT.md`, the renderers are reusable as-is, and only the tree *producer*
+  is new.
 
 Licensing still needs reading before anything mobile ships publicly — unlike desktop,
 NativePHP Mobile is a commercial product.
