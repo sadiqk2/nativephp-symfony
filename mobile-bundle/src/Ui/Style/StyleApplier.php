@@ -46,9 +46,49 @@ final class StyleApplier
         'minHeight' => 'min_height',
         'maxHeight' => 'max_height',
         'positionType' => 'position_type',
-        'safeArea' => 'safe_area',
+        'aspectRatio' => 'aspect_ratio',
         'overflow' => 'overflow',
     ];
+
+    /**
+     * How each wire key is typed, taken from upstream's applyLayout/applyStyle.
+     *
+     * The renderers read these through getFloat/getInt, so an int where upstream
+     * sends a float most likely coerces — but "most likely" is not a contract, and
+     * the C serialiser that decides is not in this checkout. Matching upstream
+     * exactly costs one cast and turns the parity test into a strict equality that
+     * catches the next drift for free.
+     *
+     * @var array<string, string>
+     */
+    private const CASTS = [
+        'aspect_ratio' => 'float',
+        'flex_basis' => 'float',
+        'flex_direction' => 'int',
+        'flex_grow' => 'float',
+        'flex_shrink' => 'float',
+        'flex_wrap' => 'int',
+        'gap' => 'float',
+        'max_height' => 'float',
+        'max_width' => 'float',
+        'min_height' => 'float',
+        'min_width' => 'float',
+        'position_type' => 'int',
+        // 'fill' is a legal value for both, and cast() passes non-numerics through.
+        'width' => 'float',
+        'height' => 'float',
+        'border_radius' => 'float',
+        'border_width' => 'float',
+        'elevation' => 'float',
+        'opacity' => 'float',
+    ];
+
+    /**
+     * Properties that belong to any element, handled before the per-key dispatch.
+     *
+     * @var array<string, true>
+     */
+    private const UNIVERSAL_PROPS = ['selectable' => true, 'glass' => true];
 
     /** @var array<string, string> */
     private const STYLE = [
@@ -56,10 +96,6 @@ final class StyleApplier
         // and the wire calls it `bg_color`.
         'bg' => 'bg_color',
         'borderRadius' => 'border_radius',
-        'borderRadiusTopLeft' => 'border_radius_top_left',
-        'borderRadiusTopRight' => 'border_radius_top_right',
-        'borderRadiusBottomLeft' => 'border_radius_bottom_left',
-        'borderRadiusBottomRight' => 'border_radius_bottom_right',
         'borderWidth' => 'border_width',
         'borderColor' => 'border_color',
         'elevation' => 'elevation',
@@ -121,23 +157,57 @@ final class StyleApplier
     {
         $layout = [];
         $style = [];
+        $props = [
+            ...$this->cornerRadiusProps($parsed),
+            ...$this->darkProps($parsed),
+        ];
+
+        // Universal properties: upstream sets these in applyStyle rather than in any
+        // per-element applyAttributes, so routing them through element setters found
+        // nothing and dropped them. `selectable` is read by the renderers; `glass`
+        // applies to any element.
+        foreach (['selectable', 'glass'] as $universal) {
+            if (isset($parsed[$universal])) {
+                $props[$universal] = (int) $parsed[$universal];
+            }
+        }
 
         foreach ($parsed as $key => $value) {
-            // `dark` and `gradient` are nested companions, not properties. They are the
-            // parser's own structure and belong to whatever consumes dark-mode output;
-            // flattening them here would put a nested array on the wire as a style value.
+            // `dark` and `gradient` are nested companions, not properties. `dark` is
+            // consumed by darkProps() above; flattening either here would put a
+            // nested array on the wire as a style value.
             if ('dark' === $key || 'gradient' === $key) {
                 continue;
             }
 
+            // safe_area is a u8 edge mask, not a boolean: 1 both, 2 top, 3 bottom.
+            // Sending `true` collapsed all three to the same thing at best, and the
+            // top-only and bottom-only variants had no mapping at all — so content
+            // sat under the notch or the home indicator.
+            if (\in_array($key, ['safeArea', 'safeAreaTop', 'safeAreaBottom'], true)) {
+                if ($value) {
+                    $layout['safe_area'] = match ($key) {
+                        'safeArea' => 1,
+                        'safeAreaTop' => 2,
+                        'safeAreaBottom' => 3,
+                    };
+                }
+
+                continue;
+            }
+
+            if (isset(self::UNIVERSAL_PROPS[$key])) {
+                continue;
+            }
+
             if (isset(self::LAYOUT[$key])) {
-                $layout[self::LAYOUT[$key]] = $value;
+                $layout[self::LAYOUT[$key]] = $this->cast(self::LAYOUT[$key], $value);
 
                 continue;
             }
 
             if (isset(self::STYLE[$key])) {
-                $style[self::STYLE[$key]] = $value;
+                $style[self::STYLE[$key]] = $this->cast(self::STYLE[$key], $value);
 
                 continue;
             }
@@ -182,6 +252,103 @@ final class StyleApplier
         if ([] !== $style) {
             $element->style($style);
         }
+
+        if ([] !== $props) {
+            $element->props($props);
+        }
+    }
+
+    private function cast(string $wireKey, mixed $value): mixed
+    {
+        if (!\is_int($value) && !\is_float($value)) {
+            return $value;
+        }
+
+        return match (self::CASTS[$wireKey] ?? null) {
+            'float' => (float) $value,
+            'int' => (int) $value,
+            default => $value,
+        };
+    }
+
+    /**
+     * The four corner radii, as the float props the renderers actually read.
+     *
+     * They were emitted as `border_radius_top_left` and friends into `style` — names
+     * that appear nowhere in upstream, PHP, Swift or Kotlin. The renderers read
+     * `radius_tl/tr/br/bl` as props, keyed on `radius_tl` being present, so every
+     * asymmetric rounding (`rounded-t-*`, chat bubbles, sheet tops) rendered square.
+     *
+     * All four are emitted whenever any is authored, with the uniform `borderRadius`
+     * filling the rest, because the renderers treat the first as the whole switch.
+     *
+     * @param array<string, mixed> $parsed
+     *
+     * @return array<string, float>
+     */
+    private function cornerRadiusProps(array $parsed): array
+    {
+        $corners = [
+            'radius_tl' => 'borderRadiusTopLeft',
+            'radius_tr' => 'borderRadiusTopRight',
+            'radius_br' => 'borderRadiusBottomRight',
+            'radius_bl' => 'borderRadiusBottomLeft',
+        ];
+
+        if ([] === array_filter($corners, static fn (string $attr): bool => isset($parsed[$attr]))) {
+            return [];
+        }
+
+        $uniform = isset($parsed['borderRadius']) ? (float) $parsed['borderRadius'] : 0.0;
+        $props = [];
+
+        foreach ($corners as $prop => $attr) {
+            $props[$prop] = isset($parsed[$attr]) ? (float) $parsed[$attr] : $uniform;
+        }
+
+        return $props;
+    }
+
+    /**
+     * The `dark:` variants, which were parsed correctly and then thrown away.
+     *
+     * The parser nests them under a `dark` key and nothing emitted them, so a
+     * light-mode background and border painted in dark mode. `dark_bg_color`,
+     * `dark_border_color` and `dark_opacity` are all read by both renderers;
+     * `dark_color` and `dark_font_size` are emitted for parity with upstream even
+     * though neither renderer reads them in this checkout.
+     *
+     * @param array<string, mixed> $parsed
+     *
+     * @return array<string, mixed>
+     */
+    private function darkProps(array $parsed): array
+    {
+        if (!\is_array($dark = $parsed['dark'] ?? null)) {
+            return [];
+        }
+
+        $props = [];
+
+        foreach ([
+            'bg' => 'dark_bg_color',
+            'borderColor' => 'dark_border_color',
+            'opacity' => 'dark_opacity',
+            'color' => 'dark_color',
+            'fontSize' => 'dark_font_size',
+        ] as $from => $to) {
+            if (!isset($dark[$from])) {
+                continue;
+            }
+
+            $props[$to] = match ($to) {
+                'dark_opacity' => (float) $dark[$from],
+                'dark_font_size' => (int) $dark[$from],
+                default => $dark[$from],
+            };
+        }
+
+        return $props;
     }
 
     /**
@@ -203,7 +370,8 @@ final class StyleApplier
         foreach (self::EDGES as $edge) {
             $value = $parsed[$property.$edge] ?? null;
             $any = $any || null !== $value;
-            $edges[] = $value ?? (\is_array($uniform) ? 0 : $uniform ?? 0);
+            // Floats throughout, as upstream casts every edge and the uniform value.
+            $edges[] = (float) ($value ?? (\is_array($uniform) ? 0 : $uniform ?? 0));
         }
 
         if ($any) {
@@ -213,7 +381,7 @@ final class StyleApplier
         }
 
         if (null !== $uniform) {
-            $layout[$property] = $uniform;
+            $layout[$property] = \is_array($uniform) ? array_map('floatval', $uniform) : (float) $uniform;
         }
     }
 
@@ -232,7 +400,10 @@ final class StyleApplier
         foreach (self::EDGES as $edge) {
             $value = $parsed['position'.$edge] ?? null;
             $any = $any || null !== $value;
-            $edges[] = $value;
+            // Upstream casts every edge with `(float) ($attrs[...] ?? 0)`. A null in
+            // a float slot is 0 at best, and shortens the tuple at worst — which
+            // shifts the other three edges.
+            $edges[] = (float) ($value ?? 0);
         }
 
         if ($any) {

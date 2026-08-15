@@ -29,6 +29,9 @@ final class Spacer extends Element
      */
     protected function layoutDefaults(): array
     {
+        // Int, matching upstream's own Spacer exactly. Its collector casts
+        // flex_grow to float when a class sets it, and does not here — the bare
+        // element is byte-compared against theirs, so parity wins over tidiness.
         return ['flex_grow' => 1];
     }
 }

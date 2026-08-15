@@ -110,6 +110,9 @@ final class NativeUiAuthoringTest extends TestCase
         $tree = $publisher->lastFrame();
 
         self::assertSame('column', $tree['type']);
+        // An explicit `layout` option is the author's own value, passed through
+        // verbatim — only values StyleApplier derives from classes get cast to the
+        // types upstream sends.
         self::assertSame(['gap' => 8], $tree['layout']);
         self::assertCount(3, $tree['children']);
         self::assertSame('Hello from Twig', $tree['children'][0]['props']['text']);
@@ -158,8 +161,8 @@ final class NativeUiAuthoringTest extends TestCase
         $node = $factory->create('column', ['class' => 'flex-1 gap-2 bg-slate-900'])
             ->toArray($registry, $nextId);
 
-        self::assertSame(1, $node['layout']['flex_grow']);
-        self::assertSame(8, $node['layout']['gap']);
+        self::assertSame(1.0, $node['layout']['flex_grow']);
+        self::assertSame(8.0, $node['layout']['gap']);
         self::assertSame('#0F172A', $node['style']['bg_color']);
     }
 
@@ -169,10 +172,10 @@ final class NativeUiAuthoringTest extends TestCase
         $registry = new CallbackRegistry();
         $nextId = 1;
 
-        $node = $factory->create('column', ['class' => 'gap-2', 'layout' => ['gap' => 99]])
+        $node = $factory->create('column', ['class' => 'gap-2', 'layout' => ['gap' => 99.0]])
             ->toArray($registry, $nextId);
 
-        self::assertSame(99, $node['layout']['gap']);
+        self::assertSame(99.0, $node['layout']['gap']);
     }
 
     public function testNativePublishPublishesAFrameFromATemplate(): void

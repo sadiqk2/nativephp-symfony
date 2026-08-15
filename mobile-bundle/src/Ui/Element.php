@@ -45,6 +45,9 @@ abstract class Element
     /** @var array<string, mixed> */
     protected array $style = [];
 
+    /** @var array<string, mixed> */
+    protected array $appliedProps = [];
+
     public function type(): string
     {
         return $this->type;
@@ -118,6 +121,24 @@ abstract class Element
     }
 
     /**
+     * Properties that belong to any element rather than to one kind of element.
+     *
+     * Upstream sets these in `applyStyle`/`Element::class()` rather than in a
+     * per-element `applyAttributes`, and they have no natural home on a typed
+     * subclass: `selectable`, `glass`, the four corner radii, and every `dark_*`
+     * override apply to whatever they are written on. Without this they were
+     * routed through per-element setters, found none, and were silently dropped.
+     *
+     * @param array<string, mixed> $props
+     */
+    public function props(array $props): static
+    {
+        $this->appliedProps = [...$this->appliedProps, ...$props];
+
+        return $this;
+    }
+
+    /**
      * Per-element layout defaults, merged *under* anything the author set.
      *
      * The reason this hook exists rather than being folded into a constructor: a
@@ -185,7 +206,9 @@ abstract class Element
 
         $layout = $this->resolvedLayout();
         $style = $this->resolvedStyle();
-        $props = $this->resolvedProps($registry);
+        // Element-specific first, then the ones applied from a stylesheet, so key
+        // order stays deterministic — it feeds the content hash.
+        $props = [...$this->resolvedProps($registry), ...$this->appliedProps];
 
         $onPress = null !== $this->pressMethod ? $registry->register($this->pressMethod) : null;
         $onLongPress = null !== $this->longPressMethod ? $registry->register($this->longPressMethod) : null;

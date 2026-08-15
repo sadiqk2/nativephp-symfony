@@ -35,6 +35,26 @@ final class Button extends Element
         return $this;
     }
 
+    /**
+     * Both of these are interned PropKeys the renderers read (`label_color` 17,
+     * `font_size` 10). Without the setters, `method_exists` in StyleApplier was
+     * false and every `text-*` class on a button was dropped, so a styled button
+     * rendered with the default label colour and size.
+     */
+    public function color(string $color): self
+    {
+        $this->buttonProps['label_color'] = $color;
+
+        return $this;
+    }
+
+    public function fontSize(float $size): self
+    {
+        $this->buttonProps['font_size'] = $size;
+
+        return $this;
+    }
+
     public function disabled(bool $disabled = true): self
     {
         $this->buttonProps['disabled'] = $disabled;

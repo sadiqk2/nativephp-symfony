@@ -20,10 +20,10 @@ final class UiStyleApplierTest extends TestCase
         $node = $this->applied('flex-1 gap-2 items-center');
 
         self::assertSame([
-            'flex_grow' => 1,
-            'flex_shrink' => 1,
-            'flex_basis' => 0,
-            'gap' => 8,
+            'flex_grow' => 1.0,
+            'flex_shrink' => 1.0,
+            'flex_basis' => 0.0,
+            'gap' => 8.0,
             'align_items' => 1,
         ], $node['layout']);
 
@@ -43,25 +43,25 @@ final class UiStyleApplierTest extends TestCase
         // would force every renderer to re-partition.
         $node = $this->applied('flex-1 rounded-lg opacity-50');
 
-        self::assertSame(['flex_grow' => 1, 'flex_shrink' => 1, 'flex_basis' => 0], $node['layout']);
-        self::assertSame(['border_radius' => 8, 'opacity' => 0.5], $node['style']);
+        self::assertSame(['flex_grow' => 1.0, 'flex_shrink' => 1.0, 'flex_basis' => 0.0], $node['layout']);
+        self::assertSame(['border_radius' => 8.0, 'opacity' => 0.5], $node['style']);
     }
 
     public function testDirectionalPaddingCollapsesIntoOneTuple(): void
     {
         // px-2 py-3 parses to four keys; the wire carries a single padding.
         // Order is top, right, bottom, left.
-        self::assertSame([12, 8, 12, 8], $this->applied('px-2 py-3')['layout']['padding']);
+        self::assertSame([12.0, 8.0, 12.0, 8.0], $this->applied('px-2 py-3')['layout']['padding']);
     }
 
     public function testUniformPaddingSeedsTheSidesItDoesNotOverride(): void
     {
-        self::assertSame([32, 16, 16, 16], $this->applied('p-4 pt-8')['layout']['padding']);
+        self::assertSame([32.0, 16.0, 16.0, 16.0], $this->applied('p-4 pt-8')['layout']['padding']);
     }
 
     public function testUniformPaddingAloneStaysScalar(): void
     {
-        self::assertSame(16, $this->applied('p-4')['layout']['padding']);
+        self::assertSame(16.0, $this->applied('p-4')['layout']['padding']);
     }
 
     public function testFullWidthBecomesAValueNotABoolean(): void
@@ -70,7 +70,7 @@ final class UiStyleApplierTest extends TestCase
         $layout = $this->applied('w-full h-12')['layout'];
 
         self::assertSame('fill', $layout['width']);
-        self::assertSame(48, $layout['height']);
+        self::assertSame(48.0, $layout['height']);
     }
 
     public function testElementPropsReachTheElementUnderTheirWireNames(): void
@@ -87,7 +87,7 @@ final class UiStyleApplierTest extends TestCase
         $node = $this->applied('text-2xl flex-1');
 
         self::assertArrayNotHasKey('props', $node);
-        self::assertSame(1, $node['layout']['flex_grow']);
+        self::assertSame(1.0, $node['layout']['flex_grow']);
     }
 
     public function testTheNestedDarkCompanionIsNotFlattenedOntoTheWire(): void
