@@ -434,6 +434,7 @@ An app ported from Laravel must add this interface to events that previously onl
 |---|---|
 | `native:install --source=…` | Copy, patch and build the Electron runtime into `nativephp/electron` |
 | `native:manifest` | Write `nativephp.json`; `--dry-run` to preview |
+| `native:doctor` | Check that the runtime can reach the app: routes, firewall, bootstrapper. Exits non-zero when it cannot |
 | `native:run` | Start the app in development |
 | `native:build [os] [arch]` | Package for distribution; `--dir` skips installer generation |
 | `native:config` | Print the startup config as JSON — **the runtime calls this** |

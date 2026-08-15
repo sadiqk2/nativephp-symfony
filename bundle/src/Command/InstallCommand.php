@@ -99,6 +99,7 @@ final class InstallCommand extends Command
 
         if ($input->getOption('skip-npm')) {
             $io->success('Runtime installed and patched. Skipped npm.');
+            $io->text('Check the wiring with: bin/console native:doctor');
 
             return Command::SUCCESS;
         }
@@ -116,6 +117,7 @@ final class InstallCommand extends Command
         }
 
         $io->success('Runtime installed. Start it with: bin/console native:run');
+        $io->text('Check the wiring first with: bin/console native:doctor');
 
         return Command::SUCCESS;
     }

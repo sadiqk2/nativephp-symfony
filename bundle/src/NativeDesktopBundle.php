@@ -9,6 +9,7 @@ use Native\Symfony\Clipboard\ClipboardManager;
 use Native\Symfony\Client\Client;
 use Native\Symfony\Command\BuildCommand;
 use Native\Symfony\Command\ConfigCommand;
+use Native\Symfony\Command\DoctorCommand;
 use Native\Symfony\Command\InstallCommand;
 use Native\Symfony\Command\ManifestCommand;
 use Native\Symfony\Command\PhpIniCommand;
@@ -441,6 +442,22 @@ final class NativeDesktopBundle extends AbstractBundle
 
         $services->set(RunCommand::class)
             ->args(['%kernel.project_dir%'])
+            ->tag('console.command');
+
+        // `router` and `security.access_map` are both optional on purpose: the
+        // first is absent in a kernel without FrameworkBundle's routing, and the
+        // second only exists when the app installs the security bundle. The
+        // command degrades to reporting what it could not check.
+        $services->set(DoctorCommand::class)
+            ->args([
+                '%kernel.project_dir%',
+                '%native_desktop.running%',
+                '%native_desktop.secret%',
+                service('router')->nullOnInvalid(),
+                service(AppBootstrapper::class)->nullOnInvalid(),
+                service('security.access_map')->nullOnInvalid(),
+                service('security.firewall.map')->nullOnInvalid(),
+            ])
             ->tag('console.command');
 
         $services->set(BuildCommand::class)

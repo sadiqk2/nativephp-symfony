@@ -127,6 +127,18 @@ The permanent fix is a manifest file — see [`native:manifest`](#7-optional-wri
 — which is patch `0001` in [`../upstream-patches/`](../upstream-patches/README.md). It is
 not merged upstream yet.
 
+### Check it before you run it
+
+```bash
+bin/console native:doctor
+```
+
+The runtime talks to your app over HTTP and throws away every non-2xx answer, so the two
+ways to get a dead app — the routes import missing, or your own firewall covering
+`/_native/api/`, both of which give a window that opens and then does nothing forever — are
+invisible from inside the app. `native:doctor` asks the router and the firewall directly and
+exits non-zero if either would swallow the runtime's calls.
+
 ## 5. Run it
 
 ```bash

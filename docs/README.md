@@ -87,6 +87,8 @@ papered over — the list is kept because *how* each was found is the useful par
 | Test counts contradicted each other across three READMEs | Read from the suites |
 | Nothing implemented `ScreenRendererInterface`, so a `#[NativeScreen]` component needed application glue — the two halves of the native-UI path did not join up | `ComponentScreenRenderer` ships, aliased to the interface; override the alias for a different renderer |
 | The routes import was a manual step, and forgetting it gave an app that boots and shows nothing | `native:install` writes it, and warns rather than guessing when there is no `config/routes/` |
+| An application firewall silently denied the runtime's own callbacks — `access_control: ^/` makes `POST /_native/api/booted` a 401, which the runtime discards, giving a window that opens and does nothing. Laravel is not exposed to this: there the two routes sit outside the app's middleware groups | `native:doctor` asks the firewall map and the access map directly and prints the exemption. Found by diffing our route registration against upstream's `routes/api.php` |
+| `native:build` crashed part-way through on any app containing a self-referential symlink (`public/storage -> ..`), with a `FileNotFoundException` naming a path forty levels deep | The staging walk remembers real directories and refuses to enter one twice |
 | The demo itself did `layout: $parser->parse(...)` on two pages — the very mistake row three above records | Both go through `StyleApplier` now; found by reading a published frame, not by a test |
 
 Two caveats that are *not* drift and will not be fixed:
