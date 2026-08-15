@@ -80,9 +80,36 @@ final class Builder
             \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS,
         );
 
+        // FOLLOW_SYMLINKS has no cycle protection of its own: a link that points at
+        // one of its own ancestors — `public/storage -> ..` is the shape people
+        // actually write — is walked again every time it is reached, and the tree is
+        // copied over and over until the paths grow long enough that opendir() fails.
+        // The iterator then stops silently, so the failure is a package that is
+        // quietly many times too large rather than an error. Remember which real
+        // directories have been entered and refuse to enter one twice.
+        $seen = [];
+
         $filtered = new \RecursiveCallbackFilterIterator(
             $directories,
-            fn (\SplFileInfo $current): bool => !$this->isExcluded($this->relative($current->getPathname())),
+            function (\SplFileInfo $current) use (&$seen): bool {
+                if ($this->isExcluded($this->relative($current->getPathname()))) {
+                    return false;
+                }
+
+                if (!$current->isDir()) {
+                    return true;
+                }
+
+                $real = realpath($current->getPathname());
+
+                if (false === $real || isset($seen[$real])) {
+                    return false;
+                }
+
+                $seen[$real] = true;
+
+                return true;
+            },
         );
 
         foreach (new \RecursiveIteratorIterator($filtered, \RecursiveIteratorIterator::SELF_FIRST) as $item) {

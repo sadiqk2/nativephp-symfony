@@ -245,6 +245,50 @@ final class BuilderTest extends TestCase
      * @param list<string> $exclude
      * @param list<string> $keep
      */
+    public function testASymlinkLoopDoesNotCopyTheTreeOverAndOver(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // `public/storage -> ..` is a link people actually write. Followed without a
+        // cycle guard it re-enters the tree until opendir() fails on path length,
+        // and the iterator then stops silently — so the symptom is a package that is
+        // quietly dozens of times too large, not an error anyone would notice.
+        $this->write('src/Kernel.php', '<?php');
+        $this->write('public/index.php', '<?php');
+        symlink($this->source, $this->source.'/public/storage');
+
+        $builder = $this->builder([]);
+        $copied = $builder->stageApplication();
+
+        self::assertFileExists($builder->appPath('src/Kernel.php'));
+        self::assertFileExists($builder->appPath('public/index.php'));
+
+        // Each real file exactly once, and no second copy underneath the link.
+        self::assertSame(2, $copied);
+        self::assertFileDoesNotExist($builder->appPath('public/storage/src/Kernel.php'));
+    }
+
+    public function testADirectorySymlinkPointingOutsideTheProjectIsStillCopied(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // The cycle guard must not reject ordinary links: a composer path repository
+        // installed with `symlink: true` puts exactly this in vendor/, and dropping
+        // it would package an app whose own dependencies are missing.
+        $outside = \dirname($this->source).'/outside';
+        $this->fs->dumpFile($outside.'/Bundle.php', '<?php');
+        symlink($outside, $this->source.'/vendor-link');
+
+        $builder = $this->builder([]);
+        $builder->stageApplication();
+
+        self::assertFileExists($builder->appPath('vendor-link/Bundle.php'));
+    }
+
     private function builder(array $exclude, array $keep = []): Builder
     {
         return new Builder(
