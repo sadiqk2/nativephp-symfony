@@ -423,7 +423,14 @@ final class NativeDesktopBundle extends AbstractBundle
         if ($config['exempt_runtime_firewall'] && interface_exists(AccessMapInterface::class)) {
             $services->set(RuntimeRoutesAccessMap::class)
                 ->decorate('security.access_map', invalidBehavior: ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
-                ->args([service('.inner'), '%native_desktop.running%']);
+                // The gate's own state, not just `running`: handing the app's rules
+                // away is only safe while something is enforcing in their place.
+                ->args([
+                    service('.inner'),
+                    '%native_desktop.running%',
+                    $config['block_browser_access'],
+                    '%native_desktop.secret%',
+                ]);
         }
 
         // --- commands ---------------------------------------------------------

@@ -301,6 +301,15 @@ final class FakeRuntime implements ClientInterface
         }
 
         if (null === $pattern = $this->match($endpoint, $this->scripted)) {
+            // A message box answers with the index of the button the user clicked,
+            // and DialogManager refuses to invent one — a missing result there means
+            // the app cannot know what was chosen, and it throws rather than guess.
+            // Under a fake there is no user, so the fake is the right place to
+            // supply the default: button 0, overridable by scripting the endpoint.
+            if ('alert/message' === $endpoint) {
+                return new Response(200, ['result' => 0]);
+            }
+
             // CONTRACT.md §0 shape 1: `res.sendStatus(200)`, which the real client
             // reads as a success carrying no data.
             return new Response(200);

@@ -34,7 +34,15 @@ final class ShellManager
      */
     public function openPath(string $path): string
     {
-        return (string) $this->client->post('shell/open-item', ['path' => $path])->value('result', '');
+        $response = $this->client->post('shell/open-item', ['path' => $path]);
+
+        // An empty string is this endpoint's "it worked", so a failed call must not
+        // be allowed to produce one by defaulting.
+        if (!$response->successful()) {
+            return sprintf('The runtime answered %d.', $response->status);
+        }
+
+        return (string) $response->value('result', '');
     }
 
     /** Open a URL in the user's default browser. */

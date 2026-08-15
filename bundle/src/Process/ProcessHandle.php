@@ -22,6 +22,15 @@ final class ProcessHandle
         public readonly ?int $pid,
         public readonly array $cmd = [],
         public readonly array $settings = [],
+        /**
+         * The runtime's own message when the fork failed.
+         *
+         * startProcess catches a failed spawn and answers 200 with
+         * `{pid: null, proc: null, settings, error}`. Since the success path also
+         * returns a null pid — the runtime replies before Electron's spawn event —
+         * this string is the only thing separating "starting" from "never started".
+         */
+        public readonly ?string $error = null,
     ) {
     }
 
@@ -37,12 +46,19 @@ final class ProcessHandle
             pid: isset($data['pid']) && is_numeric($data['pid']) ? (int) $data['pid'] : null,
             cmd: array_values($cmd),
             settings: $settings,
+            error: \is_string($data['error'] ?? null) && '' !== $data['error'] ? $data['error'] : null,
         );
     }
 
     public function isRunning(): bool
     {
         return null !== $this->pid;
+    }
+
+    /** Whether the runtime reported that this process could not be started. */
+    public function failed(): bool
+    {
+        return null !== $this->error;
     }
 
     public function isPersistent(): bool

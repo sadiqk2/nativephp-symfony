@@ -155,7 +155,12 @@ final class WindowManager
     {
         $response = $this->client->get("window/get/{$id}");
 
-        if (404 === $response->status) {
+        // Any unusable answer means null, not just a 404. getWindowData() throws a
+        // bare string for some unknown ids, which arrives as a 500 with an HTML
+        // body; decoding that gave [], and Window::fromRuntime([]) is a confident
+        // window with an empty id, zero size and every flag false. A caller reading
+        // ->closable off that gets a wrong answer rather than an absent one.
+        if (!$response->successful() || null === $response->data) {
             return null;
         }
 

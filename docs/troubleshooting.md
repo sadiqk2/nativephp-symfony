@@ -73,7 +73,10 @@ A bundle cannot fix this as configuration, which is why it is done with a decora
 `security.access_control` throws `ForbiddenOverwriteException`. Both are single-source by
 design.
 
-If you turn the option off, write the equivalent yourself:
+If you turn the option off, write the equivalent yourself — but note that a firewall
+stanza is **unconditional**, where the bundle's decorator applies only inside the runtime.
+Put it in a runtime-only config environment, or you have opened on the web exactly the hole
+the option is careful not to:
 
 ```yaml
 # config/packages/security.yaml
@@ -113,6 +116,22 @@ needs no window.
 **The window opened but the page is blank.** Open the devtools —
 `$windows->open('main')->showDevTools()` or `$windows->showDevTools()` — and look at the
 console and network tabs. This is now an ordinary Symfony debugging problem.
+
+### Anything under `public/` is readable by any local process
+
+`nativephp-router.php` serves an existing file under `public/` by returning `false` before
+the kernel boots, so `RuntimeAccessSubscriber` never sees the request and the shared secret
+does not apply:
+
+```
+GET /app.css    (no secret) -> 200
+GET /index.php  (no secret) -> 403   # goes through the kernel, so the gate applies
+```
+
+That is correct for assets and matches Laravel. It also means uploads, generated exports and
+anything else written under `public/` are readable by every process on the machine, because
+the app is served on a real loopback port. Put user data somewhere else and serve it through
+a controller.
 
 ### Every route in the packaged or dev app returns 404
 

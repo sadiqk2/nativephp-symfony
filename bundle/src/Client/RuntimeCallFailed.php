@@ -15,6 +15,21 @@ final class RuntimeCallFailed extends \RuntimeException
         );
     }
 
+    /**
+     * For a call whose *answer* cannot be trusted, as opposed to one that failed
+     * to happen. Used where a wrong default would be worse than an exception —
+     * a dialog whose result decides whether something gets deleted.
+     */
+    public static function badResponse(string $endpoint, int $status): self
+    {
+        return new self(sprintf(
+            'Runtime call %s answered %d without a usable result. Refusing to guess: the caller '.
+            'treats this answer as a decision, and a default would be the wrong one.',
+            $endpoint,
+            $status,
+        ));
+    }
+
     public static function forbidden(string $method, string $endpoint): self
     {
         return new self(sprintf(

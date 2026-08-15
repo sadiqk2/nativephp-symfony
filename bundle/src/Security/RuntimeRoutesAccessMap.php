@@ -26,26 +26,50 @@ use Symfony\Component\Security\Http\AccessMapInterface;
  * and it is also the narrowest thing that works — the request pipeline is
  * untouched, and every other path still resolves exactly as configured.
  *
- * **Only inside the runtime.** The same codebase deployed as an ordinary web
- * application must keep its firewall over these paths: there `running` is false,
- * so RuntimeAccessSubscriber lets everything through and the application's own
- * rules are the only thing standing in front of an endpoint that dispatches
- * events by name. Neutralising them there would be a hole rather than a fix.
+ * **Only where something else is actually guarding these paths.** Removing the
+ * application's rules is only safe while the shared-secret gate is enforcing in
+ * their place, so this hands over on exactly the condition that installs the
+ * gate — not merely on `running`. Two states made the difference load bearing:
+ * `block_browser_access: false` is a documented one-line option that removes the
+ * gate entirely, and the gate deliberately fails open when the runtime supplied
+ * no secret. In either, exempting these paths would leave an endpoint that
+ * dispatches events by name with nothing in front of it at all.
+ *
+ * The exact two paths, not the prefix they share. The bundle registers exactly
+ * two routes and knows both; a prefix also covers whatever else an application
+ * happens to route under it, and a catch-all front-end route — `/{path}` with a
+ * `.*` requirement, which is how every SPA is wired — silently loses its
+ * access_control for that whole subtree inside the desktop app.
  */
 final class RuntimeRoutesAccessMap implements AccessMapInterface
 {
+    /** Kept in step with Resources/config/routes.php. */
+    private const EXEMPT = ['/_native/api/booted', '/_native/api/events'];
+
     public function __construct(
         private readonly AccessMapInterface $inner,
         private readonly bool $running,
+        private readonly bool $gateEnabled,
+        private readonly ?string $secret,
     ) {
     }
 
     public function getPatterns(Request $request): array
     {
-        if ($this->running && str_starts_with($request->getPathInfo(), RuntimeAccessSubscriber::RUNTIME_PREFIX)) {
+        if ($this->guarded() && \in_array($request->getPathInfo(), self::EXEMPT, true)) {
             return [null, null];
         }
 
         return $this->inner->getPatterns($request);
+    }
+
+    /**
+     * Whether RuntimeAccessSubscriber is both installed and actually enforcing.
+     *
+     * Mirrors its own early returns; see RuntimeAccessSubscriber::onKernelRequest.
+     */
+    private function guarded(): bool
+    {
+        return $this->running && $this->gateEnabled && null !== $this->secret && '' !== $this->secret;
     }
 }

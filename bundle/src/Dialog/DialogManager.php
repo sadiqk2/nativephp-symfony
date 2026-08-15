@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Dialog;
 
+use Native\Symfony\Client\RuntimeCallFailed;
 use Native\Symfony\Contract\ClientInterface;
 use Native\Symfony\Enums\AlertType;
 
@@ -57,7 +58,19 @@ final class DialogManager
             'cancelId' => $cancelId,
         ], static fn (mixed $v): bool => null !== $v);
 
-        return (int) $this->client->post('alert/message', $payload)->value('result', 0);
+        $response = $this->client->post('alert/message', $payload);
+        $result = $response->value('result');
+
+        // Fail closed. Client only throws on a 403 or a transport error, so a 400
+        // or a 500 — showMessageBoxSync throwing on an unknown type, no window
+        // available, a renamed route after a runtime upgrade — arrived here as a
+        // null result and became button 0. Button 0 is the confirming button, so
+        // confirm() answered "yes" to a question the user never saw.
+        if (!$response->successful() || !\is_int($result)) {
+            throw RuntimeCallFailed::badResponse('alert/message', $response->status);
+        }
+
+        return $result;
     }
 
     /**
