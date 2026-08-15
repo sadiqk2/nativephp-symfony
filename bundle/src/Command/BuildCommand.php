@@ -117,6 +117,14 @@ final class BuildCommand extends Command
         });
         $io->text(sprintf('Copied %d files to %s', $copied, $builder->appPath()));
 
+        // Before composer, not after: its Flex auto-scripts (cache:clear,
+        // assets:install) read the staged .env, so with APP_ENV still 'dev' they
+        // warm a dev debug container into the var/cache that the exclude list
+        // exists to keep out of the package — ~2MB of compiled service graph that
+        // shipped in every build, while the prod cache it wants stayed cold.
+        $io->section('Cleaning the environment file');
+        $builder->cleanEnvironmentFile();
+
         if (!$input->getOption('skip-composer')) {
             $io->section('Installing production dependencies');
 
@@ -126,9 +134,6 @@ final class BuildCommand extends Command
                 return Command::FAILURE;
             }
         }
-
-        $io->section('Cleaning the environment file');
-        $builder->cleanEnvironmentFile();
 
         $io->section('Installing the CA bundle and icons');
 

@@ -74,6 +74,17 @@ final class InstallCommand extends Command
             return Command::FAILURE;
         }
 
+        // `delete: true` removes everything not in the source, node_modules included.
+        // That is right when npm follows, and a trap when it does not: the tree goes
+        // away silently and nothing says so until `native:run` fails to find electron
+        // much later. Worth two lines to say it up front.
+        if ($input->getOption('force') && $input->getOption('skip-npm') && is_dir($target.'/node_modules')) {
+            $io->warning([
+                'Overwriting the runtime deletes its node_modules, and --skip-npm will not reinstall it.',
+                'Re-run without --skip-npm before `native:run`, or run `npm install` in '.$target.' yourself.',
+            ]);
+        }
+
         $io->section('Copying the Electron runtime');
         $fs->mkdir(\dirname($target));
         // node_modules and any prior build are the installer's to create.

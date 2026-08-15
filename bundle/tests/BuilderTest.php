@@ -149,6 +149,58 @@ final class BuilderTest extends TestCase
         self::assertStringNotContainsString('STRIPE_SECRET', $env);
     }
 
+    public function testAMultiLineQuotedValueSurvivesTheClean(): void
+    {
+        // Splitting on newlines and dropping every line without an `=` truncated a
+        // multi-line value at its first line and left the quote open, so the staged
+        // .env no longer parsed. bootEnv() runs before the kernel, so the packaged
+        // app died on every launch — and the build reported success.
+        $this->write('.env', implode("\n", [
+            'APP_ENV=dev',
+            'APP_SECRET=abc123',
+            'JWT_PASSPHRASE="line one',
+            'line two"',
+            'DATABASE_URL="mysql://u:p@h/db?opt=1"',
+            '',
+        ]));
+
+        $builder = $this->builder([]);
+        $builder->stageApplication();
+        $builder->cleanEnvironmentFile();
+
+        $env = (string) file_get_contents($builder->appPath('.env'));
+
+        self::assertStringContainsString("JWT_PASSPHRASE=\"line one\nline two\"", $env);
+        self::assertStringContainsString('DATABASE_URL="mysql://u:p@h/db?opt=1"', $env);
+        // The quote count is the cheap proxy for "this still parses".
+        self::assertSame(0, substr_count($env, '"') % 2, 'An unbalanced quote means the app cannot boot.');
+    }
+
+    public function testAnExportPrefixDoesNotDefeatEitherList(): void
+    {
+        // `export FOO=bar` is valid Dotenv. Taking the key as everything before the
+        // `=` gave "export FOO", and fnmatch is anchored at both ends — so a prefix
+        // glob stopped matching and the secret shipped, while a leading-star glob
+        // still matched and stripped the APP_SECRET the keep list protects. Both
+        // directions wrong, in one file.
+        $this->write('.env', "export APP_SECRET=s3cr3t\nexport STRIPE_KEY=sk_live_abc\nAPP_SECRET=plain\n");
+
+        $builder = new Builder(
+            sourcePath: $this->source,
+            buildPath: $this->build,
+            envRemove: ['*_SECRET', 'STRIPE_*'],
+            envKeep: ['APP_SECRET'],
+        );
+
+        $builder->stageApplication();
+        $builder->cleanEnvironmentFile();
+
+        $env = (string) file_get_contents($builder->appPath('.env'));
+
+        self::assertStringContainsString('export APP_SECRET=s3cr3t', $env);
+        self::assertStringNotContainsString('STRIPE_KEY', $env);
+    }
+
     public function testCleaningTheEnvNeverTouchesTheDevelopersOwnFile(): void
     {
         $original = "APP_ENV=dev\nAWS_ACCESS_KEY_ID=AKIA\n";
@@ -268,6 +320,67 @@ final class BuilderTest extends TestCase
         // Each real file exactly once, and no second copy underneath the link.
         self::assertSame(2, $copied);
         self::assertFileDoesNotExist($builder->appPath('public/storage/src/Kernel.php'));
+    }
+
+    public function testAssetsInstallSymlinksAreStaged(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // `assets:install --symlink --relative` is the Flex default, so this shape is
+        // in essentially every real project. A cycle guard that skips any directory
+        // already visited drops one of the two paths — and which one is readdir
+        // order — packaging an app whose bundle assets all 404, with a build that
+        // still reports success.
+        $this->write('vendor/acme/admin-bundle/public/admin.css', 'body{}');
+        $this->write('public/index.php', '<?php');
+        $this->fs->mkdir($this->source.'/public/bundles');
+        symlink('../../vendor/acme/admin-bundle/public', $this->source.'/public/bundles/acmeadmin');
+
+        $builder = $this->builder([]);
+        $builder->stageApplication();
+
+        self::assertFileExists($builder->appPath('public/bundles/acmeadmin/admin.css'));
+        self::assertFileExists($builder->appPath('vendor/acme/admin-bundle/public/admin.css'));
+    }
+
+    public function testTwoDirectoriesLinkedToEachOtherTerminate(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // A mutual cycle, which an "is my target my own parent" test would miss:
+        // the repeat only shows up as an ancestor further down the path.
+        $this->write('one/a.txt', 'a');
+        $this->write('two/b.txt', 'b');
+        symlink($this->source.'/two', $this->source.'/one/to-two');
+        symlink($this->source.'/one', $this->source.'/two/to-one');
+
+        $copied = $this->builder([])->stageApplication();
+
+        // Terminates, and every real file is reachable from both sides exactly once
+        // more than its own copy: a.txt, b.txt, one/to-two/b.txt, two/to-one/a.txt.
+        self::assertSame(4, $copied);
+    }
+
+    public function testADanglingSymlinkIsSkippedRatherThanAbortingTheBuild(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // Left behind whenever a link's target is deleted, or an absolute link is
+        // carried over from another machine. copy() throws on it, and BuildCommand
+        // has no catch, so the whole build died with a stack trace.
+        $this->write('src/Kernel.php', '<?php');
+        symlink('/nonexistent/target.txt', $this->source.'/public-storage');
+
+        $copied = $this->builder([])->stageApplication();
+
+        self::assertSame(1, $copied);
+        self::assertFileExists($this->builder([])->appPath('src/Kernel.php'));
     }
 
     public function testADirectorySymlinkPointingOutsideTheProjectIsStillCopied(): void

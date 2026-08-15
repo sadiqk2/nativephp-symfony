@@ -169,9 +169,20 @@ final class NativeDesktopBundle extends AbstractBundle
                                 // Dev-only
                                 'tests', 'phpunit.xml', 'phpunit.xml.dist', '.env.test',
                                 '.php-cs-fixer*', 'phpstan*', 'rector.php',
-                                // Anything that could carry a secret into a shippable artifact
-                                'auth.json', '.env.local', '.env.*.local',
+                                // Anything that could carry a secret into a shippable
+                                // artifact. `.env.local.php` is the one to notice: it is
+                                // what `composer dump-env prod` writes, it holds every
+                                // resolved value including secrets, and Symfony's
+                                // bootEnv() prefers it over the .env this build cleans.
+                                'auth.json', '.env.local', '.env.*.local', '.env.local.php',
+                                '.env.*.php',
                                 '*.sqlite', '*.sqlite-shm', '*.sqlite-wal',
+                                // Doctrine's Flex recipe defaults to
+                                // var/data_%kernel.environment%.db, which *.sqlite misses.
+                                'var/*.db',
+                                // fnmatch is anchored, so the bare names above only match
+                                // at the project root; a nested one is copied wholesale.
+                                '*/node_modules', '*/tests',
                             ])
                             ->scalarPrototype()->end()
                         ->end()

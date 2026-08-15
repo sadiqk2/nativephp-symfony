@@ -80,35 +80,21 @@ final class Builder
             \FilesystemIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS,
         );
 
-        // FOLLOW_SYMLINKS has no cycle protection of its own: a link that points at
-        // one of its own ancestors — `public/storage -> ..` is the shape people
-        // actually write — is walked again every time it is reached, and the tree is
-        // copied over and over until the paths grow long enough that opendir() fails.
-        // The iterator then stops silently, so the failure is a package that is
-        // quietly many times too large rather than an error. Remember which real
-        // directories have been entered and refuse to enter one twice.
-        $seen = [];
-
         $filtered = new \RecursiveCallbackFilterIterator(
             $directories,
-            function (\SplFileInfo $current) use (&$seen): bool {
+            function (\SplFileInfo $current): bool {
                 if ($this->isExcluded($this->relative($current->getPathname()))) {
                     return false;
                 }
 
-                if (!$current->isDir()) {
-                    return true;
+                if ($current->isDir()) {
+                    return !$this->closesASymlinkCycle($current->getPathname());
                 }
 
-                $real = realpath($current->getPathname());
-
-                if (false === $real || isset($seen[$real])) {
-                    return false;
-                }
-
-                $seen[$real] = true;
-
-                return true;
+                // A dangling symlink reports neither isDir() nor isFile(), and
+                // copy() on one throws — which aborted the whole build over a link
+                // whose target someone deleted months ago.
+                return $current->isFile();
             },
         );
 
@@ -141,6 +127,53 @@ final class Builder
     }
 
     /**
+     * Whether entering this directory would re-enter one already on the path to it.
+     *
+     * `FOLLOW_SYMLINKS` has no cycle protection of its own, and a link pointing at
+     * one of its own ancestors — `public/storage -> ..`, which people do write —
+     * is otherwise walked again every time it is reached, until the paths grow long
+     * enough that `copy()` fails on a name forty levels deep.
+     *
+     * Comparing against the *ancestor chain* rather than a set of every directory
+     * already visited is the whole point. A global set also collapses two paths that
+     * legitimately resolve to the same place, and `assets:install --symlink` — the
+     * Flex default — produces exactly that: `public/bundles/acme -> ../../vendor/...`.
+     * Skipping the loser there drops every bundle asset from the package while the
+     * build still reports success, and which side loses is readdir order.
+     *
+     * Walking up the ancestors also catches mutual cycles (a -> b, b -> a), which a
+     * simple "is my target my own parent" test does not: the repeated directory
+     * always reappears as an ancestor of itself somewhere along the path.
+     */
+    private function closesASymlinkCycle(string $path): bool
+    {
+        $real = realpath($path);
+
+        if (false === $real) {
+            return true;
+        }
+
+        $ancestor = \dirname($path);
+        $stop = \dirname($this->sourcePath());
+
+        while ($ancestor !== $stop && '/' !== $ancestor && '.' !== $ancestor) {
+            if (realpath($ancestor) === $real) {
+                return true;
+            }
+
+            $parent = \dirname($ancestor);
+
+            if ($parent === $ancestor) {
+                break;
+            }
+
+            $ancestor = $parent;
+        }
+
+        return false;
+    }
+
+    /**
      * electron-builder prunes empty directories out of the package, and dotfiles do
      * not stop it, so each one gets a placeholder. Symfony will not boot without a
      * writable var/cache and var/log.
@@ -162,6 +195,10 @@ final class Builder
         $process = new Process(
             ['composer', 'install', '--no-dev', '--no-interaction', '--optimize-autoloader', '--no-progress'],
             $this->appPath(),
+            // Belt and braces with the .env cleaning that now happens first: Flex's
+            // auto-scripts inherit this environment, and an app with no .env at all
+            // would otherwise still warm a dev cache here.
+            ['APP_ENV' => 'prod', 'APP_DEBUG' => '0'] + getenv(),
             timeout: 600,
         );
 
@@ -199,8 +236,24 @@ final class Builder
         }
 
         $kept = [];
+        $continuation = null;
 
         foreach (file($envPath, \FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+            // A quoted value may span lines — a PEM key, a JWT passphrase, a service
+            // account JSON. Splitting on newlines and dropping every line without an
+            // `=` truncated those at the first line and left the quote open, so the
+            // staged .env no longer parsed and the packaged app died in bootEnv()
+            // before the kernel existed, with the build reporting success.
+            if (null !== $continuation) {
+                $kept[array_key_last($kept)] .= "\n".$line;
+
+                if ($this->closesQuote($line, $continuation)) {
+                    $continuation = null;
+                }
+
+                continue;
+            }
+
             $trimmed = trim($line);
 
             if ('' === $trimmed || str_starts_with($trimmed, '#')) {
@@ -212,6 +265,15 @@ final class Builder
             if (false === $key) {
                 continue;
             }
+
+            // `export FOO=bar` is valid in Symfony's Dotenv, and taking the key as
+            // everything before the `=` yielded "export FOO". fnmatch is anchored at
+            // both ends, so that broke the match in *both* directions: a prefix glob
+            // like STRIPE_* stopped matching and the secret shipped, while a leading-
+            // star glob like *_SECRET still matched and stripped an APP_SECRET the
+            // keep list was supposed to protect.
+            $key = preg_replace('/^export\s+/', '', $key) ?? $key;
+            $key = trim($key);
 
             // The keep list wins over the remove list on purpose. A broad glob like
             // *_SECRET is a reasonable thing for someone to add, and it matches
@@ -230,6 +292,14 @@ final class Builder
             }
 
             $kept[] = $trimmed;
+
+            // Whatever quote this value opened has to be tracked to the line that
+            // closes it, so the rest of the value survives with it.
+            $quote = $this->opensQuote(substr($trimmed, \strlen((string) strstr($trimmed, '=', true)) + 1));
+
+            if (null !== $quote) {
+                $continuation = $quote;
+            }
         }
 
         foreach ($this->envDefaults as $key => $value) {
@@ -237,6 +307,39 @@ final class Builder
         }
 
         $this->fs->dumpFile($envPath, implode("\n", $kept)."\n");
+    }
+
+    /**
+     * The quote character a value opens and does not close on its own line, if any.
+     */
+    private function opensQuote(string $value): ?string
+    {
+        $value = ltrim($value);
+        $quote = substr($value, 0, 1);
+
+        if ('"' !== $quote && "'" !== $quote) {
+            return null;
+        }
+
+        return $this->closesQuote(substr($value, 1), $quote) ? null : $quote;
+    }
+
+    /** Whether this text contains the unescaped closing quote. */
+    private function closesQuote(string $text, string $quote): bool
+    {
+        for ($i = 0, $length = \strlen($text); $i < $length; ++$i) {
+            if ('\\' === $text[$i]) {
+                ++$i;
+
+                continue;
+            }
+
+            if ($text[$i] === $quote) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
