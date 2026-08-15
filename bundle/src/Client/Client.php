@@ -30,23 +30,23 @@ final class Client implements ClientInterface
         return null !== $this->apiUrl && '' !== $this->apiUrl;
     }
 
-    public function get(string $endpoint, array $query = []): Response
+    public function get(string $endpoint, array $query = [], ?int $timeout = null): Response
     {
-        return $this->request('GET', $endpoint, [] === $query ? [] : ['query' => $query]);
+        return $this->request('GET', $endpoint, [] === $query ? [] : ['query' => $query], $timeout);
     }
 
-    public function post(string $endpoint, array $data = []): Response
+    public function post(string $endpoint, array $data = [], ?int $timeout = null): Response
     {
-        return $this->request('POST', $endpoint, ['json' => $data]);
+        return $this->request('POST', $endpoint, ['json' => $data], $timeout);
     }
 
-    public function delete(string $endpoint, array $data = []): Response
+    public function delete(string $endpoint, array $data = [], ?int $timeout = null): Response
     {
-        return $this->request('DELETE', $endpoint, ['json' => $data]);
+        return $this->request('DELETE', $endpoint, ['json' => $data], $timeout);
     }
 
     /** @param array<string, mixed> $options */
-    private function request(string $method, string $endpoint, array $options): Response
+    private function request(string $method, string $endpoint, array $options, ?int $timeout = null): Response
     {
         if (!$this->isAvailable()) {
             throw RuntimeNotAvailable::forEndpoint($endpoint);
@@ -64,9 +64,11 @@ final class Client implements ClientInterface
                     'Accept' => 'application/json',
                 ],
                 // Dialogs, alerts and TouchID block the runtime's event loop
-                // until the user acts, so a short timeout would abort perfectly
-                // healthy calls. Matches the upstream client's 3600s.
-                'timeout' => 3600,
+                // until the user acts, so a short default would abort perfectly
+                // healthy calls. Matches the upstream client's 3600s. Callers that
+                // are not waiting on a human pass their own: an endpoint that hangs
+                // for want of a callback holds a PHP worker for the whole hour.
+                'timeout' => $timeout ?? 3600,
             ]);
 
             $status = $response->getStatusCode();

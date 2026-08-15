@@ -244,17 +244,17 @@ final class FakeRuntime implements ClientInterface
         return $this->available;
     }
 
-    public function get(string $endpoint, array $query = []): Response
+    public function get(string $endpoint, array $query = [], ?int $timeout = null): Response
     {
         return $this->respond('GET', $endpoint, $query);
     }
 
-    public function post(string $endpoint, array $data = []): Response
+    public function post(string $endpoint, array $data = [], ?int $timeout = null): Response
     {
         return $this->respond('POST', $endpoint, $data);
     }
 
-    public function delete(string $endpoint, array $data = []): Response
+    public function delete(string $endpoint, array $data = [], ?int $timeout = null): Response
     {
         return $this->respond('DELETE', $endpoint, $data);
     }

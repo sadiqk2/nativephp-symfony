@@ -69,6 +69,7 @@ final class ChildProcessManager
         bool $persistent = false,
         bool $handlesOwnShutdown = false,
         array $iniSettings = [],
+        int $spawnTimeout = 30000,
     ): ProcessHandle {
         return $this->post('child-process/start-php', $alias, [
             'alias' => $alias,
@@ -78,6 +79,7 @@ final class ChildProcessManager
             'persistent' => $persistent,
             'handlesOwnShutdown' => $handlesOwnShutdown,
             'iniSettings' => $iniSettings,
+            'spawnTimeout' => $spawnTimeout,
         ]);
     }
 
@@ -93,6 +95,7 @@ final class ChildProcessManager
         bool $persistent = false,
         bool $handlesOwnShutdown = false,
         array $iniSettings = [],
+        int $spawnTimeout = 30000,
     ): ProcessHandle {
         return $this->php(
             alias: $alias,
@@ -100,18 +103,35 @@ final class ChildProcessManager
             persistent: $persistent,
             handlesOwnShutdown: $handlesOwnShutdown,
             iniSettings: $iniSettings,
+            spawnTimeout: $spawnTimeout,
         );
     }
 
-    /** @param list<string> $cmd */
-    public function node(string $alias, array $cmd, ?string $cwd = null, array $env = [], bool $persistent = false): ProcessHandle
-    {
+    /**
+     * @param list<string>          $cmd
+     * @param array<string, string> $env
+     */
+    public function node(
+        string $alias,
+        array $cmd,
+        ?string $cwd = null,
+        array $env = [],
+        bool $persistent = false,
+        bool $handlesOwnShutdown = false,
+        int $spawnTimeout = 30000,
+    ): ProcessHandle {
+        // startProcess destructures spawnTimeout and stopProcess reads
+        // handlesOwnShutdown for every start flavour, so omitting them here meant a
+        // node child could never be given a longer spawn window and was always
+        // tree-killed rather than sent a SIGTERM of its own.
         return $this->post('child-process/start-node', $alias, [
             'alias' => $alias,
             'cmd' => array_values($cmd),
             'cwd' => $cwd,
             'env' => $env,
             'persistent' => $persistent,
+            'handlesOwnShutdown' => $handlesOwnShutdown,
+            'spawnTimeout' => $spawnTimeout,
         ]);
     }
 

@@ -22,12 +22,19 @@ interface ClientInterface
      */
     public function isAvailable(): bool;
 
-    /** @param array<string, scalar|null> $query */
-    public function get(string $endpoint, array $query = []): Response;
+    /**
+     * The default timeout is an hour, because dialogs, alerts and TouchID block the
+     * runtime's event loop until the user acts. `$timeout` bounds the calls where
+     * nothing is waiting on a human: an endpoint that hangs for want of a callback
+     * would otherwise hold a PHP worker for that whole hour.
+     *
+     * @param array<string, scalar|null> $query
+     */
+    public function get(string $endpoint, array $query = [], ?int $timeout = null): Response;
 
     /** @param array<string, mixed> $data */
-    public function post(string $endpoint, array $data = []): Response;
+    public function post(string $endpoint, array $data = [], ?int $timeout = null): Response;
 
     /** @param array<string, mixed> $data */
-    public function delete(string $endpoint, array $data = []): Response;
+    public function delete(string $endpoint, array $data = [], ?int $timeout = null): Response;
 }

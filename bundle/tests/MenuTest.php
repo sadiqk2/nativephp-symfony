@@ -11,6 +11,9 @@ use Native\Symfony\Menu\Items\Link;
 use Native\Symfony\Menu\Items\Role;
 use Native\Symfony\Menu\Menu;
 use Native\Symfony\Menu\MenuManager;
+use Native\Symfony\Window\UrlResolver;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 use PHPUnit\Framework\TestCase;
 
 final class MenuTest extends TestCase
@@ -109,5 +112,27 @@ final class MenuTest extends TestCase
 
         $manager->removeContext();
         self::assertSame('DELETE', $client->lastCall()['method']);
+    }
+
+    public function testLinkUrlsAreAbsolutisedBeforeTheyReachTheRuntime(): void
+    {
+        // A link's URL ends up in the runtime's goToUrl -> loadURL(), which rejects
+        // a relative path with ERR_INVALID_URL. The menu item then does nothing at
+        // all while its event still fires, so the failure looks like a broken
+        // handler. WindowManager and PendingMenuBar both resolved already; this was
+        // the one path that did not.
+        $request = Request::create('http://127.0.0.1:8100/dashboard');
+        $stack = new RequestStack();
+        $stack->push($request);
+
+        $client = new FakeClient();
+        $manager = new MenuManager($client, new UrlResolver($stack, null));
+
+        $manager->set(Menu::new()->submenu('File', Menu::new()->link('Settings', '/settings')));
+
+        /** @var list<array<string, mixed>> $items */
+        $items = $client->lastCall()['data']['items'];
+
+        self::assertSame('http://127.0.0.1:8100/settings', $items[0]['submenu'][0]['url']);
     }
 }

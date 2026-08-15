@@ -328,11 +328,16 @@ final class NativeDesktopBundle extends AbstractBundle
 
         $services->set(Platform::class)->public();
 
+        // Not in the loop below: a menu's link URLs go to the runtime's goToUrl,
+        // which loadURL() rejects if they are relative.
+        $services->set(MenuManager::class)
+            ->args([service(ClientInterface::class), service(UrlResolver::class)])
+            ->public();
+
         // Single-dependency managers: the client is the only collaborator, so a
         // loop keeps this honest instead of twenty near-identical blocks.
         foreach ([
             DialogManager::class,
-            MenuManager::class,
             NotificationManager::class,
             ChildProcessManager::class,
             ClipboardManager::class,

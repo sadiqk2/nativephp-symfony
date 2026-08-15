@@ -56,17 +56,17 @@ final class AppManagerTest extends TestCase
                 return true;
             }
 
-            public function get(string $endpoint, array $query = []): \Native\Symfony\Contract\Response
+            public function get(string $endpoint, array $query = [], ?int $timeout = null): \Native\Symfony\Contract\Response
             {
                 throw new \LogicException('not used');
             }
 
-            public function post(string $endpoint, array $data = []): \Native\Symfony\Contract\Response
+            public function post(string $endpoint, array $data = [], ?int $timeout = null): \Native\Symfony\Contract\Response
             {
                 throw new \RuntimeException('connection reset');
             }
 
-            public function delete(string $endpoint, array $data = []): \Native\Symfony\Contract\Response
+            public function delete(string $endpoint, array $data = [], ?int $timeout = null): \Native\Symfony\Contract\Response
             {
                 throw new \LogicException('not used');
             }

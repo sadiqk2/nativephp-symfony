@@ -39,17 +39,17 @@ final class FakeClient implements ClientInterface
         return $this->available;
     }
 
-    public function get(string $endpoint, array $query = []): Response
+    public function get(string $endpoint, array $query = [], ?int $timeout = null): Response
     {
         return $this->record('GET', $endpoint, $query);
     }
 
-    public function post(string $endpoint, array $data = []): Response
+    public function post(string $endpoint, array $data = [], ?int $timeout = null): Response
     {
         return $this->record('POST', $endpoint, $data);
     }
 
-    public function delete(string $endpoint, array $data = []): Response
+    public function delete(string $endpoint, array $data = [], ?int $timeout = null): Response
     {
         return $this->record('DELETE', $endpoint, $data);
     }

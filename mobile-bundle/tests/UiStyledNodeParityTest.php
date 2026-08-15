@@ -92,6 +92,50 @@ final class UiStyledNodeParityTest extends TestCase
         self::assertArrayHasKey($expectedKey, $flat, sprintf('"%s" lost %s', $classes, $expectedKey));
     }
 
+    public function testConfiguredContainersMatchUpstreamExactly(): void
+    {
+        // These elements shipped as empty shells: placeable, but with no way to set
+        // anything on them. A <line> with no coordinates draws nothing at all, and a
+        // horizontal carousel was impossible to author. Compared configured, because
+        // a bare comparison is what let them ship empty in the first place.
+        $cases = [
+            'scroll_view' => [
+                fn (): object => Elements\ScrollView::make()->horizontal()->showsIndicators(false)->autoScrollTo(3),
+                fn (): object => \Native\Mobile\Edge\Elements\ScrollView::make()->horizontal()->showsIndicators(false)->autoScrollTo(3),
+            ],
+            'scroll_view 2d' => [
+                fn (): object => Elements\ScrollView::make()->both(),
+                fn (): object => \Native\Mobile\Edge\Elements\ScrollView::make()->both(),
+            ],
+            'lazy_grid' => [
+                fn (): object => Elements\LazyGrid::make()->columns(0)->gap(8.0)->horizontal()->showsIndicators(true),
+                fn (): object => \Native\Mobile\Edge\Elements\LazyGrid::make()->columns(0)->gap(8.0)->horizontal()->showsIndicators(true),
+            ],
+        ];
+
+        foreach ($cases as $name => [$mine, $theirs]) {
+            $nextId = 1;
+            $mineNode = $mine()->toArray(new CallbackRegistry(), $nextId);
+            $nextId = 1;
+            $theirNode = $theirs()->toArray(new \Native\Mobile\Edge\CallbackRegistry(), $nextId);
+
+            self::assertSame($theirNode, $mineNode, sprintf('%s diverges from upstream.', $name));
+        }
+    }
+
+    public function testCanvasPrimitivesCarryTheirCoordinates(): void
+    {
+        $nextId = 1;
+        $line = Elements\Line::make()->from(0.0, 1.0)->to(10.0, 20.0)->toArray(new CallbackRegistry(), $nextId);
+
+        self::assertSame(['from_x' => 0.0, 'from_y' => 1.0, 'to_x' => 10.0, 'to_y' => 20.0], $line['props']);
+
+        $nextId = 1;
+        $rect = Elements\Rect::make()->at(4.0, 6.0)->toArray(new CallbackRegistry(), $nextId);
+
+        self::assertSame(['left' => 4.0, 'top' => 6.0], $rect['props']);
+    }
+
     public function testSafeAreaIsAnEdgeMaskRatherThanAFlag(): void
     {
         // 1 both, 2 top, 3 bottom — a u8 in the binary layout, not a boolean.

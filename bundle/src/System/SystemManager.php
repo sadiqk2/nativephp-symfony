@@ -94,16 +94,22 @@ final class SystemManager
     /**
      * Print an HTML document.
      *
+     * Bounded, unlike most calls: the runtime only answers from inside
+     * `did-finish-load` -> `webContents.print(cb)`, so a bad data URL or a wedged
+     * print subsystem means the callback never fires and nothing ever replies. On
+     * the default hour-long timeout that holds a PHP worker for the whole hour. No
+     * human is being waited on here, so five minutes is generous.
+     *
      * @param string               $printer  A device name from printers()
      * @param array<string, mixed> $settings Electron webContents.print options
      */
-    public function print(string $printer, string $html, array $settings = []): bool
+    public function print(string $printer, string $html, array $settings = [], int $timeout = 300): bool
     {
         return $this->client->post('system/print', [
             'printer' => $printer,
             'html' => rawurlencode($html),
             'settings' => $settings,
-        ])->successful();
+        ], $timeout)->successful();
     }
 
     /**
@@ -113,7 +119,7 @@ final class SystemManager
      *
      * @return string|null Raw PDF bytes, or null on failure
      */
-    public function printToPdf(string $html, array $settings = []): ?string
+    public function printToPdf(string $html, array $settings = [], int $timeout = 300): ?string
     {
         $response = $this->client->post('system/print-to-pdf', [
             // The runtime builds a data: URL by string concatenation and its media
@@ -121,7 +127,7 @@ final class SystemManager
             // payload unencoded), so percent-encode to survive the trip.
             'html' => rawurlencode($html),
             'settings' => $settings,
-        ]);
+        ], $timeout);
 
         $result = $response->value('result');
 

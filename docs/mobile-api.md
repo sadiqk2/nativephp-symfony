@@ -224,7 +224,25 @@ $tree = Column::make(
 ```
 
 Shared on every element: `key()`, `ref()`, `onPress()`, `onLongPress()`, `navigate()`,
-`child()`, `layout()`, `style()`.
+`child()`, `layout()`, `style()`, `props()`.
+
+Container and canvas setters, each byte-compared against upstream's equivalent:
+
+| Element | Setters |
+|---|---|
+| `ScrollView` | `horizontal()`, `both()` for 2D panning, `showsIndicators()`, `autoScrollTo()` |
+| `LazyGrid` | `columns()` (clamped at 1), `gap()`, `horizontal()`, `showsIndicators()` |
+| `Line` | `from($x, $y)`, `to($x, $y)` |
+| `Rect`, `Circle` | `at($left, $top)` |
+| `Image` | `fit()`, `tintColor()`, `alt()` |
+| `Button` | `color()`, `fontSize()`, `variant()`, `disabled()` |
+
+`ScrollView::horizontal()` also sets `flex_direction`, because the main axis has to move
+with the scroll axis — otherwise `overflow: scroll` applies to the height while the content
+runs along the width, which is a carousel that does not scroll. `both()` deliberately does
+not: 2D mode bypasses flex and the renderers honour each child's declared frame.
+
+`Line` needs all four coordinates or it draws nothing.
 
 **Give a `key()` to anything in a list that can reorder.** Node identity is otherwise
 positional, and a reordered list reuses the wrong nodes — losing scroll position and input
