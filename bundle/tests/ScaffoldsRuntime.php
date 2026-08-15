@@ -122,6 +122,14 @@ trait ScaffoldsRuntime
             res.json(getWindowData(id));
         });
 
+        router.post('/set-zoom-factor', (req, res) => {
+            const { id, zoomFactor } = req.body;
+
+            state.windows[id]?.webContents.setZoomFactor(parseFloat(zoomFactor));
+
+            res.sendStatus(200);
+        });
+
         router.post('/open', (req, res) => {
             const url = appendWindowIdToUrl(req.body.url, id);
 

@@ -272,6 +272,21 @@ final class RuntimePatcher
                 'strict' => false,
                 'onMiss' => 'target not found; assuming it is fixed upstream',
             ],
+            [
+                // Deliberately beyond #137, which only fixes /open: the same hazard
+                // is on this endpoint too. Our own WindowManager types the argument
+                // float and PendingWindow defaults it to 1.0, so the bundle cannot
+                // send NaN — but ClientInterface is a documented escape hatch, and
+                // anything reaching this endpoint through it can.
+                'name' => 'window/set-zoom-factor: default the zoom factor instead of passing NaN',
+                'from' => "    state.windows[id]?.webContents.setZoomFactor(parseFloat(zoomFactor));",
+                'to' => "    const requestedZoom = parseFloat(zoomFactor);\n\n".
+                    '    state.windows[id]?.webContents.setZoomFactor('.
+                    'Number.isFinite(requestedZoom) && requestedZoom > 0 ? requestedZoom : 1);',
+                'applied' => 'const requestedZoom = parseFloat(zoomFactor);',
+                'strict' => false,
+                'onMiss' => 'target not found; assuming it is fixed upstream',
+            ],
         ];
     }
 

@@ -35,8 +35,8 @@ final class RuntimePatcherTest extends TestCase
     {
         $applied = (new RuntimePatcher())->patch($this->root);
 
-        // Seven Laravel-isms plus the five bug fixes.
-        self::assertCount(12, $applied);
+        // Seven Laravel-isms plus the six bug fixes.
+        self::assertCount(13, $applied);
 
         $php = $this->phpTs();
         self::assertStringContainsString("['bin/console', 'native:config']", $php);
@@ -109,6 +109,10 @@ final class RuntimePatcherTest extends TestCase
         self::assertStringContainsString('res.sendStatus(404);', $window);
         self::assertStringNotContainsString('BrowserWindow.getFocusedWindow().id', $window);
         self::assertStringContainsString('Number.isFinite(zoom) && zoom > 0 ? zoom : 1', $window);
+        // Both zoom endpoints, not just the one #137 covers: our own wrappers cannot
+        // send NaN, but ClientInterface is a documented escape hatch that can.
+        self::assertStringContainsString('const requestedZoom = parseFloat(zoomFactor);', $window);
+        self::assertStringNotContainsString('setZoomFactor(parseFloat(zoomFactor))', $window);
 
         self::assertStringContainsString(
             'res.status(400).json({ error: e instanceof Error ? e.message : String(e) });',
