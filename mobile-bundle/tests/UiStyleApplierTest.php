@@ -90,6 +90,33 @@ final class UiStyleApplierTest extends TestCase
         self::assertSame(1.0, $node['layout']['flex_grow']);
     }
 
+    public function testABorderColourWithNoWidthIsNotSent(): void
+    {
+        // The packed node carries one scalar border_width, so a lone colour has
+        // nothing to apply to and cannot paint. `border-t` is the shape that
+        // produces it: the wire has no per-side width, so the directional class
+        // contributes nothing and only the colour survives.
+        self::assertArrayNotHasKey('style', $this->applied('border-t border-gray-200'));
+    }
+
+    public function testAnAuthoredWidthWithNoColourIsKept(): void
+    {
+        // Deliberately not symmetric with the case above. Tailwind's `border` means
+        // a visible border, and this is upstream-patches/0008: with no theme
+        // resolver `border-2 border-theme-primary` resolves to a width and no
+        // colour, and upstream dropping that width is the bug we fixed.
+        self::assertSame(1.0, $this->applied('border')['style']['border_width']);
+        self::assertSame(2.0, $this->applied('border-2 border-theme-primary')['style']['border_width']);
+    }
+
+    public function testABorderWithBothHalvesIsSentWhole(): void
+    {
+        $style = $this->applied('border border-gray-200')['style'];
+
+        self::assertSame(1.0, $style['border_width']);
+        self::assertSame('#E5E7EB', $style['border_color']);
+    }
+
     public function testTheNestedDarkCompanionIsNotFlattenedOntoTheWire(): void
     {
         // `dark` is the parser's structure, not a style value. Passing it through would put

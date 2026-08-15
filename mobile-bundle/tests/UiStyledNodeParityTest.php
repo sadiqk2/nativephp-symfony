@@ -161,16 +161,16 @@ final class UiStyledNodeParityTest extends TestCase
             unset($node['style']['border_width'], $node['style']['border_color']);
         }
 
-        // Half-specified borders, in both directions: a bare `border` (width, no
-        // colour) and `border-t border-gray-200` (colour, no width). Upstream's
-        // applyStyle requires both keys and so emits neither; we emit whichever half
-        // was authored. Left as a divergence deliberately, and flagged as
-        // unresolved: in Tailwind `border` does mean a visible 1px border, so
-        // dropping it looks like the wrong reading — but whether a width with no
-        // colour paints, and in what colour, is a renderer question that cannot be
-        // answered without a device. Revisit when one is available.
-        if (!isset($node['style']['border_width'], $node['style']['border_color'])) {
-            unset($node['style']['border_width'], $node['style']['border_color']);
+        // A width with no colour, which we keep and upstream drops. Tailwind's
+        // `border` means a visible border, and this is the same call as
+        // upstream-patches/0008: `border-2 border-theme-primary` resolves to a
+        // width and no colour without a theme resolver, and dropping the width
+        // there is upstream's bug. The other half of this — a colour with no width
+        // — is no longer a divergence: the bundle drops it, since the packed node
+        // has one scalar border_width and there is nothing for a lone colour to
+        // apply to.
+        if (isset($node['style']['border_width']) && !isset($node['style']['border_color'])) {
+            unset($node['style']['border_width']);
         }
 
         // Per-corner radii. Ours are built exactly as upstream's

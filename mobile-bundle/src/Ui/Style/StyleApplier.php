@@ -241,6 +241,22 @@ final class StyleApplier
             // matches upstream, whose dispatchers simply do not mention it.
         }
 
+        // A border colour with no width cannot paint: the packed node carries a
+        // single scalar `border_width`, so there is nothing for the colour to apply
+        // to. `border-t border-gray-200` is the shape that produces it — the wire
+        // has no per-side width, so the directional class contributes nothing and
+        // only the colour survives. Upstream drops both; dropping the colour is the
+        // same outcome with none of the per-frame noise.
+        //
+        // The reverse is deliberately NOT symmetric. A width with no colour is kept,
+        // because Tailwind's `border` does mean a visible border, and because that is
+        // upstream-patches/0008: `border-2 border-theme-primary` resolves to a width
+        // of 2 and no colour when there is no theme resolver, and upstream dropping
+        // the width there is the bug we already fixed.
+        if (isset($style['border_color']) && !isset($style['border_width'])) {
+            unset($style['border_color']);
+        }
+
         $this->collapseEdges($parsed, $layout, 'padding');
         $this->collapseEdges($parsed, $layout, 'margin');
         $this->collapseInset($parsed, $layout);
