@@ -241,7 +241,12 @@ The `super-native` / `kitchen-sink` equivalent: Twig + Turbo/Stimulus, exercisin
 API group. This is what convinces Symfony devs the thing is real, and it doubles as the
 integration test suite.
 
-### M4 — upstream path to `nativephp/core` — patches written, **not submitted** (`upstream-patches/`)
+### M4 — upstream path to `nativephp/core` — six desktop PRs **open**, mobile patches held
+
+`upstream-patches/0002`–`0007` are open as NativePHP/desktop **#136–#141** (independent
+bug fixes, no review yet). Patch `0001` (the manifest) is deliberately held until the
+small ones land. `0008`–`0011` (mobile-air) are written and verified but unsubmitted —
+they need Sadiq's go-ahead and the mobile licensing read below.
 
 Only attempt this *with M1–M3 in hand*. Sequence of small, individually-reviewable PRs
 against `NativePHP/desktop`:
@@ -271,10 +276,11 @@ So mobile splits in two:
   runtime, a patcher for the three hardcoded bootstrap paths, and wrappers for all 54
   `nativephp_call` methods. 55 tests — but **no device verification**, which is a weaker
   standard of evidence than desktop's and is flagged wherever mobile is described.
-- **M6 — native UI for Twig**, the `super-native` equivalent. Still the largest remaining
-  piece, but now scoped rather than guessed: the wire format is documented in
-  `NATIVE-UI-CONTRACT.md`, the renderers are reusable as-is, and only the tree *producer*
-  is new.
+- **M6 — native UI for Twig — ✅ DONE.** The `super-native` equivalent: element trees
+  (36 wire types byte-compared against upstream's `Edge` classes), the Tailwind-subset
+  parser plus `StyleApplier`, `#[NativeScreen]` routing, the component lifecycle, and
+  `ComponentScreenRenderer` joining the two. Wire format in `NATIVE-UI-CONTRACT.md`;
+  upstream's renderers are reused as-is, only the tree *producer* is new.
 
 Licensing still needs reading before anything mobile ships publicly — unlike desktop,
 NativePHP Mobile is a commercial product.
