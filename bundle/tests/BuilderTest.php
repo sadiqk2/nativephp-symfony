@@ -213,13 +213,19 @@ final class BuilderTest extends TestCase
         self::assertSame($original, file_get_contents($this->source.'/.env'));
     }
 
-    public function testCleaningIsANoOpWithoutAnEnvFile(): void
+    public function testTheForcedDefaultsAreWrittenEvenWithoutAnEnvFile(): void
     {
+        // An app can keep its configuration elsewhere and still need APP_ENV=prod in
+        // the package. The defaults are advertised as forced, so "no .env" must not
+        // quietly mean "no defaults".
         $builder = $this->builder([]);
         $builder->stageApplication();
         $builder->cleanEnvironmentFile();
 
-        self::assertFileDoesNotExist($builder->appPath('.env'));
+        $env = (string) file_get_contents($builder->appPath('.env'));
+
+        self::assertStringContainsString('APP_ENV=prod', $env);
+        self::assertStringContainsString('APP_DEBUG=0', $env);
     }
 
     public function testItInstallsTheCertificateAuthority(): void

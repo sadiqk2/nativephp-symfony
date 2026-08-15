@@ -231,7 +231,14 @@ final class Builder
     {
         $envPath = $this->appPath('.env');
 
+        // No .env is not "nothing to do": the defaults are advertised as forced, and
+        // an app that keeps its configuration elsewhere still needs APP_ENV=prod in
+        // the package. Writing the file is also what makes the forcing observable.
         if (!is_file($envPath)) {
+            if ([] !== $this->envDefaults) {
+                $this->fs->dumpFile($envPath, $this->defaultsBlock());
+            }
+
             return;
         }
 
@@ -307,6 +314,17 @@ final class Builder
         }
 
         $this->fs->dumpFile($envPath, implode("\n", $kept)."\n");
+    }
+
+    private function defaultsBlock(): string
+    {
+        $lines = [];
+
+        foreach ($this->envDefaults as $key => $value) {
+            $lines[] = "{$key}={$value}";
+        }
+
+        return implode("\n", $lines)."\n";
     }
 
     /**

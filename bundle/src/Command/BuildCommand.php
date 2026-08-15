@@ -135,6 +135,8 @@ final class BuildCommand extends Command
             }
         }
 
+        $this->warnAboutPackagedSecrets($builder, $io);
+
         $io->section('Installing the CA bundle and icons');
 
         if (!$builder->installCertificateAuthority()) {
@@ -311,5 +313,31 @@ final class BuildCommand extends Command
         $slug = strtolower(preg_replace('/[^A-Za-z0-9]+/', '-', $value) ?? $value);
 
         return trim($slug, '-') ?: 'app';
+    }
+
+    /**
+     * Say once, out loud, that a packaged desktop app cannot keep a secret.
+     *
+     * Symfony's secrets vault needs its decrypt key at runtime, so excluding the
+     * key would break any app that uses the vault — this is a warning rather than
+     * an exclusion on purpose. But the key ships inside a directory the user owns
+     * and can read, which makes the vault decryptable by anyone holding the app.
+     * That is true of every credential in a desktop package, and it is the sort of
+     * thing worth being told before shipping rather than after.
+     */
+    private function warnAboutPackagedSecrets(Builder $builder, SymfonyStyle $io): void
+    {
+        $vaults = glob($builder->appPath('config/secrets/*/*.decrypt.private.php')) ?: [];
+
+        if ([] === $vaults) {
+            return;
+        }
+
+        $io->warning([
+            sprintf('The secrets decrypt key is in the package (%d vault(s)).', \count($vaults)),
+            'It has to be, or the vault cannot be read at runtime — but it means anyone with',
+            'the app can decrypt every secret in it. Desktop packages cannot hold a secret from',
+            'the person running them; keep anything that must stay secret on a server.',
+        ]);
     }
 }

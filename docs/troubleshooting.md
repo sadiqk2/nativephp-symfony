@@ -160,6 +160,17 @@ Laravel-ism that is a hard failure rather than a wrong path, and it kills `nativ
 Fix: install the patched runtime (`native:install`), or write `nativephp.json` on a
 manifest-aware runtime — its `env.dev`/`env.prod` keys are `dev`/`prod`.
 
+### A packaged app logs "Failed to cache view and routes" at every launch
+
+The runtime runs Laravel's `optimize` and `migrate --force` in a packaged build. Neither is
+a Symfony command, so each throws `CommandNotFoundException`, and the runtime records its
+`optimized_version` only on success — so it never records one and retries on every launch.
+
+Both are skipped by `RuntimePatcher`. If you see this, you are on an unpatched runtime:
+reinstall with `native:install --force`. The packaged build already ships a warmed prod
+cache, and Doctrine migrations are yours to run — from `AppBootstrapper::boot()`, if you
+want them at startup.
+
 ### The boot dies before the PHP server starts, mentioning `storage`
 
 `ensureAppFoldersAreAvailable()` calls `copySync(appPath + '/storage', …)` unconditionally,

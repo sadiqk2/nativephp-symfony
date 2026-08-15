@@ -68,7 +68,8 @@ trait ScaffoldsRuntime
 
         async function serveApp(secret, apiPort, phpIniSettings): Promise<ProcessResult> {
             const result = callPhpSync(['artisan', 'optimize'], phpOptions, phpIniSettings);
-            const migrate = callPhpSync(['artisan', 'migrate', '--force'], phpOptions, phpIniSettings);
+
+            const result = callPhpSync(['artisan', 'migrate', '--force'], phpOptions, phpIniSettings);
 
             if (runningSecureBuild()) {
                 serverPath = join(appPath, 'build', '__nativephp_app_bundle');

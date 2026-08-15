@@ -113,11 +113,16 @@ application, so you point at a checkout instead.
 
 ### Why the runtime needs patching
 
-The runtime resolves the PHP side of the app through eight hardcoded Laravel string
+The runtime resolves the PHP side of the app through ten hardcoded Laravel string
 literals in one TypeScript file: the CLI name `artisan` (six call sites), the `php -S`
 router script inside `vendor/laravel/framework`, an unconditional copy of a `storage/`
 directory, `APP_ENV=local` (which Symfony 8 rejects outright — `getAllowedEnvs()` throws),
-and `schedule:run`. `RuntimePatcher` rewrites them in **your** copy: upstream's
+`schedule:run`, and the `optimize` and `migrate --force` a packaged app runs at every
+launch. Those last two exist in no Symfony application, and their failure is not quiet:
+each logs a stack trace on every boot, and because the runtime only records its
+`optimized_version` when the call *succeeds*, it retried them forever. They are skipped —
+the build already ships a warmed production cache, and Doctrine migrations belong to the
+app rather than to the runtime. `RuntimePatcher` rewrites them in **your** copy: upstream's
 `native:install --publish` already mirrors the whole Electron project into the app's own
 directory and the runtime prefers that copy, so this is a local edit rather than a fork.
 The patcher is idempotent and fails loudly when a hunk's target has moved upstream, because

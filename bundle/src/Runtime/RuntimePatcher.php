@@ -213,6 +213,33 @@ final class RuntimePatcher
                 'strict' => true,
             ],
             [
+                // Both run only in a packaged app, and neither command exists in
+                // Symfony, so each boot logged a stack trace and a "Failed to cache
+                // view and routes". Worse, the runtime only records its
+                // optimized_version when the call succeeds — so it never did, and
+                // retried on every launch forever. Synthesising the success is what
+                // the manifest does too: patch 0001 lets an app declare these null
+                // and skip them.
+                'name' => 'skip Laravel\'s optimize (no such command in Symfony)',
+                'from' => "const result = callPhpSync(['{$this->cli}', 'optimize'], phpOptions, phpIniSettings);",
+                'to' => "// Symfony has no `optimize`; the build ships a warmed prod cache instead.\n".
+                    '        const result = { status: 0, stderr: Buffer.from(\'\') };',
+                'applied' => 'Symfony has no `optimize`',
+                'strict' => false,
+                'onMiss' => 'target not found; the runtime may already skip it',
+            ],
+            [
+                'name' => 'skip Laravel\'s migrate (Doctrine is not artisan)',
+                'from' => "const result = callPhpSync(['{$this->cli}', 'migrate', '--force'], phpOptions, phpIniSettings);",
+                'to' => "// Doctrine migrations are the app's business, not the runtime's: it cannot\n".
+                    "        // know whether this app has them, and `migrate --force` is not a Symfony\n".
+                    "        // command. Run them from your own bootstrapper if you need them.\n".
+                    '        const result = { status: 0, stderr: Buffer.from(\'\') };',
+                'applied' => "Doctrine migrations are the app's business",
+                'strict' => false,
+                'onMiss' => 'target not found; the runtime may already skip it',
+            ],
+            [
                 'name' => "APP_ENV: local/production → {$this->devEnv}/{$this->prodEnv}",
                 'from' => "APP_ENV: process.env.NODE_ENV === 'development' ? 'local' : 'production',",
                 'to' => "APP_ENV: process.env.NODE_ENV === 'development' ? '{$this->devEnv}' : '{$this->prodEnv}',",

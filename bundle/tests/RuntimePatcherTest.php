@@ -35,8 +35,8 @@ final class RuntimePatcherTest extends TestCase
     {
         $applied = (new RuntimePatcher())->patch($this->root);
 
-        // Seven Laravel-isms plus the six bug fixes.
-        self::assertCount(13, $applied);
+        // Nine Laravel-isms plus the six bug fixes.
+        self::assertCount(15, $applied);
 
         $php = $this->phpTs();
         self::assertStringContainsString("['bin/console', 'native:config']", $php);
@@ -48,6 +48,14 @@ final class RuntimePatcherTest extends TestCase
         self::assertStringContainsString("'bin/console', 'native:schedule-tick'", $php);
         self::assertStringNotContainsString("'schedule:run'", $php);
         self::assertStringContainsString("settings.cmd[0] === 'bin/console'", $this->childProcessTs());
+
+        // Neither command exists in Symfony. Unpatched, a packaged app logged a
+        // stack trace for each on every launch — and because the runtime only
+        // records optimized_version on success, it retried them forever.
+        self::assertStringNotContainsString("'optimize'", $php);
+        self::assertStringNotContainsString("'migrate', '--force'", $php);
+        self::assertStringContainsString('Symfony has no `optimize`', $php);
+        self::assertStringContainsString("Doctrine migrations are the app's business", $php);
     }
 
     public function testItIsIdempotent(): void

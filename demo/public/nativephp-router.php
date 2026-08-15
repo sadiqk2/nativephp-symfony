@@ -20,7 +20,12 @@ $candidate = $publicDir.$uri;
 // Never let a traversal escape the document root.
 $real = realpath($candidate);
 
-if ('/' !== $uri && false !== $real && str_starts_with($real, $publicDir) && is_file($real)) {
+// The separator matters: without it a sibling directory sharing the prefix —
+// /app/public-x next to /app/public — passes the containment check. PHP's built-in
+// server does its own docroot resolution on `return false` and refuses, so this is
+// not reachable today; it becomes an arbitrary read the moment the router is reused
+// under any other SAPI, which is exactly the kind of assumption worth not shipping.
+if ('/' !== $uri && false !== $real && str_starts_with($real, $publicDir.\DIRECTORY_SEPARATOR) && is_file($real)) {
     // Returning false hands the request back to the built-in server, which
     // streams the file itself with correct headers.
     return false;
