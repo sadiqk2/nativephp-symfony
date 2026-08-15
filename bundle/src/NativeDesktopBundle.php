@@ -38,6 +38,7 @@ use Native\Symfony\Http\EventsController;
 use Native\Symfony\Runtime\RuntimePatcher;
 use Native\Symfony\Screen\ScreenManager;
 use Native\Symfony\Security\RuntimeAccessSubscriber;
+use Native\Symfony\Security\RuntimeRoutesAccessMap;
 use Native\Symfony\Settings\SettingsManager;
 use Native\Symfony\Shell\ShellManager;
 use Native\Symfony\Shortcut\GlobalShortcutManager;
@@ -55,8 +56,10 @@ use Native\Symfony\Window\UrlResolver;
 use Native\Symfony\Window\WindowManager;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Symfony\Component\Security\Http\AccessMapInterface;
 
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 
@@ -232,8 +235,20 @@ final class NativeDesktopBundle extends AbstractBundle
                         'keeping other local processes out.'
                     )
                 ->end()
+                ->booleanNode('exempt_runtime_firewall')
+                    ->defaultTrue()
+                    ->info(
+                        'Prepend a security firewall with security: false over /_native/api/, so an '.
+                        "application's own access_control cannot deny the runtime's callbacks. Without ".
+                        'it a rule of ^/ answers POST /_native/api/booted with a 401, the runtime '.
+                        'discards it, and the app boots to a window that never does anything. Only '.
+                        'applies when the security bundle is installed; the two paths are already '.
+                        'gated by the shared secret before any firewall sees them.'
+                    )
+                ->end()
             ->end();
     }
+
 
     /** @param array<string, mixed> $config */
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
@@ -389,6 +404,16 @@ final class NativeDesktopBundle extends AbstractBundle
                 ->tag('kernel.event_subscriber');
         }
 
+        // Only when the app actually has a firewall to get in the way. The class
+        // implements a security-http interface, so it must not be referenced at all
+        // in an app without that package — hence the interface_exists guard rather
+        // than a nullOnInvalid reference.
+        if ($config['exempt_runtime_firewall'] && interface_exists(AccessMapInterface::class)) {
+            $services->set(RuntimeRoutesAccessMap::class)
+                ->decorate('security.access_map', invalidBehavior: ContainerInterface::IGNORE_ON_INVALID_REFERENCE)
+                ->args([service('.inner'), '%native_desktop.running%']);
+        }
+
         // --- commands ---------------------------------------------------------
         $services->set(ConfigCommand::class)
             ->args([[
@@ -457,6 +482,7 @@ final class NativeDesktopBundle extends AbstractBundle
                 service(AppBootstrapper::class)->nullOnInvalid(),
                 service('security.access_map')->nullOnInvalid(),
                 service('security.firewall.map')->nullOnInvalid(),
+                $config['exempt_runtime_firewall'] && interface_exists(AccessMapInterface::class),
             ])
             ->tag('console.command');
 

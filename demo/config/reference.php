@@ -912,6 +912,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     },
  *     testing?: bool|Param, // Replace the runtime transport with Testing\FakeRuntime, which records calls and answers with whatever a test scripted. Set it in config/packages/test/ only — with this on, nothing reaches a real runtime. // Default: false
  *     block_browser_access?: bool|Param, // Reject requests that carry neither the _php_native cookie nor the X-NativePHP-Secret header while running inside the runtime. Leave this on: the app is served on a real loopback port and the secret is the only thing keeping other local processes out. // Default: true
+ *     exempt_runtime_firewall?: bool|Param, // Prepend a security firewall with security: false over /_native/api/, so an application's own access_control cannot deny the runtime's callbacks. Without it a rule of ^/ answers POST /_native/api/booted with a 401, the runtime discards it, and the app boots to a window that never does anything. Only applies when the security bundle is installed; the two paths are already gated by the shared secret before any firewall sees them. // Default: true
  * }
  * @psalm-type NativeMobileConfig = array{
  *     app_id?: scalar|Param|null, // Bundle identifier / Android application id. // Default: "com.example.app"

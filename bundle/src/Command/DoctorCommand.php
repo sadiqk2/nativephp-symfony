@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Native\Symfony\Command;
 
 use Native\Symfony\Contract\AppBootstrapper;
+use Native\Symfony\Security\RuntimeAccessSubscriber;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -50,6 +51,8 @@ final class DoctorCommand extends Command
         private readonly ?object $accessMap = null,
         /** Symfony's `security.firewall.map`; untyped for the same reason. */
         private readonly ?object $firewallMap = null,
+        /** Whether RuntimeRoutesAccessMap is decorating the access map. */
+        private readonly bool $exemptRuntimeFirewall = true,
     ) {
         parent::__construct();
     }
@@ -161,6 +164,18 @@ final class DoctorCommand extends Command
             return 0;
         }
 
+        // The bundle decorates the access map to return no attributes for these
+        // paths while running inside the runtime, so there is nothing left to warn
+        // about. Checking the map here would report the *console's* answer anyway —
+        // `running` is false on a command line, so the decorator passes straight
+        // through and every healthy app would look broken.
+        if ($this->exemptRuntimeFirewall) {
+            $io->text(' ✓ access_control is neutralised on '.RuntimeAccessSubscriber::RUNTIME_PREFIX.' inside the runtime');
+            $io->text('   (native_desktop.exempt_runtime_firewall; outside the runtime your firewall still applies).');
+
+            return 0;
+        }
+
         $gated = [];
 
         foreach (self::RUNTIME_PATHS as $path) {
@@ -201,6 +216,8 @@ final class DoctorCommand extends Command
             'its POST is redirected to your login page and AppBootstrapper::boot() never runs.',
             'These two paths carry the shared secret and are checked by RuntimeAccessSubscriber',
             'before your firewall sees them, so exempting them costs you nothing.',
+            'Either set native_desktop.exempt_runtime_firewall: true — which does this for you,',
+            'and only while running inside the runtime — or write the firewall yourself:',
         ]);
 
         $io->writeln([

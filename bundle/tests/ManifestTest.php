@@ -277,7 +277,9 @@ final class ManifestTest extends TestCase
         $applied = (new RuntimePatcher())->patch($this->root);
 
         self::assertSame($source, file_get_contents($this->root.'/electron-plugin/src/server/php.ts'));
-        self::assertStringContainsString('skipped all patches', $applied[0]);
+        // Only the Laravel-isms are skipped. The bug fixes still apply: a
+        // manifest-aware runtime is not a fixed one, and the two are orthogonal.
+        self::assertStringContainsString('skipped the Laravel-ism patches', $applied[0]);
         self::assertStringContainsString('native:manifest', $applied[1]);
     }
 

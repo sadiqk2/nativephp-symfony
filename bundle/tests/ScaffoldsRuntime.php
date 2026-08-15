@@ -97,5 +97,90 @@ trait ScaffoldsRuntime
             }
         }
         TS);
+
+        $this->scaffoldBugFixTargets($fs);
+    }
+
+    /**
+     * The four files the bug-fix hunks target, again quoted verbatim from upstream.
+     *
+     * These carry defects rather than Laravel-isms, so the bundle patches them on the
+     * way in instead of waiting for NativePHP/desktop #137–#140 to be reviewed.
+     */
+    private function scaffoldBugFixTargets(Filesystem $fs): void
+    {
+        $fs->dumpFile($this->serverDir().'/api/window.ts', <<<'TS'
+        router.get('/current', (req, res) => {
+            // Find the current window object
+            const currentWindow = Object.values(state.windows).find(
+                (window) => window.id === BrowserWindow.getFocusedWindow().id,
+            );
+
+            // Get the developer-assigned id for that window
+            const id = Object.keys(state.windows).find((key) => state.windows[key] === currentWindow);
+
+            res.json(getWindowData(id));
+        });
+
+        router.post('/open', (req, res) => {
+            const url = appendWindowIdToUrl(req.body.url, id);
+
+            window.loadURL(url);
+
+            window.webContents.on('dom-ready', () => {
+                window.webContents.setZoomFactor(parseFloat(zoomFactor));
+            });
+        });
+        TS);
+
+        $fs->dumpFile($this->serverDir().'/api/shell.ts', <<<'TS'
+        router.delete('/trash-item', async (req, res) => {
+            try {
+                await shell.trashItem(path);
+
+                res.sendStatus(200);
+            } catch {
+                res.status(400).json();
+            }
+        });
+        TS);
+
+        $fs->dumpFile($this->serverDir().'/utils.ts', <<<'TS'
+        export async function notifyLaravel(endpoint: string, payload = {}) {
+            if (endpoint === 'events') {
+                broadcastToWindows('native-event', payload);
+            }
+
+            try {
+                await axios.post(`http://127.0.0.1:${state.phpPort}/_native/api/${endpoint}`, payload, {
+                    headers: {
+                        'X-NativePHP-Secret': state.randomSecret,
+                    },
+                });
+            } catch {
+                //
+            }
+        }
+        TS);
+
+        $fs->dumpFile($this->runtimeRoot().'/electron-plugin/src/preload/index.mts', <<<'TS'
+        const Native = {
+            on: (event, callback) => {
+                ipcRenderer.on('native-event', (_, data) => {
+                    // Strip leading slashes
+                    event = event.replace(/^(\\)+/, '');
+                    data.event = data.event.replace(/^(\\)+/, '');
+
+                    if (event === data.event) {
+                        return callback(data.payload, event);
+                    }
+                });
+            },
+            contextMenu: (template) => {
+                const menu = remote.Menu.buildFromTemplate(template);
+                menu.popup({ window: remote.getCurrentWindow() });
+            },
+        };
+        TS);
     }
 }

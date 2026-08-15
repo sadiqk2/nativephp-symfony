@@ -59,17 +59,50 @@ final class RuntimePatcher
         }
 
         if (ManifestSupport::Supported === $this->detector->detect($electronProjectPath)) {
-            // Nothing to rewrite — but the app now *must* ship the manifest, because
-            // this runtime resolves Laravel's paths whenever it cannot find one.
+            // Nothing to *rewrite* — but the app now must ship the manifest, because
+            // this runtime resolves Laravel's paths whenever it cannot find one. The
+            // bug fixes below still apply: a manifest-aware runtime is not a fixed
+            // one, and they are orthogonal to how it resolves paths.
             return [
-                'Runtime reads nativephp.json; skipped all patches.',
+                'Runtime reads nativephp.json; skipped the Laravel-ism patches.',
                 'Run "bin/console native:manifest" to write it — without it this runtime uses Laravel\'s paths.',
+                ...$this->patchBugFixes($electronProjectPath),
             ];
         }
 
         return [
             ...$this->patchFile($server.'/php.ts', $this->phpTsHunks()),
             ...$this->patchFile($server.'/api/childProcess.ts', $this->childProcessHunks()),
+            ...$this->patchBugFixes($electronProjectPath),
+        ];
+    }
+
+    /**
+     * Fixes for runtime bugs that bite Symfony apps, carried locally.
+     *
+     * These are not Laravel-isms — they are defects, four of them filed upstream as
+     * NativePHP/desktop #137–#140 and the fifth found here. Upstream has not
+     * answered discussion #504 in eighteen months, so treating a merge as the
+     * delivery mechanism would mean shipping known-broken behaviour indefinitely.
+     * `native:install --publish` already gives every app its own copy of the
+     * runtime, so the fixes can simply be part of what this bundle installs.
+     *
+     * Every hunk here is non-strict and every file optional, which is the opposite
+     * of the policy for the Laravel-isms above. A missing target means the runtime
+     * has moved on — most likely because the fix landed upstream — and aborting an
+     * install over a bug that is no longer there would be absurd.
+     *
+     * @return list<string>
+     */
+    private function patchBugFixes(string $electronProjectPath): array
+    {
+        $plugin = rtrim($electronProjectPath, '/').'/electron-plugin/src';
+
+        return [
+            ...$this->patchFile($plugin.'/server/api/window.ts', $this->windowHunks(), required: false),
+            ...$this->patchFile($plugin.'/server/api/shell.ts', $this->shellHunks(), required: false),
+            ...$this->patchFile($plugin.'/server/utils.ts', $this->utilsHunks(), required: false),
+            ...$this->patchFile($plugin.'/preload/index.mts', $this->preloadHunks(), required: false),
         ];
     }
 
@@ -78,10 +111,14 @@ final class RuntimePatcher
      *
      * @return list<string>
      */
-    private function patchFile(string $path, array $hunks): array
+    private function patchFile(string $path, array $hunks, bool $required = true): array
     {
         if (!is_file($path)) {
-            throw PatchFailed::missingFile($path);
+            if ($required) {
+                throw PatchFailed::missingFile($path);
+            }
+
+            return [sprintf('%s is absent; skipped its fixes.', basename($path))];
         }
 
         $original = (string) file_get_contents($path);
@@ -107,6 +144,13 @@ final class RuntimePatcher
 
             if ($hunk['strict']) {
                 throw PatchFailed::hunkDidNotMatch($hunk['name'], $path);
+            }
+
+            // A bug fix whose target is gone is worth saying out loud rather than
+            // passing over in silence: it usually means the fix landed upstream, and
+            // that is exactly when someone wants to know this hunk can be dropped.
+            if (isset($hunk['onMiss'])) {
+                $applied[] = $hunk['name'].' — '.$hunk['onMiss'];
             }
         }
 
@@ -174,6 +218,162 @@ final class RuntimePatcher
                 'to' => "APP_ENV: process.env.NODE_ENV === 'development' ? '{$this->devEnv}' : '{$this->prodEnv}',",
                 'applied' => "? '{$this->devEnv}' : '{$this->prodEnv}',",
                 'strict' => true,
+            ],
+        ];
+    }
+
+    /**
+     * NativePHP/desktop #138 and #137.
+     *
+     * @return list<array{name: string, from: string, to: string, applied: string, strict: bool, onMiss?: string}>
+     */
+    private function windowHunks(): array
+    {
+        return [
+            [
+                // getFocusedWindow() returns null whenever the app is in the
+                // background, which any PHP process can hit — a Messenger worker
+                // calling Window::current(), for instance. Dereferencing it threw a
+                // bare string out of getWindowData().
+                'name' => 'window/current: 404 instead of dereferencing a null focused window (#138)',
+                'from' => "router.get('/current', (req, res) => {\n".
+                    "    // Find the current window object\n".
+                    "    const currentWindow = Object.values(state.windows).find(\n".
+                    "        (window) => window.id === BrowserWindow.getFocusedWindow().id,\n".
+                    '    );',
+                'to' => "router.get('/current', (req, res) => {\n".
+                    "    const focused = BrowserWindow.getFocusedWindow();\n\n".
+                    "    // getFocusedWindow() returns null whenever the app is in the background, which\n".
+                    "    // any PHP process can hit. Dereferencing it threw a bare string from getWindowData().\n".
+                    "    if (!focused) {\n".
+                    "        res.sendStatus(404);\n".
+                    "        return;\n".
+                    "    }\n\n".
+                    "    // Find the current window object\n".
+                    '    const currentWindow = Object.values(state.windows).find((window) => window.id === focused.id);',
+                'applied' => 'const focused = BrowserWindow.getFocusedWindow();',
+                'strict' => false,
+                'onMiss' => 'target not found; assuming it is fixed upstream',
+            ],
+            [
+                // parseFloat(undefined) is NaN and setZoomFactor(NaN) renders the
+                // page at an absurd zoom. Laravel's Window always serialises a
+                // default, so this never surfaced there; every other client hits it
+                // on the first window it opens.
+                'name' => 'window/open: default the zoom factor instead of passing NaN (#137)',
+                'from' => "    window.webContents.on('dom-ready', () => {\n".
+                    '        window.webContents.setZoomFactor(parseFloat(zoomFactor));',
+                'to' => "    window.webContents.on('dom-ready', () => {\n".
+                    "        // parseFloat(undefined) is NaN, and setZoomFactor(NaN) renders the page at an\n".
+                    "        // absurd zoom.\n".
+                    "        const zoom = parseFloat(zoomFactor);\n\n".
+                    '        window.webContents.setZoomFactor(Number.isFinite(zoom) && zoom > 0 ? zoom : 1);',
+                'applied' => 'Number.isFinite(zoom) && zoom > 0 ? zoom : 1',
+                'strict' => false,
+                'onMiss' => 'target not found; assuming it is fixed upstream',
+            ],
+        ];
+    }
+
+    /**
+     * NativePHP/desktop #139.
+     *
+     * @return list<array{name: string, from: string, to: string, applied: string, strict: bool, onMiss?: string}>
+     */
+    private function shellHunks(): array
+    {
+        return [
+            [
+                'name' => 'shell/trash-item: send a body with the 400 (#139)',
+                'from' => "    } catch {\n".
+                    '        res.status(400).json();',
+                'to' => "    } catch (e) {\n".
+                    "        // res.json() with no argument is rejected by express, turning a handled\n".
+                    "        // failure into an unhandled one.\n".
+                    '        res.status(400).json({ error: e instanceof Error ? e.message : String(e) });',
+                'applied' => 'res.status(400).json({ error:',
+                'strict' => false,
+                'onMiss' => 'target not found; assuming it is fixed upstream',
+            ],
+        ];
+    }
+
+    /**
+     * NativePHP/desktop #140 — the single most useful of these for a Symfony app.
+     *
+     * The runtime swallowing every failed callback is why the documented symptom of
+     * almost everything going wrong is "the window opens and nothing happens": a
+     * crashed, 500ing or 403ing PHP app is indistinguishable from a healthy one.
+     *
+     * @return list<array{name: string, from: string, to: string, applied: string, strict: bool, onMiss?: string}>
+     */
+    private function utilsHunks(): array
+    {
+        return [
+            [
+                'name' => 'notifyLaravel: report failures under SHELL_VERBOSITY instead of swallowing them (#140)',
+                'from' => "    } catch {\n".
+                    "        //\n".
+                    '    }',
+                'to' => "    } catch (e) {\n".
+                    "        // Previously swallowed entirely, which made a crashed, 500ing or 403ing PHP\n".
+                    "        // app indistinguishable from a healthy one. Behind SHELL_VERBOSITY so normal\n".
+                    "        // runs stay quiet.\n".
+                    "        if (parseInt(process.env.SHELL_VERBOSITY) > 0) {\n".
+                    "            console.error(`notifyLaravel('\${endpoint}') failed:`, e instanceof Error ? e.message : e);\n".
+                    "        }\n".
+                    '    }',
+                'applied' => "console.error(`notifyLaravel(",
+                'strict' => false,
+                'onMiss' => 'target not found; assuming it is fixed upstream',
+            ],
+        ];
+    }
+
+    /**
+     * Found while building the demo, and not filed upstream.
+     *
+     * `Native.on` registers a *fresh* ipcRenderer listener per subscription, so N
+     * subscriptions mean N listeners each doing a string comparison on every event.
+     * Past ten, Node prints a MaxListenersExceededWarning that looks exactly like a
+     * leak — the demo trips it with eleven, which is not an unusual number for an
+     * app that logs runtime events. One dispatcher and a map of handlers is the same
+     * behaviour without the warning or the O(N) walk.
+     *
+     * @return list<array{name: string, from: string, to: string, applied: string, strict: bool, onMiss?: string}>
+     */
+    private function preloadHunks(): array
+    {
+        return [
+            [
+                'name' => 'preload: dispatch native events from one listener, not one per subscription',
+                'from' => "const Native = {\n".
+                    "    on: (event, callback) => {\n".
+                    "        ipcRenderer.on('native-event', (_, data) => {\n".
+                    "            // Strip leading slashes\n".
+                    "            event = event.replace(/^(\\\\)+/, '');\n".
+                    "            data.event = data.event.replace(/^(\\\\)+/, '');\n\n".
+                    "            if (event === data.event) {\n".
+                    "                return callback(data.payload, event);\n".
+                    "            }\n".
+                    '        });',
+                'to' => "// One listener for every subscription: registering one per Native.on() call trips\n".
+                    "// Node's MaxListenersExceededWarning at eleven subscriptions, and walks them all on\n".
+                    "// every event.\n".
+                    "const nativeHandlers = new Map();\n\n".
+                    "ipcRenderer.on('native-event', (_, data) => {\n".
+                    "    const name = String(data.event).replace(/^(\\\\)+/, '');\n\n".
+                    "    for (const callback of nativeHandlers.get(name) ?? []) {\n".
+                    "        callback(data.payload, name);\n".
+                    "    }\n".
+                    "});\n\n".
+                    "const Native = {\n".
+                    "    on: (event, callback) => {\n".
+                    "        const name = String(event).replace(/^(\\\\)+/, '');\n\n".
+                    "        nativeHandlers.set(name, [...(nativeHandlers.get(name) ?? []), callback]);",
+                'applied' => 'const nativeHandlers = new Map();',
+                'strict' => false,
+                'onMiss' => 'target not found; assuming it is fixed upstream',
             ],
         ];
     }

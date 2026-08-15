@@ -1,9 +1,14 @@
 # Troubleshooting
 
-The dominant failure mode of this runtime is **silence**. It swallows non-2xx answers from
-your app (`notifyLaravel` has an empty `catch {}`), it carries on with an empty config when
-`native:config` fails, and it ignores unknown window ids. So most entries below are
+The dominant failure mode of this runtime is **silence**. It carries on with an empty config
+when `native:config` fails, and it ignores unknown window ids. So most entries below are
 symptom-first, because the symptom is usually all you get.
+
+The worst of it — `notifyLaravel` swallowing every failed callback, which made a crashed,
+500ing or 403ing app indistinguishable from a healthy one — is **fixed in the copy of the
+runtime this bundle installs**. `RuntimePatcher` carries that fix and four others; see
+[what the bundle patches](getting-started-desktop.md#what-the-bundle-fixes-in-the-runtime).
+So under `native:run -v` a failed callback now says so.
 
 Two things to do before reading further:
 
@@ -27,7 +32,8 @@ would swallow: a missing bootstrapper, a non-JSON response, a failed broadcast.
 
 ### My app boots to a blank window, or to no window at all
 
-Five distinct causes. `native:doctor` checks the first two for you and prints the fix:
+Five distinct causes. `native:doctor` checks for the first — and the second is handled for
+you by default:
 
 ```bash
 bin/console native:doctor
@@ -45,15 +51,29 @@ bin/console debug:router | grep _native
 If they are missing, add the import shown in
 [getting started](getting-started-desktop.md#2-import-the-bundles-routes--this-is-not-automatic).
 
-**Your firewall covers the runtime's own endpoints.** `RuntimeAccessSubscriber` runs at
-priority 4096 and returns *without stopping propagation*, so your firewall still evaluates
-every request behind it. An `access_control` rule of `^/` — which is what most authenticated
-apps have — therefore redirects the runtime's `POST /_native/api/booted` to your login page,
-and `boot()` never runs. Laravel is not exposed to this: there the two routes are registered
-outside the app's middleware groups entirely.
+**Your firewall covers the runtime's own endpoints.** **The bundle handles this for you by
+default** — but it is worth knowing about, because the symptom is indistinguishable from the
+one above and the cause is in a file you wrote.
 
-Both paths already carry the shared secret and are checked before your firewall sees them,
-so exempting them costs you nothing:
+`RuntimeAccessSubscriber` runs at priority 4096 and returns *without stopping propagation* —
+it cannot do otherwise, since the router listens at 32 and your app may have listeners of its
+own below the firewall. So the firewall still evaluates, and an `access_control` rule of `^/`
+— which is what most authenticated apps have — answers the runtime's
+`POST /_native/api/booted` with a **401** that the runtime discards. Laravel is not exposed
+to this: there the two routes are registered outside the app's middleware groups entirely.
+
+`native_desktop.exempt_runtime_firewall` (on by default) decorates Symfony's
+`security.access_map` so those paths carry no attributes **while running inside the runtime**.
+Outside it — the same codebase deployed as an ordinary web application — your firewall still
+applies in full, which matters: `/_native/api/events` dispatches events by name, and
+`RuntimeAccessSubscriber` lets everything through when `NATIVEPHP_RUNNING` is unset.
+
+A bundle cannot fix this as configuration, which is why it is done with a decorator:
+`security.firewalls` rejects keys from a second config file outright, and
+`security.access_control` throws `ForbiddenOverwriteException`. Both are single-source by
+design.
+
+If you turn the option off, write the equivalent yourself:
 
 ```yaml
 # config/packages/security.yaml
@@ -67,12 +87,12 @@ security:
 Firewalls match in declaration order and the first match wins, so `native` has to come
 *before* your main firewall — appended after it, it never matches and nothing changes.
 
-`native:doctor` detects this by asking Symfony's own `security.firewall.map` and
-`security.access_map` what covers those two paths, so it reports the real answer rather than
+With the option off, `native:doctor` checks this by asking Symfony's own
+`security.firewall.map` and `security.access_map` what covers those two paths, rather than
 grepping your YAML. Both are needed: an `access_control` rule stays in the access map even
 when a `security: false` firewall covers the path, because the rule is applied by the
-firewall's `AccessListener` and that listener never runs — reading the map alone warns at
-the one person who has already fixed it.
+firewall's `AccessListener` and that listener never runs — reading the map alone warns at the
+one person who has already fixed it.
 
 **No `AppBootstrapper` is registered.** The window exists only because your code asked for
 one. `BootedController` logs a warning naming the contract and answers 500 — and the runtime

@@ -77,6 +77,7 @@ final class DoctorCommandTest extends TestCase
         // middleware groups, so nothing equivalent bites there.
         $tester = $this->doctor(
             router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']),
+            exemptRuntimeFirewall: false,
             accessMap: $this->accessMap(['IS_AUTHENTICATED_FULLY']),
         );
 
@@ -95,6 +96,7 @@ final class DoctorCommandTest extends TestCase
         // against a real security-bundle both ways, not just against this stub.
         $tester = $this->doctor(
             router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']),
+            exemptRuntimeFirewall: false,
             accessMap: $this->accessMap(['IS_AUTHENTICATED_FULLY']),
             firewallMap: $this->firewallMap(securityEnabled: false),
         );
@@ -107,6 +109,7 @@ final class DoctorCommandTest extends TestCase
     {
         $tester = $this->doctor(
             router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']),
+            exemptRuntimeFirewall: false,
             accessMap: $this->accessMap(['IS_AUTHENTICATED_FULLY']),
             firewallMap: $this->firewallMap(securityEnabled: true),
         );
@@ -119,6 +122,7 @@ final class DoctorCommandTest extends TestCase
         // Nothing enforces access_control without a firewall to enforce it.
         $tester = $this->doctor(
             router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']),
+            exemptRuntimeFirewall: false,
             accessMap: $this->accessMap(['IS_AUTHENTICATED_FULLY']),
             firewallMap: $this->firewallMap(securityEnabled: null),
         );
@@ -130,11 +134,30 @@ final class DoctorCommandTest extends TestCase
     {
         $tester = $this->doctor(
             router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']),
+            exemptRuntimeFirewall: false,
             accessMap: $this->accessMap([]),
         );
 
         self::assertSame(Command::SUCCESS, $tester->getStatusCode());
         self::assertStringContainsString('not behind access_control', $tester->getDisplay());
+    }
+
+    public function testTheBundlesOwnExemptionMakesTheFirewallCheckMoot(): void
+    {
+        // Default configuration: RuntimeRoutesAccessMap neutralises access_control on
+        // these paths inside the runtime, so an app with a rule of ^/ is fine and must
+        // not be warned at. Checking the map here would report the console's answer
+        // anyway — `running` is false on a command line, so the decorator passes
+        // straight through and every healthy app would look broken.
+        $tester = $this->doctor(
+            router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']),
+            accessMap: $this->accessMap(['IS_AUTHENTICATED_FULLY']),
+            firewallMap: $this->firewallMap(securityEnabled: true),
+            exemptRuntimeFirewall: true,
+        );
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode());
+        self::assertStringContainsString('neutralised', $tester->getDisplay());
     }
 
     public function testWithoutTheSecurityBundleTheFirewallCheckIsSkippedRatherThanAssumed(): void
@@ -273,6 +296,7 @@ final class DoctorCommandTest extends TestCase
         bool $running = false,
         ?string $secret = 'abcdefghijklmnopqrstuvwxyz012345',
         ?object $firewallMap = null,
+        bool $exemptRuntimeFirewall = false,
     ): CommandTester {
         $tester = new CommandTester(new DoctorCommand(
             projectDir: sys_get_temp_dir(),
@@ -282,6 +306,7 @@ final class DoctorCommandTest extends TestCase
             bootstrapper: $bootstrapper,
             accessMap: $accessMap,
             firewallMap: $firewallMap,
+            exemptRuntimeFirewall: $exemptRuntimeFirewall,
         ));
 
         $tester->execute([]);

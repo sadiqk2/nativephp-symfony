@@ -24,6 +24,15 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 final class RuntimeAccessSubscriber implements EventSubscriberInterface
 {
+    /**
+     * The prefix the runtime's own endpoints share.
+     *
+     * Lives here rather than on RuntimeRoutesAccessMap because that class implements
+     * a security-http interface, so merely reading a constant from it fatals in an
+     * app without the security bundle.
+     */
+    public const RUNTIME_PREFIX = '/_native/api/';
+
     public const COOKIE = '_php_native';
     public const HEADER = 'X-NativePHP-Secret';
 

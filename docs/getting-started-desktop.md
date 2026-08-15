@@ -127,17 +127,38 @@ The permanent fix is a manifest file — see [`native:manifest`](#7-optional-wri
 — which is patch `0001` in [`../upstream-patches/`](../upstream-patches/README.md). It is
 not merged upstream yet.
 
+### What the bundle fixes in the runtime
+
+`native:install` does not copy the runtime verbatim. Besides rewriting the Laravel-isms, it
+carries five bug fixes into your copy:
+
+| Fix | Why it matters here |
+|---|---|
+| `notifyLaravel` reports failures under `SHELL_VERBOSITY` instead of swallowing them ([#140](https://github.com/NativePHP/desktop/pull/140)) | The single largest cause of "it just does nothing": a crashed, 500ing or 403ing app looked exactly like a healthy one |
+| `window/current` 404s instead of dereferencing a null focused window ([#138](https://github.com/NativePHP/desktop/pull/138)) | `getFocusedWindow()` is null whenever the app is in the background — a Messenger worker calling it threw a bare string |
+| `window/open` defaults the zoom factor instead of passing `NaN` ([#137](https://github.com/NativePHP/desktop/pull/137)) | Laravel's `Window` always serialises a default, so this never surfaced there; every other client hits it on the first window |
+| `shell/trash-item` sends a body with its 400 ([#139](https://github.com/NativePHP/desktop/pull/139)) | `res.json()` with no argument is rejected by express, turning a handled failure into an unhandled one |
+| The preload dispatches native events from one listener rather than one per subscription | Past ten `Native.on()` calls Node prints a MaxListenersExceededWarning that reads like a leak. The demo trips it with eleven |
+
+The first four are filed upstream and unreviewed; the fifth was found here. Patching your own
+copy is what `--publish` is for, and it means none of this waits on a merge. Every hunk is
+non-strict: if a target has moved — most likely because the fix landed upstream — the install
+says so and carries on.
+
 ### Check it before you run it
 
 ```bash
 bin/console native:doctor
 ```
 
-The runtime talks to your app over HTTP and throws away every non-2xx answer, so the two
-ways to get a dead app — the routes import missing, or your own firewall covering
-`/_native/api/`, both of which give a window that opens and then does nothing forever — are
-invisible from inside the app. `native:doctor` asks the router and the firewall directly and
-exits non-zero if either would swallow the runtime's calls.
+The runtime talks to your app over HTTP, so a call that never lands is logged by Electron and
+nowhere you would look. The commonest way to get a dead app is the routes import missing,
+which gives a window that opens and then does nothing forever. `native:doctor` asks the router
+directly and exits non-zero if the runtime's calls would not land, then reports your
+bootstrapper and the inputs `native:build` needs.
+
+The other way — your own firewall covering `/_native/api/` — the bundle handles by default;
+see `exempt_runtime_firewall` in [troubleshooting](troubleshooting.md#desktop--boot).
 
 ## 5. Run it
 
@@ -223,6 +244,7 @@ native_desktop:
     deeplink_scheme: ~          # 'myapp', without '://' — enables OpenedFromURL
     base_url: ~                 # fallback for absolute window URLs outside a request
     block_browser_access: true  # leave this on
+    exempt_runtime_firewall: true  # keep your access_control off /_native/api/ in the runtime
     testing: false              # true swaps the transport for FakeRuntime — test/ only
     php_ini:
         memory_limit: 512M      # merged over the runtime's defaults, passed as -d flags
@@ -248,7 +270,7 @@ native_desktop:
 
 Run `bin/console config:dump-reference native_desktop` for the annotated tree.
 
-Two of these are security-relevant and worth reading before you change them:
+Three of these are security-relevant and worth reading before you change them:
 
 **`block_browser_access`** registers a subscriber at priority 4096 — above the firewall —
 that rejects any request carrying neither the `_php_native` cookie nor the
@@ -256,6 +278,15 @@ that rejects any request carrying neither the `_php_native` cookie nor the
 real loopback port; that secret is the only thing keeping other local processes out. It
 fails *open* when the runtime supplied no secret at all, so that a misconfiguration is
 diagnosable rather than a wall of 403s.
+
+**`exempt_runtime_firewall`** decorates Symfony's `security.access_map` so the runtime's two
+endpoints carry no access-control attributes — but **only while running inside the runtime**,
+where `RuntimeAccessSubscriber` has already checked the shared secret. Deployed as an ordinary
+web application the same code keeps your firewall over those paths in full, which matters:
+`/_native/api/events` dispatches events by name. Without this an `access_control` rule of `^/`
+answers the runtime's `POST /_native/api/booted` with a 401 that the runtime discards, and the
+app boots to a window that never does anything. Turn it off only if you write the equivalent
+`security: false` firewall yourself.
 
 **`events.allowed_namespaces`** is empty by default and should stay empty unless you
 dispatch your own event classes by class name. Upstream's Laravel controller does
