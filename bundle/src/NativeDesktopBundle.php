@@ -238,12 +238,13 @@ final class NativeDesktopBundle extends AbstractBundle
                 ->booleanNode('exempt_runtime_firewall')
                     ->defaultTrue()
                     ->info(
-                        'Prepend a security firewall with security: false over /_native/api/, so an '.
-                        "application's own access_control cannot deny the runtime's callbacks. Without ".
-                        'it a rule of ^/ answers POST /_native/api/booted with a 401, the runtime '.
-                        'discards it, and the app boots to a window that never does anything. Only '.
-                        'applies when the security bundle is installed; the two paths are already '.
-                        'gated by the shared secret before any firewall sees them.'
+                        "Keep the application's own access_control off /_native/api/ while running ".
+                        'inside the runtime, by decorating security.access_map. Without it a rule of '.
+                        '^/ answers POST /_native/api/booted with a 401, the runtime discards it, and '.
+                        'the app boots to a window that never does anything. Outside the runtime your '.
+                        'firewall still applies in full — that path dispatches events by name, so it '.
+                        'must stay protected on the web. Only applies when the security bundle is '.
+                        'installed; inside the runtime the shared secret is checked first regardless.'
                     )
                 ->end()
             ->end();
