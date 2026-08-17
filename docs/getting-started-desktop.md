@@ -21,7 +21,12 @@ copy goes stale and edits to the bundle appear to do nothing). The exact block i
 [root README](../README.md#0-install-the-packages), and [`demo/composer.json`](../demo/composer.json)
 is a working example. Everything after this step is unaffected by how the package arrived.
 
-If Flex does not register it, add it yourself:
+Flex will **not** register this bundle for you — it derives candidate class names from the
+PSR-4 namespace, so `Native\Symfony\` has it looking for `SymfonyBundle` or
+`NativeSymfonyBundle`, neither of which exists. (The mobile bundle's deeper namespace
+`Native\Symfony\Mobile\` yields `NativeMobileBundle`, so that one is picked up
+automatically — the asymmetry is Flex's derivation, not a difference between the packages.)
+Add it yourself:
 
 ```php
 // config/bundles.php

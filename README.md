@@ -50,12 +50,16 @@ composer require native-symfony/mobile-bundle:^0.1    # iOS and Android
 Take one or both — they share no code and neither requires the other. Use `symlink: true`:
 without it Composer caches a copy and edits to the bundle appear to do nothing.
 
-If Flex does not register them, add them yourself:
+**Register the desktop bundle by hand.** Flex picks up the mobile one on its own and cannot
+pick up the desktop one — it derives candidate class names from the PSR-4 namespace, so for
+`Native\Symfony\` it looks for `SymfonyBundle` and `NativeSymfonyBundle` and never finds
+`NativeDesktopBundle`. `Native\Symfony\Mobile\` happens to yield `NativeMobileBundle`,
+which is why the asymmetry exists at all. Verified on a fresh `symfony/skeleton`:
 
 ```php
 // config/bundles.php
-Native\Symfony\NativeDesktopBundle::class => ['all' => true],
-Native\Symfony\Mobile\NativeMobileBundle::class => ['all' => true],
+Native\Symfony\NativeDesktopBundle::class => ['all' => true],       // Flex will not add this
+Native\Symfony\Mobile\NativeMobileBundle::class => ['all' => true], // Flex adds this one
 ```
 
 ### Desktop: a window around the app you already have
@@ -219,6 +223,13 @@ See [getting started — mobile](docs/getting-started-mobile.md#can-you-build-an
 
 A complete working example of all of the above — both bundles, two windows, a native menu, a
 native-UI screen — is [`demo/`](demo/README.md), and it is also the integration test.
+
+Every step above was run against a **fresh `symfony/skeleton` (Symfony 8.1)** rather than
+written from the code: `composer require` through the path repositories, both config files,
+the bootstrapper exactly as printed, `native:install --skip-npm`, and then `native:doctor`
+reporting both endpoints reachable and `App\Native\Bootstrapper` wired with nothing to wire
+it. `native:config` in `prod` produced 181 bytes of valid JSON and an empty stderr, which is
+the rule above holding in a stock app.
 
 ## Using it
 
