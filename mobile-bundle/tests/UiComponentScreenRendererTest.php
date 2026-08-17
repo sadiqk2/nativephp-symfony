@@ -95,6 +95,71 @@ final class UiComponentScreenRendererTest extends TestCase
         self::assertContains('count:0', $this->texts($frame));
     }
 
+    public function testNavigatingToADifferentParameterRendersTheNewOne(): void
+    {
+        // The pattern is not the identity of a visit: /user/{id} is one pattern and
+        // every user is a different screen. Reusing on the pattern alone meant the
+        // component was never told about id 2, so the tree came out byte-identical,
+        // the diff recognised it as unchanged, and the device kept showing user 1
+        // forever with nothing logged anywhere.
+        $renderer = new ComponentScreenRenderer();
+        $responder = $this->responder($renderer, $this->routes('/user/{id}', UserScreen::class));
+
+        $responder->respond('/user/1');
+        self::assertContains('user 1', $this->texts($this->fullFrame($responder)));
+
+        $responder->respond('/user/2');
+        self::assertContains('user 2', $this->texts($this->fullFrame($responder)));
+    }
+
+    public function testATapOnAChildComponentReachesTheChild(): void
+    {
+        // A callback id belongs to whichever component registered it, which for
+        // anything inside a child is not the root. Dispatching on the root refused
+        // the id outright, so every tap on a child of a routed screen threw instead
+        // of running — and the id is in the published tree, so the device sends it.
+        $renderer = new ComponentScreenRenderer();
+        $responder = $this->responder($renderer, $this->routes('/s', ScreenWithChild::class));
+
+        $frame = $responder->respond('/s');
+        $callbackId = $this->firstPressId($frame);
+
+        self::assertNotNull($callbackId, 'The child button must publish a callback id.');
+        self::assertTrue($renderer->dispatch('/s', InteractionEvent::press($callbackId)));
+
+        $children = array_values($renderer->mounted('/s')?->mountedChildren() ?? []);
+        $child = $children[0] ?? null;
+        self::assertInstanceOf(ChildCounter::class, $child);
+        self::assertSame(1, $child->n);
+    }
+
+    public function testAnUnknownCallbackIdIsRefusedRatherThanThrowing(): void
+    {
+        // Routine, not exceptional: a device can tap a frame from a screen that has
+        // since been replaced.
+        $renderer = new ComponentScreenRenderer();
+        $responder = $this->responder($renderer, $this->routes('/s', ScreenWithChild::class));
+        $responder->respond('/s');
+
+        self::assertFalse($renderer->dispatch('/s', InteractionEvent::press(123456789)));
+    }
+
+    /** @param array<string, mixed> $node */
+    private function firstPressId(array $node): ?int
+    {
+        if (isset($node['on_press']) && \is_int($node['on_press'])) {
+            return $node['on_press'];
+        }
+
+        foreach ($node['children'] ?? [] as $child) {
+            if (null !== $found = $this->firstPressId($child)) {
+                return $found;
+            }
+        }
+
+        return null;
+    }
+
     // ── State survives a re-render ──────────────────
 
     public function testTheComponentInstanceSurvivesAcrossFrames(): void
@@ -343,5 +408,45 @@ final class ParameterisedScreen extends NativeComponent
     protected function render(): Element
     {
         return Text::make('slug:'.($this->parameters['slug'] ?? ''));
+    }
+}
+
+final class UserScreen extends NativeComponent
+{
+    public string $id = '';
+
+    /** @param array<string, mixed> $parameters */
+    public function withRouteParameters(array $parameters): void
+    {
+        $this->id = (string) ($parameters['id'] ?? '');
+    }
+
+    protected function render(): Element
+    {
+        return Text::make('user '.$this->id);
+    }
+}
+
+final class ChildCounter extends NativeComponent
+{
+    public int $n = 0;
+
+    #[NativeAction]
+    public function bump(): void
+    {
+        ++$this->n;
+    }
+
+    protected function render(): Element
+    {
+        return Button::make('bump')->onPress('bump');
+    }
+}
+
+final class ScreenWithChild extends NativeComponent
+{
+    protected function render(): Element
+    {
+        return Column::make($this->mount(ChildCounter::class));
     }
 }

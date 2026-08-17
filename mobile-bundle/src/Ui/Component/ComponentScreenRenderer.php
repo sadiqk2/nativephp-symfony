@@ -39,6 +39,19 @@ final class ComponentScreenRenderer implements ScreenRendererInterface
     private array $boundTo = [];
 
     /**
+     * The resolved path each mounted pattern was last rendered for.
+     *
+     * The pattern alone is not the identity of a visit: `/user/{id}` is one pattern
+     * and every user is a different screen. Without this, navigating from `/user/1`
+     * to `/user/2` reused the component without ever telling it about id 2, so the
+     * tree came out byte-identical, the diff recognised it as unchanged, and the
+     * device went on showing user 1 forever with nothing logged anywhere.
+     *
+     * @var array<string, string>
+     */
+    private array $paths = [];
+
+    /**
      * @param ContainerInterface|null $screens A service locator for screen classes that are
      *        registered as services, so a screen can take constructor dependencies. Screens
      *        absent from it are instantiated directly, which is the common case — a screen
@@ -70,7 +83,23 @@ final class ComponentScreenRenderer implements ScreenRendererInterface
             return false;
         }
 
-        $component->dispatch($event);
+        // Resolve the owner first. A callback id belongs to whichever component
+        // registered it, which for anything inside a child component is not the
+        // root — and NativeComponent::dispatch() is documented @internal for
+        // exactly this reason, refusing an id it does not own. Calling it on the
+        // root meant every tap on a child of a routed screen threw CallbackRefused
+        // instead of running, and the whole child-scoping mechanism was unreachable
+        // from the routed path. ComponentScreen::handle() has always done this.
+        $owner = $component->ownerOf($event->callbackId);
+
+        if (null === $owner) {
+            // Routine rather than exceptional: a device can tap a frame from a
+            // screen that has since been replaced. Returning false is the contract
+            // this method's own docblock already promised for an unknown id.
+            return false;
+        }
+
+        $owner->dispatch($event);
 
         return true;
     }
@@ -95,7 +124,7 @@ final class ComponentScreenRenderer implements ScreenRendererInterface
             $component->unmountTree();
         }
 
-        unset($this->mounted[$pattern], $this->boundTo[$pattern]);
+        unset($this->mounted[$pattern], $this->boundTo[$pattern], $this->paths[$pattern]);
     }
 
     public function forgetAll(): void
@@ -113,7 +142,10 @@ final class ComponentScreenRenderer implements ScreenRendererInterface
         // Reuse only while the registry is the same one. The responder mints a fresh
         // registry when the screen changes, so a different registry here means this is a
         // new visit rather than a re-render, and the previous state should not leak into it.
-        if (null !== $existing && ($this->boundTo[$pattern] ?? null) === $callbacks) {
+        if (null !== $existing
+            && ($this->boundTo[$pattern] ?? null) === $callbacks
+            && ($this->paths[$pattern] ?? null) === $match->path
+        ) {
             return $existing;
         }
 
@@ -126,6 +158,7 @@ final class ComponentScreenRenderer implements ScreenRendererInterface
 
         $this->mounted[$pattern] = $component;
         $this->boundTo[$pattern] = $callbacks;
+        $this->paths[$pattern] = $match->path;
 
         return $component;
     }
