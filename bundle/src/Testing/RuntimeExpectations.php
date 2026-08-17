@@ -29,7 +29,16 @@ use PHPUnit\Framework\Assert;
 final class RuntimeExpectations
 {
     /** Endpoints that show something modal and blocking (CONTRACT.md §6). */
-    private const DIALOG_ENDPOINTS = ['dialog/open', 'dialog/save', 'alert/message', 'alert/error'];
+    private const DIALOG_ENDPOINTS = [
+        'dialog/open',
+        'dialog/save',
+        'alert/message',
+        'alert/error',
+        // Blocks the event loop until the user acts, exactly like the four above —
+        // CONTRACT.md §0 lists it alongside them. Without it, "this path never
+        // blocks on the user" passed against code that fires a TouchID prompt.
+        'system/prompt-touch-id',
+    ];
 
     /** All four ways a child process can be started; every one is keyed by alias. */
     private const START_ENDPOINTS = [
@@ -132,9 +141,29 @@ final class RuntimeExpectations
             function (RecordedCall $call) use ($url, $id): bool {
                 $sent = $call->payload['url'] ?? null;
 
-                return ($this->matchingId($id))($call)
-                    && \is_string($sent)
-                    && ($sent === $url || str_ends_with($sent, $url));
+                if (!($this->matchingId($id))($call) || !\is_string($sent)) {
+                    return false;
+                }
+
+                if ($sent === $url) {
+                    return true;
+                }
+
+                // A relative expectation has to be compared against the path, not
+                // matched as a suffix: UrlResolver absolutises what the app sends, so
+                // some tolerance is needed, but str_ends_with also accepted
+                // /admin/reports for an expected /reports — certifying the exact
+                // routing bug the assertion exists to catch.
+                if (!str_starts_with($url, '/')) {
+                    return false;
+                }
+
+                $expected = parse_url($url);
+                $actual = parse_url($sent);
+
+                return \is_array($expected) && \is_array($actual)
+                    && ($expected['path'] ?? null) === ($actual['path'] ?? null)
+                    && ($expected['query'] ?? null) === ($actual['query'] ?? null);
             },
         );
     }

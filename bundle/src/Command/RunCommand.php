@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
 
 /**
@@ -142,13 +143,41 @@ final class RunCommand extends Command
         if (!is_file($buildPath.'/cacert.pem')) {
             // The runtime passes this to every PHP process as curl.cainfo and
             // openssl.cafile, so an app's outbound TLS depends on it.
-            $bundle = ini_get('openssl.cafile') ?: ini_get('curl.cainfo') ?: '/etc/ssl/certs/ca-certificates.crt';
+            // php-bin's own bundle first — it is the one the packaged app will use
+            // (Builder::installCertificateAuthority stages exactly this), so dev and
+            // production agree. Then the inis, which are commented out in both stock
+            // php.ini files and unset by Homebrew, since OpenSSL finds its store at
+            // build time rather than through PHP. Only then the platform locations:
+            // the single Debian path that used to be the whole fallback exists on
+            // neither macOS nor Windows, so `native:run` hard-failed before doing
+            // anything else on the platform most Electron development happens on.
+            $bundle = null;
 
-            if (!\is_string($bundle) || !is_file($bundle)) {
-                $io->error(sprintf(
-                    'Could not find a CA bundle to install at %s/cacert.pem. Copy one there manually.',
-                    $buildPath,
-                ));
+            $candidates = [
+                $this->projectDir.'/vendor/nativephp/php-bin/cacert.pem',
+                ini_get('openssl.cafile') ?: null,
+                ini_get('curl.cainfo') ?: null,
+                ...match (\PHP_OS_FAMILY) {
+                    'Darwin' => ['/etc/ssl/cert.pem', '/opt/homebrew/etc/ca-certificates/cert.pem', '/usr/local/etc/openssl@3/cert.pem'],
+                    'Windows' => [],
+                    default => ['/etc/ssl/certs/ca-certificates.crt', '/etc/pki/tls/certs/ca-bundle.crt', '/etc/ssl/cert.pem'],
+                },
+            ];
+
+            foreach ($candidates as $candidate) {
+                if (\is_string($candidate) && '' !== $candidate && is_file($candidate)) {
+                    $bundle = $candidate;
+
+                    break;
+                }
+            }
+
+            if (null === $bundle) {
+                $io->error([
+                    sprintf('Could not find a CA bundle to install at %s/cacert.pem.', $buildPath),
+                    'Install one with: composer require nativephp/php-bin (it ships cacert.pem),',
+                    'or set openssl.cafile in your php.ini, or copy a bundle there yourself.',
+                ]);
 
                 return Command::FAILURE;
             }
@@ -166,8 +195,14 @@ final class RunCommand extends Command
         return Command::SUCCESS;
     }
 
+    /**
+     * `str_starts_with($path, '/')` is not "is this absolute" anywhere but POSIX:
+     * C:\\dev\\electron and \\\\server\\share are both absolute and both failed it,
+     * turning an --electron-path into C:\\proj\\C:\\dev\\electron and reporting a
+     * project that exists as missing.
+     */
     private function absolute(string $path): string
     {
-        return str_starts_with($path, '/') ? $path : $this->projectDir.'/'.$path;
+        return Path::isAbsolute($path) ? $path : Path::join($this->projectDir, $path);
     }
 }

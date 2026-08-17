@@ -19,6 +19,8 @@ use Native\Symfony\NativeDesktopBundle;
 use Native\Symfony\Notification\NotificationManager;
 use Native\Symfony\Process\ChildProcessManager;
 use Native\Symfony\Testing\FakeRuntime;
+use Native\Symfony\Window\UrlResolver;
+use Native\Symfony\Window\WindowManager;
 use Native\Symfony\Testing\InteractsWithNativeRuntime;
 use Native\Symfony\Testing\RecordedCall;
 use Native\Symfony\Testing\RuntimeEventSimulator;
@@ -26,6 +28,8 @@ use Native\Symfony\Testing\RuntimeExpectations;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
  * The kit's own suite.
@@ -619,5 +623,76 @@ final class TestingKitTest extends TestCase
         }
 
         self::fail('Expected this assertion helper to fail, but it passed.');
+    }
+
+    public function testAnUnscriptedConfirmationIsADismissalNotAConfirmation(): void
+    {
+        // The fake has to answer a dialog, because there is no user. Which answer
+        // matters: button 0 is the confirming button, so defaulting to it made
+        // "deleting requires confirmation" — the most valuable test anyone writes
+        // here — pass against code with the guard missing entirely. cancelId is
+        // what Electron returns for Escape, and confirm() sends 1 for exactly that.
+        $runtime = FakeRuntime::available();
+
+        self::assertFalse((new DialogManager($runtime))->confirm('Delete 400 records?'));
+    }
+
+    public function testAScriptedConfirmationStillWins(): void
+    {
+        $runtime = FakeRuntime::available()->userConfirms();
+
+        self::assertTrue((new DialogManager($runtime))->confirm('Delete 400 records?'));
+    }
+
+    public function testAnUnscriptedAlertReportsTheCancelButton(): void
+    {
+        // No cancelId in the payload means there is no cancel button to report.
+        $runtime = FakeRuntime::available();
+
+        self::assertSame(0, (new DialogManager($runtime))->alert('Heads up'));
+    }
+
+    public function testClosingAWindowRemovesItFromAllAsWellAsGet(): void
+    {
+        // Upstream serves both from one state.windows map, so they cannot disagree.
+        $runtime = FakeRuntime::available()->windowIs('main')->windowIs('report');
+        $windows = new WindowManager($runtime, new UrlResolver(new RequestStack(), null), new RequestStack());
+
+        $runtime->windowDoesNotExist('report');
+
+        self::assertNull($windows->get('report'));
+        self::assertSame(['main'], array_map(static fn (object $w): string => $w->id, $windows->all()));
+    }
+
+    public function testNavigationAssertionsRejectADeeperPathThatMerelyEndsTheSameWay(): void
+    {
+        // /admin/reports is not /reports. The suffix match accepted it, certifying
+        // the exact routing bug the assertion exists to catch.
+        $runtime = FakeRuntime::available();
+        $request = Request::create('http://127.0.0.1:8100/');
+        $stack = new RequestStack();
+        $stack->push($request);
+
+        (new WindowManager($runtime, new UrlResolver($stack, null), $stack))->navigate('/admin/reports', 'main');
+
+        $expectations = new RuntimeExpectations($runtime);
+        $expectations->assertWindowNavigatedTo('/admin/reports', 'main');
+
+        try {
+            $expectations->assertWindowNavigatedTo('/reports', 'main');
+            self::fail('A deeper path must not satisfy a different expected path.');
+        } catch (\PHPUnit\Framework\AssertionFailedError) {
+            self::assertTrue(true);
+        }
+    }
+
+    public function testATouchIdPromptCountsAsABlockingDialog(): void
+    {
+        $runtime = FakeRuntime::available();
+        $runtime->post('system/prompt-touch-id', ['reason' => 'unlock']);
+
+        $this->expectException(\PHPUnit\Framework\AssertionFailedError::class);
+
+        (new RuntimeExpectations($runtime))->assertNoDialogShown();
     }
 }

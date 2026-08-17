@@ -234,6 +234,13 @@ final class FakeRuntime implements ClientInterface
     {
         unset($this->windows[$id]);
 
+        // window/all has to be rewritten too. Upstream reads both endpoints from
+        // the same state.windows map, so they cannot disagree there — leaving the
+        // old list scripted meant a closed window still appeared in all(), and a
+        // "only main is left open" assertion passed against an app that would see
+        // otherwise live.
+        $this->willReturn('window/all', array_values($this->windows));
+
         return $this->willReturnStatus("window/get/{$id}", 404);
     }
 
@@ -304,10 +311,21 @@ final class FakeRuntime implements ClientInterface
             // A message box answers with the index of the button the user clicked,
             // and DialogManager refuses to invent one — a missing result there means
             // the app cannot know what was chosen, and it throws rather than guess.
-            // Under a fake there is no user, so the fake is the right place to
-            // supply the default: button 0, overridable by scripting the endpoint.
+            // Under a fake there is no user, so the fake supplies the answer; the
+            // question is which one.
+            //
+            // Dismissal, not confirmation. Button 0 is the *confirming* button, so
+            // defaulting to it made an unscripted `confirm()` answer yes — and the
+            // test that then wrongly passes is the most valuable one anybody writes
+            // here, "deleting requires confirmation". cancelId is what Electron
+            // returns for Escape and the window close button, and confirm() sends
+            // cancelId: 1 precisely so those mean no. Every other unscripted dialog
+            // already fails safe this way: dialog/open degrades to cancelled and
+            // dialog/save to null.
             if ('alert/message' === $endpoint) {
-                return new Response(200, ['result' => 0]);
+                $cancelId = $call->payload['cancelId'] ?? 0;
+
+                return new Response(200, ['result' => \is_int($cancelId) ? $cancelId : 0]);
             }
 
             // CONTRACT.md §0 shape 1: `res.sendStatus(200)`, which the real client

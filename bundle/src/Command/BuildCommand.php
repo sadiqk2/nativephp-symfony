@@ -303,9 +303,15 @@ final class BuildCommand extends Command
         );
     }
 
+    /**
+     * `str_starts_with($path, '/')` is not "is this absolute" anywhere but POSIX:
+     * C:\\dev\\electron and \\\\server\\share are both absolute and both failed it,
+     * turning an --electron-path into C:\\proj\\C:\\dev\\electron and reporting a
+     * project that exists as missing.
+     */
     private function absolute(string $path): string
     {
-        return str_starts_with($path, '/') ? $path : $this->projectDir.'/'.$path;
+        return Path::isAbsolute($path) ? $path : Path::join($this->projectDir, $path);
     }
 
     private function slug(string $value): string

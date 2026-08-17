@@ -137,12 +137,12 @@ final class RuntimeEventSimulator
         $this->dispatch(self::name('ChildProcess\ProcessSpawned'), [$alias, $pid]);
     }
 
-    public function processExited(string $alias, int $code = 0): void
+    public function processExited(string $alias, ?int $code = 0): void
     {
         $this->dispatch(self::name('ChildProcess\ProcessExited'), ['alias' => $alias, 'code' => $code]);
     }
 
-    public function processMessageReceived(string $alias, mixed $data): void
+    public function processMessageReceived(string $alias, string $data): void
     {
         $this->dispatch(self::name('ChildProcess\MessageReceived'), ['alias' => $alias, 'data' => $data]);
     }
