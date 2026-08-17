@@ -12,8 +12,14 @@ at it.
 ## 1. Install the bundle
 
 ```bash
-composer require native-symfony/desktop-bundle
+composer require native-symfony/desktop-bundle:^0.1
 ```
+
+**Not on Packagist yet**, so that resolves only once Composer knows where to find it: clone
+this repository and add a path repository pointing at `bundle/`, with `"symlink": true` (a
+copy goes stale and edits to the bundle appear to do nothing). The exact block is in the
+[root README](../README.md#0-install-the-packages), and [`demo/composer.json`](../demo/composer.json)
+is a working example. Everything after this step is unaffected by how the package arrived.
 
 If Flex does not register it, add it yourself:
 

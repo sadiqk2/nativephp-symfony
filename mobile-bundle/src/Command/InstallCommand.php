@@ -60,8 +60,9 @@ final class InstallCommand extends Command
         $force = (bool) $input->getOption('force');
 
         $io->warning([
-            'NativePHP Mobile is a commercial product, unlike the MIT-licensed desktop runtime.',
-            'Check its licence terms before distributing anything built this way.',
+            'NativePHP Mobile is sold as a product, though the mobile-air repository these',
+            'sources come from carries an MIT LICENSE.md. Read its terms before distributing',
+            'anything built this way — this command cannot tell you what you are entitled to.',
         ]);
 
         $done = [];

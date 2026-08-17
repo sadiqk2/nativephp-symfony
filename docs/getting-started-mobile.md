@@ -9,9 +9,11 @@ Gradle in this project, and no screen has been rendered on a device. The desktop
 backed by a screenshot of a running packaged app; mobile is not held to that standard yet.
 Treat it as a well-tested design awaiting device verification.
 
-**NativePHP Mobile is a commercial product.** The desktop runtime is MIT; the iOS and
-Android hosts are not. Read its licence terms before distributing anything built this way.
-`native:mobile:install` prints this warning too, deliberately.
+**Check the licensing yourself.** NativePHP Mobile is sold as a product, but the
+`NativePHP/mobile-air` repository these host projects come from carries an MIT `LICENSE.md`
+(Bifrost Technology, LLC) and declares `"license": "MIT"` in its `composer.json` — so read
+the terms rather than trusting a summary, this one included. `native:mobile:install` prints
+the same caution deliberately. The desktop runtime is MIT.
 
 ### Can you build an Android or iOS app today?
 
@@ -21,7 +23,7 @@ provide:
 
 | You need | Why |
 |---|---|
-| A NativePHP Mobile licence and a clone of `NativePHP/mobile-air` | The iOS and Android host projects are the commercial part. `native:mobile:install` copies and retargets them; it cannot fetch them for you. |
+| A clone of `NativePHP/mobile-air`, and whatever its terms require of you | The iOS and Android host projects live there. `native:mobile:install` copies and retargets them; it cannot fetch them for you. |
 | Android Studio / the Android SDK, or Xcode | `native:mobile:build` produces the APK/AAB or the iOS archive by invoking `./gradlew` or `xcodebuild`. Neither exists in a PHP container, and neither runs in CI without a licence. |
 | A keystore or a provisioning profile | Signing is deliberately not handled here — see below. |
 
@@ -51,8 +53,13 @@ Consequently there is no dev-server loop like `native:run`. What replaces it is
 ## 1. Install
 
 ```bash
-composer require native-symfony/mobile-bundle
+composer require native-symfony/mobile-bundle:^0.1
 ```
+
+**Not on Packagist yet** — clone this repository and add a path repository pointing at
+`mobile-bundle/` with `"symlink": true`. The block is in the
+[root README](../README.md#0-install-the-packages); [`demo/composer.json`](../demo/composer.json)
+is a working example.
 
 ```php
 // config/bundles.php

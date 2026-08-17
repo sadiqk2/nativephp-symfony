@@ -18,6 +18,208 @@ full API, packaged into a distributable app that has been built *and run*.
 | [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. Ten are **open PRs** ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2) and [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)); only the manifest patch is held, until the small ones land. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
 
+## Adding it to an existing Symfony app
+
+Your application does not change. It stays an ordinary Symfony app — same controllers, same
+templates, same `bin/console` — and gains two things: a native window, and an API for the
+machine it is running on.
+
+You need PHP 8.3+, Symfony 7 or 8, and (for desktop) Node 20+ and `git`.
+
+### 0. Install the packages
+
+Neither bundle is on Packagist yet, so point Composer at a checkout. This is what the
+[`demo/`](demo/README.md) does, and it is the only step that changes once they are published.
+
+```bash
+git clone https://github.com/sadiqk2/nativephp-symfony /path/to/nativephp-symfony
+```
+
+```json
+"repositories": [
+    { "type": "path", "url": "/path/to/nativephp-symfony/bundle",        "options": { "symlink": true } },
+    { "type": "path", "url": "/path/to/nativephp-symfony/mobile-bundle", "options": { "symlink": true } }
+]
+```
+
+```bash
+composer require native-symfony/desktop-bundle:^0.1   # desktop
+composer require native-symfony/mobile-bundle:^0.1    # iOS and Android
+```
+
+Take one or both — they share no code and neither requires the other. Use `symlink: true`:
+without it Composer caches a copy and edits to the bundle appear to do nothing.
+
+If Flex does not register them, add them yourself:
+
+```php
+// config/bundles.php
+Native\Symfony\NativeDesktopBundle::class => ['all' => true],
+Native\Symfony\Mobile\NativeMobileBundle::class => ['all' => true],
+```
+
+### Desktop: a window around the app you already have
+
+**1. Configure it.** Only `name` and `app_id` really matter to start:
+
+```yaml
+# config/packages/native_desktop.yaml
+native_desktop:
+    name: 'My App'
+    app_id: com.example.myapp
+    version: '1.0.0'
+```
+
+**2. Decide what appears on launch.** The runtime boots and then POSTs `/_native/api/booted`;
+whatever that handler does *is* your startup. Nothing opens unless you ask:
+
+```php
+namespace App\Native;
+
+use Native\Symfony\Contract\AppBootstrapper;
+use Native\Symfony\Window\WindowManager;
+
+final class Bootstrapper implements AppBootstrapper
+{
+    public function __construct(private readonly WindowManager $windows) {}
+
+    public function boot(): void
+    {
+        $this->windows->open('main')->url('/')->size(1100, 760)->title('My App')->open();
+    }
+}
+```
+
+No wiring: the bundle autoconfigures the interface and a compiler pass aliases it. `boot()`
+must be idempotent — macOS re-posts `/booted` on `activate` — and `window/open` is already
+idempotent by id, so a `boot()` that only opens windows needs no guard.
+
+**3. Install the Electron runtime into your project.** The bundle deliberately does not
+vendor it; requiring `nativephp/desktop` would pull `illuminate/contracts` and
+`laravel/prompts` into a Symfony app:
+
+```bash
+git clone --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop
+bin/console native:install --source=/tmp/np-desktop/resources/electron
+```
+
+This copies the runtime to `nativephp/electron`, retargets the ten hardcoded Laravel strings
+in its TypeScript at your app, installs `public/nativephp-router.php`, writes
+`config/routes/native_desktop.yaml`, and runs `npm install` (it downloads Electron — expect
+minutes; `--skip-npm` to skip).
+
+**4. Check it before running it.** This runtime's failure mode is silence, so the check is
+not optional ceremony:
+
+```console
+$ bin/console native:doctor          # abridged: it also prints a project/PHP/runtime table
+
+Runtime endpoints
+  ✓ POST /_native/api/booted
+  ✓ POST /_native/api/events
+
+Firewall
+  – no security bundle installed, so nothing can gate the endpoints.
+
+Application startup
+  ✓ App\Bootstrapper will run when the runtime finishes booting.
+
+Build inputs
+  ✓ nativephp/php-bin
+  ✓ Electron project
+```
+
+A missing routes import is the commonest way to get an app that opens a window and then does
+nothing forever — `/booted` 404s, `boot()` never runs, and Electron logs it somewhere you
+would not look. `native:doctor` asks the router directly and exits non-zero.
+
+**If your app has a firewall**, the bundle keeps your `access_control` off `/_native/api/`
+while the shared-secret gate is enforcing. Symfony's security config is single-source, so a
+bundle cannot contribute a firewall — declare one yourself if you prefer it explicit:
+
+```yaml
+# config/packages/security.yaml — before your main firewall
+security:
+    firewalls:
+        native_runtime:
+            pattern: ^/_native/api/
+            security: false
+```
+
+**5. Run and package.**
+
+```bash
+bin/console native:run                        # dev; -v logs every PHP command the runtime spawns
+composer require nativephp/php-bin            # static PHP binaries, needed to package
+bin/console native:build linux x64 --dir      # unpacked build, the fast smoke test
+```
+
+### Mobile: the same app, on a phone
+
+The mobile path is **one process with PHP compiled into it** — no port, no shared secret. And
+the render path most apps want is the WebView one: a Symfony app that declares no
+`#[NativeScreen]` produces no native-route manifest, so both platforms' `BootPlanner` takes
+the WebView by construction. Your controllers and Twig templates are unchanged; the new thing
+is the device API (camera, biometrics, push, haptics — 54 methods).
+
+**1. Configure it.** `fake_bridge` is what makes development possible at all: `nativephp_call()`
+is a compiled extension that exists only inside a packaged app, so off a device every call
+returns `null` and a working app is indistinguishable from a broken one. The fake records
+instead.
+
+```yaml
+# config/packages/native_mobile.yaml
+native_mobile:
+    name: 'My App'
+    app_id: com.example.myapp
+    version: '1.0.0'      # quote it — YAML 1.0 is a float, and the hosts compare by string
+
+# config/packages/dev/native_mobile.yaml and config/packages/test/native_mobile.yaml
+native_mobile:
+    fake_bridge: true
+```
+
+**2. Bring in the host projects and retarget them.** `native:mobile:install` prints a
+licensing caution deliberately — NativePHP Mobile is sold as a product, though the
+`mobile-air` repository itself is MIT; read its terms rather than either summary:
+
+```bash
+git clone --depth 1 https://github.com/NativePHP/mobile-air /tmp/np-mobile
+bin/console native:mobile:install --source=/tmp/np-mobile/resources
+bin/console native:mobile:doctor
+```
+
+The installer mirrors `resources/androidstudio` to `nativephp/android` and
+`resources/xcode` to `nativephp/ios`, then points the two places each host hardcodes a path
+into another vendor's `bootstrap/` at this bundle's shims instead. It throws rather than
+skipping a path, because a missed one is a launch to a blank screen with no diagnostic.
+
+**3. Build.**
+
+```bash
+bin/console native:mobile:build android --dry-run      # print the whole plan, touch nothing
+bin/console native:mobile:build android --stage-only   # everything up to Gradle
+bin/console native:mobile:build android --aab          # …then Gradle
+bin/console native:mobile:build ios --export-options=auto --team-id=ABCDE12345
+```
+
+Staging, `.env` cleaning, the app archive and the manifest all run here and are covered by
+tests. The last step is Gradle or Xcode on a machine that has them — and **no build produced
+by these commands has been opened by either yet**, which is the one caveat worth repeating.
+See [getting started — mobile](docs/getting-started-mobile.md#can-you-build-an-android-or-ios-app-today).
+
+### Two rules that are absolute
+
+- **`native:config` and `native:php-ini` must print nothing but JSON.** The runtime runs them
+  before its API server exists, captures stdout with `execFile` and `JSON.parse`s it. Anything
+  your app echoes during console boot — a banner, a `dump()`, a deprecation — breaks the parse
+  and the app starts with no config and no visible symptom.
+- **Never assume `NATIVEPHP_API_URL` or `NATIVEPHP_SECRET` exist.** At that point in the boot
+  they do not, so any service that calls the runtime from a console-boot path throws.
+
+A complete working example of all of the above — both bundles, two windows, a native menu, a
+native-UI screen — is [`demo/`](demo/README.md), and it is also the integration test.
+
 ## Using it
 
 **[`docs/`](docs/README.md) is the documentation for building an application with this.**
