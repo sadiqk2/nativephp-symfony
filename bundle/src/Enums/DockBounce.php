@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Enums;
+namespace Native\Symfony\Desktop\Enums;
 
 /**
  * macOS dock bounce style. `Critical` bounces until the app is activated;

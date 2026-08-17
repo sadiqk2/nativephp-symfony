@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Menu\Items;
+namespace Native\Symfony\Desktop\Menu\Items;
 
 /**
  * A radio item. Electron groups consecutive radio items automatically — separate

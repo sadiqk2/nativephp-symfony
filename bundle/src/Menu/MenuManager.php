@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Menu;
+namespace Native\Symfony\Desktop\Menu;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Window\UrlResolver;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Window\UrlResolver;
 
 /**
  * The application menu (POST /api/menu) and the page context menu

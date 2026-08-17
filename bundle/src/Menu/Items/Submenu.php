@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Menu\Items;
+namespace Native\Symfony\Desktop\Menu\Items;
 
 /**
  * A nested menu. compileMenu recurses into `submenu`, accepting either a plain

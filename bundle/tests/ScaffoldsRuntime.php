@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
 use Symfony\Component\Filesystem\Filesystem;
 

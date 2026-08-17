@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Native\Symfony\Http\BootedController;
-use Native\Symfony\Http\EventsController;
+use Native\Symfony\Desktop\Http\BootedController;
+use Native\Symfony\Desktop\Http\EventsController;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
 
 /**

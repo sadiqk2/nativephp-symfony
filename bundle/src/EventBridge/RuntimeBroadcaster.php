@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\EventBridge;
+namespace Native\Symfony\Desktop\EventBridge;
 
-use Native\Symfony\Contract\BroadcastsToRuntime;
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\BroadcastsToRuntime;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 

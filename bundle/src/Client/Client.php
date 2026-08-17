@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Client;
+namespace Native\Symfony\Desktop\Client;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Contract\Response;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\Response;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;

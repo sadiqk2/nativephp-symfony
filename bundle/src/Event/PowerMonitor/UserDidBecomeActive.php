@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Event\PowerMonitor;
+namespace Native\Symfony\Desktop\Event\PowerMonitor;
 
 use Symfony\Contracts\EventDispatcher\Event;
 

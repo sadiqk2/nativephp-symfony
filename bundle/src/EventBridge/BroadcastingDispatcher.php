@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\EventBridge;
+namespace Native\Symfony\Desktop\EventBridge;
 
-use Native\Symfony\Contract\BroadcastsToRuntime;
+use Native\Symfony\Desktop\Contract\BroadcastsToRuntime;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Contracts\EventDispatcher\Event;
 

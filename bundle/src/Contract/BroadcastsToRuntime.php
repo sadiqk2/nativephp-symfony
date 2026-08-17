@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Contract;
+namespace Native\Symfony\Desktop\Contract;
 
 /**
  * Marker for app events that should also reach the front end.
@@ -17,7 +17,7 @@ namespace Native\Symfony\Contract;
  * original but not a drop-in translation of it — an app ported across has to
  * add this interface to events that previously only declared a channel.
  *
- * @see \Native\Symfony\EventBridge\RuntimeBroadcaster
+ * @see \Native\Symfony\Desktop\EventBridge\RuntimeBroadcaster
  */
 interface BroadcastsToRuntime
 {

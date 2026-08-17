@@ -34,7 +34,7 @@ Set it in `config/packages/test/` only. With it on, nothing reaches a real runti
 The trait wires the three pieces in one `use`, and works both ways round:
 
 ```php
-use Native\Symfony\Testing\InteractsWithNativeRuntime;
+use Native\Symfony\Desktop\Testing\InteractsWithNativeRuntime;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 final class BootstrapperTest extends KernelTestCase
@@ -79,7 +79,7 @@ cannot distinguish a correct fallback from a lost id.
 
 ## Faking the desktop runtime
 
-`Native\Symfony\Testing\FakeRuntime` implements `ClientInterface`, records every request, and
+`Native\Symfony\Desktop\Testing\FakeRuntime` implements `ClientInterface`, records every request, and
 answers with whatever the test scripted. Because only the transport is faked, the real
 `WindowManager` and the real `PendingWindow` build the payload — so what you assert on is the
 wire, not a stub. All 116 endpoints are covered the day they are added, including the ones

@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\EventBridge;
+namespace Native\Symfony\Desktop\EventBridge;
 
-use Native\Symfony\Event\App;
-use Native\Symfony\Event\AutoUpdater;
-use Native\Symfony\Event\ChildProcess;
-use Native\Symfony\Event\Menu;
-use Native\Symfony\Event\MenuBar;
-use Native\Symfony\Event\NativeEvent;
-use Native\Symfony\Event\Notifications;
-use Native\Symfony\Event\PowerMonitor;
-use Native\Symfony\Event\Settings;
-use Native\Symfony\Event\Windows;
+use Native\Symfony\Desktop\Event\App;
+use Native\Symfony\Desktop\Event\AutoUpdater;
+use Native\Symfony\Desktop\Event\ChildProcess;
+use Native\Symfony\Desktop\Event\Menu;
+use Native\Symfony\Desktop\Event\MenuBar;
+use Native\Symfony\Desktop\Event\NativeEvent;
+use Native\Symfony\Desktop\Event\Notifications;
+use Native\Symfony\Desktop\Event\PowerMonitor;
+use Native\Symfony\Desktop\Event\Settings;
+use Native\Symfony\Desktop\Event\Windows;
 
 /**
  * Turns a runtime event push into an object to dispatch.

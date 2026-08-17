@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Clipboard\ClipboardManager;
-use Native\Symfony\Dock\DockManager;
-use Native\Symfony\Enums\ClipboardType;
-use Native\Symfony\Enums\SystemTheme;
-use Native\Symfony\Menu\Menu;
-use Native\Symfony\Notification\NotificationManager;
-use Native\Symfony\PowerMonitor\PowerMonitorManager;
-use Native\Symfony\Screen\ScreenManager;
-use Native\Symfony\Settings\SettingsManager;
-use Native\Symfony\Shell\ShellManager;
-use Native\Symfony\Shortcut\GlobalShortcutManager;
-use Native\Symfony\Support\Platform;
-use Native\Symfony\System\ProgressBar;
-use Native\Symfony\System\SystemManager;
+use Native\Symfony\Desktop\Clipboard\ClipboardManager;
+use Native\Symfony\Desktop\Dock\DockManager;
+use Native\Symfony\Desktop\Enums\ClipboardType;
+use Native\Symfony\Desktop\Enums\SystemTheme;
+use Native\Symfony\Desktop\Menu\Menu;
+use Native\Symfony\Desktop\Notification\NotificationManager;
+use Native\Symfony\Desktop\PowerMonitor\PowerMonitorManager;
+use Native\Symfony\Desktop\Screen\ScreenManager;
+use Native\Symfony\Desktop\Settings\SettingsManager;
+use Native\Symfony\Desktop\Shell\ShellManager;
+use Native\Symfony\Desktop\Shortcut\GlobalShortcutManager;
+use Native\Symfony\Desktop\Support\Platform;
+use Native\Symfony\Desktop\System\ProgressBar;
+use Native\Symfony\Desktop\System\SystemManager;
 use PHPUnit\Framework\TestCase;
 
 final class ManagersTest extends TestCase

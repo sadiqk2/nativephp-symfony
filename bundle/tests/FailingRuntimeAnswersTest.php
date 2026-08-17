@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Client\RuntimeCallFailed;
-use Native\Symfony\Dialog\DialogManager;
-use Native\Symfony\EventBridge\EventFactory;
-use Native\Symfony\Event\AutoUpdater\UpdateAvailable;
-use Native\Symfony\Process\ProcessHandle;
-use Native\Symfony\Shell\ShellManager;
-use Native\Symfony\Window\UrlResolver;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Client\RuntimeCallFailed;
+use Native\Symfony\Desktop\Dialog\DialogManager;
+use Native\Symfony\Desktop\EventBridge\EventFactory;
+use Native\Symfony\Desktop\Event\AutoUpdater\UpdateAvailable;
+use Native\Symfony\Desktop\Process\ProcessHandle;
+use Native\Symfony\Desktop\Shell\ShellManager;
+use Native\Symfony\Desktop\Window\UrlResolver;
+use Native\Symfony\Desktop\Window\WindowManager;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -117,7 +117,7 @@ final class FailingRuntimeAnswersTest extends TestCase
             $event = (new EventFactory([]))->create("\\Native\\Desktop\\Events\\AutoUpdater\\{$name}", $payload);
 
             self::assertSame(
-                'Native\\Symfony\\Event\\AutoUpdater\\'.$name,
+                'Native\\Symfony\\Desktop\\Event\\AutoUpdater\\'.$name,
                 $event::class,
                 sprintf('%s degraded instead of constructing.', $name),
             );

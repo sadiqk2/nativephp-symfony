@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Manifest;
+namespace Native\Symfony\Desktop\Manifest;
 
 /**
  * The `nativephp.json` an app writes to tell the Electron runtime where its

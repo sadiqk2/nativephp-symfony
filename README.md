@@ -50,17 +50,19 @@ composer require native-symfony/mobile-bundle:^0.1    # iOS and Android
 Take one or both — they share no code and neither requires the other. Use `symlink: true`:
 without it Composer caches a copy and edits to the bundle appear to do nothing.
 
-**Register the desktop bundle by hand.** Flex picks up the mobile one on its own and cannot
-pick up the desktop one — it derives candidate class names from the PSR-4 namespace, so for
-`Native\Symfony\` it looks for `SymfonyBundle` and `NativeSymfonyBundle` and never finds
-`NativeDesktopBundle`. `Native\Symfony\Mobile\` happens to yield `NativeMobileBundle`,
-which is why the asymmetry exists at all. Verified on a fresh `symfony/skeleton`:
+Flex registers both for you. If it is not installed, add them yourself:
 
 ```php
 // config/bundles.php
-Native\Symfony\NativeDesktopBundle::class => ['all' => true],       // Flex will not add this
-Native\Symfony\Mobile\NativeMobileBundle::class => ['all' => true], // Flex adds this one
+Native\Symfony\Desktop\NativeDesktopBundle::class => ['all' => true],
+Native\Symfony\Mobile\NativeMobileBundle::class => ['all' => true],
 ```
+
+Both namespaces end in the name Flex derives its candidate bundle class from, which is not a
+coincidence: the desktop bundle used to live at `Native\Symfony\` and Flex could not find
+`NativeDesktopBundle` under it — it looks for `SymfonyBundle` and `NativeSymfonyBundle` there
+— so the line above had to be written by hand while the mobile one appeared on its own.
+Verified on a fresh `symfony/skeleton` in both directions.
 
 ### Desktop: a window around the app you already have
 
@@ -80,8 +82,8 @@ whatever that handler does *is* your startup. Nothing opens unless you ask:
 ```php
 namespace App\Native;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Window\WindowManager;
 
 final class Bootstrapper implements AppBootstrapper
 {

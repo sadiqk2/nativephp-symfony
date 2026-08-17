@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Client\Client;
-use Native\Symfony\Client\RuntimeCallFailed;
-use Native\Symfony\Client\RuntimeNotAvailable;
+use Native\Symfony\Desktop\Client\Client;
+use Native\Symfony\Desktop\Client\RuntimeCallFailed;
+use Native\Symfony\Desktop\Client\RuntimeNotAvailable;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\AbstractLogger;
 use Symfony\Component\HttpClient\MockHttpClient;

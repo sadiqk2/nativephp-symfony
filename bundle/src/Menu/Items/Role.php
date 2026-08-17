@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Menu\Items;
+namespace Native\Symfony\Desktop\Menu\Items;
 
-use Native\Symfony\Enums\MenuRole;
+use Native\Symfony\Desktop\Enums\MenuRole;
 
 /**
  * A built-in OS behaviour (copy, paste, quit, the whole edit menu, …).

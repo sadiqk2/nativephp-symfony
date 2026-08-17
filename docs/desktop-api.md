@@ -20,7 +20,7 @@ so `$windows->close('typo')` is a no-op, not an error.
 
 **Outside the runtime, every call throws.** `Client::isAvailable()` is false when
 `NATIVEPHP_API_URL` is unset, and any call then throws
-`Native\Symfony\Client\RuntimeNotAvailable`. Code that also runs as an ordinary web request
+`Native\Symfony\Desktop\Client\RuntimeNotAvailable`. Code that also runs as an ordinary web request
 must guard:
 
 ```php
@@ -29,14 +29,14 @@ if ($this->client->isAvailable()) {
 }
 ```
 
-`Native\Symfony\Client\RuntimeCallFailed` covers the other two failures: a transport error,
+`Native\Symfony\Desktop\Client\RuntimeCallFailed` covers the other two failures: a transport error,
 and a `403` (the shared secret did not match).
 
 ---
 
 ## Windows
 
-`Native\Symfony\Window\WindowManager` — 21 endpoints.
+`Native\Symfony\Desktop\Window\WindowManager` — 21 endpoints.
 
 ```php
 $windows->open('settings')            // returns PendingWindow; nothing happens until open()
@@ -108,11 +108,11 @@ $id = $windows->detectId();   // ?string
 
 ## Menus
 
-`Native\Symfony\Menu\Menu` is an immutable builder; `MenuManager` sends it.
+`Native\Symfony\Desktop\Menu\Menu` is an immutable builder; `MenuManager` sends it.
 
 ```php
-use Native\Symfony\Enums\MenuRole;
-use Native\Symfony\Menu\Menu;
+use Native\Symfony\Desktop\Enums\MenuRole;
+use Native\Symfony\Desktop\Menu\Menu;
 
 $menu = Menu::new()
     ->submenu('App', Menu::new()
@@ -133,7 +133,7 @@ $menus->removeContext();
 
 Item types: `label()`, `link()`, `checkbox()`, `radio()`, `role()`, `separator()`,
 `submenu()`, plus `Menu::make(MenuItem ...$items)` and `add()` if you want to construct
-`Native\Symfony\Menu\Items\*` yourself. `MenuRole` covers 42 Electron roles.
+`Native\Symfony\Desktop\Menu\Items\*` yourself. `MenuRole` covers 42 Electron roles.
 
 **Every method returns a new `Menu`.** `$menu->label('x');` on its own does nothing —
 assign the result.
@@ -177,7 +177,7 @@ calling code needs no platform checks.
 
 ## Dialogs
 
-`Native\Symfony\Dialog\DialogManager` — 4 endpoints, **all of which block the runtime's
+`Native\Symfony\Desktop\Dialog\DialogManager` — 4 endpoints, **all of which block the runtime's
 event loop until the user answers**. The client's timeout is 3600s for exactly this reason.
 
 ```php
@@ -239,7 +239,7 @@ overrides title and body entirely.
 ## Clipboard
 
 ```php
-use Native\Symfony\Enums\ClipboardType;
+use Native\Symfony\Desktop\Enums\ClipboardType;
 
 $clipboard->setText('hello');
 $text = $clipboard->text();
@@ -339,7 +339,7 @@ The runtime pushes 44 typed events plus any number of caller-named ones. Typed e
 dispatch under their class name, so a listener is ordinary Symfony:
 
 ```php
-use Native\Symfony\Event\Windows\WindowResized;
+use Native\Symfony\Desktop\Event\Windows\WindowResized;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
 final class WindowListener
@@ -352,7 +352,7 @@ final class WindowListener
 }
 ```
 
-Namespaces under `Native\Symfony\Event\`: `Windows\` (9), `App\` (3, including
+Namespaces under `Native\Symfony\Desktop\Event\`: `Windows\` (9), `App\` (3, including
 `ApplicationBooted` which the bundle dispatches itself), `Menu\`, `MenuBar\` (7),
 `Notifications\` (4), `ChildProcess\` (5), `PowerMonitor\` (8), `Settings\`,
 `AutoUpdater\` (7).
@@ -385,7 +385,7 @@ Laravel sniffs every dispatched event with a wildcard listener. Symfony has no w
 hook, so intent is declared on the event:
 
 ```php
-use Native\Symfony\Contract\BroadcastsToRuntime;
+use Native\Symfony\Desktop\Contract\BroadcastsToRuntime;
 
 final class ImportProgressed implements BroadcastsToRuntime
 {

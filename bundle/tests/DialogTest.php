@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Dialog\DialogManager;
-use Native\Symfony\Enums\AlertType;
+use Native\Symfony\Desktop\Dialog\DialogManager;
+use Native\Symfony\Desktop\Enums\AlertType;
 use PHPUnit\Framework\TestCase;
 
 final class DialogTest extends TestCase

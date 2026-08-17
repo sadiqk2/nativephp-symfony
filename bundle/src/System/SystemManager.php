@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\System;
+namespace Native\Symfony\Desktop\System;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Enums\SystemTheme;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Enums\SystemTheme;
 
 /**
  * OS integration — 10 endpoints: biometrics, OS-keychain encryption, printing and

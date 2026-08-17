@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Http;
+namespace Native\Symfony\Desktop\Http;
 
-use Native\Symfony\Event\NativeEvent;
-use Native\Symfony\EventBridge\EventFactory;
+use Native\Symfony\Desktop\Event\NativeEvent;
+use Native\Symfony\Desktop\EventBridge\EventFactory;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;

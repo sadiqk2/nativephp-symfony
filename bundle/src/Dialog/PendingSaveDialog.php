@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Dialog;
+namespace Native\Symfony\Desktop\Dialog;
 
-use Native\Symfony\Enums\DialogProperty;
+use Native\Symfony\Desktop\Enums\DialogProperty;
 
 final class PendingSaveDialog extends PendingDialog
 {

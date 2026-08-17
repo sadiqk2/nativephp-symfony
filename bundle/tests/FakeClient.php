@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Contract\Response;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\Response;
 
 /**
  * Records calls so tests can assert on the wire payloads, which is where the

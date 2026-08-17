@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Runtime;
+namespace Native\Symfony\Desktop\Runtime;
 
 final class PatchFailed extends \RuntimeException
 {

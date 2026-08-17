@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Event\MenuBar;
+namespace Native\Symfony\Desktop\Event\MenuBar;
 
 use Symfony\Contracts\EventDispatcher\Event;
 

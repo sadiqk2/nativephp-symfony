@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Process;
+namespace Native\Symfony\Desktop\Process;
 
 /**
  * Runs `messenger:consume` as a runtime-supervised child process.

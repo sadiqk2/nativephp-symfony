@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Testing;
+namespace Native\Symfony\Desktop\Testing;
 
-use Native\Symfony\Client\RuntimeNotAvailable;
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Contract\Response;
+use Native\Symfony\Desktop\Client\RuntimeNotAvailable;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\Response;
 
 /**
  * A runtime that isn't there: records every request the app makes and answers

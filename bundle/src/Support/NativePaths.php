@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Support;
+namespace Native\Symfony\Desktop\Support;
 
 /**
  * The ten OS locations the runtime pushes into the environment at boot, plus

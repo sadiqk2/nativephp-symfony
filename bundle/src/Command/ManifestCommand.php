@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Command;
+namespace Native\Symfony\Desktop\Command;
 
-use Native\Symfony\Manifest\Manifest;
-use Native\Symfony\Manifest\ManifestSupport;
-use Native\Symfony\Manifest\ManifestSupportDetector;
-use Native\Symfony\Manifest\ManifestWriter;
-use Native\Symfony\Support\Platform;
-use Native\Symfony\Support\ProjectPath;
+use Native\Symfony\Desktop\Manifest\Manifest;
+use Native\Symfony\Desktop\Manifest\ManifestSupport;
+use Native\Symfony\Desktop\Manifest\ManifestSupportDetector;
+use Native\Symfony\Desktop\Manifest\ManifestWriter;
+use Native\Symfony\Desktop\Support\Platform;
+use Native\Symfony\Desktop\Support\ProjectPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

@@ -101,10 +101,10 @@ one person who has already fixed it.
 one. `BootedController` logs a warning naming the contract and answers 500 — and the runtime
 throws that 500 away, so the log line is the only symptom:
 
-> The NativePHP runtime booted but no Native\Symfony\Contract\AppBootstrapper service is
+> The NativePHP runtime booted but no Native\Symfony\Desktop\Contract\AppBootstrapper service is
 > registered, so no window will open.
 
-Implement `Native\Symfony\Contract\AppBootstrapper` on any service; autoconfiguration and
+Implement `Native\Symfony\Desktop\Contract\AppBootstrapper` on any service; autoconfiguration and
 `AliasContractsPass` do the wiring. (If you register two implementations, the compiler pass
 fails with both class names — that is deliberate.)
 

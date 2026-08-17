@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace App\EventListener;
 
-use Native\Symfony\Event\App\ApplicationBooted;
-use Native\Symfony\Event\ChildProcess\ErrorReceived;
-use Native\Symfony\Event\ChildProcess\MessageReceived;
-use Native\Symfony\Event\ChildProcess\ProcessExited;
-use Native\Symfony\Event\ChildProcess\ProcessSpawned;
-use Native\Symfony\Event\Settings\SettingChanged;
-use Native\Symfony\Event\Windows\WindowClosed;
-use Native\Symfony\Event\Windows\WindowFocused;
-use Native\Symfony\Event\Windows\WindowResized;
-use Native\Symfony\Event\Windows\WindowShown;
+use Native\Symfony\Desktop\Event\App\ApplicationBooted;
+use Native\Symfony\Desktop\Event\ChildProcess\ErrorReceived;
+use Native\Symfony\Desktop\Event\ChildProcess\MessageReceived;
+use Native\Symfony\Desktop\Event\ChildProcess\ProcessExited;
+use Native\Symfony\Desktop\Event\ChildProcess\ProcessSpawned;
+use Native\Symfony\Desktop\Event\Settings\SettingChanged;
+use Native\Symfony\Desktop\Event\Windows\WindowClosed;
+use Native\Symfony\Desktop\Event\Windows\WindowFocused;
+use Native\Symfony\Desktop\Event\Windows\WindowResized;
+use Native\Symfony\Desktop\Event\Windows\WindowShown;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Command;
+namespace Native\Symfony\Desktop\Command;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Security\RuntimeAccessSubscriber;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Security\RuntimeAccessSubscriber;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -265,7 +265,7 @@ final class DoctorCommand extends Command
 
         if (null === $this->bootstrapper) {
             $io->text(' – no AppBootstrapper is registered, so /booted does nothing but dispatch its event.');
-            $io->text('   Implement Native\Symfony\Contract\AppBootstrapper to open a window at startup.');
+            $io->text('   Implement Native\Symfony\Desktop\Contract\AppBootstrapper to open a window at startup.');
 
             return 0;
         }

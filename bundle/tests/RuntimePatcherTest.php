@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Runtime\PatchFailed;
-use Native\Symfony\Runtime\RuntimePatcher;
+use Native\Symfony\Desktop\Runtime\PatchFailed;
+use Native\Symfony\Desktop\Runtime\RuntimePatcher;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 

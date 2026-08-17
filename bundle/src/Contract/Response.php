@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Contract;
+namespace Native\Symfony\Desktop\Contract;
 
 /**
  * A runtime reply.

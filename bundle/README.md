@@ -61,7 +61,7 @@ bin/console native:run
 that already reads a `nativephp.json` — so once the upstream manifest change lands,
 `native:manifest` is the whole story and nothing is patched.
 
-Then implement `Native\Symfony\Contract\AppBootstrapper` on any service. The bundle
+Then implement `Native\Symfony\Desktop\Contract\AppBootstrapper` on any service. The bundle
 autoconfigures and aliases it — no wiring needed.
 
 Routes cannot be auto-registered (Symfony bundles cannot register their own), so

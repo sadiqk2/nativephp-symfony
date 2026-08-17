@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Note;
 
-use Native\Symfony\Settings\SettingsManager;
+use Native\Symfony\Desktop\Settings\SettingsManager;
 
 /**
  * The app's persistence, such as it is: the runtime's own settings store.

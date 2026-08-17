@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Runtime;
+namespace Native\Symfony\Desktop\Runtime;
 
-use Native\Symfony\Manifest\ManifestSupport;
-use Native\Symfony\Manifest\ManifestSupportDetector;
+use Native\Symfony\Desktop\Manifest\ManifestSupport;
+use Native\Symfony\Desktop\Manifest\ManifestSupportDetector;
 
 /**
  * Rewrites the eight places NativePHP's Electron runtime assumes Laravel.

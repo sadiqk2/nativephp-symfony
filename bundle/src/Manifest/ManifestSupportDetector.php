@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Manifest;
+namespace Native\Symfony\Desktop\Manifest;
 
 /**
  * Decides whether an installed Electron runtime reads `nativephp.json`.

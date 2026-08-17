@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Event\AutoUpdater;
+namespace Native\Symfony\Desktop\Event\AutoUpdater;
 
 use Symfony\Contracts\EventDispatcher\Event;
 

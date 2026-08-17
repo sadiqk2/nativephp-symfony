@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\MenuBar;
+namespace Native\Symfony\Desktop\MenuBar;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Menu\Menu;
-use Native\Symfony\Window\UrlResolver;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Menu\Menu;
+use Native\Symfony\Desktop\Window\UrlResolver;
 
 /**
  * Builder for menu-bar/create — a tray icon, with or without a popover window.

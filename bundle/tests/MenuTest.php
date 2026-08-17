@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Enums\MenuRole;
-use Native\Symfony\Menu\Items\Checkbox;
-use Native\Symfony\Menu\Items\Label;
-use Native\Symfony\Menu\Items\Link;
-use Native\Symfony\Menu\Items\Role;
-use Native\Symfony\Menu\Menu;
-use Native\Symfony\Menu\MenuManager;
-use Native\Symfony\Window\UrlResolver;
+use Native\Symfony\Desktop\Enums\MenuRole;
+use Native\Symfony\Desktop\Menu\Items\Checkbox;
+use Native\Symfony\Desktop\Menu\Items\Label;
+use Native\Symfony\Desktop\Menu\Items\Link;
+use Native\Symfony\Desktop\Menu\Items\Role;
+use Native\Symfony\Desktop\Menu\Menu;
+use Native\Symfony\Desktop\Menu\MenuManager;
+use Native\Symfony\Desktop\Window\UrlResolver;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use PHPUnit\Framework\TestCase;

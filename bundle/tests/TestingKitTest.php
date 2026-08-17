@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\App\AppManager;
-use Native\Symfony\Client\RuntimeNotAvailable;
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Contract\Response;
-use Native\Symfony\Dialog\DialogManager;
-use Native\Symfony\Event\App\OpenedFromURL;
-use Native\Symfony\Event\ChildProcess\ProcessExited;
-use Native\Symfony\Event\ChildProcess\ProcessSpawned;
-use Native\Symfony\Event\Menu\MenuItemClicked;
-use Native\Symfony\Event\NativeEvent;
-use Native\Symfony\Event\Windows\WindowResized;
-use Native\Symfony\NativeDesktopBundle;
-use Native\Symfony\Notification\NotificationManager;
-use Native\Symfony\Process\ChildProcessManager;
-use Native\Symfony\Testing\FakeRuntime;
-use Native\Symfony\Window\UrlResolver;
-use Native\Symfony\Window\WindowManager;
-use Native\Symfony\Testing\InteractsWithNativeRuntime;
-use Native\Symfony\Testing\RecordedCall;
-use Native\Symfony\Testing\RuntimeEventSimulator;
-use Native\Symfony\Testing\RuntimeExpectations;
+use Native\Symfony\Desktop\App\AppManager;
+use Native\Symfony\Desktop\Client\RuntimeNotAvailable;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\Response;
+use Native\Symfony\Desktop\Dialog\DialogManager;
+use Native\Symfony\Desktop\Event\App\OpenedFromURL;
+use Native\Symfony\Desktop\Event\ChildProcess\ProcessExited;
+use Native\Symfony\Desktop\Event\ChildProcess\ProcessSpawned;
+use Native\Symfony\Desktop\Event\Menu\MenuItemClicked;
+use Native\Symfony\Desktop\Event\NativeEvent;
+use Native\Symfony\Desktop\Event\Windows\WindowResized;
+use Native\Symfony\Desktop\NativeDesktopBundle;
+use Native\Symfony\Desktop\Notification\NotificationManager;
+use Native\Symfony\Desktop\Process\ChildProcessManager;
+use Native\Symfony\Desktop\Testing\FakeRuntime;
+use Native\Symfony\Desktop\Window\UrlResolver;
+use Native\Symfony\Desktop\Window\WindowManager;
+use Native\Symfony\Desktop\Testing\InteractsWithNativeRuntime;
+use Native\Symfony\Desktop\Testing\RecordedCall;
+use Native\Symfony\Desktop\Testing\RuntimeEventSimulator;
+use Native\Symfony\Desktop\Testing\RuntimeExpectations;
 use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -592,7 +592,7 @@ final class TestingKitTest extends TestCase
     {
         $container = $this->compile([]);
 
-        self::assertSame('Native\Symfony\Client\Client', (string) $container->getAlias(ClientInterface::class));
+        self::assertSame('Native\Symfony\Desktop\Client\Client', (string) $container->getAlias(ClientInterface::class));
         self::assertFalse($container->hasDefinition(FakeRuntime::class));
     }
 

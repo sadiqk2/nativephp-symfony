@@ -344,7 +344,7 @@ described exactly this before `symfony serve` existed.
 13 files use `Illuminate\Support\Traits\Conditionable` for `->when()`/`->unless()` on
 the fluent builders, one uses `Macroable`. Pulling `illuminate/support` into a Symfony
 bundle for this would be absurd. Vendor a 25-LOC `Conditionable` into
-`Native\Symfony\Support` and drop `Macroable`. `Str`/`Arr`/`Collection` uses are few
+`Native\Symfony\Desktop\Support` and drop `Macroable`. `Str`/`Arr`/`Collection` uses are few
 enough (a handful) to inline.
 
 ### 7.5 The `_windowId` convention

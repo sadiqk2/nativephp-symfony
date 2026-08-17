@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Command\DoctorCommand;
-use Native\Symfony\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Command\DoctorCommand;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;

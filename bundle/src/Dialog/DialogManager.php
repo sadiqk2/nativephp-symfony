@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Dialog;
+namespace Native\Symfony\Desktop\Dialog;
 
-use Native\Symfony\Client\RuntimeCallFailed;
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Enums\AlertType;
+use Native\Symfony\Desktop\Client\RuntimeCallFailed;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Enums\AlertType;
 
 /**
  * dialog/open, dialog/save, alert/message and alert/error — 4 endpoints, all of

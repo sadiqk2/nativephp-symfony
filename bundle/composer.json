@@ -38,12 +38,12 @@
     },
     "autoload": {
         "psr-4": {
-            "Native\\Symfony\\": "src/"
+            "Native\\Symfony\\Desktop\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Native\\Symfony\\Tests\\": "tests/"
+            "Native\\Symfony\\Desktop\\Tests\\": "tests/"
         }
     },
     "config": {

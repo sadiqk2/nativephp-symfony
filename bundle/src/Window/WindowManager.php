@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Window;
+namespace Native\Symfony\Desktop\Window;
 
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**

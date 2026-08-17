@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Command\InstallCommand;
-use Native\Symfony\Runtime\RuntimePatcher;
+use Native\Symfony\Desktop\Command\InstallCommand;
+use Native\Symfony\Desktop\Runtime\RuntimePatcher;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;

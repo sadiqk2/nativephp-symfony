@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Screen;
+namespace Native\Symfony\Desktop\Screen;
 
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 
 /**
  * Displays and cursor position — 4 endpoints.

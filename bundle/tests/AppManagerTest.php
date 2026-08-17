@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\App\AppManager;
-use Native\Symfony\App\AppPath;
+use Native\Symfony\Desktop\App\AppManager;
+use Native\Symfony\Desktop\App\AppPath;
 use PHPUnit\Framework\TestCase;
 
 final class AppManagerTest extends TestCase
@@ -50,23 +50,23 @@ final class AppManagerTest extends TestCase
     {
         // app/relaunch relaunches and quits without answering; awaiting it would
         // hang until the process dies.
-        $client = new class implements \Native\Symfony\Contract\ClientInterface {
+        $client = new class implements \Native\Symfony\Desktop\Contract\ClientInterface {
             public function isAvailable(): bool
             {
                 return true;
             }
 
-            public function get(string $endpoint, array $query = [], ?int $timeout = null): \Native\Symfony\Contract\Response
+            public function get(string $endpoint, array $query = [], ?int $timeout = null): \Native\Symfony\Desktop\Contract\Response
             {
                 throw new \LogicException('not used');
             }
 
-            public function post(string $endpoint, array $data = [], ?int $timeout = null): \Native\Symfony\Contract\Response
+            public function post(string $endpoint, array $data = [], ?int $timeout = null): \Native\Symfony\Desktop\Contract\Response
             {
                 throw new \RuntimeException('connection reset');
             }
 
-            public function delete(string $endpoint, array $data = [], ?int $timeout = null): \Native\Symfony\Contract\Response
+            public function delete(string $endpoint, array $data = [], ?int $timeout = null): \Native\Symfony\Desktop\Contract\Response
             {
                 throw new \LogicException('not used');
             }

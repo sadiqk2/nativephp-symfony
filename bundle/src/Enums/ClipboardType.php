@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Enums;
+namespace Native\Symfony\Desktop\Enums;
 
 /**
  * Clipboard buffer. `Selection` is the X11 primary selection and is ignored on

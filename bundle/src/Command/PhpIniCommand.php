@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Command;
+namespace Native\Symfony\Desktop\Command;
 
-use Native\Symfony\Contract\ProvidesPhpIni;
+use Native\Symfony\Desktop\Contract\ProvidesPhpIni;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

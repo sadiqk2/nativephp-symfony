@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Contract;
+namespace Native\Symfony\Desktop\Contract;
 
 /**
  * Optional companion to AppBootstrapper. Whatever this returns is merged over
@@ -11,7 +11,7 @@ namespace Native\Symfony\Contract;
  *
  * Same name and shape as the upstream Laravel contract, deliberately.
  *
- * @see \Native\Symfony\Command\PhpIniCommand
+ * @see \Native\Symfony\Desktop\Command\PhpIniCommand
  */
 interface ProvidesPhpIni
 {

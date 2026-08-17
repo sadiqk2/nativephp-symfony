@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\PowerMonitor;
+namespace Native\Symfony\Desktop\PowerMonitor;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Enums\IdleState;
-use Native\Symfony\Enums\ThermalState;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Enums\IdleState;
+use Native\Symfony\Desktop\Enums\ThermalState;
 
 /**
  * Power and idle state — 4 endpoints.

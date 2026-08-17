@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Testing;
+namespace Native\Symfony\Desktop\Testing;
 
 use PHPUnit\Framework\Assert;
 

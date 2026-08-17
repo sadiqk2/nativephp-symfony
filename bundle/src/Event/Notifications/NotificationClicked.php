@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Event\Notifications;
+namespace Native\Symfony\Desktop\Event\Notifications;
 
 use Symfony\Contracts\EventDispatcher\Event;
 

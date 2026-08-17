@@ -6,11 +6,11 @@ namespace App\Controller;
 
 use App\Event\NoteSaved;
 use App\Note\NoteStore;
-use Native\Symfony\Clipboard\ClipboardManager;
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Dialog\DialogManager;
-use Native\Symfony\Notification\NotificationManager;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Clipboard\ClipboardManager;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Dialog\DialogManager;
+use Native\Symfony\Desktop\Notification\NotificationManager;
+use Native\Symfony\Desktop\Window\WindowManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

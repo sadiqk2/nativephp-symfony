@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Event\NativeEvent;
-use Native\Symfony\Event\Windows\WindowResized;
-use Native\Symfony\EventBridge\EventFactory;
-use Native\Symfony\Http\EventsController;
+use Native\Symfony\Desktop\Event\NativeEvent;
+use Native\Symfony\Desktop\Event\Windows\WindowResized;
+use Native\Symfony\Desktop\EventBridge\EventFactory;
+use Native\Symfony\Desktop\Http\EventsController;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;

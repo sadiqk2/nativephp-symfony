@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\App;
+namespace Native\Symfony\Desktop\App;
 
 /**
  * Electron's app.getPath() names, as accepted by GET app/path/{name}.

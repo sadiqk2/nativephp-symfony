@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Clipboard;
+namespace Native\Symfony\Desktop\Clipboard;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Enums\ClipboardType;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Enums\ClipboardType;
 
 /**
  * The system clipboard — 7 endpoints.

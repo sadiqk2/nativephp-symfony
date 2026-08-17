@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Command\BuildCommand;
-use Native\Symfony\Command\ManifestCommand;
-use Native\Symfony\Command\RunCommand;
-use Native\Symfony\Manifest\Manifest;
-use Native\Symfony\Manifest\ManifestSupportDetector;
-use Native\Symfony\Manifest\ManifestWriter;
-use Native\Symfony\Support\Platform;
-use Native\Symfony\Support\ProjectPath;
+use Native\Symfony\Desktop\Command\BuildCommand;
+use Native\Symfony\Desktop\Command\ManifestCommand;
+use Native\Symfony\Desktop\Command\RunCommand;
+use Native\Symfony\Desktop\Manifest\Manifest;
+use Native\Symfony\Desktop\Manifest\ManifestSupportDetector;
+use Native\Symfony\Desktop\Manifest\ManifestWriter;
+use Native\Symfony\Desktop\Support\Platform;
+use Native\Symfony\Desktop\Support\ProjectPath;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;

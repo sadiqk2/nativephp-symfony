@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Menu\Items;
+namespace Native\Symfony\Desktop\Menu\Items;
 
 /**
  * One entry in a menu template.

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Testing;
+namespace Native\Symfony\Desktop\Testing;
 
-use Native\Symfony\EventBridge\EventFactory;
-use Native\Symfony\Http\EventsController;
+use Native\Symfony\Desktop\EventBridge\EventFactory;
+use Native\Symfony\Desktop\Http\EventsController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 

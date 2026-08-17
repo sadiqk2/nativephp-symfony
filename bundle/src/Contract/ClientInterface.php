@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Contract;
+namespace Native\Symfony\Desktop\Contract;
 
 /**
  * Channel A: the app's side of the 116-endpoint runtime API.

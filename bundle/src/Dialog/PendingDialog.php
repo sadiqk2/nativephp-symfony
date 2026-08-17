@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Dialog;
+namespace Native\Symfony\Desktop\Dialog;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Enums\DialogProperty;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Enums\DialogProperty;
 
 /**
  * Shared builder for dialog/open and dialog/save.

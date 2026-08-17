@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Command;
+namespace Native\Symfony\Desktop\Command;
 
-use Native\Symfony\Builder\Builder;
-use Native\Symfony\Support\Platform;
-use Native\Symfony\Support\ProjectPath;
+use Native\Symfony\Desktop\Builder\Builder;
+use Native\Symfony\Desktop\Support\Platform;
+use Native\Symfony\Desktop\Support\ProjectPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

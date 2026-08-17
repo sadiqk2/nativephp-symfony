@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Event\ChildProcess;
+namespace Native\Symfony\Desktop\Event\ChildProcess;
 
 use Symfony\Contracts\EventDispatcher\Event;
 

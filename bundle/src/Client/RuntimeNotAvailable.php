@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Client;
+namespace Native\Symfony\Desktop\Client;
 
 /**
  * Thrown when a native API is used outside the runtime — from an ordinary web

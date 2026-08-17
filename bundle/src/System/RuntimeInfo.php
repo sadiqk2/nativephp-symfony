@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\System;
+namespace Native\Symfony\Desktop\System;
 
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 
 /**
  * GET /api/process — details of the **Electron** process, not the PHP one.

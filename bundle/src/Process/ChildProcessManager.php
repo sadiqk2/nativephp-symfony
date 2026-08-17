@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Process;
+namespace Native\Symfony\Desktop\Process;
 
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 
 /**
  * Runtime-managed child processes — 8 endpoints.

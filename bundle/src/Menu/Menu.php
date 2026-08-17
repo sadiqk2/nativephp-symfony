@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Menu;
+namespace Native\Symfony\Desktop\Menu;
 
-use Native\Symfony\Enums\MenuRole;
-use Native\Symfony\Menu\Items\Checkbox;
-use Native\Symfony\Menu\Items\Label;
-use Native\Symfony\Menu\Items\Link;
-use Native\Symfony\Menu\Items\MenuItem;
-use Native\Symfony\Menu\Items\Radio;
-use Native\Symfony\Menu\Items\Role;
-use Native\Symfony\Menu\Items\Separator;
-use Native\Symfony\Menu\Items\Submenu;
+use Native\Symfony\Desktop\Enums\MenuRole;
+use Native\Symfony\Desktop\Menu\Items\Checkbox;
+use Native\Symfony\Desktop\Menu\Items\Label;
+use Native\Symfony\Desktop\Menu\Items\Link;
+use Native\Symfony\Desktop\Menu\Items\MenuItem;
+use Native\Symfony\Desktop\Menu\Items\Radio;
+use Native\Symfony\Desktop\Menu\Items\Role;
+use Native\Symfony\Desktop\Menu\Items\Separator;
+use Native\Symfony\Desktop\Menu\Items\Submenu;
 
 /**
  * Builds a menu template. Immutable — every method returns a new instance, so a

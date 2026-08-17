@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Window;
+namespace Native\Symfony\Desktop\Window;
 
 use Symfony\Component\HttpFoundation\RequestStack;
 

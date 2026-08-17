@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Client;
+namespace Native\Symfony\Desktop\Client;
 
 final class RuntimeCallFailed extends \RuntimeException
 {

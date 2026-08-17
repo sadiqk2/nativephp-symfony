@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Contract\Response;
-use Native\Symfony\System\DebugLogger;
-use Native\Symfony\Testing\FakeRuntime;
+use Native\Symfony\Desktop\Contract\Response;
+use Native\Symfony\Desktop\System\DebugLogger;
+use Native\Symfony\Desktop\Testing\FakeRuntime;
 use PHPUnit\Framework\TestCase;
 
 /**

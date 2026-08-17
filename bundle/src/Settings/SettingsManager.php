@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Settings;
+namespace Native\Symfony\Desktop\Settings;
 
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 
 /**
  * The runtime's key/value store — 4 endpoints, backed by electron-store (a JSON

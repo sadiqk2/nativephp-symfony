@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Http;
+namespace Native\Symfony\Desktop\Http;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Event\App\ApplicationBooted;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Event\App\ApplicationBooted;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Symfony\Component\HttpFoundation\JsonResponse;

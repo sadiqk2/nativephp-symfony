@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Process\ChildProcessManager;
-use Native\Symfony\Process\MessengerWorker;
+use Native\Symfony\Desktop\Process\ChildProcessManager;
+use Native\Symfony\Desktop\Process\MessengerWorker;
 use PHPUnit\Framework\TestCase;
 
 final class ProcessTest extends TestCase

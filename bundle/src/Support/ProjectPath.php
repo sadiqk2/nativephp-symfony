@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Support;
+namespace Native\Symfony\Desktop\Support;
 
 use Symfony\Component\Filesystem\Path;
 

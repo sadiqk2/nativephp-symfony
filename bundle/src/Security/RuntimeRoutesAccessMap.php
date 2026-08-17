@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Security;
+namespace Native\Symfony\Desktop\Security;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Http\AccessMapInterface;

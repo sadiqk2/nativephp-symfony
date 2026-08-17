@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Enums\MenuRole;
-use Native\Symfony\Menu\Menu;
-use Native\Symfony\Menu\MenuManager;
-use Native\Symfony\Shortcut\GlobalShortcutManager;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Enums\MenuRole;
+use Native\Symfony\Desktop\Menu\Menu;
+use Native\Symfony\Desktop\Menu\MenuManager;
+use Native\Symfony\Desktop\Shortcut\GlobalShortcutManager;
+use Native\Symfony\Desktop\Window\WindowManager;
 
 /**
  * The whole app-startup contract, in one class.

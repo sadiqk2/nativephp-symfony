@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Process;
+namespace Native\Symfony\Desktop\Process;
 
 /**
  * A runtime-managed child process.

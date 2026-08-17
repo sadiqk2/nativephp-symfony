@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Event;
+namespace Native\Symfony\Desktop\Event;
 
 use Symfony\Contracts\EventDispatcher\Event;
 

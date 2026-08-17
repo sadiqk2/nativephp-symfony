@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Enums;
+namespace Native\Symfony\Desktop\Enums;
 
 /** Electron's dialog.showMessageBox `type`. */
 enum AlertType: string

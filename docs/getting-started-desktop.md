@@ -21,18 +21,19 @@ copy goes stale and edits to the bundle appear to do nothing). The exact block i
 [root README](../README.md#0-install-the-packages), and [`demo/composer.json`](../demo/composer.json)
 is a working example. Everything after this step is unaffected by how the package arrived.
 
-Flex will **not** register this bundle for you — it derives candidate class names from the
-PSR-4 namespace, so `Native\Symfony\` has it looking for `SymfonyBundle` or
-`NativeSymfonyBundle`, neither of which exists. (The mobile bundle's deeper namespace
-`Native\Symfony\Mobile\` yields `NativeMobileBundle`, so that one is picked up
-automatically — the asymmetry is Flex's derivation, not a difference between the packages.)
-Add it yourself:
+Flex registers the bundle for you: it derives candidate class names from the PSR-4 namespace,
+and `Native\Symfony\Desktop\` yields `Native\Symfony\Desktop\NativeDesktopBundle`. That is
+what the namespace is shaped for — the bundle used to be `Native\Symfony\`, where the
+candidates are `SymfonyBundle` and `NativeSymfonyBundle` and the real class matched neither,
+so every application had to register it by hand.
+
+Without Flex, add it yourself:
 
 ```php
 // config/bundles.php
 return [
     // …
-    Native\Symfony\NativeDesktopBundle::class => ['all' => true],
+    Native\Symfony\Desktop\NativeDesktopBundle::class => ['all' => true],
 ];
 ```
 
@@ -71,8 +72,8 @@ for it:
 
 namespace App\Native;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Window\WindowManager;
 
 final class Bootstrapper implements AppBootstrapper
 {
@@ -241,7 +242,7 @@ whether the runtime you have installed will actually read it:
 
 Defaults are Symfony's, including `doctrine:migrations:migrate --no-interaction
 --allow-no-migration` for the migrate step. If you have no Doctrine Migrations, define the
-`Native\Symfony\Manifest\Manifest` service yourself with `migrate: null`.
+`Native\Symfony\Desktop\Manifest\Manifest` service yourself with `migrate: null`.
 
 ## 8. Configuration
 

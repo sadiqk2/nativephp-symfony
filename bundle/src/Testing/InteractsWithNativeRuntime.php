@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Testing;
+namespace Native\Symfony\Desktop\Testing;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\EventBridge\EventFactory;
-use Native\Symfony\Window\UrlResolver;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\EventBridge\EventFactory;
+use Native\Symfony\Desktop\Window\UrlResolver;
+use Native\Symfony\Desktop\Window\WindowManager;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;

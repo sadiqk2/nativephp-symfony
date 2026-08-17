@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Event\App\OpenedFromURL;
-use Native\Symfony\Event\App\OpenFile;
-use Native\Symfony\Event\NativeEvent;
-use Native\Symfony\Event\Windows\WindowFocused;
-use Native\Symfony\Event\Windows\WindowResized;
-use Native\Symfony\EventBridge\EventFactory;
+use Native\Symfony\Desktop\Event\App\OpenedFromURL;
+use Native\Symfony\Desktop\Event\App\OpenFile;
+use Native\Symfony\Desktop\Event\NativeEvent;
+use Native\Symfony\Desktop\Event\Windows\WindowFocused;
+use Native\Symfony\Desktop\Event\Windows\WindowResized;
+use Native\Symfony\Desktop\EventBridge\EventFactory;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 

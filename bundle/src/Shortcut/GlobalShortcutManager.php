@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Shortcut;
+namespace Native\Symfony\Desktop\Shortcut;
 
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 
 /**
  * System-wide keyboard shortcuts — 3 endpoints.

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\DependencyInjection;
+namespace Native\Symfony\Desktop\DependencyInjection;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Contract\ProvidesPhpIni;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Contract\ProvidesPhpIni;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 

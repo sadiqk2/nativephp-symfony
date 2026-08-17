@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Updater;
+namespace Native\Symfony\Desktop\Updater;
 
-use Native\Symfony\Contract\ClientInterface;
+use Native\Symfony\Desktop\Contract\ClientInterface;
 
 /**
  * electron-updater control — 3 endpoints, plus 7 events.

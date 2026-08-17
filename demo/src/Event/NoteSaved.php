@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Event;
 
-use Native\Symfony\Contract\BroadcastsToRuntime;
+use Native\Symfony\Desktop\Contract\BroadcastsToRuntime;
 
 /**
  * An application event that also reaches every open window's JavaScript.

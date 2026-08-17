@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Manifest\Manifest;
-use Native\Symfony\Manifest\ManifestSupport;
-use Native\Symfony\Manifest\ManifestSupportDetector;
-use Native\Symfony\Manifest\ManifestWriter;
-use Native\Symfony\Runtime\RuntimePatcher;
+use Native\Symfony\Desktop\Manifest\Manifest;
+use Native\Symfony\Desktop\Manifest\ManifestSupport;
+use Native\Symfony\Desktop\Manifest\ManifestSupportDetector;
+use Native\Symfony\Desktop\Manifest\ManifestWriter;
+use Native\Symfony\Desktop\Runtime\RuntimePatcher;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Filesystem\Filesystem;
 

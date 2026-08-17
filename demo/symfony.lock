@@ -1,4 +1,7 @@
 {
+    "native-symfony/desktop-bundle": {
+        "version": "0.1.0"
+    },
     "native-symfony/mobile-bundle": {
         "version": "0.1.0"
     },

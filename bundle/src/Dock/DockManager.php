@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Dock;
+namespace Native\Symfony\Desktop\Dock;
 
-use Native\Symfony\Contract\ClientInterface;
-use Native\Symfony\Enums\DockBounce;
-use Native\Symfony\Menu\Menu;
-use Native\Symfony\Support\Platform;
+use Native\Symfony\Desktop\Contract\ClientInterface;
+use Native\Symfony\Desktop\Enums\DockBounce;
+use Native\Symfony\Desktop\Menu\Menu;
+use Native\Symfony\Desktop\Support\Platform;
 
 /**
  * The macOS dock — 8 endpoints.

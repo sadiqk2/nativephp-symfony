@@ -23,8 +23,8 @@ understanding before you rely on it.
 
 namespace App\Native;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Window\WindowManager;
 
 final class Bootstrapper implements AppBootstrapper
 {
@@ -52,7 +52,7 @@ Opening a second window from a controller, and closing it from inside itself:
 
 namespace App\Controller;
 
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Window\WindowManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -129,9 +129,9 @@ $open = $this->windows->all();                     // list<Window>
 
 namespace App\Native;
 
-use Native\Symfony\Contract\AppBootstrapper;
-use Native\Symfony\Process\MessengerWorker;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Process\MessengerWorker;
+use Native\Symfony\Desktop\Window\WindowManager;
 
 final class Bootstrapper implements AppBootstrapper
 {
@@ -211,11 +211,11 @@ all a listener needs:
 
 namespace App\Native;
 
-use Native\Symfony\Event\App\ApplicationBooted;
-use Native\Symfony\Event\ChildProcess\ProcessExited;
-use Native\Symfony\Event\Settings\SettingChanged;
-use Native\Symfony\Event\Windows\WindowResized;
-use Native\Symfony\Settings\SettingsManager;
+use Native\Symfony\Desktop\Event\App\ApplicationBooted;
+use Native\Symfony\Desktop\Event\ChildProcess\ProcessExited;
+use Native\Symfony\Desktop\Event\Settings\SettingChanged;
+use Native\Symfony\Desktop\Event\Windows\WindowResized;
+use Native\Symfony\Desktop\Settings\SettingsManager;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 
@@ -270,7 +270,7 @@ a name of *your* choosing. There is no class to key on, so those arrive as `Nati
 under two names — `native.<name>` and `NativeEvent::class`. Register for one, never both:
 
 ```php
-use Native\Symfony\Event\NativeEvent;
+use Native\Symfony\Desktop\Event\NativeEvent;
 
 final class ShortcutListener
 {

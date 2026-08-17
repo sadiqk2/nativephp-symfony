@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Native\Symfony\Tests;
+namespace Native\Symfony\Desktop\Tests;
 
-use Native\Symfony\Window\UrlResolver;
-use Native\Symfony\Window\WindowManager;
+use Native\Symfony\Desktop\Window\UrlResolver;
+use Native\Symfony\Desktop\Window\WindowManager;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
