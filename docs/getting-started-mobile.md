@@ -13,6 +13,28 @@ Treat it as a well-tested design awaiting device verification.
 Android hosts are not. Read its licence terms before distributing anything built this way.
 `native:mobile:install` prints this warning too, deliberately.
 
+### Can you build an Android or iOS app today?
+
+Yes — on a machine with the platform toolchain. Nothing in this bundle is a stub, and no
+step is waiting on unwritten code. What it needs from you is the half no PHP package can
+provide:
+
+| You need | Why |
+|---|---|
+| A NativePHP Mobile licence and a clone of `NativePHP/mobile-air` | The iOS and Android host projects are the commercial part. `native:mobile:install` copies and retargets them; it cannot fetch them for you. |
+| Android Studio / the Android SDK, or Xcode | `native:mobile:build` produces the APK/AAB or the iOS archive by invoking `./gradlew` or `xcodebuild`. Neither exists in a PHP container, and neither runs in CI without a licence. |
+| A keystore or a provisioning profile | Signing is deliberately not handled here — see below. |
+
+Everything on this side of that line runs and is covered by tests: staging, `.env` cleaning,
+the app archive, `bundle_meta.json`, the native-route manifest, toolchain detection, and the
+exact command plan. `--stage-only` stops precisely at the boundary; `--dry-run` prints the
+toolchain commands for you to run on a machine that has them.
+
+The honest caveat is verification, not capability: **no build produced by these commands has
+been opened by Xcode or Gradle, and no screen has been rendered on a device.** The desktop
+side is backed by a screenshot of a running packaged app; this is not, yet. If you have a Mac
+or an Android SDK, that is the single most valuable thing anyone can contribute here.
+
 ---
 
 ## The one architectural difference from desktop

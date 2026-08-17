@@ -1,12 +1,17 @@
-# Upstream patches — prepared, not submitted
+# Upstream patches — six submitted, five held
 
-Eleven patches, ready to become pull requests. **Nothing here has been submitted.** They
-are prepared so that opening the PRs is a decision rather than a project.
+Eleven patches. The six independent desktop bug fixes are **open pull requests**; the rest
+are prepared so that opening them is a decision rather than a project.
 
-| | repo | base |
-|---|---|---|
-| `0001`–`0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` |
-| `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` |
+| | repo | base | status |
+|---|---|---|---|
+| `0002`–`0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` | **open PRs [#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
+| `0001` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` | held until the small ones land — it is the one that needs a maintainer conversation |
+| `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` | not submitted |
+
+The order is deliberate: six small, individually reviewable fixes first, so that the
+manifest patch — the only one that asks upstream to change a design — arrives to someone
+who has already merged code from the same author.
 
 Every patch applies cleanly to a clean tree, individually and as a series — verified with
 `git apply --check`. `0001` typechecks clean under the project's own `tsc`. `0008` is

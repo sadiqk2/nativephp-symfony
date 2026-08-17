@@ -4,7 +4,7 @@ Build desktop applications with Symfony, on NativePHP's Electron runtime.
 
 Status: **M3 complete.** All **116 runtime endpoints** and all **44 events** are
 implemented, and `native:build` produces a distributable app that has been **built and
-run** — see `../M3-RESULTS.md`. 305 tests.
+run** — see `../M3-RESULTS.md`. 357 tests.
 
 Not done yet: installer targets beyond `--dir`, and code signing (the env plumbing is
 there, untested without real credentials).
@@ -182,7 +182,7 @@ is created, which is why calling it from `boot()` is safe even though the runtim
 composer install && vendor/bin/phpunit
 ```
 
-305 tests, 660 assertions. `ContractCoverageTest` parses the runtime's own express
+357 tests, 780 assertions. `ContractCoverageTest` parses the runtime's own express
 routers and fails if an endpoint goes uncovered or an event name goes unmapped, so
 upstream drift breaks the suite rather than surfacing a release later.
 
