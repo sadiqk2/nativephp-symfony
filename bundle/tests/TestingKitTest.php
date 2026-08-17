@@ -664,6 +664,39 @@ final class TestingKitTest extends TestCase
         self::assertSame(['main'], array_map(static fn (object $w): string => $w->id, $windows->all()));
     }
 
+    public function testSayingAnUnknownWindowIsAbsentLeavesAHandWrittenListAlone(): void
+    {
+        // windowDoesNotExist('ghost') is a statement about 'ghost'. Rewriting window/all
+        // from the fake's own (empty) map here would throw away a list the test wrote.
+        $runtime = FakeRuntime::available()
+            ->willReturn('window/all', [['id' => 'main'], ['id' => 'report']])
+            ->windowDoesNotExist('ghost');
+
+        self::assertCount(2, $runtime->post('window/all')->array());
+    }
+
+    public function testClosingTheCurrentWindowStopsItBeingTheCurrentOne(): void
+    {
+        // The runtime cannot report a current window that window/get 404s: closing the
+        // focused one leaves it dereferencing getFocusedWindow().id with no guard, which
+        // is the documented 500. Leaving the old script in place let a test assert on a
+        // window the app could never actually read.
+        $runtime = FakeRuntime::available()->currentWindowIs('main');
+
+        $runtime->windowDoesNotExist('main');
+
+        self::assertSame(500, $runtime->post('window/current')->status);
+    }
+
+    public function testClosingSomeOtherWindowLeavesTheCurrentOneAlone(): void
+    {
+        $runtime = FakeRuntime::available()->currentWindowIs('main')->windowIs('report');
+
+        $runtime->windowDoesNotExist('report');
+
+        self::assertSame(200, $runtime->post('window/current')->status);
+    }
+
     public function testNavigationAssertionsRejectADeeperPathThatMerelyEndsTheSameWay(): void
     {
         // /admin/reports is not /reports. The suffix match accepted it, certifying

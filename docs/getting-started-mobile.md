@@ -246,10 +246,24 @@ handed it (a registry of its own makes every incoming callback id miss). Navigat
 back is a new visit and does start fresh; call `forget($pattern)` when a screen closes so its
 component is unmounted rather than held for the life of the app.
 
+**A visit is a path, not a pattern.** `/user/1` and `/user/2` share one route pattern but are
+two screens, so moving between them mounts a new component and hands it the new parameters.
+Reusing on the pattern alone produced a byte-identical tree, which the frame diff then
+reported as unchanged — the device kept showing the first user, and nothing logged anything.
+
 A screen with constructor dependencies just needs to be a service — the bundle autoconfigures
 every `NativeComponent` with the `native.screen` tag, and the renderer resolves the class
 through that locator. A screen with no dependencies needs no registration at all. Route
 parameters are handed over only if the screen declares `withRouteParameters(array $params)`.
+
+Screens are registered **non-shared**, and that matters: a component may be bound to one
+component tree only, so the renderer builds a fresh one per mount, and a shared service would
+hand back the instance it had just unmounted. The bundle enforces this both through
+autoconfiguration and through a compiler pass over the `native.screen` tag, so you get it
+without asking. If you declare `shared: true` on a screen yourself the container leaves your
+choice alone and the renderer refuses the second mount with a message naming the fix — on a
+device the alternative is a 500 on the frame request, i.e. a screen that works once and is
+blank ever after.
 
 To render something other than a component — a Twig template, a controller action — implement
 `ScreenRendererInterface` yourself and override the alias in your own configuration, which is

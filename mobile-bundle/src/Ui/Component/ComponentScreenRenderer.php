@@ -178,6 +178,20 @@ final class ComponentScreenRenderer implements ScreenRendererInterface
                 ));
             }
 
+            // A shared service is the same object every time, and a component may be bound
+            // to one tree only — so the second mount of this screen would die inside
+            // bind(), on a message that cannot say where the instance came from. The bundle
+            // registers screens as non-shared for exactly this reason; arriving here means
+            // something declared otherwise, and the fix is one line of configuration.
+            if ($component->isBound()) {
+                throw new \LogicException(sprintf(
+                    'Screen service "%s" is shared, so mounting it a second time would reuse a '.
+                    'component that is already bound to a tree — carrying the previous screen\'s '.
+                    'state and children into this one. Register it with shared: false.',
+                    $class,
+                ));
+            }
+
             return $this->withParameters($component, $match);
         }
 

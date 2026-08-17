@@ -174,6 +174,18 @@ abstract class NativeComponent
     }
 
     /**
+     * Whether this component has already been attached to a tree.
+     *
+     * For callers that obtain instances from somewhere they do not control — a service
+     * locator, say — and would otherwise learn about it from a `bind()` exception that
+     * cannot say where the instance came from.
+     */
+    final public function isBound(): bool
+    {
+        return $this->nativeBound;
+    }
+
+    /**
      * This component's own registry — the one its elements register into, and the one
      * a returning callback id is looked up in.
      */

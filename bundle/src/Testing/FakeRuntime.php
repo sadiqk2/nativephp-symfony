@@ -59,6 +59,9 @@ final class FakeRuntime implements ClientInterface
     /** @var array<string, array<string, mixed>> */
     private array $windows = [];
 
+    /** The window `window/current` is scripted to report, so closing it can stop it doing so. */
+    private ?string $currentWindow = null;
+
     private function __construct(private bool $available)
     {
     }
@@ -214,6 +217,7 @@ final class FakeRuntime implements ClientInterface
     public function currentWindowIs(string $id, array $attributes = []): self
     {
         $this->windowIs($id, $attributes);
+        $this->currentWindow = $id;
 
         return $this->willReturn('window/current', $this->windows[$id]);
     }
@@ -232,6 +236,8 @@ final class FakeRuntime implements ClientInterface
     /** `window/get/{id}` answers 404 with the status phrase as its body. */
     public function windowDoesNotExist(string $id): self
     {
+        $known = isset($this->windows[$id]);
+
         unset($this->windows[$id]);
 
         // window/all has to be rewritten too. Upstream reads both endpoints from
@@ -239,7 +245,24 @@ final class FakeRuntime implements ClientInterface
         // old list scripted meant a closed window still appeared in all(), and a
         // "only main is left open" assertion passed against an app that would see
         // otherwise live.
-        $this->willReturn('window/all', array_values($this->windows));
+        //
+        // Only for a window this fake was actually told about, though: saying a
+        // never-registered id does not exist is a statement about that id alone,
+        // and rewriting the list there would silently discard a window/all a test
+        // had scripted by hand.
+        if ($known) {
+            $this->willReturn('window/all', array_values($this->windows));
+        }
+
+        // And it cannot still be the current one. Closing the focused window leaves the
+        // runtime dereferencing getFocusedWindow().id with no null guard, which is the 500
+        // noCurrentWindow() scripts (CONTRACT.md §1) — whereas leaving the old script in
+        // place had window/current hand back a window that window/get now 404s, a state the
+        // real runtime cannot be in.
+        if ($id === $this->currentWindow) {
+            $this->currentWindow = null;
+            $this->willReturnStatus('window/current', 500);
+        }
 
         return $this->willReturnStatus("window/get/{$id}", 404);
     }

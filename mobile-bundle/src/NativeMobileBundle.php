@@ -9,6 +9,7 @@ use Native\Symfony\Mobile\Build;
 use Native\Symfony\Mobile\Bridge\Bridge;
 use Native\Symfony\Mobile\Bridge\BridgeInterface;
 use Native\Symfony\Mobile\Bridge\FakeBridge;
+use Native\Symfony\Mobile\DependencyInjection\NativeScreenSharingPass;
 use Native\Symfony\Mobile\Runtime\MobileRuntimePatcher;
 use Native\Symfony\Mobile\Runtime\ResponseEmitter;
 use Native\Symfony\Mobile\Ui\ElementFactory;
@@ -103,8 +104,22 @@ final class NativeMobileBundle extends AbstractBundle
         // renderer's locator, so a screen with constructor dependencies works without the
         // app wiring anything. A screen with none needs no registration at all — the
         // renderer instantiates it directly.
+        //
+        // Not shared, which is not a preference: a component may be bound to exactly one
+        // tree, and `bind()` throws on a second attempt because reusing an instance would
+        // carry its state and children into the next screen. A shared service is the same
+        // object every time the locator is asked, so the second mount of any screen — a
+        // back-navigation, or merely /user/1 to /user/2 — would throw. Under the stock
+        // `App\:` glob every screen in an application is a service, so that is the default
+        // path, not an exotic one.
         $container->registerForAutoconfiguration(NativeComponent::class)
-            ->addTag('native.screen');
+            ->addTag('native.screen')
+            ->setShared(false);
+
+        // Autoconfiguration only reaches services that opted into it. A screen wired by
+        // hand with `autoconfigure: false`, or tagged explicitly, would still arrive
+        // shared, so the guarantee is enforced over the tag itself as well.
+        $container->addCompilerPass(new NativeScreenSharingPass());
     }
 
     /** @param array<string, mixed> $config */

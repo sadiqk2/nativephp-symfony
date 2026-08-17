@@ -130,12 +130,20 @@ $fake->userConfirms();                 // index 0 — confirm() builds [confirm,
 $fake->userDeclines();                 // index 1
 ```
 
+**An unscripted dialog is a dismissal, not an answer.** `dialog/open` degrades to cancelled,
+`dialog/save` to null, and a message box answers with the payload's own `cancelId` — which is
+what Electron returns for Escape and the window close button, and which `confirm()` sets to
+the *declining* button for exactly that reason. So a `confirm()` nobody scripted comes back
+`false`. Answering with button 0 instead would make "deleting requires confirmation" — the
+most valuable test anyone writes against this kit — pass against code missing the guard
+altogether.
+
 ### Scripting windows
 
 ```php
 $fake->windowIs('main', ['width' => 800, 'height' => 600]);   // window/get/main + window/all
 $fake->currentWindowIs('main');                               // …and window/current
-$fake->windowDoesNotExist('ghost');                           // 404 with the status phrase
+$fake->windowDoesNotExist('ghost');                           // 404 — and drops it from window/all
 $fake->noCurrentWindow();                                     // window/current answers 500
 ```
 

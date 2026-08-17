@@ -326,6 +326,72 @@ final class UiComponentScreenRendererTest extends TestCase
         $responder->respond('/counter');
     }
 
+    public function testAScreenFromTheLocatorIsMountedAfreshEachTime(): void
+    {
+        // The container registers screens non-shared, so the locator is expected to hand
+        // back a new instance per get() — which is what makes a second mount possible at
+        // all, since a component may be bound to one tree only.
+        $made = 0;
+        $renderer = new ComponentScreenRenderer($this->factoryLocator([
+            UserScreen::class => function () use (&$made): UserScreen {
+                ++$made;
+
+                return new UserScreen();
+            },
+        ]));
+        $responder = $this->responder($renderer, $this->routes('/user/{id}', UserScreen::class));
+
+        $responder->respond('/user/1');
+        self::assertContains('user 1', $this->texts($this->fullFrame($responder)));
+
+        $responder->respond('/user/2');
+        self::assertContains('user 2', $this->texts($this->fullFrame($responder)));
+        self::assertSame(2, $made, 'Each mount must construct its own screen.');
+    }
+
+    public function testASharedScreenServiceIsReportedRatherThanFailingInsideBind(): void
+    {
+        // Proven against the real classes before this test existed: a shared service comes
+        // back already bound on the second mount, and bind() threw a message that could not
+        // say where the instance came from — on a device, a 500 on the frame request, so a
+        // screen that works once and is blank ever after. Reached by a back-navigation, or
+        // on a parameterised route by nothing more than moving to the next id.
+        $renderer = new ComponentScreenRenderer($this->locator([UserScreen::class => new UserScreen()]));
+        $responder = $this->responder($renderer, $this->routes('/user/{id}', UserScreen::class));
+
+        $responder->respond('/user/1');
+
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessageMatches('/is shared.*shared: false/s');
+
+        $responder->respond('/user/2');
+    }
+
+    /**
+     * A locator whose services are built per get(), as a non-shared definition behaves.
+     *
+     * @param array<string, callable(): object> $factories
+     */
+    private function factoryLocator(array $factories): ContainerInterface
+    {
+        return new class($factories) implements ContainerInterface {
+            /** @param array<string, callable(): object> $factories */
+            public function __construct(private readonly array $factories)
+            {
+            }
+
+            public function has(string $id): bool
+            {
+                return isset($this->factories[$id]);
+            }
+
+            public function get(string $id): object
+            {
+                return ($this->factories[$id])();
+            }
+        };
+    }
+
     /** @param array<string, object> $services */
     private function locator(array $services): ContainerInterface
     {
