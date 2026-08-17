@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M3 — the build · NativePHP for Symfony</title>
+<meta name="description" content="Packaging, and what it got wrong first — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item active" href="m3-results.html" aria-current="page"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="m3--the-build-pipeline"><a class="anchor" href="#m3--the-build-pipeline">M3 — the build pipeline</a></h1>
+<p><code>native:build</code> packages a Symfony application into a distributable desktop app, and
+<strong>the packaged app has been built and run</strong>, not just built. 235 tests.</p>
+<p>Screenshot: <code>spike/shot-packaged.png</code> — that window is the packaged binary from
+<code>dist/linux-unpacked</code>, running the staged app under the static PHP from <code>php-bin</code>.</p>
+<hr>
+<h2 id="the-pipeline"><a class="anchor" href="#the-pipeline">The pipeline</a></h2>
+<p><code>Builder</code> + <code>BuildCommand</code> mirror upstream&#39;s sequence, because the shape is dictated by
+electron-builder&#39;s <code>extraResources</code> entry: whatever sits at <code>$NATIVEPHP_BUILD_PATH</code> is
+copied into the package, so &quot;building&quot; means assembling that directory.</p>
+<ol>
+<li><strong>Pre-build hooks</strong> — shell commands from config, run in the project root. A failure
+stops the build before anything is staged.</li>
+<li><strong>Stage</strong> the app into <code>nativephp/build/app</code>, skipping excluded paths. The walk uses a
+<code>RecursiveCallbackFilterIterator</code>, so an excluded directory is never descended into —
+the difference between a fast build and copying <code>node_modules</code> before deleting it.</li>
+<li><strong><code>composer install --no-dev</code></strong> in the build directory, then drop <code>vendor/nativephp/php-bin</code>
+(tens of megabytes of binaries for every platform, only one of which is needed, and it
+lives outside <code>app/</code>) and <code>vendor/bin</code>.</li>
+<li><strong>Clean the <code>.env</code></strong> — strip secrets, force <code>APP_ENV=prod</code> / <code>APP_DEBUG=0</code>. Only the
+staged copy is touched; the developer&#39;s own file is never modified, and there is a test
+for that.</li>
+<li><strong>CA bundle and icons</strong> — <code>cacert.pem</code> from <code>php-bin</code> (without it the packaged app has
+no working outbound TLS), icons into both the build dir and electron-builder&#39;s
+<code>buildResources</code>.</li>
+<li><strong>Patch <code>package.json</code></strong> — electron-builder reads the app&#39;s identity from there, not
+from our config.</li>
+<li><strong>electron-builder</strong>, whose <code>beforeBuild</code> hook runs <code>php.js</code> to unzip the <em>target</em>
+platform&#39;s static PHP over whatever the dev machine left behind.</li>
+<li><strong>Post-build hooks.</strong></li>
+</ol>
+<p><code>--dir</code> produces an unpacked directory instead of an installer, which skips needing <code>fpm</code>,
+<code>dpkg</code> or an AppImage runtime — the fast path for checking a build actually works.</p>
+<h3 id="nativephpphp-bin-is-a-clean-dependency"><a class="anchor" href="#nativephpphp-bin-is-a-clean-dependency"><code>nativephp/php-bin</code> is a clean dependency</a></h3>
+<p>Worth stating because it was not obvious: <code>php-bin</code> has <strong>zero PHP dependencies</strong>. It is
+static binaries for linux/mac/win × x64/arm64 × PHP 8.3/8.4/8.5, plus <code>cacert.pem</code>,
+multi-licensed. So a Symfony app can require it without pulling in anything Laravel —
+unlike <code>nativephp/desktop</code>, which would drag in <code>illuminate/contracts</code>,
+<code>laravel/prompts</code> and <code>spatie/laravel-package-tools</code>.</p>
+<hr>
+<h2 id="proof-the-packaged-app-runs"><a class="anchor" href="#proof-the-packaged-app-runs">Proof: the packaged app runs</a></h2>
+<p>Built for linux-x64, then launched from <code>dist/linux-unpacked</code> under Xvfb:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>PHP Server started on port: 8100
+  … serving resources/build/app/public/nativephp-router.php   ← the staged app
+Process [diag] spawned!
+Process [diag] exited with code [0].</code></pre>
+</figure>
+<p>The window reports, from inside the package:</p>
+<div class="table-scroll"><table class="plain"><tbody>
+<tr><td><code>Symfony 8.1.4 on PHP 8.4.21</code></td><td><strong>8.4.21 is the static musl binary from php-bin</strong> — the container&#39;s own PHP is 8.4.24, so this is the packaged runtime, not a leak from the host</td></tr>
+<tr><td><code>electron app version 1.0.0</code></td><td>our configured version, not Electron&#39;s 2.0.0 → the <code>package.json</code> patch took effect</td></tr>
+<tr><td><code>userData path /tmp/.config/symfony-native-demo</code></td><td>the slugged app name → identity flowed all the way through</td></tr>
+<tr><td>menu bar <code>App │ Demo │ Edit</code></td><td>the custom application menu, in a packaged build</td></tr>
+<tr><td><code>WindowShown [&quot;main&quot;]</code>, <code>WindowFocused [&quot;main&quot;]</code></td><td>channel C alive in the package</td></tr>
+<tr><td><code>_windowId detected: main</code></td><td>the renderer&#39;s own request carried it</td></tr>
+</tbody></table></div>
+<p>And every diagnostic passes in the packaged app, including a clipboard round-trip, a
+notification, a settings write/read/forget cycle, and a child process spawning and exiting.</p>
+<p>Artifact size: 406 MB unpacked (115 MB of that is Electron, 67 MB the PHP binary).</p>
+<hr>
+<h2 id="findings"><a class="anchor" href="#findings">Findings</a></h2>
+<h3 id="1-laravels-env-cleanup-patterns-destroy-a-symfony-app"><a class="anchor" href="#1-laravels-env-cleanup-patterns-destroy-a-symfony-app">1. Laravel&#39;s <code>.env</code> cleanup patterns destroy a Symfony app</a></h3>
+<p>This is the important one. Upstream&#39;s <code>cleanup_env_keys</code> globs <code>*_SECRET</code>. That is
+harmless in Laravel, whose application key is <code>APP_KEY</code> — and lethal here, because
+Symfony&#39;s is <strong><code>APP_SECRET</code></strong>, read by <code>config/packages/framework.yaml</code> as
+<code>%env(APP_SECRET)%</code>. Strip it and the packaged app throws <code>EnvNotFoundException</code> at
+container build: it does not boot at all.</p>
+<p>I inherited the pattern list and the first real build stripped it. Nothing in the build
+output complained — the failure would only have appeared when someone ran the shipped app.</p>
+<p>Fixed with more than a narrower default, because a user adding <code>*_SECRET</code> themselves is a
+perfectly reasonable thing to do: there is now an <code>env_keep</code> list that <strong>wins over</strong>
+<code>env_remove</code>, defaulting to <code>APP_SECRET</code>. The blanket <code>*_SECRET</code> / <code>*_KEY</code> /
+<code>*_TOKEN</code> / <code>*_PASSWORD</code> globs are also gone from the defaults in favour of named vendor
+prefixes. Test: <code>testAppSecretSurvivesEvenABlanketSecretGlob</code>.</p>
+<p>This generalises. Any Laravel-shaped default list carried across needs re-reading against
+Symfony&#39;s own names, not just translating — the two frameworks collide on <code>APP_*</code>.</p>
+<h3 id="2-packaged-apps-have-no-opcache"><a class="anchor" href="#2-packaged-apps-have-no-opcache">2. Packaged apps have no opcache</a></h3>
+<p>Every invocation of the <code>php-bin</code> binary prints:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>Warning: Failed loading Zend extension 'opcache' (… Dynamic loading not supported)</code></pre>
+</figure>
+<p>The static musl build cannot dynamically load extensions, and its baked-in ini asks for
+opcache anyway. So a production NativePHP app — Laravel or Symfony — runs <strong>without</strong>
+opcache, and every request pays full compile cost. For Symfony that argues for warming
+<code>var/cache</code> at build time rather than relying on runtime caching.</p>
+<p>The warning also arrives HTML-escaped (<code>&lt;br /&gt;</code>) into stderr, which means the binary ships
+with <code>html_errors=1</code> — cosmetic, but it makes the runtime&#39;s logs harder to read.</p>
+<h3 id="3-the-bifrost-question-half-answered"><a class="anchor" href="#3-the-bifrost-question-half-answered">3. The Bifrost question, half answered</a></h3>
+<p>The unprotected build path <strong>works for Symfony</strong> — that is now demonstrated rather than
+assumed. <code>native:build</code> prints a warning saying so, because shipping readable source
+should be a decision, not a surprise.</p>
+<p>What is still unanswered is the protected path: upstream branches on the presence of
+<code>build/__nativephp_app_bundle</code>, fetched from Bifrost per project and used <em>both</em> as the
+<code>php -S</code> router and prepended to every CLI invocation. Whether that server-side bundler
+can target <code>public/index.php</code> + <code>bin/console</code> instead of the Laravel pair is not
+knowable from the open-source client. Still needs @simonhamp.</p>
+<h3 id="4-a-composer-path-repo-copied-rather-than-symlinked-into-the-build"><a class="anchor" href="#4-a-composer-path-repo-copied-rather-than-symlinked-into-the-build">4. A composer path repo copied rather than symlinked into the build</a></h3>
+<p>The demo consumes the bundle through a path repo with <code>symlink: true</code>, so I expected the
+staged <code>vendor/native-symfony/desktop-bundle</code> to be a dangling symlink in the artifact.
+It came out as a real directory — <code>composer install --no-dev</code> in the build directory
+materialised it. Convenient, but not something to rely on: a real distribution should
+install the bundle from a registry, and anyone building from a path repo should check the
+artifact rather than assume.</p>
+<hr>
+<h2 id="what-is-left"><a class="anchor" href="#what-is-left">What is left</a></h2>
+<ul>
+<li><strong>M4</strong> — the upstream PRs. Eight manifest parameters, plus the bug list, which M3 grows:
+the unguarded <code>parseFloat(zoomFactor)</code>, the unguarded <code>storage/</code> copy, the swallowed
+config-command failures, the hardcoded <code>schedule:run</code>, the dead
+<code>config(&#39;native-php.secret&#39;)</code> route, <code>window/current</code>&#39;s missing null guard, and
+<code>shell/trash-item</code>&#39;s argument-less <code>res.json()</code>. Each stands on its own merits.</li>
+<li>Installer targets beyond <code>--dir</code> (AppImage, deb, dmg, NSIS) — the pipeline invokes them
+already; they need an environment with the packaging tools, not more code.</li>
+<li>Signing and notarisation: the env plumbing is in <code>BuildCommand</code>, untested because it
+needs real credentials.</li>
+</ul>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="m2-results.html"><span>← Previous</span><strong>M2 — the bundle</strong></a>
+            <span></span>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M3-RESULTS.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#the-pipeline">The pipeline</a></li><li class="lvl3"><a href="#nativephpphp-bin-is-a-clean-dependency">nativephp/php-bin is a clean dependency</a></li><li class="lvl2"><a href="#proof-the-packaged-app-runs">Proof: the packaged app runs</a></li><li class="lvl2"><a href="#findings">Findings</a></li><li class="lvl3"><a href="#1-laravels-env-cleanup-patterns-destroy-a-symfony-app">1. Laravel's .env cleanup patterns destroy a Symfony app</a></li><li class="lvl3"><a href="#2-packaged-apps-have-no-opcache">2. Packaged apps have no opcache</a></li><li class="lvl3"><a href="#3-the-bifrost-question-half-answered">3. The Bifrost question, half answered</a></li><li class="lvl3"><a href="#4-a-composer-path-repo-copied-rather-than-symlinked-into-the-build">4. A composer path repo copied rather than symlinked into the build</a></li><li class="lvl2"><a href="#what-is-left">What is left</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

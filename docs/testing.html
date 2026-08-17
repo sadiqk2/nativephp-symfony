@@ -4,76 +4,68 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Testing · NativePHP for Symfony</title>
-<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<meta name="description" content="FakeRuntime, expectations, event simulation — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 </head>
 <body>
-<a class="skip" href="#content">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="layout">
-    <aside class="sidebar">
-        <a class="brand" href="index.html">
-            <span class="brand-mark" aria-hidden="true">NS</span>
-            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
-        </a>
-        <nav class="nav" aria-label="Documentation">
-<a class="nav-link" href="index.html">
-            <span class="nav-title">Overview</span>
-            <span class="nav-blurb">What is here, and what is authoritative</span>
-        </a>
-<p class="nav-section">Using it</p>
-<a class="nav-link" href="getting-started-desktop.html">
-            <span class="nav-title">Desktop</span>
-            <span class="nav-blurb">From composer require to a window</span>
-        </a>
-<a class="nav-link" href="getting-started-mobile.html">
-            <span class="nav-title">Mobile</span>
-            <span class="nav-blurb">Both render paths, and what is verified</span>
-        </a>
-<p class="nav-section">Reference</p>
-<a class="nav-link" href="desktop-api.html">
-            <span class="nav-title">Desktop API</span>
-            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
-        </a>
-<a class="nav-link" href="mobile-api.html">
-            <span class="nav-title">Mobile API</span>
-            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
-        </a>
-<p class="nav-section">Working with it</p>
-<a class="nav-link" href="recipes.html">
-            <span class="nav-title">Recipes</span>
-            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
-        </a>
-<a class="nav-link current" href="testing.html" aria-current="page">
-            <span class="nav-title">Testing</span>
-            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
-        </a>
-<a class="nav-link" href="troubleshooting.html">
-            <span class="nav-title">Troubleshooting</span>
-            <span class="nav-blurb">Symptom → cause → fix</span>
-        </a>
-        </nav>
-        <div class="sidebar-foot">
-            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
-            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
         </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item active" href="testing.html" aria-current="page"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
     </aside>
 
-    <main id="content">
-        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
-<li class="d2"><a href="#wiring-one-flag-and-one-trait">Wiring: one flag and one trait</a></li>
-<li class="d2"><a href="#faking-the-desktop-runtime">Faking the desktop runtime</a></li>
-<li class="d3"><a href="#scripting-replies">Scripting replies</a></li>
-<li class="d3"><a href="#scripting-the-user">Scripting the user</a></li>
-<li class="d3"><a href="#scripting-windows">Scripting windows</a></li>
-<li class="d3"><a href="#inspecting-the-log">Inspecting the log</a></li>
-<li class="d2"><a href="#asserting-what-the-app-asked-for">Asserting what the app asked for</a></li>
-<li class="d2"><a href="#pushing-events-into-the-app">Pushing events into the app</a></li>
-<li class="d2"><a href="#mobile">Mobile</a></li>
-<li class="d3"><a href="#native-ui-screens">Native-UI screens</a></li>
-<li class="d2"><a href="#what-these-tests-cannot-tell-you">What these tests cannot tell you</a></li>
-</ul></nav>
+    <main id="main">
         <article class="prose">
 <h1 id="testing"><a class="anchor" href="#testing">Testing</a></h1>
 <p>Desktop apps are testable without Electron, and mobile apps without a device. Both bundles
@@ -90,10 +82,12 @@ difference between testing your payloads and testing a stub.</p>
 </ul>
 <hr>
 <h2 id="wiring-one-flag-and-one-trait"><a class="anchor" href="#wiring-one-flag-and-one-trait">Wiring: one flag and one trait</a></h2>
-<pre><code class="language-yaml"># config/packages/test/native_desktop.yaml
-native_desktop:
-    testing: true
-</code></pre>
+<figure class="code">
+<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-yaml"><span class="hljs-comment"># config/packages/test/native_desktop.yaml</span>
+<span class="hljs-attr">native_desktop:</span>
+    <span class="hljs-attr">testing:</span> <span class="hljs-literal">true</span></code></pre>
+</figure>
 <p>That re-points the <code>ClientInterface</code> alias at <code>FakeRuntime</code> and <strong>nothing else</strong>: every
 manager, every controller and the event bridge stay exactly as they are in production, so a
 functional test exercises the real payload building against a runtime that records instead of
@@ -101,23 +95,25 @@ one that has to be running. It also registers <code>RuntimeEventSimulator</code>
 <code>RuntimeExpectations</code> when PHPUnit is present — all three public.</p>
 <p>Set it in <code>config/packages/test/</code> only. With it on, nothing reaches a real runtime.</p>
 <p>The trait wires the three pieces in one <code>use</code>, and works both ways round:</p>
-<pre><code class="language-php">use Native\Symfony\Desktop\Testing\InteractsWithNativeRuntime;
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">InteractsWithNativeRuntime</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">KernelTestCase</span>;
 
-final class BootstrapperTest extends KernelTestCase
-{
-    use InteractsWithNativeRuntime;
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">BootstrapperTest</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">KernelTestCase</span>
+</span>{
+    <span class="hljs-keyword">use</span> <span class="hljs-title">InteractsWithNativeRuntime</span>;
 
-    public function testItOpensTheMainWindow(): void
-    {
-        self::bootKernel();
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">testItOpensTheMainWindow</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">bootKernel</span>();
 
-        self::getContainer()-&gt;get(\App\Native\Bootstrapper::class)-&gt;boot();
+        <span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">getContainer</span>()-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-title class_">\App\Native\Bootstrapper</span>::<span class="hljs-variable language_">class</span>)-&gt;<span class="hljs-title function_ invoke__">boot</span>();
 
-        $this-&gt;nativeExpects()-&gt;assertWindowOpened(&#39;main&#39;, [&#39;width&#39; =&gt; 1100]);
+        <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">nativeExpects</span>()-&gt;<span class="hljs-title function_ invoke__">assertWindowOpened</span>(<span class="hljs-string">&#x27;main&#x27;</span>, [<span class="hljs-string">&#x27;width&#x27;</span> =&gt; <span class="hljs-number">1100</span>]);
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <ul>
 <li>In a <code>KernelTestCase</code> with <code>testing: true</code>, <code>nativeRuntime()</code> finds the fake the container
 already injected everywhere — so the services under test are asserted against the same call
@@ -128,7 +124,7 @@ made against the one nobody called, is the failure mode this avoids.</li>
 <code>RequestStack</code>; every other manager is just <code>new XManager($this-&gt;nativeRuntime())</code>.</li>
 </ul>
 <p>The trait&#39;s surface:</p>
-<div class="table-scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<div class="table-scroll"><table class="plain"><tbody>
 <tr><td><code>nativeRuntime(): FakeRuntime</code></td><td>The fake every native call goes through</td></tr>
 <tr><td><code>nativeExpects(): RuntimeExpectations</code></td><td>Assertions</td></tr>
 <tr><td><code>nativeEvents(?EventDispatcherInterface): RuntimeEventSimulator</code></td><td>Push events; defaults to the container&#39;s dispatcher so the app&#39;s real listeners run</td></tr>
@@ -148,17 +144,21 @@ answers with whatever the test scripted. Because only the transport is faked, th
 wire, not a stub. All 116 endpoints are covered the day they are added, including the ones
 with no manager.</p>
 <p>Overriding the alias by hand still works if you prefer it:</p>
-<pre><code class="language-php">self::getContainer()-&gt;set(ClientInterface::class, FakeRuntime::available());
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">getContainer</span>()-&gt;<span class="hljs-title function_ invoke__">set</span>(<span class="hljs-title class_">ClientInterface</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-title class_">FakeRuntime</span>::<span class="hljs-title function_ invoke__">available</span>());</code></pre>
+</figure>
 <p><code>FakeRuntime::unavailable()</code> models a process the runtime did not start: every call throws
 <code>RuntimeNotAvailable</code>, exactly as the real client does, so <code>isAvailable()</code> guards are testable.</p>
 <h3 id="scripting-replies"><a class="anchor" href="#scripting-replies">Scripting replies</a></h3>
-<pre><code class="language-php">$fake = FakeRuntime::available()
-    -&gt;willReturn(&#39;app/version&#39;, [&#39;version&#39; =&gt; &#39;1.2.3&#39;])
-    -&gt;willReturnStatus(&#39;window/get/ghost&#39;, 404)
-    -&gt;willRespondWith(&#39;settings/theme&#39;, new Response(200, [&#39;value&#39; =&gt; &#39;dark&#39;]))
-    -&gt;willRespondUsing(&#39;clipboard&#39;, fn (RecordedCall $c) =&gt; new Response(200, $c-&gt;payload));
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$fake</span> = <span class="hljs-title class_">FakeRuntime</span>::<span class="hljs-title function_ invoke__">available</span>()
+    -&gt;<span class="hljs-title function_ invoke__">willReturn</span>(<span class="hljs-string">&#x27;app/version&#x27;</span>, [<span class="hljs-string">&#x27;version&#x27;</span> =&gt; <span class="hljs-string">&#x27;1.2.3&#x27;</span>])
+    -&gt;<span class="hljs-title function_ invoke__">willReturnStatus</span>(<span class="hljs-string">&#x27;window/get/ghost&#x27;</span>, <span class="hljs-number">404</span>)
+    -&gt;<span class="hljs-title function_ invoke__">willRespondWith</span>(<span class="hljs-string">&#x27;settings/theme&#x27;</span>, <span class="hljs-keyword">new</span> <span class="hljs-title class_">Response</span>(<span class="hljs-number">200</span>, [<span class="hljs-string">&#x27;value&#x27;</span> =&gt; <span class="hljs-string">&#x27;dark&#x27;</span>]))
+    -&gt;<span class="hljs-title function_ invoke__">willRespondUsing</span>(<span class="hljs-string">&#x27;clipboard&#x27;</span>, fn (RecordedCall <span class="hljs-variable">$c</span>) =&gt; <span class="hljs-keyword">new</span> <span class="hljs-title class_">Response</span>(<span class="hljs-number">200</span>, <span class="hljs-variable">$c</span>-&gt;payload));</code></pre>
+</figure>
 <ul>
 <li>Endpoints may be exact or <code>*</code> wildcards (<code>window/get/*</code>). Exact wins over wildcard, and
 among wildcards the longest — so <code>window/*</code> cannot shadow <code>window/get/main</code> by declaration
@@ -174,14 +174,16 @@ test pass against a runtime that would fail.</li>
 <p>Dialogs cannot be tested any other way — they block the runtime&#39;s event loop and their return
 value <em>is</em> a human decision. These are <code>willReturn()</code> with the runtime&#39;s exact response shape
 filled in:</p>
-<pre><code class="language-php">$fake-&gt;userPicksFiles(&#39;/tmp/a.csv&#39;, &#39;/tmp/b.csv&#39;);
-$fake-&gt;userCancelsFileSelection();     // {result: undefined} — a MISSING key, not []
-$fake-&gt;userSavesFileAs(&#39;/tmp/out.pdf&#39;);
-$fake-&gt;userCancelsSave();
-$fake-&gt;userClicksAlertButton(2);
-$fake-&gt;userConfirms();                 // index 0 — confirm() builds [confirm, cancel]
-$fake-&gt;userDeclines();                 // index 1
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userPicksFiles</span>(<span class="hljs-string">&#x27;/tmp/a.csv&#x27;</span>, <span class="hljs-string">&#x27;/tmp/b.csv&#x27;</span>);
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userCancelsFileSelection</span>();     <span class="hljs-comment">// {result: undefined} — a MISSING key, not []</span>
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userSavesFileAs</span>(<span class="hljs-string">&#x27;/tmp/out.pdf&#x27;</span>);
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userCancelsSave</span>();
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userClicksAlertButton</span>(<span class="hljs-number">2</span>);
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userConfirms</span>();                 <span class="hljs-comment">// index 0 — confirm() builds [confirm, cancel]</span>
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userDeclines</span>();                 <span class="hljs-comment">// index 1</span></code></pre>
+</figure>
 <p><strong>An unscripted dialog is a dismissal, not an answer.</strong> <code>dialog/open</code> degrades to cancelled,
 <code>dialog/save</code> to null, and a message box answers with the payload&#39;s own <code>cancelId</code> — which is
 what Electron returns for Escape and the window close button, and which <code>confirm()</code> sets to
@@ -190,58 +192,64 @@ the <em>declining</em> button for exactly that reason. So a <code>confirm()</cod
 most valuable test anyone writes against this kit — pass against code missing the guard
 altogether.</p>
 <h3 id="scripting-windows"><a class="anchor" href="#scripting-windows">Scripting windows</a></h3>
-<pre><code class="language-php">$fake-&gt;windowIs(&#39;main&#39;, [&#39;width&#39; =&gt; 800, &#39;height&#39; =&gt; 600]);   // window/get/main + window/all
-$fake-&gt;currentWindowIs(&#39;main&#39;);                               // …and window/current
-$fake-&gt;windowDoesNotExist(&#39;ghost&#39;);                           // 404 — and drops it from window/all
-$fake-&gt;noCurrentWindow();                                     // window/current answers 500
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">windowIs</span>(<span class="hljs-string">&#x27;main&#x27;</span>, [<span class="hljs-string">&#x27;width&#x27;</span> =&gt; <span class="hljs-number">800</span>, <span class="hljs-string">&#x27;height&#x27;</span> =&gt; <span class="hljs-number">600</span>]);   <span class="hljs-comment">// window/get/main + window/all</span>
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">currentWindowIs</span>(<span class="hljs-string">&#x27;main&#x27;</span>);                               <span class="hljs-comment">// …and window/current</span>
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">windowDoesNotExist</span>(<span class="hljs-string">&#x27;ghost&#x27;</span>);                           <span class="hljs-comment">// 404 — and drops it from window/all</span>
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">noCurrentWindow</span>();                                     <span class="hljs-comment">// window/current answers 500</span></code></pre>
+</figure>
 <p><code>noCurrentWindow()</code> is not an edge case: it is <code>window/current</code>&#39;s documented behaviour when
 the app is backgrounded, since the runtime dereferences <code>getFocusedWindow().id</code> with no null
 guard. Any code that reads the current window should have a test for it.</p>
 <h3 id="inspecting-the-log"><a class="anchor" href="#inspecting-the-log">Inspecting the log</a></h3>
-<pre><code class="language-php">$fake-&gt;calls();                    // list&lt;RecordedCall&gt;, in order
-$fake-&gt;callsTo(&#39;child-process/*&#39;); // filtered
-$fake-&gt;forgetCalls();              // keep the script, clear the log — for multi-phase tests
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">calls</span>();                    <span class="hljs-comment">// list&lt;RecordedCall&gt;, in order</span>
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">callsTo</span>(<span class="hljs-string">&#x27;child-process/*&#x27;</span>); <span class="hljs-comment">// filtered</span>
+<span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">forgetCalls</span>();              <span class="hljs-comment">// keep the script, clear the log — for multi-phase tests</span></code></pre>
+</figure>
 <p><code>RecordedCall</code> carries <code>$sequence</code>, <code>$method</code>, <code>$endpoint</code>, <code>$payload</code>, plus
 <code>matchesEndpoint($pattern)</code>, <code>payloadContains($subset)</code> and <code>describe()</code>.</p>
 <h2 id="asserting-what-the-app-asked-for"><a class="anchor" href="#asserting-what-the-app-asked-for">Asserting what the app asked for</a></h2>
 <p><code>RuntimeExpectations</code> wraps a <code>FakeRuntime</code> and phrases assertions as intents. When one fails
 it prints the whole call log, because the question a red test has to answer is &quot;then what did
 it do instead?&quot;.</p>
-<pre><code class="language-php">$expect = $this-&gt;nativeExpects();   // or new RuntimeExpectations($fake)
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$expect</span> = <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">nativeExpects</span>();   <span class="hljs-comment">// or new RuntimeExpectations($fake)</span>
 
-// …exercise the app…
+<span class="hljs-comment">// …exercise the app…</span>
 
-$expect-&gt;assertWindowOpened(&#39;main&#39;, [&#39;width&#39; =&gt; 1000]);
-$expect-&gt;assertWindowTitled(&#39;Ledger&#39;);
-$expect-&gt;assertWindowResized(760, 520, &#39;main&#39;);
-$expect-&gt;assertWindowNavigatedTo(&#39;/reports&#39;);
-$expect-&gt;assertNoWindowClosed();
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertWindowOpened</span>(<span class="hljs-string">&#x27;main&#x27;</span>, [<span class="hljs-string">&#x27;width&#x27;</span> =&gt; <span class="hljs-number">1000</span>]);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertWindowTitled</span>(<span class="hljs-string">&#x27;Ledger&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertWindowResized</span>(<span class="hljs-number">760</span>, <span class="hljs-number">520</span>, <span class="hljs-string">&#x27;main&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertWindowNavigatedTo</span>(<span class="hljs-string">&#x27;/reports&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNoWindowClosed</span>();
 
-$expect-&gt;assertFileDialogShown([&#39;multiSelections&#39; =&gt; true]);
-$expect-&gt;assertFileDialogShownAttachedTo(&#39;main&#39;);
-$expect-&gt;assertNoDialogShown();
-$expect-&gt;assertAlerted(&#39;Delete 4 items?&#39;);
-$expect-&gt;assertErrorBoxShown(&#39;Could not start&#39;);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertFileDialogShown</span>([<span class="hljs-string">&#x27;multiSelections&#x27;</span> =&gt; <span class="hljs-literal">true</span>]);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertFileDialogShownAttachedTo</span>(<span class="hljs-string">&#x27;main&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNoDialogShown</span>();
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertAlerted</span>(<span class="hljs-string">&#x27;Delete 4 items?&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertErrorBoxShown</span>(<span class="hljs-string">&#x27;Could not start&#x27;</span>);
 
-$expect-&gt;assertNotificationSent(&#39;Export finished&#39;);
-$expect-&gt;assertNoNotificationSent();
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNotificationSent</span>(<span class="hljs-string">&#x27;Export finished&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNoNotificationSent</span>();
 
-$expect-&gt;assertProcessStarted(&#39;messenger_async&#39;);
-$expect-&gt;assertProcessStopped(&#39;import&#39;);
-$expect-&gt;assertMessageSentToProcess(&#39;import&#39;, [&#39;pause&#39; =&gt; true]);
-$expect-&gt;assertProcessNotStarted();
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertProcessStarted</span>(<span class="hljs-string">&#x27;messenger_async&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertProcessStopped</span>(<span class="hljs-string">&#x27;import&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertMessageSentToProcess</span>(<span class="hljs-string">&#x27;import&#x27;</span>, [<span class="hljs-string">&#x27;pause&#x27;</span> =&gt; <span class="hljs-literal">true</span>]);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertProcessNotStarted</span>();
 
-$expect-&gt;assertQuitRequested();
-$expect-&gt;assertNoQuitRequested();
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertQuitRequested</span>();
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNoQuitRequested</span>();
 
-// 116 endpoints will always outrun the named helpers:
-$expect-&gt;assertCalled(&#39;settings/theme&#39;, [&#39;value&#39; =&gt; &#39;dark&#39;]);
-$expect-&gt;assertNotCalled(&#39;app/relaunch&#39;);
-$expect-&gt;assertCalledTimes(2, &#39;window/show&#39;);
-$expect-&gt;assertNothingSent();          // the assertion for a guarded path
-</code></pre>
+<span class="hljs-comment">// 116 endpoints will always outrun the named helpers:</span>
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertCalled</span>(<span class="hljs-string">&#x27;settings/theme&#x27;</span>, [<span class="hljs-string">&#x27;value&#x27;</span> =&gt; <span class="hljs-string">&#x27;dark&#x27;</span>]);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNotCalled</span>(<span class="hljs-string">&#x27;app/relaunch&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertCalledTimes</span>(<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;window/show&#x27;</span>);
+<span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNothingSent</span>();          <span class="hljs-comment">// the assertion for a guarded path</span></code></pre>
+</figure>
 <p>Passing <code>null</code> as an id asserts that <em>some</em> window was opened, resized, and so on.</p>
 <p><strong>These assert requests, never outcomes.</strong> The runtime ignores unknown window ids silently,
 <code>menu-bar/*</code> and <code>context/*</code> answer <code>200</code> before doing any work, and no endpoint reports
@@ -253,71 +261,83 @@ real outcome is observable is a dialog&#39;s return value, and that is your own 
 <code>POST /_native/api/events</code> would — through the real <code>EventsController</code>, so JSON encoding, the
 dual argument spreading and the double dispatch of caller-named events all apply. A simulator
 that skipped those would prove nothing.</p>
-<pre><code class="language-php">$simulator = $this-&gt;nativeEvents();   // the container&#39;s dispatcher, so real listeners run
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$simulator</span> = <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">nativeEvents</span>();   <span class="hljs-comment">// the container&#x27;s dispatcher, so real listeners run</span>
 
-$simulator-&gt;windowResized(&#39;main&#39;, 760, 520);
-$simulator-&gt;windowFocused(&#39;main&#39;);
-$simulator-&gt;windowClosed(&#39;main&#39;);
-$simulator-&gt;settingChanged(&#39;theme&#39;, &#39;dark&#39;);
-$simulator-&gt;processExited(&#39;messenger_async&#39;, 137);
-$simulator-&gt;processMessageReceived(&#39;import&#39;, &quot;42 rows\n&quot;);
-$simulator-&gt;menuItemClicked(&#39;save&#39;, label: &#39;Save&#39;);
-$simulator-&gt;notificationClicked($reference);
-$simulator-&gt;notificationReplied($reference, &#39;on my way&#39;);
-$simulator-&gt;openedFromUrl(&#39;myapp://open/42&#39;);
-$simulator-&gt;shortcutPressed(&#39;App\Shortcut\Palette&#39;, &#39;CommandOrControl+Shift+K&#39;);
-$simulator-&gt;powerStateChanged(&#39;on-battery&#39;);
-$simulator-&gt;screenLocked();
-</code></pre>
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">windowResized</span>(<span class="hljs-string">&#x27;main&#x27;</span>, <span class="hljs-number">760</span>, <span class="hljs-number">520</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">windowFocused</span>(<span class="hljs-string">&#x27;main&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">windowClosed</span>(<span class="hljs-string">&#x27;main&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">settingChanged</span>(<span class="hljs-string">&#x27;theme&#x27;</span>, <span class="hljs-string">&#x27;dark&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">processExited</span>(<span class="hljs-string">&#x27;messenger_async&#x27;</span>, <span class="hljs-number">137</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">processMessageReceived</span>(<span class="hljs-string">&#x27;import&#x27;</span>, <span class="hljs-string">&quot;42 rows\n&quot;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">menuItemClicked</span>(<span class="hljs-string">&#x27;save&#x27;</span>, <span class="hljs-attr">label</span>: <span class="hljs-string">&#x27;Save&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">notificationClicked</span>(<span class="hljs-variable">$reference</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">notificationReplied</span>(<span class="hljs-variable">$reference</span>, <span class="hljs-string">&#x27;on my way&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">openedFromUrl</span>(<span class="hljs-string">&#x27;myapp://open/42&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">shortcutPressed</span>(<span class="hljs-string">&#x27;App\Shortcut\Palette&#x27;</span>, <span class="hljs-string">&#x27;CommandOrControl+Shift+K&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">powerStateChanged</span>(<span class="hljs-string">&#x27;on-battery&#x27;</span>);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">screenLocked</span>();</code></pre>
+</figure>
 <p>Anything not covered by a helper, including your own event names:</p>
-<pre><code class="language-php">$simulator-&gt;dispatch(&#39;Native\Desktop\Events\Windows\WindowMaximized&#39;, [&#39;main&#39;]);
-$simulator-&gt;dispatch(&#39;App\Menu\NewReport&#39;, [&#39;from&#39; =&gt; &#39;toolbar&#39;]);   // → NativeEvent
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">dispatch</span>(<span class="hljs-string">&#x27;Native\Desktop\Events\Windows\WindowMaximized&#x27;</span>, [<span class="hljs-string">&#x27;main&#x27;</span>]);
+<span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">dispatch</span>(<span class="hljs-string">&#x27;App\Menu\NewReport&#x27;</span>, [<span class="hljs-string">&#x27;from&#x27;</span> =&gt; <span class="hljs-string">&#x27;toolbar&#x27;</span>]);   <span class="hljs-comment">// → NativeEvent</span></code></pre>
+</figure>
 <p><code>dispatch()</code> returns nothing on purpose: the runtime discards your answer, so there is no
 outcome to hand back. What a test asserts on is what its own listener did.</p>
 <p>To check the mapping itself — that a payload really reaches the constructor argument you think
 it does — use <code>make()</code>:</p>
-<pre><code class="language-php">$event = $simulator-&gt;make(&#39;Native\Desktop\Events\ChildProcess\ProcessExited&#39;, [&#39;alias&#39; =&gt; &#39;x&#39;, &#39;code&#39; =&gt; 1]);
-self::assertSame(1, $event-&gt;code);
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$event</span> = <span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Native\Desktop\Events\ChildProcess\ProcessExited&#x27;</span>, [<span class="hljs-string">&#x27;alias&#x27;</span> =&gt; <span class="hljs-string">&#x27;x&#x27;</span>, <span class="hljs-string">&#x27;code&#x27;</span> =&gt; <span class="hljs-number">1</span>]);
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-number">1</span>, <span class="hljs-variable">$event</span>-&gt;code);</code></pre>
+</figure>
 <p>If you construct the simulator yourself and test events your app dispatches by class name,
 pass your app&#39;s own <code>EventFactory</code> — the one configured with <code>events.allowed_namespaces</code> — as
 the second constructor argument. <code>nativeEvents()</code> and the container-registered service already
 do that.</p>
 <h2 id="mobile"><a class="anchor" href="#mobile">Mobile</a></h2>
-<pre><code class="language-php">use Native\Symfony\Mobile\Api\SecureStorage;
-use Native\Symfony\Mobile\Bridge\FakeBridge;
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Api</span>\<span class="hljs-title">SecureStorage</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">FakeBridge</span>;
 
-$bridge = new FakeBridge();
-$bridge-&gt;willReturn(&#39;SecureStorage.Get&#39;, [&#39;value&#39; =&gt; &#39;tok_123&#39;]);
+<span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FakeBridge</span>();
+<span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">willReturn</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, [<span class="hljs-string">&#x27;value&#x27;</span> =&gt; <span class="hljs-string">&#x27;tok_123&#x27;</span>]);
 
-self::assertSame(&#39;tok_123&#39;, (new SecureStorage($bridge))-&gt;get(&#39;token&#39;));
-self::assertSame(&#39;SecureStorage.Get&#39;, $bridge-&gt;lastCall()[&#39;method&#39;]);
-</code></pre>
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;tok_123&#x27;</span>, (<span class="hljs-keyword">new</span> <span class="hljs-title class_">SecureStorage</span>(<span class="hljs-variable">$bridge</span>))-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;token&#x27;</span>));
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, <span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">lastCall</span>()[<span class="hljs-string">&#x27;method&#x27;</span>]);</code></pre>
+</figure>
 <p><code>new FakeBridge(available: false)</code> models being outside a packaged app. Through the container,
 set <code>native_mobile.fake_bridge: true</code> in <code>config/packages/test/native_mobile.yaml</code>.</p>
 <p>The real <code>Bridge</code> accepts an <code>$invoker</code> callable in place of the extension function, so the
 real class can be tested too:</p>
-<pre><code class="language-php">$bridge = new Bridge(null, fn (string $method, string $json): ?string =&gt; &#39;{&quot;ok&quot;:true}&#39;);
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Bridge</span>(<span class="hljs-literal">null</span>, <span class="hljs-function"><span class="hljs-keyword">fn</span> (<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$method</span>, <span class="hljs-keyword">string</span> <span class="hljs-variable">$json</span></span>): ?<span class="hljs-title">string</span> =&gt;</span> <span class="hljs-string">&#x27;{&quot;ok&quot;:true}&#x27;</span>);</code></pre>
+</figure>
 <h3 id="native-ui-screens"><a class="anchor" href="#native-ui-screens">Native-UI screens</a></h3>
 <p>There is no device, so the assertion target is the <strong>published frame</strong>, which
 <code>ElementPublisher</code> captures when the extension is absent:</p>
-<pre><code class="language-php">$screen = $factory-&gt;open(new TodoScreen());
-$frame = $screen-&gt;frame();
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$screen</span> = <span class="hljs-variable">$factory</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">TodoScreen</span>());
+<span class="hljs-variable">$frame</span> = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">frame</span>();
 
-self::assertSame(&#39;column&#39;, $frame[&#39;type&#39;]);
-self::assertSame(&#39;Todo&#39;, $frame[&#39;children&#39;][0][&#39;props&#39;][&#39;text&#39;]);
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;column&#x27;</span>, <span class="hljs-variable">$frame</span>[<span class="hljs-string">&#x27;type&#x27;</span>]);
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;Todo&#x27;</span>, <span class="hljs-variable">$frame</span>[<span class="hljs-string">&#x27;children&#x27;</span>][<span class="hljs-number">0</span>][<span class="hljs-string">&#x27;props&#x27;</span>][<span class="hljs-string">&#x27;text&#x27;</span>]);
 
-$next = $screen-&gt;handle([
-    &#39;callback_id&#39; =&gt; $screen-&gt;callbackId(&#39;add&#39;),
-    &#39;type&#39; =&gt; InteractionEvent::PRESS,
+<span class="hljs-variable">$next</span> = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">handle</span>([
+    <span class="hljs-string">&#x27;callback_id&#x27;</span> =&gt; <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">callbackId</span>(<span class="hljs-string">&#x27;add&#x27;</span>),
+    <span class="hljs-string">&#x27;type&#x27;</span> =&gt; <span class="hljs-title class_">InteractionEvent</span>::<span class="hljs-variable constant_">PRESS</span>,
 ]);
 
-// Unchanged nodes come back as {id, type, flags: 1, _hash} — that is subtree reuse,
-// not a missing node. Only what actually changed carries layout, style, props and children.
-self::assertSame(1, $next[&#39;children&#39;][0][&#39;flags&#39;] ?? null);
-</code></pre>
+<span class="hljs-comment">// Unchanged nodes come back as {id, type, flags: 1, _hash} — that is subtree reuse,</span>
+<span class="hljs-comment">// not a missing node. Only what actually changed carries layout, style, props and children.</span>
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-number">1</span>, <span class="hljs-variable">$next</span>[<span class="hljs-string">&#x27;children&#x27;</span>][<span class="hljs-number">0</span>][<span class="hljs-string">&#x27;flags&#x27;</span>] ?? <span class="hljs-literal">null</span>);</code></pre>
+</figure>
 <p><code>ComponentScreen::callbackId($expression)</code> goes from expression to id, which is the direction
 a test needs (the device learns ids from the frame). <code>frame()</code> also runs
 <code>assertCallbacksDispatchable()</code>, so <strong>rendering a screen in a test is what catches a typo&#39;d
@@ -334,16 +354,27 @@ Those live in the bundles, not in your app.</p>
 <li>that a window was <em>seen</em>. Every assertion above is about a request.</li>
 <li>that a <code>200</code> meant success. <code>menu-bar/*</code> and <code>context/*</code> acknowledge before acting.</li>
 <li>that the runtime behaves as the contract describes. That is what
-<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/SPIKE-RESULTS.md" target="_blank" rel="noopener"><code>../SPIKE-RESULTS.md</code></a>, <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M2-RESULTS.md" target="_blank" rel="noopener"><code>../M2-RESULTS.md</code></a> and
-<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M3-RESULTS.md" target="_blank" rel="noopener"><code>../M3-RESULTS.md</code></a> are: the record of running it and finding out.</li>
+<a href="spike-results.html"><code>../SPIKE-RESULTS.md</code></a>, <a href="m2-results.html"><code>../M2-RESULTS.md</code></a> and
+<a href="m3-results.html"><code>../M3-RESULTS.md</code></a> are: the record of running it and finding out.</li>
 <li>anything about mobile on a real device. Nothing in this project has run on one.</li>
 </ul>
 
         </article>
-        <footer class="foot">
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="recipes.html"><span>← Previous</span><strong>Recipes</strong></a>
+            <a class="pager-link next" href="troubleshooting.html"><span>Next →</span><strong>Troubleshooting</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/testing.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#wiring-one-flag-and-one-trait">Wiring: one flag and one trait</a></li><li class="lvl2"><a href="#faking-the-desktop-runtime">Faking the desktop runtime</a></li><li class="lvl3"><a href="#scripting-replies">Scripting replies</a></li><li class="lvl3"><a href="#scripting-the-user">Scripting the user</a></li><li class="lvl3"><a href="#scripting-windows">Scripting windows</a></li><li class="lvl3"><a href="#inspecting-the-log">Inspecting the log</a></li><li class="lvl2"><a href="#asserting-what-the-app-asked-for">Asserting what the app asked for</a></li><li class="lvl2"><a href="#pushing-events-into-the-app">Pushing events into the app</a></li><li class="lvl2"><a href="#mobile">Mobile</a></li><li class="lvl3"><a href="#native-ui-screens">Native-UI screens</a></li><li class="lvl2"><a href="#what-these-tests-cannot-tell-you">What these tests cannot tell you</a></li></ul></nav>
 </div>
+
+<script src="assets/site.js" defer></script>
 </body>
 </html>

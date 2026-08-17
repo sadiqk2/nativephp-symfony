@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobile bundle · NativePHP for Symfony</title>
+<meta name="description" content="What ships in native-symfony/mobile-bundle — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item active" href="mobile-bundle.html" aria-current="page"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="native-symfonymobile-bundle"><a class="anchor" href="#native-symfonymobile-bundle">native-symfony/mobile-bundle</a></h1>
+<p>Build iOS and Android applications with Symfony, on NativePHP&#39;s mobile runtime.</p>
+<p>Status: <strong>the WebView render path is implemented, and the native-UI wire format is
+implemented and verified.</strong> All <strong>54 native bridge methods</strong> are wrapped, the SAPI
+shim and persistent runtime are in place, element trees are byte-identical to
+upstream&#39;s, and 340 tests cover it.</p>
+<blockquote>
+<p><strong>Verified by tests, not by a device.</strong> Unlike the desktop bundle — whose claim is
+backed by a screenshot of a running packaged app — nothing here has run on a phone
+or an emulator. This environment has no Xcode and no Android SDK. Treat mobile as a
+well-tested design awaiting device verification, and read that distinction as load
+bearing.</p>
+</blockquote>
+<blockquote>
+<p><strong>Licence.</strong> NativePHP Mobile is a commercial product, unlike the MIT-licensed
+desktop runtime. Read its terms before distributing anything built this way.</p>
+</blockquote>
+<h2 id="why-there-is-no-edge-port-here"><a class="anchor" href="#why-there-is-no-edge-port-here">Why there is no Edge port here</a></h2>
+<p>Mobile has two render paths. The native-UI one draws SwiftUI and Jetpack Compose from
+Blade templates, and its engine is 17,316 LOC — the reason an earlier version of this
+project wrote mobile off entirely.</p>
+<p>It is optional. <code>BootPlanner</code>, on both platforms, falls back to a WebView whenever an
+app registers no <code>Route::native</code> patterns, and <code>NATIVEPHP_BOOT_MODE=web</code> forces it at
+build time. Its own docblock calls that path <em>&quot;always safe, byte-identical to the
+pre-native-first behavior&quot;</em>. A Symfony app registers no native routes, so it takes the
+WebView path by construction — and Twig in a WebView is just Twig.</p>
+<p>Full reasoning: <a href="mobile-analysis.html"><code>../MOBILE-ANALYSIS.md</code></a>.</p>
+<h2 id="what-it-gives-you"><a class="anchor" href="#what-it-gives-you">What it gives you</a></h2>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProfileController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params">
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> Camera <span class="hljs-variable">$camera</span>,
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> SecureStorage <span class="hljs-variable">$storage</span>,
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> Device <span class="hljs-variable">$device</span>,
+    </span>) </span>{}
+
+    <span class="hljs-meta">#[Route</span>(<span class="hljs-string">&#x27;/profile/photo&#x27;</span>)<span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">photo</span>(<span class="hljs-params"></span>): <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// Asynchronous: the result arrives as an event once the user has acted.</span>
+        <span class="hljs-comment">// A true here means the camera was opened, nothing more.</span>
+        <span class="hljs-variable language_">$this</span>-&gt;camera-&gt;<span class="hljs-title function_ invoke__">photo</span>(<span class="hljs-attr">quality</span>: <span class="hljs-number">85</span>);
+
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">redirectToRoute</span>(<span class="hljs-string">&#x27;profile&#x27;</span>);
+    }
+}</code></pre>
+</figure>
+<p>Sixteen autowired API services: <code>Biometric</code>, <code>Browser</code>, <code>Camera</code>, <code>Device</code>, <code>Dialog</code>,
+<code>Files</code>, <code>Geolocation</code>, <code>Microphone</code>, <code>MobileWallet</code>, <code>NativeUi</code>, <code>Network</code>,
+<code>Performance</code>, <code>PushNotifications</code>, <code>SecureStorage</code>, <code>Share</code>, <code>System</code>.</p>
+<h2 id="install"><a class="anchor" href="#install">Install</a></h2>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">composer require native-symfony/mobile-bundle
+
+git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/mobile-air /tmp/np-mobile
+bin/console native:mobile:install --<span class="hljs-built_in">source</span>=/tmp/np-mobile/resources
+
+bin/console native:mobile:doctor    <span class="hljs-comment"># what the integration can see</span></code></pre>
+</figure>
+<p>Then build with Android Studio or Xcode. There is no headless path — both toolchains
+are required.</p>
+<h2 id="configuration"><a class="anchor" href="#configuration">Configuration</a></h2>
+<figure class="code">
+<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-yaml"><span class="hljs-attr">native_mobile:</span>
+    <span class="hljs-attr">app_id:</span> <span class="hljs-string">com.example.app</span>
+    <span class="hljs-attr">name:</span> <span class="hljs-string">&#x27;My App&#x27;</span>
+    <span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;1.0.0&#x27;</span>
+    <span class="hljs-attr">fake_bridge:</span> <span class="hljs-literal">false</span>      <span class="hljs-comment"># true swaps in a recording fake — see below</span>
+    <span class="hljs-attr">collect_garbage:</span> <span class="hljs-literal">false</span>  <span class="hljs-comment"># gc_collect_cycles() after each persistent request</span></code></pre>
+</figure>
+<h2 id="testing-without-a-device"><a class="anchor" href="#testing-without-a-device">Testing without a device</a></h2>
+<p><code>nativephp_call()</code> is a compiled extension that exists only inside a packaged app, so
+outside one the bridge is always unavailable and every call returns null. Two ways
+around that, both shipped rather than kept in this package&#39;s own tests:</p>
+<figure class="code">
+<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-yaml"><span class="hljs-comment"># config/packages/test/native_mobile.yaml</span>
+<span class="hljs-attr">native_mobile:</span>
+    <span class="hljs-attr">fake_bridge:</span> <span class="hljs-literal">true</span></code></pre>
+</figure>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FakeBridge</span>();
+<span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">willReturn</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, [<span class="hljs-string">&#x27;value&#x27;</span> =&gt; <span class="hljs-string">&#x27;tok_123&#x27;</span>]);
+
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;tok_123&#x27;</span>, (<span class="hljs-keyword">new</span> <span class="hljs-title class_">SecureStorage</span>(<span class="hljs-variable">$bridge</span>))-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;token&#x27;</span>));
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, <span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">lastCall</span>()[<span class="hljs-string">&#x27;method&#x27;</span>]);</code></pre>
+</figure>
+<p>The real <code>Bridge</code> also accepts an <code>$invoker</code> callable standing in for the extension
+function, which is how this package tests the real class rather than only the fake.</p>
+<h2 id="the-two-things-most-likely-to-bite"><a class="anchor" href="#the-two-things-most-likely-to-bite">The two things most likely to bite</a></h2>
+<p><strong>A dispatch is not an outcome.</strong> Camera, biometrics, media pickers and the payment
+sheet all return once the UI is <em>presented</em>. The result arrives later as an event.
+These deliberately live on <code>dispatch()</code> rather than <code>call()</code> so the distinction is
+visible in the type.</p>
+<p><strong>Dots in a <code>SecureStorage</code> key are not part of the key</strong> — the same dot-prop
+behaviour the desktop bundle documents for settings.</p>
+<h2 id="native-ui-from-twig"><a class="anchor" href="#native-ui-from-twig">Native UI from Twig</a></h2>
+<p>The second render path. <code>Ui/</code> produces the element tree the SwiftUI and Jetpack
+Compose renderers consume — the <code>super-native</code> equivalent, authored from Twig:</p>
+<figure class="code">
+<span class="code-lang">twig</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-twig"><span class="hljs-template-tag">{%</span> <span class="hljs-name">do</span> native_publish(native(<span class="hljs-string">&#x27;column&#x27;</span>, {layout: {gap: <span class="hljs-number">8</span>}}, [
+    native(<span class="hljs-string">&#x27;text&#x27;</span>,   {text: <span class="hljs-string">&#x27;Hello&#x27;</span>, fontSize: <span class="hljs-number">24</span>}),
+    native(<span class="hljs-string">&#x27;button&#x27;</span>, {label: <span class="hljs-string">&#x27;Tap me&#x27;</span>, onPress: <span class="hljs-string">&#x27;save&#x27;</span>}),
+    native(<span class="hljs-string">&#x27;spacer&#x27;</span>),
+])) <span class="hljs-template-tag">%}</span></code></pre>
+</figure>
+<p>Upstream&#39;s Blade equivalent is a tag precompiler that rewrites <code>&lt;native:*&gt;</code> tags into
+collector calls specifically to <em>bypass</em> Blade&#39;s component lifecycle for speed. Twig
+needs none of that: its functions are already calls.</p>
+<p><strong>Verified against upstream, not just modelled on it.</strong> <code>UiWireFormatTest</code> loads
+upstream&#39;s own collector through a stub autoloader — its <code>Edge</code> classes have no
+framework dependencies — and byte-compares trees, content hashes, callback ids and
+navigation keys. That comparison caught three things a careful reading had got wrong;
+they are written up in <a href="native-ui-contract.html"><code>../NATIVE-UI-CONTRACT.md</code></a>.</p>
+<p>Screens are declared with <code>#[NativeScreen(&#39;/items/{id}&#39;)]</code> and rendered by components:</p>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">NativeComponent</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-variable">$count</span> = <span class="hljs-number">0</span>;
+
+    <span class="hljs-meta">#[NativeAction</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">increment</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span> </span>{ <span class="hljs-variable language_">$this</span>-&gt;count++; }
+
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>): <span class="hljs-title">Element</span> </span>{ <span class="hljs-comment">/* … */</span> }
+}</code></pre>
+</figure>
+<p>State is ordinary typed properties — no serialisation, no rehydration, because the PHP
+process is long-lived. <strong>Only <code>#[NativeAction]</code> methods are callable from the device</strong>, and
+an id arriving from the native side is only ever a lookup key: it never becomes a method
+name.</p>
+<p>Styling uses the same Tailwind-subset classes:</p>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-comment">// StyleApplier, not -&gt;layout($parser-&gt;parse(...)): the parser emits a camelCase</span>
+<span class="hljs-comment">// intermediate vocabulary, and camelCase keys on the wire are silently ignored.</span>
+<span class="hljs-variable">$styles</span>-&gt;<span class="hljs-title function_ invoke__">applyClasses</span>(<span class="hljs-variable">$column</span>, <span class="hljs-string">&#x27;flex-1 p-4 gap-2&#x27;</span>);
+
+<span class="hljs-comment">// Or, from a template, the `class` option:</span>
+<span class="hljs-comment">//   native(&#x27;column&#x27;, {class: &#x27;flex-1 p-4 gap-2&#x27;})</span></code></pre>
+</figure>
+<p><code>StyleParser</code> reproduces upstream&#39;s output <strong>byte-identically</strong> — verified against 684
+tokens and 1,336 class strings extracted from <code>super-native</code>, plus a 48,849-parse
+differential sweep against upstream&#39;s own parser. The only intentional divergence is a
+bug fix (see <code>../upstream-patches/</code> <code>0008</code>).</p>
+<p>What is implemented: the tree builder with the identity, Merkle-hash and reuse rules,
+a callback registry, <strong>all 36 wire types</strong> (37 element classes — <code>Fab</code> shares
+<code>pressable</code>), a factory, the Twig extension, and a publisher that keeps the diff state
+between frames. Every type is byte-compared against upstream&#39;s equivalent, and the test
+also fails on an <em>invented</em> type, since one the renderers do not know produces a missing
+region on the device and no error anywhere. What is not: the Tailwind-subset
+style parser, <code>Route::native</code> equivalents, and a component lifecycle — that last being
+the real design question, since Symfony has nothing Livewire-shaped to borrow.</p>
+<h2 id="architecture"><a class="anchor" href="#architecture">Architecture</a></h2>
+<div class="table-scroll"><table class="plain"><tbody>
+<tr><td><code>Bridge/</code></td><td><code>nativephp_call()</code> wrapper, its interface, and a recording fake</td></tr>
+<tr><td><code>Api/</code></td><td>16 typed services covering all 54 methods</td></tr>
+<tr><td><code>Runtime/MobileRuntime</code></td><td>the persistent kernel — boot once, serve many</td></tr>
+<tr><td><code>Runtime/ServerRequestFactory</code></td><td>a <code>Request</code> from the host&#39;s superglobals</td></tr>
+<tr><td><code>Runtime/ResponseEmitter</code></td><td>a raw HTTP message on stdout, header-injection safe</td></tr>
+<tr><td><code>Runtime/MobileRuntimePatcher</code></td><td>retargets the hosts&#39; hardcoded bootstrap paths</td></tr>
+<tr><td><code>Resources/bootstrap/</code></td><td><code>native.php</code>, <code>persistent.php</code>, <code>dispatch.php</code>, <code>console.php</code></td></tr>
+<tr><td><code>Ui/</code></td><td>the native element tree: builder, registry, 37 elements, factory, publisher</td></tr>
+<tr><td><code>Ui/Twig/</code></td><td><code>native()</code> for authoring trees from templates</td></tr>
+<tr><td><code>Ui/Routing/</code></td><td><code>#[NativeScreen]</code>, the BootPlanner-compatible matcher, manifest export</td></tr>
+<tr><td><code>Ui/Component/</code></td><td><code>NativeComponent</code>, <code>ComponentScreen</code>, <code>ComponentScreenRenderer</code> (routing → components), and the four-layer callback guard</td></tr>
+<tr><td><code>Ui/Style/</code></td><td>the Tailwind-subset parser — 100% parity with upstream across 684 tokens</td></tr>
+</tbody></table></div>
+<p><code>native.php</code> pays for the autoloader and container per request; <code>persistent.php</code> plus
+<code>dispatch.php</code> pay once. Prefer the persistent pair wherever the host supports it.</p>
+<h2 id="tests"><a class="anchor" href="#tests">Tests</a></h2>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">composer install &amp;&amp; vendor/bin/phpunit</code></pre>
+</figure>
+<p>340 tests. <code>UiWireFormatTest</code> byte-compares element trees against upstream&#39;s own
+collector, and <code>UiElementCoverageTest</code> does it per type — which is how two missing
+defaults were found (<code>ScrollView</code>&#39;s <code>overflow=2</code> and <code>Circle</code>&#39;s <code>border_radius=9999</code>). <code>BridgeCoverageTest</code> parses the upstream sources and fails if a native
+method has no wrapper, so upstream drift breaks the suite. <code>MobileRuntimeTest</code> drives
+a real Symfony kernel through the persistent runtime and proves state does not leak
+between requests and that a throwing controller is contained rather than fatal.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="desktop-bundle.html"><span>← Previous</span><strong>Desktop bundle</strong></a>
+            <a class="pager-link next" href="demo.html"><span>Next →</span><strong>The demo app</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/mobile-bundle/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#why-there-is-no-edge-port-here">Why there is no Edge port here</a></li><li class="lvl2"><a href="#what-it-gives-you">What it gives you</a></li><li class="lvl2"><a href="#install">Install</a></li><li class="lvl2"><a href="#configuration">Configuration</a></li><li class="lvl2"><a href="#testing-without-a-device">Testing without a device</a></li><li class="lvl2"><a href="#the-two-things-most-likely-to-bite">The two things most likely to bite</a></li><li class="lvl2"><a href="#native-ui-from-twig">Native UI from Twig</a></li><li class="lvl2"><a href="#architecture">Architecture</a></li><li class="lvl2"><a href="#tests">Tests</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

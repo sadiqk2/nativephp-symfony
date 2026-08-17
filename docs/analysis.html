@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deep dive · NativePHP for Symfony</title>
+<meta name="description" content="Boot sequence, port map, the Laravel-isms — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item active" href="analysis.html" aria-current="page"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="nativephp-desktop--deep-technical-analysis"><a class="anchor" href="#nativephp-desktop--deep-technical-analysis">NativePHP Desktop — Deep Technical Analysis</a></h1>
+<p>Reference document for porting NativePHP to Symfony. Read alongside <code>PLAN.md</code>.
+Based on a full read of <code>NativePHP/desktop</code> @ HEAD (2026-08-14): 9,615 LOC PHP
+(178 files) + 4,100 LOC TypeScript, and <code>NativePHP/mobile-air</code> @ HEAD: 54,744 LOC
+PHP (272 files).</p>
+<p>Everything below is read out of the source, not from the docs.</p>
+<hr>
+<h2 id="1-the-boot-sequence-exactly"><a class="anchor" href="#1-the-boot-sequence-exactly">1. The boot sequence, exactly</a></h2>
+<p>This is the single most important thing to understand. From
+<code>electron-plugin/src/index.ts::bootstrapApp()</code>:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code> 1. app.whenReady()                                    Electron
+ 2. loadConfig()
+      └─ execFile(php, ['artisan','native:config'])    ← spawns PHP, reads stdout as JSON
+ 3. setDockIcon()                                       macOS dev only
+ 4. setAppUserModelId(config.app_id)
+ 5. setDeepLinkHandler(config.deeplink_scheme)
+ 6. startAutoUpdater(config.updater.*)
+ 7. startElectronApi()
+      └─ express listen on 127.0.0.1, first free port in 4000–5000
+         state.electronApiPort = port
+         state.randomSecret = 32-char random string (generated at module load)
+ 8. loadPhpIni()
+      └─ execFile(php, ['artisan','native:php-ini'])   ← spawns PHP, reads stdout as JSON
+ 9. startPhpApp()  →  serveApp()
+      a. ensureAppFoldersAreAvailable()   copies &lt;app&gt;/storage → userData/storage
+      b. env = getDefaultEnvironmentVariables(secret, apiPort)   ← 20+ NATIVEPHP_* vars
+      c. optional: artisan nightwatch:agent
+      d. if !dev: artisan optimize          (cached by app version in electron-store)
+      e. if !dev: artisan migrate --force   (cached by app version in electron-store)
+      f. phpPort = first free port in 8100–9000
+      g. spawn: php -d &lt;ini…&gt; -S 127.0.0.1:&lt;phpPort&gt; &lt;routerScript&gt;   cwd=&lt;app&gt;/public
+         └─ resolves when stderr matches /Development Server \(.*:(\d+)\) started/
+      h. appendCookie()  → sets cookie _php_native=&lt;secret&gt; for http://localhost:&lt;phpPort&gt;
+10. startScheduler()   aligns to the next minute boundary, then artisan schedule:run every 60s
+11. session.webRequest.onBeforeSendHeaders  →  inject X-NativePHP-Secret on every
+    request to http://127.0.0.1:&lt;phpPort&gt;/*
+12. notifyLaravel('booted')  →  POST http://127.0.0.1:&lt;phpPort&gt;/_native/api/booted
+      └─ PHP: NativeAppBootedController → app(config('nativephp.provider'))-&gt;boot()
+         → THIS is where the app opens its first window</code></pre>
+</figure>
+<p><strong>Step 12 is the whole app-startup contract.</strong> The runtime never opens a window.
+It calls one endpoint and the app decides. That is a two-line port.</p>
+<p>Note the ordering constraint at step 9b: <code>NATIVEPHP_API_URL</code> and <code>NATIVEPHP_SECRET</code>
+are only in the env because the API server started at step 7. The PHP process
+receives them as environment variables — there is no discovery, no handshake, no
+config file. <code>config(&#39;nativephp-internal.api_url&#39;)</code> reads
+<code>env(&#39;NATIVEPHP_API_URL&#39;)</code> and the <code>Client</code> uses it as a base URL. Trivially
+portable to <code>%env(NATIVEPHP_API_URL)%</code>.</p>
+<hr>
+<h2 id="2-the-two-channels-and-the-auth-model"><a class="anchor" href="#2-the-two-channels-and-the-auth-model">2. The two channels and the auth model</a></h2>
+<h3 id="channel-a--php-→-runtime-116-endpoints"><a class="anchor" href="#channel-a--php-→-runtime-116-endpoints">Channel A — PHP → runtime (116 endpoints)</a></h3>
+<ul>
+<li>Base URL: <code>http://127.0.0.1:&lt;apiPort&gt;/api/</code> (<code>NATIVEPHP_API_URL</code>)</li>
+<li>Auth: <code>X-NativePHP-Secret: &lt;secret&gt;</code> on every request. <code>api/middleware.ts</code> is
+nine lines: wrong header → <code>403</code>, full stop. No CSRF, no session, no bearer.</li>
+<li>Content type: JSON both ways. Many endpoints return bare <code>200</code> with no body.</li>
+<li>Client: <code>src/Client/Client.php</code>, 38 LOC, three methods (<code>get</code>/<code>post</code>/<code>delete</code>),
+<code>timeout(60*60)</code>.</li>
+</ul>
+<h3 id="channel-b--runtime-→-php-44-event-types"><a class="anchor" href="#channel-b--runtime-→-php-44-event-types">Channel B — runtime → PHP (44 event types)</a></h3>
+<ul>
+<li><code>utils.ts::notifyLaravel(endpoint, payload)</code> → <code>POST http://127.0.0.1:&lt;phpPort&gt;/_native/api/&lt;endpoint&gt;</code>
+with the same <code>X-NativePHP-Secret</code> header. Two endpoints only: <code>events</code> and <code>booted</code>.</li>
+<li><strong>Errors are swallowed</strong> (<code>catch {}</code> with an empty body). A crashed PHP app is
+invisible to the runtime. Worth knowing when debugging a port.</li>
+<li><code>notifyLaravel(&#39;events&#39;, …)</code> <em>also</em> forwards to every renderer via
+<code>broadcastToWindows(&#39;native-event&#39;, payload)</code>, so browser JS sees the event
+without a PHP round-trip.</li>
+</ul>
+<h3 id="channel-c--runtime-→-renderer-the-browser"><a class="anchor" href="#channel-c--runtime-→-renderer-the-browser">Channel C — runtime → renderer (the browser)</a></h3>
+<ul>
+<li><code>preload/index.mts</code> exposes <code>window.Native.on(event, cb)</code> and
+<code>window.Native.contextMenu(template)</code> via <code>contextBridge</code>, plus a
+<code>window.postMessage({type:&#39;native-event&#39;, …})</code> bridge and a <code>native:init</code>
+CustomEvent on the window.</li>
+<li><strong><code>window.Native</code> is entirely framework-agnostic.</strong> It works in a Twig page as-is.</li>
+<li>Only <code>preload/livewire-dispatcher.js</code> is Laravel-specific — a 30-line shim that
+turns postMessage into <code>Livewire.dispatch(&#39;native:&#39;+name, payload)</code>. It is
+injected into every full-page HTML response by
+<code>src/Events/LivewireDispatcher.php</code> hooking Laravel&#39;s <code>RequestHandled</code> event.
+A Symfony port replaces this file with a Stimulus/Turbo (or plain
+<code>CustomEvent</code>) dispatcher and injects it from a <code>kernel.response</code> subscriber.</li>
+</ul>
+<h3 id="three-layer-security-model"><a class="anchor" href="#three-layer-security-model">Three-layer security model</a></h3>
+<ol>
+<li><code>_php_native</code> cookie, set by Electron directly into the session
+(<code>utils.ts::appendCookie</code>) — value is <code>state.randomSecret</code>.</li>
+<li><code>X-NativePHP-Secret</code> header, injected by <code>webRequest.onBeforeSendHeaders</code>
+for renderer navigations and set explicitly by <code>notifyLaravel</code>.</li>
+<li><code>PreventRegularBrowserAccess</code> middleware: if either matches
+<code>config(&#39;nativephp-internal.secret&#39;)</code>, pass; otherwise <code>abort(403)</code>.</li>
+</ol>
+<p>So the PHP dev server is listening on a real TCP port and the <em>only</em> thing keeping
+a browser on the same machine out is that shared secret. Port this faithfully — it
+is not decoration.</p>
+<hr>
+<h2 id="3-what-the-runtime-requires-of-the-php-app--the-real-contract"><a class="anchor" href="#3-what-the-runtime-requires-of-the-php-app--the-real-contract">3. What the runtime requires of the PHP app — the real contract</a></h2>
+<p>Seven things. That is the complete list.</p>
+<div class="table-scroll"><table><thead><tr><th>#</th><th>Requirement</th><th>Current (Laravel)</th><th>Symfony equivalent</th></tr></thead><tbody>
+<tr><td>1</td><td>A CLI entrypoint accepting subcommands</td><td><code>artisan</code> at project root</td><td><code>bin/console</code></td></tr>
+<tr><td>2</td><td><code>&lt;cli&gt; native:config</code> printing JSON on stdout</td><td><code>echo json_encode(config(&#39;nativephp&#39;))</code></td><td>a Command doing the same</td></tr>
+<tr><td>3</td><td><code>&lt;cli&gt; native:php-ini</code> printing JSON on stdout</td><td>provider&#39;s <code>phpIni()</code> or <code>{}</code></td><td>a Command doing the same</td></tr>
+<tr><td>4</td><td>A <code>php -S</code> router script + a document-root cwd</td><td><code>vendor/laravel/framework/…/server.php</code>, cwd <code>public/</code></td><td>own router script, cwd <code>public/</code></td></tr>
+<tr><td>5</td><td><code>POST /_native/api/booted</code> → open windows</td><td><code>NativeAppBootedController</code></td><td>a controller</td></tr>
+<tr><td>6</td><td><code>POST /_native/api/events</code> → dispatch an event</td><td><code>DispatchEventFromAppController</code></td><td>a controller</td></tr>
+<tr><td>7</td><td>Writable dirs at the paths the env vars name</td><td><code>storage/framework/*</code>, <code>bootstrap/cache</code></td><td><code>var/cache</code>, <code>var/log</code></td></tr>
+</tbody></table></div>
+<p>Optional, degrade gracefully if absent: <code>optimize</code>, <code>migrate --force</code>,
+<code>schedule:run</code>, <code>nightwatch:agent</code>.</p>
+<h3 id="config-keys-the-runtime-actually-reads"><a class="anchor" href="#config-keys-the-runtime-actually-reads">Config keys the runtime actually reads</a></h3>
+<p>Out of the ~90-line <code>config/nativephp.php</code>, <code>index.ts</code> consumes exactly <strong>five</strong>:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>app_id                                    → electronApp.setAppUserModelId()
+deeplink_scheme                           → app.setAsDefaultProtocolClient()
+updater.enabled                           → autoUpdater.checkForUpdatesAndNotify()
+updater.default                           → picks the provider key
+updater.providers.&lt;default&gt;.public_url    → autoUpdater.setFeedURL()</code></pre>
+</figure>
+<p>Everything else in that file (<code>version</code>, <code>author</code>, <code>cleanup_*</code>, <code>queue_workers</code>,
+<code>prebuild</code>/<code>postbuild</code>, <code>nsis</code>, <code>binary_path</code>) is consumed by the <strong>PHP-side build
+commands</strong>, never by the runtime. So M1&#39;s <code>native:config</code> can emit five keys and
+work. This is a much smaller contract than the config file suggests.</p>
+<h3 id="the-environment-contract"><a class="anchor" href="#the-environment-contract">The environment contract</a></h3>
+<p><code>php.ts::getDefaultEnvironmentVariables()</code> — grouped by portability:</p>
+<ul>
+<li><strong>Framework-neutral (17):</strong> <code>APP_DEBUG</code>, <code>NATIVEPHP_RUNNING</code>,
+<code>NATIVEPHP_STORAGE_PATH</code>, <code>NATIVEPHP_DATABASE_PATH</code>, <code>NATIVEPHP_API_URL</code>,
+<code>NATIVEPHP_SECRET</code>, and ten <code>NATIVEPHP_*_PATH</code> vars mapping Electron&#39;s
+<code>app.getPath()</code> (home, appData, userData, desktop, documents, downloads, music,
+pictures, videos, recent) plus <code>NATIVEPHP_EXTRAS_PATH</code>.</li>
+<li><strong>Laravel-shaped (8):</strong> <code>APP_ENV</code> (the <em>name</em> is neutral, the <em>values</em> are not —
+<code>local</code>/<code>production</code> are Laravel&#39;s; see §6 item 8), <code>LARAVEL_STORAGE_PATH</code>, and —
+only in a secure build —
+<code>APP_SERVICES_CACHE</code>, <code>APP_PACKAGES_CACHE</code>, <code>APP_CONFIG_CACHE</code>,
+<code>APP_ROUTES_CACHE</code>, <code>APP_EVENTS_CACHE</code>, <code>VIEW_COMPILED_PATH</code> (commented out).</li>
+<li><strong>Optional:</strong> <code>NIGHTWATCH_TOKEN</code>, <code>NIGHTWATCH_INGEST_URI</code>.</li>
+</ul>
+<p>The ten path vars become Laravel filesystem disks in <code>NativeServiceProvider::configureDisks()</code>
+(<code>user_home</code>, <code>app_data</code>, <code>user_data</code>, <code>desktop</code>, <code>documents</code>, <code>downloads</code>, <code>music</code>,
+<code>pictures</code>, <code>videos</code>, <code>recent</code>, <code>extras</code>), each <code>driver: local, throw: false, links: skip</code>.
+Symfony has no equivalent global disk registry — either register Flysystem adapters via
+<code>league/flysystem-bundle</code> config, or expose a small <code>NativePaths</code> service. <strong>Recommend the
+latter for M2</strong> and Flysystem later; don&#39;t make <code>league/flysystem-bundle</code> a hard dependency.</p>
+<hr>
+<h2 id="4-reverse-channel--the-44-events"><a class="anchor" href="#4-reverse-channel--the-44-events">4. Reverse channel — the 44 events</a></h2>
+<p><code>DispatchEventFromAppController</code> is the whole mechanism:</p>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$event</span> = <span class="hljs-variable">$request</span>-&gt;<span class="hljs-title function_ invoke__">input</span>(<span class="hljs-string">&#x27;event&#x27;</span>);           <span class="hljs-comment">// e.g. &quot;\Native\Desktop\Events\Windows\WindowResized&quot;</span>
+<span class="hljs-variable">$payload</span> = <span class="hljs-variable">$request</span>-&gt;<span class="hljs-title function_ invoke__">input</span>(<span class="hljs-string">&#x27;payload&#x27;</span>, []);
+<span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">class_exists</span>(<span class="hljs-variable">$event</span>)) { <span class="hljs-title function_ invoke__">event</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable">$event</span>(...<span class="hljs-variable">$payload</span>)); }
+<span class="hljs-keyword">else</span>                      { <span class="hljs-title function_ invoke__">event</span>(<span class="hljs-variable">$event</span>, <span class="hljs-variable">$payload</span>); }</code></pre>
+</figure>
+<p>Two subtleties a port must replicate exactly:</p>
+<ol>
+<li><strong><code>...$payload</code> is both positional and named spreading.</strong> <code>WindowResized</code> is
+pushed as <code>[id, width, height]</code> (positional); <code>ChildProcess\ProcessExited</code> is
+pushed as <code>{alias, code}</code> (string keys → PHP 8 <em>named arguments</em>). Any port
+needs the same dual behaviour or half the events break.</li>
+<li><strong>Unknown event names still dispatch</strong>, as a string-named event with an array
+payload. <code>globalShortcut</code>, menu items and notifications all let PHP choose the
+event name it wants pushed back — the runtime is already generic here. In Symfony
+this needs an explicit fallback: dispatch a generic <code>NativeEvent</code> under the given
+name via <code>EventDispatcherInterface::dispatch($e, $name)</code>.</li>
+</ol>
+<p>Event names arrive with inconsistent leading backslashes (<code>&#39;\\Native\\…&#39;</code> from
+<code>index.ts</code> and <code>helper/index.ts</code>, bare from <code>window.ts</code>). The preload strips them
+with <code>replace(/^(\\)+/, &#39;&#39;)</code>; <code>class_exists()</code> tolerates both. Normalise on the
+Symfony side rather than inheriting the inconsistency.</p>
+<p>Full inventory: 9 Windows, 9 ChildProcess/AutoUpdater… precisely —
+Windows 9, AutoUpdater 7, MenuBar 7, PowerMonitor 8, ChildProcess 5,
+Notifications 4, App 2, Menu 1, Settings 1 = <strong>44</strong>, plus <code>App\ApplicationBooted</code>
+which is dispatched by PHP itself, never pushed.</p>
+<h3 id="forward-direction--app-→-runtime-→-renderer"><a class="anchor" href="#forward-direction--app-→-runtime-→-renderer">Forward direction — app → runtime → renderer</a></h3>
+<p><code>EventWatcher</code> (29 LOC) registers <code>Event::listen(&#39;*&#39;)</code>, and for every dispatched
+object that (a) has <code>broadcastOn()</code>, (b) includes the string channel <code>nativephp</code>,
+and (c) is not itself a <code>Native\Desktop\Events\*</code> class, POSTs it to
+<code>/api/broadcast</code>, which <code>broadcastToWindows()</code> pushes to every renderer.</p>
+<p><strong>This is the hardest single thing to port.</strong> Symfony&#39;s <code>EventDispatcher</code> has no
+wildcard listener. Options:</p>
+<ul>
+<li><p><strong>(recommended)</strong> a marker interface <code>BroadcastsToRuntime</code> plus a decorator on
+<code>event_dispatcher</code> that inspects each dispatched object. Symfony dispatches by event
+<em>class</em>, not by interface, so the alternative — a compiler pass registering a
+listener per implementor — cannot see runtime-created classes.</p>
+<p>Correction from building it: the decorator must implement
+<code>Symfony\Component\EventDispatcher\EventDispatcherInterface</code>, not the contracts
+interface. The compiled container registers every listener by calling
+<code>addListener()</code> on the <code>event_dispatcher</code> service, so a decorator with only
+<code>dispatch()</code> breaks container compilation. Seven methods to delegate, not ~40 LOC of
+pure logic. See <code>M2-RESULTS.md</code> finding 3.</p>
+</li>
+<li><p>Not recommended: requiring users to call <code>Native::broadcast($event)</code> explicitly.
+It works, but it silently changes the programming model versus the Laravel docs.</p>
+</li>
+</ul>
+<p><code>LogWatcher</code> has the same shape (listens for <code>MessageLogged</code> → POST <code>/api/debug/log</code>)
+and in Symfony is just a Monolog handler. Note <code>/api/debug/*</code> is <strong>only mounted when
+<code>NODE_ENV === &#39;development&#39;</code></strong> (<code>api.ts</code>), so a production build POSTing there gets 404s
+into the void — harmless, but don&#39;t spend time debugging it.</p>
+<hr>
+<h2 id="5-port-map--where-the-9615-loc-go"><a class="anchor" href="#5-port-map--where-the-9615-loc-go">5. Port map — where the 9,615 LOC go</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Area</th><th>LOC</th><th>Difficulty</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>src/*.php</code> (root: the 19 API classes)</td><td>1,603</td><td><strong>easy</strong></td><td>Each method is <code>$this-&gt;client-&gt;post(&#39;window/resize&#39;, […])</code>. Mechanical.</td></tr>
+<tr><td><code>src/Events/</code></td><td>1,220</td><td><strong>easy</strong></td><td>44 data classes + <code>EventWatcher</code> (hard, §4) + <code>LivewireDispatcher</code> (replace).</td></tr>
+<tr><td><code>src/Drivers/</code></td><td>1,187</td><td><strong>medium</strong></td><td>Electron project management, npm orchestration, updater providers. Mostly reusable with <code>base_path()</code> → a paths service.</td></tr>
+<tr><td><code>src/Commands/</code></td><td>1,093</td><td><strong>medium</strong></td><td>11 commands. <code>native:config</code>/<code>native:php-ini</code> are 10 LOC each. DB commands (<code>migrate</code>, <code>seed</code>, <code>wipe</code>, <code>fresh</code>) extend Laravel&#39;s own — Symfony needs Doctrine equivalents or drops them.</td></tr>
+<tr><td><code>src/Fakes/</code></td><td>915</td><td><strong>easy</strong></td><td>Test doubles. Port later; not on the critical path.</td></tr>
+<tr><td><code>src/Windows/</code></td><td>601</td><td><strong>easy</strong></td><td><code>WindowManager</code> + fluent <code>Window</code>/<code>PendingOpenWindow</code>. Uses <code>Conditionable</code> — Symfony has no trait for that; either vendor a 20-LOC copy or drop <code>-&gt;when()</code>.</td></tr>
+<tr><td><code>src/Builder/</code></td><td>552</td><td><strong>medium</strong></td><td>Already uses <code>symfony/filesystem</code> + <code>Symfony\Component\Filesystem\Path</code>. Mostly framework-neutral already.</td></tr>
+<tr><td><code>src/Facades/</code></td><td>527</td><td><strong>delete</strong></td><td>Replace with autowired services. Zero port work; pure subtraction.</td></tr>
+<tr><td><code>src/Support/</code></td><td>480</td><td><strong>easy</strong></td><td><code>Composer</code> (uses <code>base_path</code>, <code>data_set</code>), <code>Environment</code> (pure PHP_OS_FAMILY, copy verbatim), <code>Timezones</code>.</td></tr>
+<tr><td><code>src/Menu/</code>, <code>src/MenuBar/</code></td><td>708</td><td><strong>easy</strong></td><td>Fluent builders producing arrays; the shape is defined by <code>helper/index.ts::compileMenu</code>.</td></tr>
+<tr><td><code>src/Concerns/</code></td><td>262</td><td><strong>easy</strong></td><td><code>DetectsWindowId</code> needs <code>Referer</code>-then-current-URL <code>_windowId</code> extraction from a Symfony <code>Request</code>.</td></tr>
+<tr><td><code>src/Contracts/</code>, <code>Enums/</code>, <code>DataObjects/</code></td><td>264</td><td><strong>copy</strong></td><td>Already framework-free. First candidates for <code>nativephp/core</code>.</td></tr>
+<tr><td><code>src/Http/</code></td><td>121</td><td><strong>easy</strong></td><td>3 controllers + 2 middleware.</td></tr>
+<tr><td><code>src/Client/</code></td><td>38</td><td><strong>easy</strong></td><td>Swap <code>Http</code> facade for <code>HttpClientInterface</code>.</td></tr>
+<tr><td><code>src/Logging/</code>, <code>src/Exceptions/</code></td><td>44</td><td><strong>easy</strong></td><td>Monolog handler; an <code>ErrorListener</code> writing <code>[NATIVE_EXCEPTION]:</code> to <code>error_log</code> (the runtime greps stderr for that literal prefix — keep it).</td></tr>
+</tbody></table></div>
+<p>Realistic first-pass scope for a usable bundle: <strong>~3,500 LOC</strong> (root API classes +
+events + Http + Client + Windows + Menu + the four commands needed for the dev
+loop). Facades and Fakes are free. Builder/Drivers can wait until someone needs a
+production build.</p>
+<hr>
+<h2 id="6-the-six-laravel-isms-in-the-electron-plugin-with-locations"><a class="anchor" href="#6-the-six-laravel-isms-in-the-electron-plugin-with-locations">6. The six Laravel-isms in the Electron plugin, with locations</a></h2>
+<p>All in <code>electron-plugin/src/server/php.ts</code> unless noted:</p>
+<div class="table-scroll"><table><thead><tr><th>#</th><th>Location</th><th>Code</th><th>Fix</th></tr></thead><tbody>
+<tr><td>1</td><td>L153, L174</td><td><code>const command = [&#39;artisan&#39;, &#39;native:php-ini&#39; | &#39;native:config&#39;]</code></td><td>manifest key <code>cli</code></td></tr>
+<tr><td>2</td><td>L184, L208, L286, L425, L442</td><td><code>args[0] === &#39;artisan&#39;</code> guards; <code>[&#39;artisan&#39;,&#39;schedule:run&#39;|&#39;optimize&#39;|&#39;migrate --force&#39;]</code></td><td>manifest keys <code>cli</code>, <code>lifecycle.*</code></td></tr>
+<tr><td>3</td><td>L388–L397</td><td>router script <code>vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php</code>, <code>cwd = join(appPath,&#39;public&#39;)</code></td><td>manifest keys <code>router</code>, <code>docroot</code></td></tr>
+<tr><td>4</td><td>L20, L24–L28, L253</td><td><code>LARAVEL_STORAGE_PATH</code>; mkdir <code>storage/framework/{cache,sessions,views,testing}</code>; <code>copySync(join(appPath,&#39;storage&#39;), storagePath)</code></td><td>manifest key <code>writableDirs[]</code></td></tr>
+<tr><td>5</td><td>L22, L428–L433</td><td><code>bootstrap/cache</code> + <code>APP_{SERVICES,PACKAGES,CONFIG,ROUTES,EVENTS}_CACHE</code></td><td>manifest key <code>cacheEnv{}</code></td></tr>
+<tr><td>6</td><td>L47–L96</td><td><code>vendor/laravel/nightwatch</code> detection</td><td>leave as-is; it no-ops elsewhere</td></tr>
+<tr><td>7</td><td><code>api/childProcess.ts:174</code></td><td><code>settings.cmd[0] === &#39;artisan&#39;</code></td><td>manifest key <code>cli</code></td></tr>
+<tr><td><strong>8</strong></td><td>L~300 (<code>getDefaultEnvironmentVariables</code>)</td><td><code>APP_ENV: … ? &#39;local&#39; : &#39;production&#39;</code></td><td>manifest key <code>env.{dev,prod}</code></td></tr>
+</tbody></table></div>
+<p>Item 8 was <strong>not</strong> visible from reading — it surfaced only when the spike ran, and it
+is the only one of the eight that is a <em>hard</em> boot failure rather than a wrong path:
+Symfony 8 whitelists <code>APP_ENV</code> in <code>Kernel::getAllowedEnvs()</code> and throws on <code>local</code>.
+See <code>SPIKE-RESULTS.md</code> finding 1.</p>
+<p>That is the entire upstream diff needed for framework independence at the runtime
+layer. A <code>nativephp.json</code> manifest with six keys, defaulting to today&#39;s Laravel
+values, is a zero-behaviour-change PR. The org already uses exactly this pattern —
+<code>mobile-ui/composer.json</code> declares <code>extra.nativephp.manifest → nativephp.json</code>.</p>
+<p><strong>And the escape hatch:</strong> <code>ElectronServiceProvider::electronPath()</code> prefers
+<code>base_path(&#39;nativephp/electron/&#39;)</code> over the vendor copy whenever a <code>package.json</code>
+exists there, and <code>native:install --publish</code> mirrors the whole Electron project
+into the user&#39;s repo. So a Symfony bundle can ship a patched plugin <em>today</em>,
+without upstream cooperation. The upstream PR is for hygiene, not for unblocking.</p>
+<hr>
+<h2 id="7-symfony-specific-design-problems-and-resolutions"><a class="anchor" href="#7-symfony-specific-design-problems-and-resolutions">7. Symfony-specific design problems and resolutions</a></h2>
+<h3 id="71-runtime-mutable-config--the-deepest-mismatch"><a class="anchor" href="#71-runtime-mutable-config--the-deepest-mismatch">7.1 Runtime-mutable config — the deepest mismatch</a></h3>
+<p><code>NativeServiceProvider::configureApp()</code> mutates config at boot: <code>session.driver=file</code>,
+<code>queue.default=database</code>, a whole <code>database.connections.nativephp</code> array,
+<code>queue.failed.database</code>, <code>queue.batching.database</code>, plus
+<code>rewriteStoragePath()</code> which does <code>Arr::dot(config()-&gt;all())</code> and string-replaces the
+old storage path in <strong>every</strong> config value. Symfony&#39;s container is compiled and frozen;
+none of this is possible at runtime.</p>
+<p>Resolution: everything the runtime needs to vary is <em>already</em> an environment
+variable, because it has to cross a process boundary. So:</p>
+<ul>
+<li><code>%env(NATIVEPHP_STORAGE_PATH)%</code> etc. straight into <code>framework.cache</code>,
+<code>framework.session.save_path</code>, Monolog paths, and a <code>doctrine.dbal.connections.nativephp</code>
+with <code>path: &#39;%env(NATIVEPHP_DATABASE_PATH)%&#39;</code>.</li>
+<li>Ship a <code>config/packages/native.yaml</code> recipe that wires those, rather than trying to
+mutate anything. Declarative where Laravel is imperative — arguably better.</li>
+<li>The <code>Arr::dot</code> path rewriting has no analogue and needs none: Symfony&#39;s
+<code>%kernel.cache_dir%</code>/<code>%kernel.logs_dir%</code> are single-sourced, unlike Laravel&#39;s
+dozens of independently-configured absolute paths.</li>
+<li>SQLite WAL setup (<code>PRAGMA journal_mode=WAL</code>, <code>busy_timeout=5000</code>) becomes a
+DBAL <code>postConnect</code> event subscriber. Do not skip this — multiple PHP processes
+(dev server + queue workers + scheduler) hit that file concurrently.</li>
+</ul>
+<h3 id="72-queue-workers"><a class="anchor" href="#72-queue-workers">7.2 Queue workers</a></h3>
+<p><code>QueueWorker::up()</code> spawns <code>artisan queue:listen|queue:work</code> as a <em>runtime child
+process</em> via <code>/api/child-process/start-php</code> — the Electron <code>utilityProcess</code>, with
+<code>persistent: true</code> so the runtime restarts it on exit. Symfony Messenger&#39;s
+<code>messenger:consume</code> maps cleanly onto the same call; only the argument names change
+(<code>--memory</code>/<code>--timeout</code>/<code>--sleep</code> → <code>--memory-limit</code>/<code>--time-limit</code>/<code>--sleep</code>).</p>
+<p>The <code>persistent</code> watchdog, <code>handlesOwnShutdown</code> SIGTERM semantics, and the 12-second
+drain window in <code>index.ts::before-quit</code> are all runtime-side and come for free.</p>
+<h3 id="73-the-dev-server-document-root"><a class="anchor" href="#73-the-dev-server-document-root">7.3 The dev-server document root</a></h3>
+<p>Laravel&#39;s <code>server.php</code> router exists to emulate mod_rewrite for <code>php -S</code>. Symfony
+ships <code>Symfony\Component\HttpFoundation\Response</code> but no equivalent router script for
+the built-in server (<code>symfony serve</code> uses its own Go binary, which is not usable here —
+the runtime needs <code>php -S</code> so it can pass <code>-d</code> ini flags and own the process).</p>
+<p>Write a ~20-line router: serve the file if it exists under <code>public/</code>, else
+<code>require public/index.php</code>. This is well-trodden ground; Symfony&#39;s own docs
+described exactly this before <code>symfony serve</code> existed.</p>
+<h3 id="74-conditionable-macroable-str-arr-collections"><a class="anchor" href="#74-conditionable-macroable-str-arr-collections">7.4 <code>Conditionable</code>, <code>Macroable</code>, <code>Str</code>, <code>Arr</code>, collections</a></h3>
+<p>13 files use <code>Illuminate\Support\Traits\Conditionable</code> for <code>-&gt;when()</code>/<code>-&gt;unless()</code> on
+the fluent builders, one uses <code>Macroable</code>. Pulling <code>illuminate/support</code> into a Symfony
+bundle for this would be absurd. Vendor a 25-LOC <code>Conditionable</code> into
+<code>Native\Symfony\Desktop\Support</code> and drop <code>Macroable</code>. <code>Str</code>/<code>Arr</code>/<code>Collection</code> uses are few
+enough (a handful) to inline.</p>
+<h3 id="75-the-_windowid-convention"><a class="anchor" href="#75-the-_windowid-convention">7.5 The <code>_windowId</code> convention</a></h3>
+<p>Every navigation the runtime performs appends <code>?_windowId=&lt;id&gt;</code>
+(<code>utils.ts::appendWindowIdToUrl</code>), and <code>DetectsWindowId</code> recovers it from the
+<code>Referer</code> header, falling back to the current URL. Consequences for Symfony:</p>
+<ul>
+<li>The query parameter is part of the URL for HTTP-cache purposes. Make sure
+<code>native:</code> routes are <code>no-store</code>, or two windows will share cached pages.</li>
+<li><code>Referer</code>-based detection means the <em>current</em> request&#39;s window is inferred from
+where the user came from. Fragile by design; keep the fallback order identical
+rather than &quot;improving&quot; it, or multi-window apps will target the wrong window.</li>
+</ul>
+<h3 id="77-laravels-default-lists-do-not-translate--they-collide"><a class="anchor" href="#77-laravels-default-lists-do-not-translate--they-collide">7.7 Laravel&#39;s default lists do not translate — they collide</a></h3>
+<p><code>config/nativephp.php</code>&#39;s <code>cleanup_env_keys</code> globs <code>*_SECRET</code>. Harmless in Laravel, whose
+key is <code>APP_KEY</code>; fatal in Symfony, whose key is <strong><code>APP_SECRET</code></strong> and is read by
+<code>framework.yaml</code> as <code>%env(APP_SECRET)%</code>. A build that strips it produces an app that
+throws <code>EnvNotFoundException</code> before it can render anything.</p>
+<p>The lesson is general, and applies to anything carried across from the Laravel config:
+these lists were written against Laravel&#39;s names and the two frameworks collide on
+<code>APP_*</code>. Re-read them rather than translating them. See <code>M3-RESULTS.md</code> finding 1 for the
+fix, which guards against the user re-introducing the glob themselves.</p>
+<h3 id="76-provider-bootstrap"><a class="anchor" href="#76-provider-bootstrap">7.6 Provider bootstrap</a></h3>
+<p><code>config(&#39;nativephp.provider&#39;)</code> names a class (<code>App\Providers\NativeAppServiceProvider</code>)
+that the booted-controller resolves and calls <code>-&gt;boot()</code> on, and that
+<code>native:php-ini</code> optionally calls <code>-&gt;phpIni()</code> on. In Symfony this becomes an
+interface pair — <code>NativeAppBootstrapper { public function boot(): void; }</code> and the
+existing <code>ProvidesPhpIni</code> — implemented by a user service and autowired. Cleaner
+than the Laravel version, which resolves a service-provider class out of the
+container for two ad-hoc method calls.</p>
+<hr>
+<h2 id="8-findings-worth-reporting-upstream"><a class="anchor" href="#8-findings-worth-reporting-upstream">8. Findings worth reporting upstream</a></h2>
+<p>These make good first PRs: small, real, and they buy credibility before asking for
+the framework-agnosticism refactor.</p>
+<ol>
+<li><p><strong><code>CreateSecurityCookieController</code> reads a config namespace that does not exist.</strong>
+<code>src/Http/Controllers/CreateSecurityCookieController.php:11,15</code> uses
+<code>config(&#39;native-php.secret&#39;)</code>. The only config files are <code>nativephp.php</code> and
+<code>nativephp-internal.php</code> — grep confirms <code>native-php</code> appears nowhere else in the
+package. So the guard compares user input against <code>null</code> (passing only when no
+<code>secret</code> param is sent) and then sets the cookie to <code>null</code>. The route is
+effectively dead; the real cookie is set by Electron in <code>utils.ts::appendCookie</code>.
+Either fix to <code>nativephp-internal.secret</code> or delete the route. As written it is
+also the one route <code>PreventRegularBrowserAccess</code> deliberately lets through
+unauthenticated.</p>
+</li>
+<li><p><strong><code>notifyLaravel</code> swallows every error</strong> (<code>utils.ts</code>, empty <code>catch {}</code>). A PHP app
+that is down, 500ing, or 403ing is indistinguishable from one working fine. A
+single <code>console.error</code> behind <code>SHELL_VERBOSITY</code> would save porters and app
+developers a lot of time — I hit this repeatedly while tracing the flow.</p>
+</li>
+<li><p><strong><code>window/current</code> will throw if no window is focused.</strong>
+<code>api/window.ts</code> calls <code>BrowserWindow.getFocusedWindow().id</code> with no null guard;
+<code>getFocusedWindow()</code> returns <code>null</code> when the app is in the background. Then
+<code>getWindowData(undefined)</code> throws a bare string. Reachable from any background
+PHP process (a queue worker calling <code>Window::current()</code>).</p>
+</li>
+<li><p><strong><code>shell/trash-item</code> returns <code>res.status(400).json()</code> with no argument</strong>, which
+express rejects. Minor, but it turns a handled failure into an unhandled one.</p>
+</li>
+<li><p><strong>A missing <code>storage/</code> directory kills the boot.</strong>
+<code>php.ts::ensureAppFoldersAreAvailable()</code> calls
+<code>copySync(join(appPath,&#39;storage&#39;), storagePath)</code> unconditionally, and <code>fs-extra</code>
+throws on a missing source — so boot dies at step 9a, before the PHP server starts.
+Not Symfony-specific: a Laravel app whose storage lives elsewhere hits it too. One
+<code>existsSync</code> guard fixes it. Found by running the spike.</p>
+</li>
+<li><p><strong><code>native:config</code> / <code>native:php-ini</code> failures are swallowed.</strong>
+<code>index.ts::loadConfig()</code> / <code>loadPhpIni()</code> catch, log, and return <code>{}</code>. During the
+spike both commands were failing and boot ran to completion anyway — no app id, no
+deep links, no updater, no visible symptom. Same class as finding 2, and the single
+most expensive thing to debug when porting: a broken config command and a correct
+one look identical.</p>
+</li>
+<li><p><strong><code>schedule:run</code> is spawned unconditionally every 60s</strong> with no check that the
+command exists, producing a silently failing process per minute for any app that
+lacks it.</p>
+</li>
+<li><p><strong><code>window/open</code> without <code>zoomFactor</code> calls <code>setZoomFactor(NaN)</code>.</strong>
+<code>api/window.ts</code> does <code>setZoomFactor(parseFloat(zoomFactor))</code> on <code>dom-ready</code> with no
+guard. Invisible upstream because <code>Windows\Window</code> defaults the property to <code>1.0</code>
+and always serialises it — so it lands on the first independent client instead.
+Found by looking at a window rendering four enormous letters.</p>
+</li>
+<li><p><strong>Packaged apps silently have no opcache.</strong> The <code>php-bin</code> static binary cannot load
+extensions dynamically, yet its baked-in ini asks for opcache, so every invocation
+prints a warning and every request pays full compile cost. Affects Laravel apps
+equally. The warning is also HTML-escaped into stderr (<code>html_errors=1</code>), which makes
+the runtime&#39;s logs harder to read.</p>
+</li>
+<li><p><strong>Stale conflict metadata.</strong> <code>composer.json</code> conflicts with <code>nativephp/laravel</code>
+   and <code>nativephp/electron</code> — correct — but the <code>homepage</code> still points at
+   <code>github.com/nativephp/laravel</code>, which is archived, and <code>extra.laravel.aliases</code>
+   maps <code>Updater</code> to <code>Native\Electron\Facades\Updater</code> while the class actually
+   lives at <code>Native\Desktop\Drivers\Electron\Facades\Updater</code>. That alias is broken.</p>
+</li>
+</ol>
+<hr>
+<h2 id="9-open-questions-that-need-maintainer-input"><a class="anchor" href="#9-open-questions-that-need-maintainer-input">9. Open questions that need maintainer input</a></h2>
+<ol>
+<li><p><strong>Bifrost and the secure build.</strong> <code>BuildCommand</code> branches on
+<code>Builder::hasBundled()</code> — the presence of <code>build/__nativephp_app_bundle</code>,
+downloaded from <code>bifrost.nativephp.com</code> (<code>api/v1/projects/{id}/builds/latest-desktop-bundle</code>).
+Without it, <code>native:build</code> prints a loud <code>* * * INSECURE BUILD * * *</code> warning and
+ships readable source. In a secure build the bundle file is used <em>both</em> as the
+<code>php -S</code> router script and prepended to every <code>artisan</code> invocation — so it is a
+loader that must know the project&#39;s entrypoints. Whether Bifrost&#39;s server-side
+bundler can target <code>public/index.php</code> + <code>bin/console</code> instead of
+<code>public/index.php</code> + <code>artisan</code> is not answerable from the client code. <strong>If it
+cannot, Symfony users get source-exposed builds only</strong> — a genuine product gap,
+and also a commercial argument <em>for</em> Symfony support: Bifrost is the paid product,
+and a Symfony adapter enlarges its market.</p>
+</li>
+<li><p><strong>Naming and vendor namespace.</strong> <code>nativephp/desktop</code> is MIT, so adapting the code
+is unambiguously fine. Publishing as <code>nativephp/symfony</code> is a brand question.</p>
+</li>
+<li><p><strong>Would a manifest PR be accepted?</strong> §6&#39;s PR is small and behaviour-preserving,
+but it is the one thing that must land upstream for the port not to carry a
+patched copy of the plugin forever.</p>
+</li>
+</ol>
+<hr>
+<h2 id="10-mobile--a-correction"><a class="anchor" href="#10-mobile--a-correction">10. Mobile — a correction</a></h2>
+<blockquote>
+<p><strong>This section is superseded by <code>MOBILE-ANALYSIS.md</code>.</strong> The numbers below are accurate but
+the conclusion drawn from them was wrong: the Blade-coupled rendering engine is <strong>optional</strong>,
+not mandatory. <code>BootPlanner</code> on both platforms falls back to a WebView path whenever an app
+registers no <code>Route::native</code> patterns, and <code>NATIVEPHP_BOOT_MODE=web</code> forces it explicitly. A
+Symfony mobile app therefore needs <strong>none</strong> of the 17,316 lines described here — it needs a
+~100-line SAPI shim and wrappers for 54 bridge methods.</p>
+<p>I measured the hard path and treated it as the only path. Kept below as written, because the
+Edge figures still price the <em>native-UI</em> project (M6) correctly.</p>
+</blockquote>
+<h3 id="the-original-assessment--why-native-ui-is-a-different-order-of-magnitude"><a class="anchor" href="#the-original-assessment--why-native-ui-is-a-different-order-of-magnitude">The original assessment — why native UI is a different order of magnitude</a></h3>
+<p>Numbers, so this is not a matter of taste:</p>
+<ul>
+<li><strong><code>src/Edge/</code> is 17,316 LOC — 32% of mobile&#39;s entire PHP codebase.</strong> It is a
+rendering engine: <code>NativeTagPrecompiler</code> (compiles <code>&lt;native:*&gt;</code> tags straight into
+<code>NativeElementCollector</code> calls, explicitly <em>bypassing</em> the Blade component
+lifecycle for speed), <code>TailwindParser</code>, <code>ElementRegistry</code>, <code>ComponentRegistry</code>,
+37 element classes, a Yoga-flexbox layout model, <code>NativeRouter</code>, plus
+<code>Route::native()</code> / <code>Route::nativeGroup()</code> / <code>-&gt;layout()</code> macros on Laravel&#39;s
+Router. <strong>32 of its 92 files import Blade, <code>Illuminate\View</code>, or a compiler
+directly.</strong></li>
+<li>The device-side bootstrap is a hand-rolled SAPI: <code>bootstrap/{ios,android}/native.php</code>
+reconstructs <code>$_GET</code>/<code>$_POST</code>/<code>$_COOKIE</code> from <code>$_SERVER</code>, requires
+<code>bootstrap/app.php</code>, resolves <code>Illuminate\Contracts\Http\Kernel</code>, and echoes a raw
+HTTP response by hand. <code>persistent.php</code> + <code>src/Runtime.php</code> keep the interpreter
+alive across requests via <code>zend_eval_string()</code> into <code>Runtime::dispatch()</code>, with a
+<code>Runtime::boot($app)</code> that takes a Laravel application instance.</li>
+<li>The native bridge itself (<code>nativephp_call($method, $jsonPayload)</code>, a PHP extension
+function) <em>is</em> framework-agnostic — that part is fine.</li>
+<li>Requires Xcode + Android Studio + NDK + Kotlin/Swift to even run the test loop.</li>
+<li>~20 satellite plugin packages, each shipping its own Kotlin/Swift renderers, plus a
+plugin manifest/compiler system (<code>src/Plugins/</code>, <code>AndroidPluginCompiler</code>,
+<code>IOSPluginCompiler</code>).</li>
+</ul>
+<p>A Twig port means reimplementing a 17k-LOC Blade-coupled rendering engine against a
+moving target, before a single native call happens. Desktop needs ~3,500 LOC against
+a stable HTTP contract, and its UI layer needs <strong>zero</strong> work because a Symfony app in
+a WebView is already a Symfony app.</p>
+<p>Verdict unchanged: desktop first, and mobile only if desktop earns it.</p>
+<hr>
+<h2 id="11-revised-milestones"><a class="anchor" href="#11-revised-milestones">11. Revised milestones</a></h2>
+<p>M0 and M1 are now well-enough understood to start immediately.</p>
+<ul>
+<li><strong>M0 — <code>CONTRACT.md</code>.</strong> §§1–4 above are most of it. What remains is the per-endpoint
+request/response table for all 116 endpoints. Mechanical; extract from the 22 TS
+route files.</li>
+<li><strong>M1 — spike.</strong> Concretely, in a fresh Symfony 7 app:<ol>
+<li><code>composer require nativephp/desktop</code> (yes, the Laravel one — for its
+<code>resources/electron/</code>), then copy <code>resources/electron</code> to <code>nativephp/electron</code>.</li>
+<li>Patch three spots in <code>nativephp/electron/electron-plugin/src/server/php.ts</code>
+(§6 items 1, 2, 3), rebuild <code>dist/</code>.</li>
+<li>Root <code>artisan</code> shim → <code>bin/console</code>.</li>
+<li>Two commands: <code>native:config</code> (emit the five keys), <code>native:php-ini</code> (emit <code>{}</code>).</li>
+<li>Two controllers: <code>/_native/api/booted</code>, <code>/_native/api/events</code>.</li>
+<li>One router script for <code>php -S</code>.</li>
+<li>A 40-LOC <code>Client</code> on <code>HttpClientInterface</code>, and <code>Window::open()</code> /
+<code>Window::resize()</code>.</li>
+<li><code>npm install &amp;&amp; npm run dev</code> in <code>nativephp/electron</code> with <code>APP_PATH=&lt;symfony app&gt;</code>.
+Exit criterion: a Twig page in an Electron window that resizes itself.</li>
+</ol>
+</li>
+<li><strong>M2–M5</strong> as in <code>PLAN.md</code>, with the port map in §5 as the work breakdown and the
+design resolutions in §7 as the decisions already made.</li>
+<li><strong>Alongside M1:</strong> open the five findings in §8 as issues/PRs. They are real,
+independently useful, and they establish that this is a serious effort before
+#504 gets re-opened with a spec attached.</li>
+</ul>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="architecture.html"><span>← Previous</span><strong>Architecture</strong></a>
+            <a class="pager-link next" href="mobile-analysis.html"><span>Next →</span><strong>Mobile analysis</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/ANALYSIS.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#1-the-boot-sequence-exactly">1. The boot sequence, exactly</a></li><li class="lvl2"><a href="#2-the-two-channels-and-the-auth-model">2. The two channels and the auth model</a></li><li class="lvl3"><a href="#channel-a--php-→-runtime-116-endpoints">Channel A — PHP → runtime (116 endpoints)</a></li><li class="lvl3"><a href="#channel-b--runtime-→-php-44-event-types">Channel B — runtime → PHP (44 event types)</a></li><li class="lvl3"><a href="#channel-c--runtime-→-renderer-the-browser">Channel C — runtime → renderer (the browser)</a></li><li class="lvl3"><a href="#three-layer-security-model">Three-layer security model</a></li><li class="lvl2"><a href="#3-what-the-runtime-requires-of-the-php-app--the-real-contract">3. What the runtime requires of the PHP app — the real contract</a></li><li class="lvl3"><a href="#config-keys-the-runtime-actually-reads">Config keys the runtime actually reads</a></li><li class="lvl3"><a href="#the-environment-contract">The environment contract</a></li><li class="lvl2"><a href="#4-reverse-channel--the-44-events">4. Reverse channel — the 44 events</a></li><li class="lvl3"><a href="#forward-direction--app-→-runtime-→-renderer">Forward direction — app → runtime → renderer</a></li><li class="lvl2"><a href="#5-port-map--where-the-9615-loc-go">5. Port map — where the 9,615 LOC go</a></li><li class="lvl2"><a href="#6-the-six-laravel-isms-in-the-electron-plugin-with-locations">6. The six Laravel-isms in the Electron plugin, with locations</a></li><li class="lvl2"><a href="#7-symfony-specific-design-problems-and-resolutions">7. Symfony-specific design problems and resolutions</a></li><li class="lvl3"><a href="#71-runtime-mutable-config--the-deepest-mismatch">7.1 Runtime-mutable config — the deepest mismatch</a></li><li class="lvl3"><a href="#72-queue-workers">7.2 Queue workers</a></li><li class="lvl3"><a href="#73-the-dev-server-document-root">7.3 The dev-server document root</a></li><li class="lvl3"><a href="#74-conditionable-macroable-str-arr-collections">7.4 Conditionable, Macroable, Str, Arr, collections</a></li><li class="lvl3"><a href="#75-the-_windowid-convention">7.5 The _windowId convention</a></li><li class="lvl3"><a href="#77-laravels-default-lists-do-not-translate--they-collide">7.7 Laravel's default lists do not translate — they collide</a></li><li class="lvl3"><a href="#76-provider-bootstrap">7.6 Provider bootstrap</a></li><li class="lvl2"><a href="#8-findings-worth-reporting-upstream">8. Findings worth reporting upstream</a></li><li class="lvl2"><a href="#9-open-questions-that-need-maintainer-input">9. Open questions that need maintainer input</a></li><li class="lvl2"><a href="#10-mobile--a-correction">10. Mobile — a correction</a></li><li class="lvl3"><a href="#the-original-assessment--why-native-ui-is-a-different-order-of-magnitude">The original assessment — why native UI is a different order of magnitude</a></li><li class="lvl2"><a href="#11-revised-milestones">11. Revised milestones</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

@@ -4,71 +4,68 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Recipes · NativePHP for Symfony</title>
-<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<meta name="description" content="Multi-window, workers, native screens, packaging — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 </head>
 <body>
-<a class="skip" href="#content">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="layout">
-    <aside class="sidebar">
-        <a class="brand" href="index.html">
-            <span class="brand-mark" aria-hidden="true">NS</span>
-            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
-        </a>
-        <nav class="nav" aria-label="Documentation">
-<a class="nav-link" href="index.html">
-            <span class="nav-title">Overview</span>
-            <span class="nav-blurb">What is here, and what is authoritative</span>
-        </a>
-<p class="nav-section">Using it</p>
-<a class="nav-link" href="getting-started-desktop.html">
-            <span class="nav-title">Desktop</span>
-            <span class="nav-blurb">From composer require to a window</span>
-        </a>
-<a class="nav-link" href="getting-started-mobile.html">
-            <span class="nav-title">Mobile</span>
-            <span class="nav-blurb">Both render paths, and what is verified</span>
-        </a>
-<p class="nav-section">Reference</p>
-<a class="nav-link" href="desktop-api.html">
-            <span class="nav-title">Desktop API</span>
-            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
-        </a>
-<a class="nav-link" href="mobile-api.html">
-            <span class="nav-title">Mobile API</span>
-            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
-        </a>
-<p class="nav-section">Working with it</p>
-<a class="nav-link current" href="recipes.html" aria-current="page">
-            <span class="nav-title">Recipes</span>
-            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
-        </a>
-<a class="nav-link" href="testing.html">
-            <span class="nav-title">Testing</span>
-            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
-        </a>
-<a class="nav-link" href="troubleshooting.html">
-            <span class="nav-title">Troubleshooting</span>
-            <span class="nav-blurb">Symptom → cause → fix</span>
-        </a>
-        </nav>
-        <div class="sidebar-foot">
-            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
-            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
         </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item active" href="recipes.html" aria-current="page"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
     </aside>
 
-    <main id="content">
-        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
-<li class="d2"><a href="#a-multi-window-app-and-the-_windowid-convention">A multi-window app, and the _windowId convention</a></li>
-<li class="d2"><a href="#running-a-messenger-worker">Running a Messenger worker</a></li>
-<li class="d2"><a href="#reacting-to-a-runtime-event-with-a-typed-listener">Reacting to a runtime event with a typed listener</a></li>
-<li class="d3"><a href="#caller-named-events">Caller-named events</a></li>
-<li class="d2"><a href="#a-native-ui-screen-with-state">A native-UI screen with state</a></li>
-<li class="d2"><a href="#building-for-distribution">Building for distribution</a></li>
-</ul></nav>
+    <main id="main">
         <article class="prose">
 <h1 id="recipes"><a class="anchor" href="#recipes">Recipes</a></h1>
 <p>Complete, working answers to the things people actually build. Every sample here is written
@@ -86,84 +83,88 @@ against the real classes; check the signatures in
 <p>The runtime appends <code>?_windowId=&lt;id&gt;</code> to every navigation it performs. That parameter is how
 a request knows which window it came from — and it is the whole mechanism, so it is worth
 understanding before you rely on it.</p>
-<pre><code class="language-php">&lt;?php
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Native;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Native</span>;
 
-use Native\Symfony\Desktop\Contract\AppBootstrapper;
-use Native\Symfony\Desktop\Window\WindowManager;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Contract</span>\<span class="hljs-title">AppBootstrapper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Window</span>\<span class="hljs-title">WindowManager</span>;
 
-final class Bootstrapper implements AppBootstrapper
-{
-    public function __construct(private readonly WindowManager $windows)
-    {
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bootstrapper</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AppBootstrapper</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> WindowManager <span class="hljs-variable">$windows</span></span>)
+    </span>{
     }
 
-    public function boot(): void
-    {
-        $this-&gt;windows-&gt;open(&#39;main&#39;)
-            -&gt;url(&#39;/&#39;)
-            -&gt;size(1100, 760)
-            -&gt;minSize(640, 480)
-            -&gt;title(&#39;Ledger&#39;)
-            -&gt;rememberState()
-            -&gt;open();
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-string">&#x27;main&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">url</span>(<span class="hljs-string">&#x27;/&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">size</span>(<span class="hljs-number">1100</span>, <span class="hljs-number">760</span>)
+            -&gt;<span class="hljs-title function_ invoke__">minSize</span>(<span class="hljs-number">640</span>, <span class="hljs-number">480</span>)
+            -&gt;<span class="hljs-title function_ invoke__">title</span>(<span class="hljs-string">&#x27;Ledger&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">rememberState</span>()
+            -&gt;<span class="hljs-title function_ invoke__">open</span>();
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <p>Opening a second window from a controller, and closing it from inside itself:</p>
-<pre><code class="language-php">&lt;?php
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Controller;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Controller</span>;
 
-use Native\Symfony\Desktop\Window\WindowManager;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Window</span>\<span class="hljs-title">WindowManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Controller</span>\<span class="hljs-title">AbstractController</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">HttpFoundation</span>\<span class="hljs-title">Response</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">Route</span>;
 
-final class InspectorController extends AbstractController
-{
-    public function __construct(private readonly WindowManager $windows)
-    {
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">InspectorController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> WindowManager <span class="hljs-variable">$windows</span></span>)
+    </span>{
     }
 
-    #[Route(&#39;/inspector/open/{id}&#39;, name: &#39;inspector_open&#39;)]
-    public function open(string $id): Response
-    {
-        // One window per inspected entity. open() is idempotent by id, so clicking
-        // twice focuses the existing window instead of stacking a second one.
-        $this-&gt;windows-&gt;open(&#39;inspector:&#39;.$id)
-            -&gt;url($this-&gt;generateUrl(&#39;inspector_show&#39;, [&#39;id&#39; =&gt; $id]))
-            -&gt;size(520, 640)
-            -&gt;title(&#39;Inspector — &#39;.$id)
-            -&gt;open();
+    <span class="hljs-meta">#[Route</span>(<span class="hljs-string">&#x27;/inspector/open/{id}&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;inspector_open&#x27;</span>)<span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">open</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$id</span></span>): <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// One window per inspected entity. open() is idempotent by id, so clicking</span>
+        <span class="hljs-comment">// twice focuses the existing window instead of stacking a second one.</span>
+        <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-string">&#x27;inspector:&#x27;</span>.<span class="hljs-variable">$id</span>)
+            -&gt;<span class="hljs-title function_ invoke__">url</span>(<span class="hljs-variable">$this</span>-&gt;<span class="hljs-title function_ invoke__">generateUrl</span>(<span class="hljs-string">&#x27;inspector_show&#x27;</span>, [<span class="hljs-string">&#x27;id&#x27;</span> =&gt; <span class="hljs-variable">$id</span>]))
+            -&gt;<span class="hljs-title function_ invoke__">size</span>(<span class="hljs-number">520</span>, <span class="hljs-number">640</span>)
+            -&gt;<span class="hljs-title function_ invoke__">title</span>(<span class="hljs-string">&#x27;Inspector — &#x27;</span>.<span class="hljs-variable">$id</span>)
+            -&gt;<span class="hljs-title function_ invoke__">open</span>();
 
-        return $this-&gt;redirectToRoute(&#39;home&#39;);
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">redirectToRoute</span>(<span class="hljs-string">&#x27;home&#x27;</span>);
     }
 
-    #[Route(&#39;/inspector/{id}&#39;, name: &#39;inspector_show&#39;)]
-    public function show(string $id): Response
-    {
-        return $this-&gt;render(&#39;inspector.html.twig&#39;, [
-            &#39;id&#39; =&gt; $id,
-            // Which window am I? Null outside the runtime, or if the navigation
-            // did not carry the parameter.
-            &#39;windowId&#39; =&gt; $this-&gt;windows-&gt;detectId(),
+    <span class="hljs-meta">#[Route</span>(<span class="hljs-string">&#x27;/inspector/{id}&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;inspector_show&#x27;</span>)<span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">show</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$id</span></span>): <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">render</span>(<span class="hljs-string">&#x27;inspector.html.twig&#x27;</span>, [
+            <span class="hljs-string">&#x27;id&#x27;</span> =&gt; <span class="hljs-variable">$id</span>,
+            <span class="hljs-comment">// Which window am I? Null outside the runtime, or if the navigation</span>
+            <span class="hljs-comment">// did not carry the parameter.</span>
+            <span class="hljs-string">&#x27;windowId&#x27;</span> =&gt; <span class="hljs-variable">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">detectId</span>(),
         ]);
     }
 
-    #[Route(&#39;/inspector/{id}/close&#39;, name: &#39;inspector_close&#39;, methods: [&#39;POST&#39;])]
-    public function close(string $id): Response
-    {
-        // No id argument: close() falls back to the window this request came from,
-        // recovered from the Referer. A form POST is exactly the case the
-        // Referer-before-URL order exists for.
-        $this-&gt;windows-&gt;close();
+    <span class="hljs-meta">#[Route</span>(<span class="hljs-string">&#x27;/inspector/{id}/close&#x27;</span>, <span class="hljs-attr">name</span>: <span class="hljs-string">&#x27;inspector_close&#x27;</span>, <span class="hljs-attr">methods</span>: [<span class="hljs-string">&#x27;POST&#x27;</span>])<span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">close</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$id</span></span>): <span class="hljs-title">Response</span>
+    </span>{
+        <span class="hljs-comment">// No id argument: close() falls back to the window this request came from,</span>
+        <span class="hljs-comment">// recovered from the Referer. A form POST is exactly the case the</span>
+        <span class="hljs-comment">// Referer-before-URL order exists for.</span>
+        <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">close</span>();
 
-        return new Response(status: Response::HTTP_NO_CONTENT);
+        <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">Response</span>(status: <span class="hljs-title class_">Response</span>::<span class="hljs-variable constant_">HTTP_NO_CONTENT</span>);
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <p>Three rules that follow from the mechanism:</p>
 <ol>
 <li><strong>Keep the fallback order.</strong> <code>detectId()</code> reads the Referer first, then the current URL,
@@ -178,52 +179,58 @@ the dev server&#39;s port is chosen by the runtime and never published to PHP; o
 request it throws a <code>LogicException</code> that says exactly this.</li>
 </ol>
 <p>Reading the window back:</p>
-<pre><code class="language-php">$window = $this-&gt;windows-&gt;get(&#39;inspector:&#39;.$id);   // ?Window
-$current = $this-&gt;windows-&gt;current();              // ?Window — may be null; never chain on it
-$open = $this-&gt;windows-&gt;all();                     // list&lt;Window&gt;
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$window</span> = <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;inspector:&#x27;</span>.<span class="hljs-variable">$id</span>);   <span class="hljs-comment">// ?Window</span>
+<span class="hljs-variable">$current</span> = <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">current</span>();              <span class="hljs-comment">// ?Window — may be null; never chain on it</span>
+<span class="hljs-variable">$open</span> = <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">all</span>();                     <span class="hljs-comment">// list&lt;Window&gt;</span></code></pre>
+</figure>
 <h2 id="running-a-messenger-worker"><a class="anchor" href="#running-a-messenger-worker">Running a Messenger worker</a></h2>
-<pre><code class="language-php">&lt;?php
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Native;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Native</span>;
 
-use Native\Symfony\Desktop\Contract\AppBootstrapper;
-use Native\Symfony\Desktop\Process\MessengerWorker;
-use Native\Symfony\Desktop\Window\WindowManager;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Contract</span>\<span class="hljs-title">AppBootstrapper</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Process</span>\<span class="hljs-title">MessengerWorker</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Window</span>\<span class="hljs-title">WindowManager</span>;
 
-final class Bootstrapper implements AppBootstrapper
-{
-    public function __construct(
-        private readonly WindowManager $windows,
-        private readonly MessengerWorker $worker,
-    ) {
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bootstrapper</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AppBootstrapper</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params">
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> WindowManager <span class="hljs-variable">$windows</span>,
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> MessengerWorker <span class="hljs-variable">$worker</span>,
+    </span>) </span>{
     }
 
-    public function boot(): void
-    {
-        $this-&gt;windows-&gt;open(&#39;main&#39;)-&gt;url(&#39;/&#39;)-&gt;size(1000, 700)-&gt;open();
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-string">&#x27;main&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">url</span>(<span class="hljs-string">&#x27;/&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">size</span>(<span class="hljs-number">1000</span>, <span class="hljs-number">700</span>)-&gt;<span class="hljs-title function_ invoke__">open</span>();
 
-        // Idempotent by alias, which matters: /booted can fire more than once and
-        // this must not start a second consumer.
-        $this-&gt;worker-&gt;up(
-            alias: &#39;async&#39;,
-            transports: [&#39;async&#39;],
-            memoryLimit: 256,   // MB
-            timeLimit: 3600,    // seconds, then it exits and the watchdog restarts it
-            sleep: 1,
+        <span class="hljs-comment">// Idempotent by alias, which matters: /booted can fire more than once and</span>
+        <span class="hljs-comment">// this must not start a second consumer.</span>
+        <span class="hljs-variable language_">$this</span>-&gt;worker-&gt;<span class="hljs-title function_ invoke__">up</span>(
+            <span class="hljs-attr">alias</span>: <span class="hljs-string">&#x27;async&#x27;</span>,
+            <span class="hljs-attr">transports</span>: [<span class="hljs-string">&#x27;async&#x27;</span>],
+            <span class="hljs-attr">memoryLimit</span>: <span class="hljs-number">256</span>,   <span class="hljs-comment">// MB</span>
+            <span class="hljs-attr">timeLimit</span>: <span class="hljs-number">3600</span>,    <span class="hljs-comment">// seconds, then it exits and the watchdog restarts it</span>
+            <span class="hljs-attr">sleep</span>: <span class="hljs-number">1</span>,
         );
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <p>Watch it, and stop it:</p>
-<pre><code class="language-php">$handle = $worker-&gt;status(&#39;async&#39;);    // ?ProcessHandle
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$handle</span> = <span class="hljs-variable">$worker</span>-&gt;<span class="hljs-title function_ invoke__">status</span>(<span class="hljs-string">&#x27;async&#x27;</span>);    <span class="hljs-comment">// ?ProcessHandle</span>
 
-if (null === $handle || !$handle-&gt;isRunning()) {
-    $worker-&gt;up(alias: &#39;async&#39;, transports: [&#39;async&#39;]);
+<span class="hljs-keyword">if</span> (<span class="hljs-literal">null</span> === <span class="hljs-variable">$handle</span> || !<span class="hljs-variable">$handle</span>-&gt;<span class="hljs-title function_ invoke__">isRunning</span>()) {
+    <span class="hljs-variable">$worker</span>-&gt;<span class="hljs-title function_ invoke__">up</span>(<span class="hljs-attr">alias</span>: <span class="hljs-string">&#x27;async&#x27;</span>, <span class="hljs-attr">transports</span>: [<span class="hljs-string">&#x27;async&#x27;</span>]);
 }
 
-$worker-&gt;down(&#39;async&#39;);
-</code></pre>
+<span class="hljs-variable">$worker</span>-&gt;<span class="hljs-title function_ invoke__">down</span>(<span class="hljs-string">&#x27;async&#x27;</span>);</code></pre>
+</figure>
 <p>What <code>up()</code> does that you would otherwise have to remember: <code>persistent: true</code> so the
 runtime&#39;s watchdog restarts a worker that exited on <code>--memory-limit</code>;
 <code>handlesOwnShutdown: true</code> so shutdown is a plain SIGTERM to that process rather than a
@@ -234,204 +241,218 @@ exits cleanly.</p>
 own process aliases. Use the un-prefixed name in every <code>MessengerWorker</code> call; use the
 prefixed one when reading <code>ChildProcessManager::all()</code> or matching events.</p>
 <p>Worker output arrives as events:</p>
-<pre><code class="language-php">#[AsEventListener]
-public function onWorkerOutput(MessageReceived $event): void
-{
-    if (&#39;messenger_async&#39; === $event-&gt;alias) {
-        // Not line-buffered: one event may carry several lines or part of one.
-        $this-&gt;logger-&gt;info(rtrim($event-&gt;data));
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onWorkerOutput</span>(<span class="hljs-params">MessageReceived <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+</span>{
+    <span class="hljs-keyword">if</span> (<span class="hljs-string">&#x27;messenger_async&#x27;</span> === <span class="hljs-variable">$event</span>-&gt;alias) {
+        <span class="hljs-comment">// Not line-buffered: one event may carry several lines or part of one.</span>
+        <span class="hljs-variable language_">$this</span>-&gt;logger-&gt;<span class="hljs-title function_ invoke__">info</span>(<span class="hljs-title function_ invoke__">rtrim</span>(<span class="hljs-variable">$event</span>-&gt;data));
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <p>For a one-off job instead of a consumer, use <code>ChildProcessManager::console()</code> — same
 supervision, no watchdog:</p>
-<pre><code class="language-php">$processes-&gt;console(&#39;import&#39;, [&#39;app:import&#39;, $path]);
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$processes</span>-&gt;<span class="hljs-title function_ invoke__">console</span>(<span class="hljs-string">&#x27;import&#x27;</span>, [<span class="hljs-string">&#x27;app:import&#x27;</span>, <span class="hljs-variable">$path</span>]);</code></pre>
+</figure>
 <h2 id="reacting-to-a-runtime-event-with-a-typed-listener"><a class="anchor" href="#reacting-to-a-runtime-event-with-a-typed-listener">Reacting to a runtime event with a typed listener</a></h2>
 <p>Typed events dispatch under their class name, so <code>#[AsEventListener]</code> on a typed parameter is
 all a listener needs:</p>
-<pre><code class="language-php">&lt;?php
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Native;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Native</span>;
 
-use Native\Symfony\Desktop\Event\App\ApplicationBooted;
-use Native\Symfony\Desktop\Event\ChildProcess\ProcessExited;
-use Native\Symfony\Desktop\Event\Settings\SettingChanged;
-use Native\Symfony\Desktop\Event\Windows\WindowResized;
-use Native\Symfony\Desktop\Settings\SettingsManager;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">App</span>\<span class="hljs-title">ApplicationBooted</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">ChildProcess</span>\<span class="hljs-title">ProcessExited</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">Settings</span>\<span class="hljs-title">SettingChanged</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">Windows</span>\<span class="hljs-title">WindowResized</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Settings</span>\<span class="hljs-title">SettingsManager</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Psr</span>\<span class="hljs-title">Log</span>\<span class="hljs-title">LoggerInterface</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsEventListener</span>;
 
-final class RuntimeListener
-{
-    public function __construct(
-        private readonly SettingsManager $settings,
-        private readonly LoggerInterface $logger,
-    ) {
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">RuntimeListener</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params">
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> SettingsManager <span class="hljs-variable">$settings</span>,
+        <span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> LoggerInterface <span class="hljs-variable">$logger</span>,
+    </span>) </span>{
     }
 
-    #[AsEventListener]
-    public function onBooted(ApplicationBooted $event): void
-    {
-        $this-&gt;logger-&gt;info(&#39;The runtime finished booting.&#39;);
+    <span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onBooted</span>(<span class="hljs-params">ApplicationBooted <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable language_">$this</span>-&gt;logger-&gt;<span class="hljs-title function_ invoke__">info</span>(<span class="hljs-string">&#x27;The runtime finished booting.&#x27;</span>);
     }
 
-    /**
+    <span class="hljs-comment">/**
      * User-driven resizes only. A resize your own code requested through
      * WindowManager::resize() does NOT arrive here.
-     */
-    #[AsEventListener]
-    public function onResized(WindowResized $event): void
-    {
-        $this-&gt;settings-&gt;set(&quot;geometry:{$event-&gt;id}&quot;, [$event-&gt;width, $event-&gt;height]);
+     */</span>
+    <span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onResized</span>(<span class="hljs-params">WindowResized <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable language_">$this</span>-&gt;settings-&gt;<span class="hljs-title function_ invoke__">set</span>(<span class="hljs-string">&quot;geometry:<span class="hljs-subst">{$event-&gt;id}</span>&quot;</span>, [<span class="hljs-variable">$event</span>-&gt;width, <span class="hljs-variable">$event</span>-&gt;height]);
     }
 
-    #[AsEventListener]
-    public function onSettingChanged(SettingChanged $event): void
-    {
-        // Fires for writes this app makes itself — the runtime watches the store,
-        // not the caller. Writing from here would loop.
-        // And $event-&gt;key is the ROOT key: writing &#39;a.b&#39; reports &#39;a&#39;.
-        $this-&gt;logger-&gt;debug(&#39;setting {key} changed&#39;, [&#39;key&#39; =&gt; $event-&gt;key]);
+    <span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onSettingChanged</span>(<span class="hljs-params">SettingChanged <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// Fires for writes this app makes itself — the runtime watches the store,</span>
+        <span class="hljs-comment">// not the caller. Writing from here would loop.</span>
+        <span class="hljs-comment">// And $event-&gt;key is the ROOT key: writing &#x27;a.b&#x27; reports &#x27;a&#x27;.</span>
+        <span class="hljs-variable language_">$this</span>-&gt;logger-&gt;<span class="hljs-title function_ invoke__">debug</span>(<span class="hljs-string">&#x27;setting {key} changed&#x27;</span>, [<span class="hljs-string">&#x27;key&#x27;</span> =&gt; <span class="hljs-variable">$event</span>-&gt;key]);
     }
 
-    #[AsEventListener]
-    public function onProcessExited(ProcessExited $event): void
-    {
-        $this-&gt;logger-&gt;warning(&#39;{alias} exited with {code}&#39;, [
-            &#39;alias&#39; =&gt; $event-&gt;alias,
-            &#39;code&#39; =&gt; $event-&gt;code,
+    <span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onProcessExited</span>(<span class="hljs-params">ProcessExited <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable language_">$this</span>-&gt;logger-&gt;<span class="hljs-title function_ invoke__">warning</span>(<span class="hljs-string">&#x27;{alias} exited with {code}&#x27;</span>, [
+            <span class="hljs-string">&#x27;alias&#x27;</span> =&gt; <span class="hljs-variable">$event</span>-&gt;alias,
+            <span class="hljs-string">&#x27;code&#x27;</span> =&gt; <span class="hljs-variable">$event</span>-&gt;code,
         ]);
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <h3 id="caller-named-events"><a class="anchor" href="#caller-named-events">Caller-named events</a></h3>
 <p>A global shortcut, a menu item with an <code>event:</code>, or a notification with <code>event()</code> pushes back
 a name of <em>your</em> choosing. There is no class to key on, so those arrive as <code>NativeEvent</code>
 under two names — <code>native.&lt;name&gt;</code> and <code>NativeEvent::class</code>. Register for one, never both:</p>
-<pre><code class="language-php">use Native\Symfony\Desktop\Event\NativeEvent;
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">NativeEvent</span>;
 
-final class ShortcutListener
-{
-    public function __construct(private readonly GlobalShortcutManager $shortcuts) {}
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ShortcutListener</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> GlobalShortcutManager <span class="hljs-variable">$shortcuts</span></span>) </span>{}
 
-    public function register(): void
-    {
-        // register() cannot report failure — another app may already own the
-        // accelerator. registerChecked() asks the OS afterwards.
-        if (!$this-&gt;shortcuts-&gt;registerChecked(&#39;CommandOrControl+Shift+K&#39;, &#39;App\Shortcut\Palette&#39;)) {
-            // fall back to an in-app binding
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">register</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// register() cannot report failure — another app may already own the</span>
+        <span class="hljs-comment">// accelerator. registerChecked() asks the OS afterwards.</span>
+        <span class="hljs-keyword">if</span> (!<span class="hljs-variable language_">$this</span>-&gt;shortcuts-&gt;<span class="hljs-title function_ invoke__">registerChecked</span>(<span class="hljs-string">&#x27;CommandOrControl+Shift+K&#x27;</span>, <span class="hljs-string">&#x27;App\Shortcut\Palette&#x27;</span>)) {
+            <span class="hljs-comment">// fall back to an in-app binding</span>
         }
     }
 
-    #[AsEventListener(event: &#39;native.App\Shortcut\Palette&#39;)]
-    public function onPalette(NativeEvent $event): void
-    {
-        // $event-&gt;name is the name you chose; $event-&gt;payload is whatever came with it
+    <span class="hljs-meta">#[AsEventListener</span>(<span class="hljs-attr">event</span>: <span class="hljs-string">&#x27;native.App\Shortcut\Palette&#x27;</span>)<span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onPalette</span>(<span class="hljs-params">NativeEvent <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// $event-&gt;name is the name you chose; $event-&gt;payload is whatever came with it</span>
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <p>While porting, a catch-all is the fastest way to see what the runtime is really sending:</p>
-<pre><code class="language-php">#[AsEventListener]
-public function onAnything(NativeEvent $event): void
-{
-    $this-&gt;logger-&gt;debug(&#39;native event {name}&#39;, [
-        &#39;name&#39; =&gt; $event-&gt;name,
-        &#39;payload&#39; =&gt; $event-&gt;payload,
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onAnything</span>(<span class="hljs-params">NativeEvent <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+</span>{
+    <span class="hljs-variable language_">$this</span>-&gt;logger-&gt;<span class="hljs-title function_ invoke__">debug</span>(<span class="hljs-string">&#x27;native event {name}&#x27;</span>, [
+        <span class="hljs-string">&#x27;name&#x27;</span> =&gt; <span class="hljs-variable">$event</span>-&gt;name,
+        <span class="hljs-string">&#x27;payload&#x27;</span> =&gt; <span class="hljs-variable">$event</span>-&gt;payload,
     ]);
-}
-</code></pre>
+}</code></pre>
+</figure>
 <p>Test any of this without a runtime — see <a href="testing.html#pushing-events-into-the-app">Testing</a>.</p>
 <h2 id="a-native-ui-screen-with-state"><a class="anchor" href="#a-native-ui-screen-with-state">A native-UI screen with state</a></h2>
 <p>Mobile only, and the least device-verified path in the project. Read
-<a href="getting-started-mobile.html#path-b--the-native-ui-render-path">the mobile getting-started page</a>
+<a href="mobile.html#path-b--the-native-ui-render-path">the mobile getting-started page</a>
 first.</p>
-<pre><code class="language-php">&lt;?php
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
-namespace App\Screen;
+<span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Screen</span>;
 
-use Native\Symfony\Mobile\Ui\Component\NativeAction;
-use Native\Symfony\Mobile\Ui\Component\NativeComponent;
-use Native\Symfony\Mobile\Ui\Element;
-use Native\Symfony\Mobile\Ui\Elements\Button;
-use Native\Symfony\Mobile\Ui\Elements\Column;
-use Native\Symfony\Mobile\Ui\Elements\Row;
-use Native\Symfony\Mobile\Ui\Elements\Text;
-use Native\Symfony\Mobile\Ui\Elements\TextInput;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">NativeAction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">NativeComponent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Element</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Button</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Column</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Row</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Text</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">TextInput</span>;
 
-final class TodoScreen extends NativeComponent
-{
-    /** @var list&lt;string&gt; */
-    private array $items = [];
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">TodoScreen</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">NativeComponent</span>
+</span>{
+    <span class="hljs-comment">/** <span class="hljs-doctag">@var</span> list&lt;string&gt; */</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">array</span> <span class="hljs-variable">$items</span> = [];
 
-    private string $draft = &#39;&#39;;
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">string</span> <span class="hljs-variable">$draft</span> = <span class="hljs-string">&#x27;&#x27;</span>;
 
-    #[NativeAction]
-    public function draftChanged(string $value): void
-    {
-        // The argument comes from InteractionEvent, narrowed by event type:
-        // TEXT_CHANGE always yields exactly one string.
-        $this-&gt;draft = $value;
+    <span class="hljs-meta">#[NativeAction</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">draftChanged</span>(<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$value</span></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// The argument comes from InteractionEvent, narrowed by event type:</span>
+        <span class="hljs-comment">// TEXT_CHANGE always yields exactly one string.</span>
+        <span class="hljs-variable language_">$this</span>-&gt;draft = <span class="hljs-variable">$value</span>;
     }
 
-    #[NativeAction]
-    public function add(): void
-    {
-        if (&#39;&#39; !== trim($this-&gt;draft)) {
-            $this-&gt;items[] = $this-&gt;draft;
-            $this-&gt;draft = &#39;&#39;;
+    <span class="hljs-meta">#[NativeAction</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">add</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-string">&#x27;&#x27;</span> !== <span class="hljs-title function_ invoke__">trim</span>(<span class="hljs-variable">$this</span>-&gt;draft)) {
+            <span class="hljs-variable language_">$this</span>-&gt;items[] = <span class="hljs-variable language_">$this</span>-&gt;draft;
+            <span class="hljs-variable language_">$this</span>-&gt;draft = <span class="hljs-string">&#x27;&#x27;</span>;
         }
     }
 
-    #[NativeAction]
-    public function remove(int $index): void
-    {
-        // Literal arguments in the expression come first, event values after.
-        unset($this-&gt;items[$index]);
-        $this-&gt;items = array_values($this-&gt;items);
+    <span class="hljs-meta">#[NativeAction</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">remove</span>(<span class="hljs-params"><span class="hljs-keyword">int</span> <span class="hljs-variable">$index</span></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-comment">// Literal arguments in the expression come first, event values after.</span>
+        <span class="hljs-keyword">unset</span>(<span class="hljs-variable language_">$this</span>-&gt;items[<span class="hljs-variable">$index</span>]);
+        <span class="hljs-variable language_">$this</span>-&gt;items = <span class="hljs-title function_ invoke__">array_values</span>(<span class="hljs-variable">$this</span>-&gt;items);
     }
 
-    protected function render(): Element
-    {
-        $rows = [];
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>): <span class="hljs-title">Element</span>
+    </span>{
+        <span class="hljs-variable">$rows</span> = [];
 
-        foreach ($this-&gt;items as $index =&gt; $item) {
-            $rows[] = Row::make(
-                Text::make($item),
-                Button::make(&#39;×&#39;)-&gt;onPress(&quot;remove({$index})&quot;),
+        <span class="hljs-keyword">foreach</span> (<span class="hljs-variable language_">$this</span>-&gt;items <span class="hljs-keyword">as</span> <span class="hljs-variable">$index</span> =&gt; <span class="hljs-variable">$item</span>) {
+            <span class="hljs-variable">$rows</span>[] = <span class="hljs-title class_">Row</span>::<span class="hljs-title function_ invoke__">make</span>(
+                <span class="hljs-title class_">Text</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-variable">$item</span>),
+                <span class="hljs-title class_">Button</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;×&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">onPress</span>(<span class="hljs-string">&quot;remove(<span class="hljs-subst">{$index}</span>)&quot;</span>),
             )
-                // Keyed, so removing row 0 does not hand row 1&#39;s native state to it.
-                -&gt;key(&#39;item-&#39;.$item);
+                <span class="hljs-comment">// Keyed, so removing row 0 does not hand row 1&#x27;s native state to it.</span>
+                -&gt;<span class="hljs-title function_ invoke__">key</span>(<span class="hljs-string">&#x27;item-&#x27;</span>.<span class="hljs-variable">$item</span>);
         }
 
-        return Column::make(
-            Text::make(&#39;Todo&#39;)-&gt;fontSize(24)-&gt;fontWeight(&#39;bold&#39;),
-            TextInput::make($this-&gt;draft)
-                -&gt;placeholder(&#39;What needs doing?&#39;)
-                -&gt;onChange(&#39;draftChanged&#39;),
-            Button::make(&#39;Add&#39;)-&gt;onPress(&#39;add&#39;),
-            ...$rows,
-        )-&gt;layout([&#39;gap&#39; =&gt; 8, &#39;padding&#39; =&gt; 16]);
+        <span class="hljs-keyword">return</span> <span class="hljs-title class_">Column</span>::<span class="hljs-title function_ invoke__">make</span>(
+            <span class="hljs-title class_">Text</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Todo&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">fontSize</span>(<span class="hljs-number">24</span>)-&gt;<span class="hljs-title function_ invoke__">fontWeight</span>(<span class="hljs-string">&#x27;bold&#x27;</span>),
+            <span class="hljs-title class_">TextInput</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-variable">$this</span>-&gt;draft)
+                -&gt;<span class="hljs-title function_ invoke__">placeholder</span>(<span class="hljs-string">&#x27;What needs doing?&#x27;</span>)
+                -&gt;<span class="hljs-title function_ invoke__">onChange</span>(<span class="hljs-string">&#x27;draftChanged&#x27;</span>),
+            <span class="hljs-title class_">Button</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Add&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">onPress</span>(<span class="hljs-string">&#x27;add&#x27;</span>),
+            ...<span class="hljs-variable">$rows</span>,
+        )-&gt;<span class="hljs-title function_ invoke__">layout</span>([<span class="hljs-string">&#x27;gap&#x27;</span> =&gt; <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;padding&#x27;</span> =&gt; <span class="hljs-number">16</span>]);
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <p>Driving it:</p>
-<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Component\ComponentScreenFactory;
-use Native\Symfony\Mobile\Ui\Component\InteractionEvent;
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ComponentScreenFactory</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">InteractionEvent</span>;
 
-$screen = $factory-&gt;open(new TodoScreen());   // one fresh instance per screen
-$frame = $screen-&gt;frame();                    // first paint
+<span class="hljs-variable">$screen</span> = <span class="hljs-variable">$factory</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">TodoScreen</span>());   <span class="hljs-comment">// one fresh instance per screen</span>
+<span class="hljs-variable">$frame</span> = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">frame</span>();                    <span class="hljs-comment">// first paint</span>
 
-// An interaction as the native layer delivers it:
-$screen-&gt;handle([&#39;callback_id&#39; =&gt; $screen-&gt;callbackId(&#39;add&#39;), &#39;type&#39; =&gt; InteractionEvent::PRESS]);
-$screen-&gt;handle([
-    &#39;callback_id&#39; =&gt; $screen-&gt;callbackId(&#39;draftChanged&#39;),
-    &#39;type&#39; =&gt; InteractionEvent::TEXT_CHANGE,
-    &#39;text&#39; =&gt; &#39;Buy milk&#39;,
+<span class="hljs-comment">// An interaction as the native layer delivers it:</span>
+<span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">handle</span>([<span class="hljs-string">&#x27;callback_id&#x27;</span> =&gt; <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">callbackId</span>(<span class="hljs-string">&#x27;add&#x27;</span>), <span class="hljs-string">&#x27;type&#x27;</span> =&gt; <span class="hljs-title class_">InteractionEvent</span>::<span class="hljs-variable constant_">PRESS</span>]);
+<span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">handle</span>([
+    <span class="hljs-string">&#x27;callback_id&#x27;</span> =&gt; <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">callbackId</span>(<span class="hljs-string">&#x27;draftChanged&#x27;</span>),
+    <span class="hljs-string">&#x27;type&#x27;</span> =&gt; <span class="hljs-title class_">InteractionEvent</span>::<span class="hljs-variable constant_">TEXT_CHANGE</span>,
+    <span class="hljs-string">&#x27;text&#x27;</span> =&gt; <span class="hljs-string">&#x27;Buy milk&#x27;</span>,
 ]);
 
-$screen-&gt;close();   // unmounts the graph, drops the diff state
-</code></pre>
+<span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">close</span>();   <span class="hljs-comment">// unmounts the graph, drops the diff state</span></code></pre>
+</figure>
 <p>Things this recipe is quietly getting right:</p>
 <ul>
 <li><strong>Only <code>#[NativeAction]</code> methods are reachable.</strong> Drop the attribute and the button becomes
@@ -446,12 +467,14 @@ when the device is still showing a superseded frame.</li>
 props are assigned to public non-readonly properties. An unknown prop name throws.</li>
 </ul>
 <h2 id="building-for-distribution"><a class="anchor" href="#building-for-distribution">Building for distribution</a></h2>
-<pre><code class="language-bash">composer require nativephp/php-bin          # static PHP binaries + cacert.pem, no PHP deps
-bin/console native:build linux x64 --dir    # unpacked directory — the fast smoke test
-bin/console native:build linux x64          # installer
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">composer require nativephp/php-bin          <span class="hljs-comment"># static PHP binaries + cacert.pem, no PHP deps</span>
+bin/console native:build linux x64 --<span class="hljs-built_in">dir</span>    <span class="hljs-comment"># unpacked directory — the fast smoke test</span>
+bin/console native:build linux x64          <span class="hljs-comment"># installer</span>
 bin/console native:build mac arm64
-bin/console native:build win x64 --publish  # publish to the configured updater provider
-</code></pre>
+bin/console native:build win x64 --publish  <span class="hljs-comment"># publish to the configured updater provider</span></code></pre>
+</figure>
 <p>The pipeline: pre-build hooks → stage the app into <code>nativephp/build/app</code> → <code>composer install --no-dev</code> there → clean the staged <code>.env</code> → install <code>cacert.pem</code> and icons → patch the
 Electron project&#39;s <code>package.json</code> with your app identity → electron-builder → post-build
 hooks. <code>--skip-composer</code> reuses the staged vendor dir; <code>-v</code> shows subprocess output.</p>
@@ -483,10 +506,21 @@ needs real credentials. Installer targets beyond <code>--dir</code> are invoked 
 <code>dpkg</code> or an AppImage runtime present.</p>
 
         </article>
-        <footer class="foot">
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="native-ui-contract.html"><span>← Previous</span><strong>Native-UI format</strong></a>
+            <a class="pager-link next" href="testing.html"><span>Next →</span><strong>Testing</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/recipes.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#a-multi-window-app-and-the-_windowid-convention">A multi-window app, and the _windowId convention</a></li><li class="lvl2"><a href="#running-a-messenger-worker">Running a Messenger worker</a></li><li class="lvl2"><a href="#reacting-to-a-runtime-event-with-a-typed-listener">Reacting to a runtime event with a typed listener</a></li><li class="lvl3"><a href="#caller-named-events">Caller-named events</a></li><li class="lvl2"><a href="#a-native-ui-screen-with-state">A native-UI screen with state</a></li><li class="lvl2"><a href="#building-for-distribution">Building for distribution</a></li></ul></nav>
 </div>
+
+<script src="assets/site.js" defer></script>
 </body>
 </html>

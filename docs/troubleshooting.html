@@ -4,117 +4,68 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Troubleshooting · NativePHP for Symfony</title>
-<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<meta name="description" content="Symptom → cause → fix — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 </head>
 <body>
-<a class="skip" href="#content">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="layout">
-    <aside class="sidebar">
-        <a class="brand" href="index.html">
-            <span class="brand-mark" aria-hidden="true">NS</span>
-            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
-        </a>
-        <nav class="nav" aria-label="Documentation">
-<a class="nav-link" href="index.html">
-            <span class="nav-title">Overview</span>
-            <span class="nav-blurb">What is here, and what is authoritative</span>
-        </a>
-<p class="nav-section">Using it</p>
-<a class="nav-link" href="getting-started-desktop.html">
-            <span class="nav-title">Desktop</span>
-            <span class="nav-blurb">From composer require to a window</span>
-        </a>
-<a class="nav-link" href="getting-started-mobile.html">
-            <span class="nav-title">Mobile</span>
-            <span class="nav-blurb">Both render paths, and what is verified</span>
-        </a>
-<p class="nav-section">Reference</p>
-<a class="nav-link" href="desktop-api.html">
-            <span class="nav-title">Desktop API</span>
-            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
-        </a>
-<a class="nav-link" href="mobile-api.html">
-            <span class="nav-title">Mobile API</span>
-            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
-        </a>
-<p class="nav-section">Working with it</p>
-<a class="nav-link" href="recipes.html">
-            <span class="nav-title">Recipes</span>
-            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
-        </a>
-<a class="nav-link" href="testing.html">
-            <span class="nav-title">Testing</span>
-            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
-        </a>
-<a class="nav-link current" href="troubleshooting.html" aria-current="page">
-            <span class="nav-title">Troubleshooting</span>
-            <span class="nav-blurb">Symptom → cause → fix</span>
-        </a>
-        </nav>
-        <div class="sidebar-foot">
-            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
-            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
         </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item active" href="troubleshooting.html" aria-current="page"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
     </aside>
 
-    <main id="content">
-        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
-<li class="d2"><a href="#desktop--boot">Desktop — boot</a></li>
-<li class="d3"><a href="#my-app-boots-to-a-blank-window-or-to-no-window-at-all">My app boots to a blank window, or to no window at all</a></li>
-<li class="d3"><a href="#anything-under-public-is-readable-by-any-local-process">Anything under public/ is readable by any local process</a></li>
-<li class="d3"><a href="#every-route-in-the-packaged-or-dev-app-returns-404">Every route in the packaged or dev app returns 404</a></li>
-<li class="d3"><a href="#the-boot-dies-with-the-environment-local-is-not-registered-as-allowed">The boot dies with "The environment "local" is not registered as allowed"</a></li>
-<li class="d3"><a href="#a-packaged-app-logs-failed-to-cache-view-and-routes-at-every-launch">A packaged app logs "Failed to cache view and routes" at every launch</a></li>
-<li class="d3"><a href="#the-boot-dies-before-the-php-server-starts-mentioning-storage">The boot dies before the PHP server starts, mentioning storage</a></li>
-<li class="d3"><a href="#something-i-configured-is-being-ignored--app-id-deep-links-the-updater">Something I configured is being ignored — app id, deep links, the updater</a></li>
-<li class="d3"><a href="#i-get-403-from-every-request-when-i-open-the-app-url-in-a-browser">I get 403 from every request when I open the app URL in a browser</a></li>
-<li class="d3"><a href="#runtimecallfailed-…-rejected-with-403--the-x-nativephp-secret-header-did-not-match">RuntimeCallFailed: … rejected with 403 — the X-NativePHP-Secret header did not match</a></li>
-<li class="d3"><a href="#runtimenotavailable-…-nativephp_api_url-is-not-set">RuntimeNotAvailable: … NATIVEPHP_API_URL is not set</a></li>
-<li class="d3"><a href="#logicexception-cannot-build-an-absolute-window-url-outside-an-http-request">LogicException: Cannot build an absolute window URL outside an HTTP request</a></li>
-<li class="d2"><a href="#desktop--windows-and-events">Desktop — windows and events</a></li>
-<li class="d3"><a href="#my-resize-does-not-fire-an-event">My resize does not fire an event</a></li>
-<li class="d3"><a href="#windows-current-returns-null">$windows->current() returns null</a></li>
-<li class="d3"><a href="#the-page-renders-enormous--about-four-letters-fill-the-window">The page renders enormous — about four letters fill the window</a></li>
-<li class="d3"><a href="#the-window-title-never-changes-when-the-pages--does">The window title never changes when the page's <title> does</a></li>
-<li class="d3"><a href="#my-settings-change-event-has-the-wrong-key">My settings change event has the wrong key</a></li>
-<li class="d3"><a href="#my-settings-listener-loops-forever">My settings listener loops forever</a></li>
-<li class="d3"><a href="#my-listener-never-runs--runs-twice">My listener never runs / runs twice</a></li>
-<li class="d3"><a href="#an-events-payload-does-not-match-the-class-or-arrives-with-__error">An event's payload does not match the class, or arrives with __error</a></li>
-<li class="d3"><a href="#my-child-process-does-nothing-or-restart-on-a-dead-alias-succeeds">My child process does nothing, or restart() on a dead alias "succeeds"</a></li>
-<li class="d3"><a href="#my-global-shortcut-never-fires">My global shortcut never fires</a></li>
-<li class="d3"><a href="#dock-calls-do-nothing">Dock calls do nothing</a></li>
-<li class="d3"><a href="#debug-calls-do-nothing-in-the-packaged-app">debug/* calls do nothing in the packaged app</a></li>
-<li class="d3"><a href="#the-log-says-runtime-returned-non-json-for-post-…">The log says "Runtime returned non-JSON for POST …"</a></li>
-<li class="d2"><a href="#desktop--packaging">Desktop — packaging</a></li>
-<li class="d3"><a href="#the-packaged-app-cannot-make-https-calls">The packaged app cannot make HTTPS calls</a></li>
-<li class="d3"><a href="#the-packaged-app-does-not-boot-at-all--envnotfoundexception">The packaged app does not boot at all — EnvNotFoundException</a></li>
-<li class="d3"><a href="#the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request">The packaged app is slow, and logs an opcache warning on every request</a></li>
-<li class="d3"><a href="#the-packaged-app-fails-writing-cache-or-logs">The packaged app fails writing cache or logs</a></li>
-<li class="d3"><a href="#the-build-contains-readable-php-source">The build contains readable PHP source</a></li>
-<li class="d2"><a href="#desktop--tooling">Desktop — tooling</a></li>
-<li class="d3"><a href="#nativeinstall-says-the-source-does-not-look-like-a-nativephp-electron-project">native:install says the source does not look like a NativePHP Electron project</a></li>
-<li class="d3"><a href="#nativeinstall-fails-with-could-not-apply-the-…-patch">native:install fails with "Could not apply the … patch"</a></li>
-<li class="d3"><a href="#i-edited-the-runtimes-typescript-and-nothing-changed">I edited the runtime's TypeScript and nothing changed</a></li>
-<li class="d3"><a href="#nativerun-says-the-electron-project-has-no-node_modules">native:run says the Electron project has no node_modules</a></li>
-<li class="d3"><a href="#nativerun-cannot-find-an-icon-or-a-ca-bundle">native:run cannot find an icon or a CA bundle</a></li>
-<li class="d3"><a href="#a-failing-process-every-minute">A failing process every minute</a></li>
-<li class="d2"><a href="#mobile">Mobile</a></li>
-<li class="d3"><a href="#every-mobile-api-call-returns-null-false-or-an-empty-array">Every mobile API call returns null, false, or an empty array</a></li>
-<li class="d3"><a href="#my-callback-runs-with-no-arguments">My callback runs with no arguments</a></li>
-<li class="d3"><a href="#a-button-on-the-device-does-nothing-at-all">A button on the device does nothing at all</a></li>
-<li class="d3"><a href="#the-device-shows-a-stale-or-spliced-in-subtree-after-navigating">The device shows a stale or spliced-in subtree after navigating</a></li>
-<li class="d3"><a href="#a-reordered-list-loses-scroll-position-or-input-focus">A reordered list loses scroll position or input focus</a></li>
-<li class="d3"><a href="#my-component-state-resets-at-random">My component state resets at random</a></li>
-<li class="d3"><a href="#a-native-screen-boots-into-the-webview-instead">A native screen boots into the WebView instead</a></li>
-<li class="d3"><a href="#a-nativescreen-renders-but-its-state-resets-on-every-tap">A #[NativeScreen] renders, but its state resets on every tap</a></li>
-<li class="d3"><a href="#nativescreenresponder-cannot-be-instantiated">NativeScreenResponder cannot be instantiated</a></li>
-<li class="d3"><a href="#theme--classes-produce-no-colour-or-ios-classes-vanish">theme-* classes produce no colour, or ios: classes vanish</a></li>
-<li class="d3"><a href="#my-parsed-styles-have-no-effect-on-the-device">My parsed styles have no effect on the device</a></li>
-<li class="d3"><a href="#the-app-launches-to-a-blank-screen-with-nothing-in-the-log">The app launches to a blank screen with nothing in the log</a></li>
-</ul></nav>
+    <main id="main">
         <article class="prose">
 <h1 id="troubleshooting"><a class="anchor" href="#troubleshooting">Troubleshooting</a></h1>
 <p>The dominant failure mode of this runtime is <strong>silence</strong>. It carries on with an empty config
@@ -123,12 +74,14 @@ symptom-first, because the symptom is usually all you get.</p>
 <p>The worst of it — <code>notifyLaravel</code> swallowing every failed callback, which made a crashed,
 500ing or 403ing app indistinguishable from a healthy one — is <strong>fixed in the copy of the
 runtime this bundle installs</strong>. <code>RuntimePatcher</code> carries that fix and four others; see
-<a href="getting-started-desktop.html#what-the-bundle-fixes-in-the-runtime">what the bundle patches</a>.
+<a href="desktop.html#what-the-bundle-fixes-in-the-runtime">what the bundle patches</a>.
 So under <code>native:run -v</code> a failed callback now says so.</p>
 <p>Two things to do before reading further:</p>
-<pre><code class="language-bash">bin/console native:run -v      # sets SHELL_VERBOSITY=1 — the runtime then logs every
-                               # PHP command it spawns, with its full argv and env
-</code></pre>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">bin/console native:run -v      <span class="hljs-comment"># sets SHELL_VERBOSITY=1 — the runtime then logs every</span>
+                               <span class="hljs-comment"># PHP command it spawns, with its full argv and env</span></code></pre>
+</figure>
 <p>and watch your own log (<code>var/log/dev.log</code>). The bundle logs deliberately where the runtime
 would swallow: a missing bootstrapper, a non-JSON response, a failed broadcast.</p>
 <ul>
@@ -143,16 +96,20 @@ would swallow: a missing bootstrapper, a non-JSON response, a failed broadcast.<
 <h3 id="my-app-boots-to-a-blank-window-or-to-no-window-at-all"><a class="anchor" href="#my-app-boots-to-a-blank-window-or-to-no-window-at-all">My app boots to a blank window, or to no window at all</a></h3>
 <p>Five distinct causes. <code>native:doctor</code> checks for the first — and the second is handled for
 you by default:</p>
-<pre><code class="language-bash">bin/console native:doctor
-</code></pre>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">bin/console native:doctor</code></pre>
+</figure>
 <p><strong>The routes are not imported.</strong> Symfony bundles cannot register routes, so the runtime&#39;s
 <code>POST /_native/api/booted</code> 404s and nothing ever asks for a window.</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
 <pre><code class="language-bash">bin/console debug:router | grep _native
-# native_desktop_booted   POST   /_native/api/booted
-# native_desktop_events   POST   /_native/api/events
-</code></pre>
+<span class="hljs-comment"># native_desktop_booted   POST   /_native/api/booted</span>
+<span class="hljs-comment"># native_desktop_events   POST   /_native/api/events</span></code></pre>
+</figure>
 <p>If they are missing, add the import shown in
-<a href="getting-started-desktop.html#2-import-the-bundles-routes--this-is-not-automatic">getting started</a>.</p>
+<a href="desktop.html#2-import-the-bundles-routes">getting started</a>.</p>
 <p><strong>Your firewall covers the runtime&#39;s own endpoints.</strong> <strong>The bundle handles this for you by
 default</strong> — but it is worth knowing about, because the symptom is indistinguishable from the
 one above and the cause is in a file you wrote.</p>
@@ -175,13 +132,15 @@ design.</p>
 stanza is <strong>unconditional</strong>, where the bundle&#39;s decorator applies only inside the runtime.
 Put it in a runtime-only config environment, or you have opened on the web exactly the hole
 the option is careful not to:</p>
-<pre><code class="language-yaml"># config/packages/security.yaml
-security:
-    firewalls:
-        native:
-            pattern: ^/_native/api/
-            security: false
-</code></pre>
+<figure class="code">
+<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
+<span class="hljs-attr">security:</span>
+    <span class="hljs-attr">firewalls:</span>
+        <span class="hljs-attr">native:</span>
+            <span class="hljs-attr">pattern:</span> <span class="hljs-string">^/_native/api/</span>
+            <span class="hljs-attr">security:</span> <span class="hljs-literal">false</span></code></pre>
+</figure>
 <p>Firewalls match in declaration order and the first match wins, so <code>native</code> has to come
 <em>before</em> your main firewall — appended after it, it never matches and nothing changes.</p>
 <p>With the option off, <code>native:doctor</code> checks this by asking Symfony&#39;s own
@@ -211,9 +170,11 @@ console and network tabs. This is now an ordinary Symfony debugging problem.</p>
 <p><code>nativephp-router.php</code> serves an existing file under <code>public/</code> by returning <code>false</code> before
 the kernel boots, so <code>RuntimeAccessSubscriber</code> never sees the request and the shared secret
 does not apply:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
 <pre><code>GET /app.css    (no secret) -&gt; 200
-GET /index.php  (no secret) -&gt; 403   # goes through the kernel, so the gate applies
-</code></pre>
+GET /index.php  (no secret) -&gt; 403   # goes through the kernel, so the gate applies</code></pre>
+</figure>
 <p>That is correct for assets and matches Laravel. It also means uploads, generated exports and
 anything else written under <code>public/</code> are readable by every process on the machine, because
 the app is served on a real loopback port. Put user data somewhere else and serve it through
@@ -224,10 +185,12 @@ literal (<code>vendor/laravel/framework/.../server.php</code> → <code>public/n
 patch did not apply, or you installed a <em>manifest-aware</em> runtime without writing
 <code>nativephp.json</code>, the runtime resolves Laravel&#39;s paths and 404s everything with nothing in
 the log.</p>
-<pre><code class="language-bash">bin/console native:manifest              # writes nativephp.json and reports what the runtime supports
-bin/console native:install --source=… -f # or reinstall and re-patch
-ls public/nativephp-router.php           # must exist
-</code></pre>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">bin/console native:manifest              <span class="hljs-comment"># writes nativephp.json and reports what the runtime supports</span>
+bin/console native:install --<span class="hljs-built_in">source</span>=… -f <span class="hljs-comment"># or reinstall and re-patch</span>
+<span class="hljs-built_in">ls</span> public/nativephp-router.php           <span class="hljs-comment"># must exist</span></code></pre>
+</figure>
 <p><code>native:manifest</code> tells you which case you are in: <em>Supported</em>, <em>Absent</em> (today&#39;s upstream —
 the patches are what make it work) or <em>Unknown</em>.</p>
 <h3 id="the-boot-dies-with-the-environment-local-is-not-registered-as-allowed"><a class="anchor" href="#the-boot-dies-with-the-environment-local-is-not-registered-as-allowed">The boot dies with &quot;The environment &quot;local&quot; is not registered as allowed&quot;</a></h3>
@@ -255,9 +218,11 @@ unpatched runtime, either patch it or create an empty <code>storage/</code>.</p>
 <code>try { … } catch (e) { console.error(e) }</code> and returns <code>{}</code>, then boot continues to
 completion: no app id, no deep-link registration, no updater, and a window that looks
 perfectly normal. A totally broken config command and a correct one are visually identical.</p>
-<pre><code class="language-bash">bin/console native:config    # must print exactly one line of JSON, nothing else
-bin/console native:php-ini
-</code></pre>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">bin/console native:config    <span class="hljs-comment"># must print exactly one line of JSON, nothing else</span>
+bin/console native:php-ini</code></pre>
+</figure>
 <p>Anything else on stdout — a banner, a deprecation notice, a <code>dump()</code>, a log line written
 during console boot — breaks <code>JSON.parse</code>. Also make sure nothing in that path calls the
 runtime: at that point <code>NATIVEPHP_API_URL</code> is unset and the client throws
@@ -276,8 +241,10 @@ still running after a restart, most often.</p>
 <h3 id="runtimenotavailable-…-nativephp_api_url-is-not-set"><a class="anchor" href="#runtimenotavailable-…-nativephp_api_url-is-not-set"><code>RuntimeNotAvailable: … NATIVEPHP_API_URL is not set</code></a></h3>
 <p>The code is running in a process the runtime did not start: a plain CLI invocation, an
 ordinary web request, or a test. Guard it:</p>
-<pre><code class="language-php">if ($this-&gt;client-&gt;isAvailable()) { … }
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">if</span> (<span class="hljs-variable language_">$this</span>-&gt;client-&gt;<span class="hljs-title function_ invoke__">isAvailable</span>()) { … }</code></pre>
+</figure>
 <p>Or, in tests, use <code>FakeRuntime::available()</code> — see <a href="testing.html">Testing</a>.</p>
 <h3 id="logicexception-cannot-build-an-absolute-window-url-outside-an-http-request"><a class="anchor" href="#logicexception-cannot-build-an-absolute-window-url-outside-an-http-request"><code>LogicException: Cannot build an absolute window URL outside an HTTP request</code></a></h3>
 <p><code>UrlResolver</code> builds window URLs from the current request because the PHP server&#39;s port is
@@ -374,9 +341,11 @@ phrase for the status code (express&#39;s <code>res.sendStatus(200)</code> sends
 <h3 id="the-packaged-app-cannot-make-https-calls"><a class="anchor" href="#the-packaged-app-cannot-make-https-calls">The packaged app cannot make HTTPS calls</a></h3>
 <p>No CA bundle. The runtime passes <code>$NATIVEPHP_BUILD_PATH/cacert.pem</code> to every PHP process as
 <code>curl.cainfo</code> and <code>openssl.cafile</code>; without it every outbound TLS handshake fails.</p>
-<pre><code class="language-bash">composer require nativephp/php-bin    # ships cacert.pem; zero PHP dependencies
-bin/console native:build linux x64
-</code></pre>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">composer require nativephp/php-bin    <span class="hljs-comment"># ships cacert.pem; zero PHP dependencies</span>
+bin/console native:build linux x64</code></pre>
+</figure>
 <p><code>native:build</code> warns rather than failing when it cannot find one — check the build output for
 &quot;The packaged app will have no CA bundle&quot;.</p>
 <h3 id="the-packaged-app-does-not-boot-at-all--envnotfoundexception"><a class="anchor" href="#the-packaged-app-does-not-boot-at-all--envnotfoundexception">The packaged app does not boot at all — <code>EnvNotFoundException</code></a></h3>
@@ -388,8 +357,10 @@ is harmless there (its key is <code>APP_KEY</code>).</p>
 and defaults to <code>[&#39;APP_SECRET&#39;]</code>. If you see this, you have removed <code>APP_SECRET</code> from
 <code>env_keep</code>. Put it back.</p>
 <h3 id="the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request"><a class="anchor" href="#the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request">The packaged app is slow, and logs an opcache warning on every request</a></h3>
-<pre><code>Warning: Failed loading Zend extension &#39;opcache&#39; (… Dynamic loading not supported)
-</code></pre>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>Warning: Failed loading Zend extension 'opcache' (… Dynamic loading not supported)</code></pre>
+</figure>
 <p>The static musl PHP binary cannot dynamically load extensions and its baked-in ini asks for
 opcache anyway. <strong>Packaged NativePHP apps have no opcache</strong> — Laravel&#39;s too — so every request
 pays full compile cost.</p>
@@ -417,8 +388,10 @@ router path and 404s everything. Either pin an older <code>NativePHP/desktop</co
 <code>RuntimePatcher</code>, or move to a manifest-aware runtime and <code>native:manifest</code>.</p>
 <h3 id="i-edited-the-runtimes-typescript-and-nothing-changed"><a class="anchor" href="#i-edited-the-runtimes-typescript-and-nothing-changed">I edited the runtime&#39;s TypeScript and nothing changed</a></h3>
 <p>The runtime loads <code>electron-plugin/dist/</code>, which ships pre-compiled. Rebuild:</p>
-<pre><code class="language-bash">cd nativephp/electron &amp;&amp; npm run plugin:build
-</code></pre>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash"><span class="hljs-built_in">cd</span> nativephp/electron &amp;&amp; npm run plugin:build</code></pre>
+</figure>
 <p><code>native:install</code> does this for you after patching, which is why <code>--skip-npm</code> leaves the
 patched sources inert.</p>
 <h3 id="nativerun-says-the-electron-project-has-no-node_modules"><a class="anchor" href="#nativerun-says-the-electron-project-has-no-node_modules"><code>native:run</code> says the Electron project has no <code>node_modules</code></a></h3>
@@ -440,10 +413,12 @@ not have. Patch the runtime, or write the manifest (<code>lifecycle.schedule</co
 <p><code>nativephp_call()</code> is a compiled extension that exists <strong>only inside a packaged app</strong>, so
 outside one <code>Bridge::isAvailable()</code> is false and every call no-ops. That includes your dev
 machine, your test suite and CI.</p>
-<pre><code class="language-yaml"># config/packages/test/native_mobile.yaml (or dev)
-native_mobile:
-    fake_bridge: true
-</code></pre>
+<figure class="code">
+<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-yaml"><span class="hljs-comment"># config/packages/test/native_mobile.yaml (or dev)</span>
+<span class="hljs-attr">native_mobile:</span>
+    <span class="hljs-attr">fake_bridge:</span> <span class="hljs-literal">true</span></code></pre>
+</figure>
 <p><code>bin/console native:mobile:doctor</code> states it plainly, and says so again in a note.</p>
 <h3 id="my-callback-runs-with-no-arguments"><a class="anchor" href="#my-callback-runs-with-no-arguments">My callback runs with no arguments</a></h3>
 <p>Mobile native UI, and there are three separate causes.</p>
@@ -525,8 +500,10 @@ naming the interface at the point a native screen is actually requested.</p>
 <code>native_mobile.platform</code> is <code>ios</code> or <code>android</code>; <code>null</code> means &quot;neither&quot;, which is the safe
 default off a device and the wrong one on it.</p>
 <p>Pass the out-param to see exactly what was dropped:</p>
-<pre><code class="language-php">$style = $parser-&gt;parse($classes, $dropped);   // $dropped: list&lt;string&gt;
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$style</span> = <span class="hljs-variable">$parser</span>-&gt;<span class="hljs-title function_ invoke__">parse</span>(<span class="hljs-variable">$classes</span>, <span class="hljs-variable">$dropped</span>);   <span class="hljs-comment">// $dropped: list&lt;string&gt;</span></code></pre>
+</figure>
 <p>Note that intentional no-ops (a variant aimed at the <em>other</em> platform) are excluded from
 <code>$dropped</code>, since they are not typos.</p>
 <h3 id="my-parsed-styles-have-no-effect-on-the-device"><a class="anchor" href="#my-parsed-styles-have-no-effect-on-the-device">My parsed styles have no effect on the device</a></h3>
@@ -548,10 +525,21 @@ the projects you are actually building. Re-run it against the copies under <code
 and <code>nativephp/ios</code>.</p>
 
         </article>
-        <footer class="foot">
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="testing.html"><span>← Previous</span><strong>Testing</strong></a>
+            <a class="pager-link next" href="architecture.html"><span>Next →</span><strong>Architecture</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/troubleshooting.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#desktop--boot">Desktop — boot</a></li><li class="lvl3"><a href="#my-app-boots-to-a-blank-window-or-to-no-window-at-all">My app boots to a blank window, or to no window at all</a></li><li class="lvl3"><a href="#anything-under-public-is-readable-by-any-local-process">Anything under public/ is readable by any local process</a></li><li class="lvl3"><a href="#every-route-in-the-packaged-or-dev-app-returns-404">Every route in the packaged or dev app returns 404</a></li><li class="lvl3"><a href="#the-boot-dies-with-the-environment-local-is-not-registered-as-allowed">The boot dies with &quot;The environment &quot;local&quot; is not registered as allowed&quot;</a></li><li class="lvl3"><a href="#a-packaged-app-logs-failed-to-cache-view-and-routes-at-every-launch">A packaged app logs &quot;Failed to cache view and routes&quot; at every launch</a></li><li class="lvl3"><a href="#the-boot-dies-before-the-php-server-starts-mentioning-storage">The boot dies before the PHP server starts, mentioning storage</a></li><li class="lvl3"><a href="#something-i-configured-is-being-ignored--app-id-deep-links-the-updater">Something I configured is being ignored — app id, deep links, the updater</a></li><li class="lvl3"><a href="#i-get-403-from-every-request-when-i-open-the-app-url-in-a-browser">I get 403 from every request when I open the app URL in a browser</a></li><li class="lvl3"><a href="#runtimecallfailed-…-rejected-with-403--the-x-nativephp-secret-header-did-not-match">RuntimeCallFailed: … rejected with 403 — the X-NativePHP-Secret header did not match</a></li><li class="lvl3"><a href="#runtimenotavailable-…-nativephp_api_url-is-not-set">RuntimeNotAvailable: … NATIVEPHP_API_URL is not set</a></li><li class="lvl3"><a href="#logicexception-cannot-build-an-absolute-window-url-outside-an-http-request">LogicException: Cannot build an absolute window URL outside an HTTP request</a></li><li class="lvl2"><a href="#desktop--windows-and-events">Desktop — windows and events</a></li><li class="lvl3"><a href="#my-resize-does-not-fire-an-event">My resize does not fire an event</a></li><li class="lvl3"><a href="#windows-current-returns-null">$windows-&gt;current() returns null</a></li><li class="lvl3"><a href="#the-page-renders-enormous--about-four-letters-fill-the-window">The page renders enormous — about four letters fill the window</a></li><li class="lvl3"><a href="#the-window-title-never-changes-when-the-pages--does">The window title never changes when the page's &lt;title&gt; does</a></li><li class="lvl3"><a href="#my-settings-change-event-has-the-wrong-key">My settings change event has the wrong key</a></li><li class="lvl3"><a href="#my-settings-listener-loops-forever">My settings listener loops forever</a></li><li class="lvl3"><a href="#my-listener-never-runs--runs-twice">My listener never runs / runs twice</a></li><li class="lvl3"><a href="#an-events-payload-does-not-match-the-class-or-arrives-with-__error">An event's payload does not match the class, or arrives with __error</a></li><li class="lvl3"><a href="#my-child-process-does-nothing-or-restart-on-a-dead-alias-succeeds">My child process does nothing, or restart() on a dead alias &quot;succeeds&quot;</a></li><li class="lvl3"><a href="#my-global-shortcut-never-fires">My global shortcut never fires</a></li><li class="lvl3"><a href="#dock-calls-do-nothing">Dock calls do nothing</a></li><li class="lvl3"><a href="#debug-calls-do-nothing-in-the-packaged-app">debug/ calls do nothing in the packaged app</a></li><li class="lvl3"><a href="#the-log-says-runtime-returned-non-json-for-post-…">The log says &quot;Runtime returned non-JSON for POST …&quot;</a></li><li class="lvl2"><a href="#desktop--packaging">Desktop — packaging</a></li><li class="lvl3"><a href="#the-packaged-app-cannot-make-https-calls">The packaged app cannot make HTTPS calls</a></li><li class="lvl3"><a href="#the-packaged-app-does-not-boot-at-all--envnotfoundexception">The packaged app does not boot at all — EnvNotFoundException</a></li><li class="lvl3"><a href="#the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request">The packaged app is slow, and logs an opcache warning on every request</a></li><li class="lvl3"><a href="#the-packaged-app-fails-writing-cache-or-logs">The packaged app fails writing cache or logs</a></li><li class="lvl3"><a href="#the-build-contains-readable-php-source">The build contains readable PHP source</a></li><li class="lvl2"><a href="#desktop--tooling">Desktop — tooling</a></li><li class="lvl3"><a href="#nativeinstall-says-the-source-does-not-look-like-a-nativephp-electron-project">native:install says the source does not look like a NativePHP Electron project</a></li><li class="lvl3"><a href="#nativeinstall-fails-with-could-not-apply-the-…-patch">native:install fails with &quot;Could not apply the … patch&quot;</a></li><li class="lvl3"><a href="#i-edited-the-runtimes-typescript-and-nothing-changed">I edited the runtime's TypeScript and nothing changed</a></li><li class="lvl3"><a href="#nativerun-says-the-electron-project-has-no-node_modules">native:run says the Electron project has no node_modules</a></li><li class="lvl3"><a href="#nativerun-cannot-find-an-icon-or-a-ca-bundle">native:run cannot find an icon or a CA bundle</a></li><li class="lvl3"><a href="#a-failing-process-every-minute">A failing process every minute</a></li><li class="lvl2"><a href="#mobile">Mobile</a></li><li class="lvl3"><a href="#every-mobile-api-call-returns-null-false-or-an-empty-array">Every mobile API call returns null, false, or an empty array</a></li><li class="lvl3"><a href="#my-callback-runs-with-no-arguments">My callback runs with no arguments</a></li><li class="lvl3"><a href="#a-button-on-the-device-does-nothing-at-all">A button on the device does nothing at all</a></li><li class="lvl3"><a href="#the-device-shows-a-stale-or-spliced-in-subtree-after-navigating">The device shows a stale or spliced-in subtree after navigating</a></li><li class="lvl3"><a href="#a-reordered-list-loses-scroll-position-or-input-focus">A reordered list loses scroll position or input focus</a></li><li class="lvl3"><a href="#my-component-state-resets-at-random">My component state resets at random</a></li><li class="lvl3"><a href="#a-native-screen-boots-into-the-webview-instead">A native screen boots into the WebView instead</a></li><li class="lvl3"><a href="#a-nativescreen-renders-but-its-state-resets-on-every-tap">A #[NativeScreen] renders, but its state resets on every tap</a></li><li class="lvl3"><a href="#nativescreenresponder-cannot-be-instantiated">NativeScreenResponder cannot be instantiated</a></li><li class="lvl3"><a href="#theme--classes-produce-no-colour-or-ios-classes-vanish">theme- classes produce no colour, or ios: classes vanish</a></li><li class="lvl3"><a href="#my-parsed-styles-have-no-effect-on-the-device">My parsed styles have no effect on the device</a></li><li class="lvl3"><a href="#the-app-launches-to-a-blank-screen-with-nothing-in-the-log">The app launches to a blank screen with nothing in the log</a></li></ul></nav>
 </div>
+
+<script src="assets/site.js" defer></script>
 </body>
 </html>

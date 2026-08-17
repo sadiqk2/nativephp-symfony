@@ -49,7 +49,7 @@ bin/console debug:router | grep _native
 ```
 
 If they are missing, add the import shown in
-[getting started](getting-started-desktop.md#2-import-the-bundles-routes--this-is-not-automatic).
+[getting started](getting-started-desktop.md#2-import-the-bundles-routes).
 
 **Your firewall covers the runtime's own endpoints.** **The bundle handles this for you by
 default** — but it is worth knowing about, because the symptom is indistinguishable from the

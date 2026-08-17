@@ -1,230 +1,397 @@
 /**
- * Builds docs/*.md into a static site in docs/ that GitHub Pages can serve as-is.
+ * Builds the documentation site: every Markdown document in the repository becomes a page in
+ * docs/, which GitHub Pages serves as-is.
  *
- * Why generated HTML rather than Jekyll: Pages' Jekyll mode would have to be configured
- * blind — there is no Ruby here, so the first look at the result would be the published
- * site. This produces files that can be opened, screenshotted and checked before anyone
- * else sees them, which is the same reason this project screenshots the demo instead of
- * trusting its tests alone. The cost is that the site is rebuilt by running this script.
+ * Why generated HTML rather than Jekyll or a remote theme: there is no Ruby in this
+ * environment, so a Jekyll site's first rendering would have been the published one. These
+ * files can be opened, screenshotted and read before anyone else sees them — the same reason
+ * this project screenshots the demo rather than trusting its tests alone. The cost is that the
+ * site is rebuilt by running this script.
  *
- *   node tools/build-docs.mjs
+ *   npm install marked highlight.js
+ *   DOCS_ROOT="$PWD" node tools/build-docs.mjs
  *
- * The Markdown stays the source of truth and stays readable on GitHub; each file gets an
- * .html twin beside it, plus assets/site.css and .nojekyll (which stops Pages trying to
- * process any of it as Jekyll).
+ * DOCS_ROOT exists because ESM resolves a bare `import 'marked'` from the importing file's
+ * directory upwards, so the script has to be runnable from wherever the modules were installed
+ * while still writing into this repository.
  *
- * Needs `marked`, which is not vendored — install it anywhere and point NODE_PATH at it:
- *
- *   npm install marked
- *   DOCS_ROOT=/path/to/repo node /path/to/repo/tools/build-docs.mjs
+ * Everything it emits is self-contained: system fonts, an inline SVG favicon, one stylesheet,
+ * one small script, one JSON search index. No CDN, no webfont, no analytics. Documentation
+ * gets read while something is broken, sometimes behind a proxy.
  */
 
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
-import { join, dirname } from 'node:path';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { join, dirname, posix } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { marked } from 'marked';
+import hljs from 'highlight.js';
 
-// DOCS_ROOT exists so the script can be run from wherever `marked` happens to be
-// installed — ESM resolves bare specifiers from the *working* directory upwards, not from
-// the script's location, and this repository does not vendor node modules.
 const root = process.env.DOCS_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..');
-const docsDir = join(root, 'docs');
-const repo = 'https://github.com/sadiqk2/nativephp-symfony';
-
-/** The nav, in reading order — not alphabetical, and not derived from the filesystem. */
-const NAV = [
-    { file: 'README.md', title: 'Overview', blurb: 'What is here, and what is authoritative' },
-    { section: 'Using it' },
-    { file: 'getting-started-desktop.md', title: 'Desktop', blurb: 'From composer require to a window' },
-    { file: 'getting-started-mobile.md', title: 'Mobile', blurb: 'Both render paths, and what is verified' },
-    { section: 'Reference' },
-    { file: 'desktop-api.md', title: 'Desktop API', blurb: 'Windows, menus, dialogs, processes, events' },
-    { file: 'mobile-api.md', title: 'Mobile API', blurb: '16 bridge groups and the native-UI layers' },
-    { section: 'Working with it' },
-    { file: 'recipes.md', title: 'Recipes', blurb: 'Multi-window, workers, native screens, packaging' },
-    { file: 'testing.md', title: 'Testing', blurb: 'FakeRuntime, expectations, event simulation' },
-    { file: 'troubleshooting.md', title: 'Troubleshooting', blurb: 'Symptom → cause → fix' },
-];
-
-const pages = NAV.filter((entry) => entry.file);
-const htmlName = (file) => (file === 'README.md' ? 'index.html' : file.replace(/\.md$/, '.html'));
+const out = join(root, 'docs');
+const REPO = 'https://github.com/sadiqk2/nativephp-symfony';
+const BLOB = `${REPO}/blob/main`;
 
 /**
- * Heading ids, matched to GitHub's own slugger so in-page links written against GitHub keep
- * working here — and so a link that is broken *there* is broken here too, rather than being
- * quietly repaired by a more forgiving rule.
- *
- * Two details are the whole reason this is not a one-liner: each space becomes its own
- * hyphen rather than collapsing (so `## Desktop — boot`, whose em dash is stripped, is
- * `desktop--boot` with two), and underscores survive (`_windowId` → `_windowid`).
+ * Every page, in reading order, grouped the way someone learns this rather than the way the
+ * filesystem happens to be arranged. `src` is relative to the repository root; `slug` names
+ * the file written into docs/.
  */
-const slug = (text) =>
+const NAV = [
+    { group: 'Start here' },
+    { src: 'docs/README.md', slug: 'index', title: 'Introduction', blurb: 'What this is, and what is verified' },
+    { src: 'docs/getting-started-desktop.md', slug: 'desktop', title: 'Desktop', blurb: 'composer require to a window on screen' },
+    { src: 'docs/getting-started-mobile.md', slug: 'mobile', title: 'Mobile', blurb: 'iOS and Android, and what a build needs' },
+
+    { group: 'Reference' },
+    { src: 'docs/desktop-api.md', slug: 'desktop-api', title: 'Desktop API', blurb: 'Windows, menus, dialogs, processes, events' },
+    { src: 'docs/mobile-api.md', slug: 'mobile-api', title: 'Mobile API', blurb: '54 bridge methods and the native-UI layers' },
+    { src: 'CONTRACT.md', slug: 'contract', title: 'Wire protocol', blurb: 'All 116 endpoints and 44 events, exactly' },
+    { src: 'NATIVE-UI-CONTRACT.md', slug: 'native-ui-contract', title: 'Native-UI format', blurb: 'What SwiftUI and Compose consume' },
+
+    { group: 'Working with it' },
+    { src: 'docs/recipes.md', slug: 'recipes', title: 'Recipes', blurb: 'Multi-window, workers, native screens, packaging' },
+    { src: 'docs/testing.md', slug: 'testing', title: 'Testing', blurb: 'FakeRuntime, expectations, event simulation' },
+    { src: 'docs/troubleshooting.md', slug: 'troubleshooting', title: 'Troubleshooting', blurb: 'Symptom → cause → fix' },
+
+    { group: 'How it works' },
+    { src: 'ARCHITECTURE.md', slug: 'architecture', title: 'Architecture', blurb: 'Desktop vs mobile, and the shared traps' },
+    { src: 'ANALYSIS.md', slug: 'analysis', title: 'Deep dive', blurb: 'Boot sequence, port map, the Laravel-isms' },
+    { src: 'MOBILE-ANALYSIS.md', slug: 'mobile-analysis', title: 'Mobile analysis', blurb: 'Both render paths, and a corrected conclusion' },
+    { src: 'PLAN.md', slug: 'plan', title: 'Plan', blurb: 'The milestones, and where each one landed' },
+
+    { group: 'The packages' },
+    { src: 'bundle/README.md', slug: 'desktop-bundle', title: 'Desktop bundle', blurb: 'What ships in native-symfony/desktop-bundle' },
+    { src: 'mobile-bundle/README.md', slug: 'mobile-bundle', title: 'Mobile bundle', blurb: 'What ships in native-symfony/mobile-bundle' },
+    { src: 'demo/README.md', slug: 'demo', title: 'The demo app', blurb: 'Deskpad: both bundles, driven end to end' },
+    { src: 'upstream-patches/README.md', slug: 'upstream-patches', title: 'Upstream patches', blurb: 'Eleven fixes, ten of them open PRs' },
+
+    { group: 'Record' },
+    { src: 'SPIKE-RESULTS.md', slug: 'spike-results', title: 'M1 — the spike', blurb: 'Proving it possible at all' },
+    { src: 'M2-RESULTS.md', slug: 'm2-results', title: 'M2 — the bundle', blurb: 'The 116-endpoint surface' },
+    { src: 'M3-RESULTS.md', slug: 'm3-results', title: 'M3 — the build', blurb: 'Packaging, and what it got wrong first' },
+];
+
+const pages = NAV.filter((n) => n.src && existsSync(join(root, n.src)));
+const bySource = new Map(pages.map((p) => [p.src, p]));
+const fileOf = (page) => `${page.slug}.html`;
+
+/**
+ * GitHub's slugger, reproduced. Two details matter and both are easy to miss: each space
+ * becomes its own hyphen, so `## Desktop — boot` (em dash stripped) is `desktop--boot` with
+ * two; and underscores survive, so `_windowId` is `_windowid`. Matching it is deliberate in
+ * both directions — a link written against GitHub keeps working here, and one that is broken
+ * there stays broken rather than being quietly repaired by a more forgiving rule.
+ */
+const slugify = (text) =>
     text
         .toLowerCase()
         .replace(/<[^>]+>/g, '')
-        .replace(/[`~!@#$%^&*()+=<>?,./:;"'|{}[\]\\\u2013\u2014]/g, '')
+        .replace(/[`~!@#$%^&*()+=<>?,./:;"'|{}[\]\\–—]/g, '')
         .trim()
         .replace(/\s/g, '-');
 
-function renderer(currentFile) {
+const escapeHtml = (s) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+/** Fence languages these documents use that highlight.js knows under another name. */
+const LANGS = { console: 'bash', sh: 'bash', shell: 'bash', yml: 'yaml', jsonc: 'json', ts: 'typescript', kt: 'kotlin', mjs: 'javascript' };
+
+function highlight(code, lang) {
+    const name = LANGS[lang] ?? lang;
+
+    return name && hljs.getLanguage(name)
+        ? hljs.highlight(code, { language: name, ignoreIllegals: true }).value
+        : escapeHtml(code);
+}
+
+/** Resolve a link written inside `page` to something that works on this site. */
+function resolveLink(href, page) {
+    if (/^(https?:|mailto:|#|data:)/.test(href)) return href;
+
+    const [target, fragment] = href.split('#');
+    const suffix = fragment ? `#${fragment}` : '';
+
+    if (!target) return href;
+
+    // Relative to the document the link lives in, then matched against the page list.
+    const fromRoot = posix.normalize(posix.join(posix.dirname(page.src), target));
+    const known = bySource.get(fromRoot);
+
+    if (known) return fileOf(known) + suffix;
+
+    // Something the site does not carry — a source file, a directory. Send it to GitHub
+    // rather than leaving a link that 404s inside the site.
+    return `${BLOB}/${fromRoot}${suffix}`;
+}
+
+function renderer(page) {
     const r = new marked.Renderer();
-    const known = new Set(pages.map((p) => p.file));
 
     r.heading = ({ text, depth }) => {
-        const inline = marked.parseInline(text);
-        const id = slug(text);
-        // The anchor is a link on the heading itself rather than a floating symbol: one
-        // element to style, and it works on touch, where hover-reveal does not.
-        return `<h${depth} id="${id}"><a class="anchor" href="#${id}">${inline}</a></h${depth}>\n`;
+        const id = slugify(text);
+        return `<h${depth} id="${id}"><a class="anchor" href="#${id}">${marked.parseInline(text)}</a></h${depth}>\n`;
     };
 
     r.link = ({ href, title, tokens }) => {
-        const text = marked.parseInline(tokens.map((t) => t.raw).join(''));
-        let target = href;
+        const target = resolveLink(href, page);
+        const label = marked.parseInline(tokens.map((t) => t.raw).join(''));
+        const external = /^https?:/.test(target);
 
-        if (known.has(href)) {
-            target = htmlName(href);
-        } else if (href.startsWith('../')) {
-            // Everything above docs/ stays on GitHub: the analysis and specification files
-            // are not part of this site, and a broken relative link is worse than a jump.
-            target = `${repo}/blob/main/${href.slice(3)}`;
-        } else if (/^[\w-]+\.md#/.test(href)) {
-            const [file, fragment] = href.split('#');
-            target = known.has(file) ? `${htmlName(file)}#${fragment}` : target;
-        }
-
-        const attrs = target.startsWith('http') ? ' target="_blank" rel="noopener"' : '';
-        return `<a href="${target}"${title ? ` title="${title}"` : ''}${attrs}>${text}</a>`;
+        return `<a href="${target}"${title ? ` title="${escapeHtml(title)}"` : ''}${
+            external ? ' target="_blank" rel="noopener"' : ''
+        }>${label}</a>`;
     };
 
-    // Tables are the densest thing in these documents and the first to break a narrow
-    // viewport, so each one scrolls inside its own box rather than widening the page.
+    r.code = ({ text, lang }) => {
+        const language = (lang ?? '').split(/\s+/)[0];
+
+        // The copy button is in the markup rather than injected by script, so a page with
+        // JavaScript off shows no half-built control.
+        return `<figure class="code">
+${language ? `<span class="code-lang">${escapeHtml(language)}</span>` : ''}<button class="copy" type="button">Copy</button>
+<pre><code${language ? ` class="language-${escapeHtml(language)}"` : ''}>${highlight(text, language)}</code></pre>
+</figure>\n`;
+    };
+
     r.table = (token) => {
-        const head = token.header.map((c) => `<th>${marked.parseInline(c.text)}</th>`).join('');
+        // These documents use headerless tables (`| | |`) as two-column layout; rendering an
+        // empty header band for them looks like a mistake.
+        const hasHeader = token.header.some((cell) => cell.text.trim() !== '');
+        const head = hasHeader
+            ? `<thead><tr>${token.header.map((c) => `<th>${marked.parseInline(c.text)}</th>`).join('')}</tr></thead>`
+            : '';
         const body = token.rows
             .map((row) => `<tr>${row.map((c) => `<td>${marked.parseInline(c.text)}</td>`).join('')}</tr>`)
             .join('\n');
-        return `<div class="table-scroll"><table><thead><tr>${head}</tr></thead><tbody>\n${body}\n</tbody></table></div>\n`;
+
+        return `<div class="table-scroll"><table${hasHeader ? '' : ' class="plain"'}>${head}<tbody>\n${body}\n</tbody></table></div>\n`;
     };
 
     return r;
 }
 
-function tableOfContents(markdown) {
+function outline(markdown) {
     const items = [];
-    let inFence = false;
+    let fenced = false;
 
     for (const line of markdown.split('\n')) {
-        if (line.startsWith('```')) inFence = !inFence;
-        if (inFence) continue;
+        if (line.startsWith('```')) fenced = !fenced;
+        if (fenced) continue;
 
-        const match = /^(##|###)\s+(.*)$/.exec(line);
-        if (match) {
-            const text = match[2].replace(/`/g, '').replace(/\*\*/g, '');
-            items.push({ depth: match[1].length, text, id: slug(match[2]) });
-        }
+        const m = /^(##|###)\s+(.*)$/.exec(line);
+        if (m) items.push({ depth: m[1].length, raw: m[2], id: slugify(m[2]) });
     }
 
-    if (items.length < 3) return '';
+    return items;
+}
 
-    const links = items
-        .map((i) => `<li class="d${i.depth}"><a href="#${i.id}">${i.text}</a></li>`)
+/** Plain text for the search index: no markup, no code, collapsed whitespace. */
+const searchText = (markdown) =>
+    markdown
+        .replace(/```[\s\S]*?```/g, ' ')
+        .replace(/`[^`]*`/g, ' ')
+        .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+        .replace(/[#>*_|]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 2000);
+
+const sidebar = (current) =>
+    NAV.filter((n) => n.group || bySource.has(n.src))
+        .map((n) => {
+            if (n.group) return `<p class="nav-group">${n.group}</p>`;
+            const page = bySource.get(n.src);
+            const active = page.slug === current.slug;
+            return `<a class="nav-item${active ? ' active' : ''}" href="${fileOf(page)}"${active ? ' aria-current="page"' : ''}><span class="nav-name">${page.title}</span><span class="nav-hint">${page.blurb}</span></a>`;
+        })
         .join('\n');
 
-    return `<nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>\n${links}\n</ul></nav>`;
-}
+const tocMarkup = (items) => {
+    if (items.length < 3) return '<div class="toc-space"></div>';
 
-function sidebar(currentFile) {
-    return NAV.map((entry) => {
-        if (entry.section) return `<p class="nav-section">${entry.section}</p>`;
-        const current = entry.file === currentFile;
-        return `<a class="nav-link${current ? ' current' : ''}" href="${htmlName(entry.file)}"${current ? ' aria-current="page"' : ''}>
-            <span class="nav-title">${entry.title}</span>
-            <span class="nav-blurb">${entry.blurb}</span>
-        </a>`;
-    }).join('\n');
-}
+    const links = items
+        .map((i) => `<li class="lvl${i.depth}"><a href="#${i.id}">${escapeHtml(i.raw.replace(/[`*]/g, ''))}</a></li>`)
+        .join('');
 
-const shell = ({ title, body, toc, nav, isIndex }) => `<!doctype html>
+    return `<nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul>${links}</ul></nav>`;
+};
+
+const FAVICON = `data:image/svg+xml,${encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#5b53f0"/><path d="M8.5 23V9h3.2l8.6 8.8V9h3.2v14h-3.2l-8.6-8.8V23z" fill="#fff"/></svg>',
+)}`;
+
+function shell({ page, body, toc, prev, next }) {
+    return `<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${title} · NativePHP for Symfony</title>
-<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<title>${escapeHtml(page.title)} · NativePHP for Symfony</title>
+<meta name="description" content="${escapeHtml(page.blurb)} — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="${FAVICON}">
 <link rel="stylesheet" href="assets/site.css">
-<link rel="icon" href="data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#6366f1"/><path d="M9 22V10h3l8 8V10h3v12h-3l-8-8v8z" fill="#fff"/></svg>')}">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 </head>
-<body${isIndex ? ' class="is-index"' : ''}>
-<a class="skip" href="#content">Skip to content</a>
+<body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="layout">
-    <aside class="sidebar">
-        <a class="brand" href="index.html">
-            <span class="brand-mark" aria-hidden="true">NS</span>
-            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
-        </a>
-        <nav class="nav" aria-label="Documentation">
-${nav}
-        </nav>
-        <div class="sidebar-foot">
-            <a href="${repo}" target="_blank" rel="noopener">Source on GitHub ↗</a>
-            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
         </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="${REPO}" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+${sidebar(page)}
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
     </aside>
 
-    <main id="content">
-        ${toc}
+    <main id="main">
         <article class="prose">
 ${body}
         </article>
-        <footer class="foot">
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+
+        <nav class="pager" aria-label="Pagination">
+            ${prev ? `<a class="pager-link" href="${fileOf(prev)}"><span>← Previous</span><strong>${prev.title}</strong></a>` : '<span></span>'}
+            ${next ? `<a class="pager-link next" href="${fileOf(next)}"><span>Next →</span><strong>${next.title}</strong></a>` : '<span></span>'}
+        </nav>
+
+        <footer class="footer">
+            <a href="${BLOB}/${page.src}" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
+
+    ${toc}
 </div>
+
+<script src="assets/site.js" defer></script>
 </body>
 </html>
 `;
-
-const hero = `<div class="hero">
-    <p class="eyebrow">Documentation</p>
-    <h1>Symfony, in a native window</h1>
-    <p class="lede">Two bundles on NativePHP's runtimes: an Electron desktop app around the Symfony
-    application you already have, and iOS/Android with 54 device methods and a native-UI path.
-    Your controllers, templates and console do not change.</p>
-    <div class="hero-links">
-        <a class="cta" href="getting-started-desktop.html">Start with desktop →</a>
-        <a class="cta ghost" href="getting-started-mobile.html">Or mobile</a>
-    </div>
-</div>`;
-
-mkdirSync(join(docsDir, 'assets'), { recursive: true });
-writeFileSync(join(docsDir, '.nojekyll'), '');
-writeFileSync(
-    join(docsDir, 'assets', 'site.css'),
-    readFileSync(join(root, 'tools', 'docs-theme.css'), 'utf8'),
-);
-
-let built = 0;
-for (const page of pages) {
-    const markdown = readFileSync(join(docsDir, page.file), 'utf8');
-    marked.use({ renderer: renderer(page.file) });
-
-    const isIndex = page.file === 'README.md';
-    const body = (isIndex ? hero : '') + marked.parse(markdown);
-
-    writeFileSync(
-        join(docsDir, htmlName(page.file)),
-        shell({
-            title: page.title,
-            body,
-            toc: tableOfContents(markdown),
-            nav: sidebar(page.file),
-            isIndex,
-        }),
-    );
-    built++;
 }
 
-console.log(`built ${built} pages into docs/`);
+const HERO = `<section class="hero">
+    <p class="eyebrow">Documentation</p>
+    <h1 class="hero-title">Ship your Symfony app as a desktop, iOS and Android application</h1>
+    <p class="hero-lede">Two bundles on NativePHP's runtimes. Your controllers, templates, console
+    commands and tests do not change — they gain a native window, a menu bar, and 54 device methods.</p>
+    <div class="hero-actions">
+        <a class="button" href="desktop.html">Get started with desktop</a>
+        <a class="button ghost" href="mobile.html">iOS and Android</a>
+    </div>
+</section>
+
+<div class="cards">
+    <a class="card" href="desktop.html">
+        <h3>Desktop, around what you have</h3>
+        <p>An Electron window serving your existing app. All 116 runtime endpoints and 44 events, wrapped as ordinary Symfony services.</p>
+        <span class="more">Start here →</span>
+    </a>
+    <a class="card" href="mobile.html">
+        <h3>Mobile without a rewrite</h3>
+        <p>A Symfony app takes the WebView path by construction, so Twig stays Twig — or render real SwiftUI and Compose trees from PHP.</p>
+        <span class="more">Read the guide →</span>
+    </a>
+    <a class="card" href="testing.html">
+        <h3>Testable with no device</h3>
+        <p><code>FakeRuntime</code> records at the transport seam, so your payload building is exercised rather than replaced by a stub.</p>
+        <span class="more">Testing →</span>
+    </a>
+    <a class="card" href="troubleshooting.html">
+        <h3>Written for silent failures</h3>
+        <p>This runtime's usual failure mode is silence rather than an error, which is why troubleshooting is organised symptom-first.</p>
+        <span class="more">Symptom → fix →</span>
+    </a>
+</div>
+
+<div class="quickstart">
+    <p class="quickstart-head">Desktop, from nothing</p>
+    <figure class="code"><span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">${highlight(
+    `composer require native-symfony/desktop-bundle:^0.1
+
+# bring the Electron runtime into the project and retarget it at Symfony
+git clone --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop
+bin/console native:install --source=/tmp/np-desktop/resources/electron
+
+bin/console native:doctor   # says whether the runtime can reach your app
+bin/console native:run      # a window, with your application in it`,
+    'bash',
+)}</code></pre></figure>
+</div>
+
+<p class="callout"><strong>What is verified, plainly.</strong> Desktop is proven end to end: a packaged
+application that has been built and run, with screenshots. Mobile is covered by tests — including byte
+comparisons against upstream's own renderers — but no build produced here has been opened by Xcode or
+Gradle, and no screen has been rendered on a device. That distinction is kept on every page.</p>
+`;
+
+// ── build ────────────────────────────────────────────────────────────────────
+
+mkdirSync(join(out, 'assets'), { recursive: true });
+writeFileSync(join(out, '.nojekyll'), '');
+writeFileSync(join(out, 'assets', 'site.css'), readFileSync(join(root, 'tools', 'docs-theme.css'), 'utf8'));
+writeFileSync(join(out, 'assets', 'site.js'), readFileSync(join(root, 'tools', 'docs-site.js'), 'utf8'));
+
+const index = [];
+
+pages.forEach((page, i) => {
+    const markdown = readFileSync(join(root, page.src), 'utf8');
+    marked.use({ renderer: renderer(page) });
+
+    const items = outline(markdown);
+
+    writeFileSync(
+        join(out, fileOf(page)),
+        shell({
+            page,
+            body: (page.slug === 'index' ? HERO : '') + marked.parse(markdown),
+            toc: tocMarkup(items),
+            prev: pages[i - 1],
+            next: pages[i + 1],
+        }),
+    );
+
+    index.push({
+        t: page.title,
+        u: fileOf(page),
+        b: page.blurb,
+        h: items.filter((x) => 2 === x.depth).map((x) => ({ t: x.raw.replace(/[`*]/g, ''), a: x.id })),
+        x: searchText(markdown),
+    });
+});
+
+writeFileSync(join(out, 'assets', 'search.json'), JSON.stringify(index));
+
+// A 404 that keeps the reader inside the site rather than showing GitHub's.
+writeFileSync(
+    join(out, '404.html'),
+    shell({
+        page: { slug: '404', title: 'Not found', blurb: 'That page does not exist', src: 'docs/README.md' },
+        body: `<h1>Not found</h1>
+<p>That page is not part of this documentation. Try the <a href="index.html">introduction</a>, the
+<a href="desktop.html">desktop guide</a>, or <a href="troubleshooting.html">troubleshooting</a> if
+something is broken.</p>`,
+        toc: '<div class="toc-space"></div>',
+    }),
+);
+
+console.log(`built ${pages.length} pages + 404 into docs/`);

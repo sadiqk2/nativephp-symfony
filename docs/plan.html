@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plan · NativePHP for Symfony</title>
+<meta name="description" content="The milestones, and where each one landed — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item active" href="plan.html" aria-current="page"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="nativephp-for-symfony--architecture-study--implementation-plan"><a class="anchor" href="#nativephp-for-symfony--architecture-study--implementation-plan">NativePHP for Symfony — Architecture Study &amp; Implementation Plan</a></h1>
+<p>Status: planning. Written 2026-08-14 after a full read of the NativePHP org.
+Prior art: <a href="https://github.com/NativePHP/laravel/discussions/504" target="_blank" rel="noopener">NativePHP/laravel discussion #504</a> (opened by @sadiqk2, Feb 2025).</p>
+<blockquote>
+<p><strong>See <code>ANALYSIS.md</code> for the deep technical reference</strong>: the exact boot sequence,
+the full runtime contract, the 44-event reverse channel, a per-directory port map
+with LOC, the eight Laravel-isms in <code>php.ts</code> with line numbers, Symfony-specific
+design resolutions, eight upstream bugs worth reporting, and the M1 recipe.</p>
+<p><strong><code>CONTRACT.md</code></strong> is the wire protocol (all 116 endpoints, 44 events, env vars).
+<strong><code>SPIKE-RESULTS.md</code></strong> is the working proof, with the findings that only running it revealed.
+<strong><code>M2-RESULTS.md</code></strong> covers the bundle, <strong><code>M3-RESULTS.md</code></strong> the build pipeline, and
+<code>bundle/README.md</code> is the package&#39;s own documentation.
+<strong><code>MOBILE-ANALYSIS.md</code></strong> covers mobile — and corrects §2.3 and §10&#39;s verdict on it.</p>
+</blockquote>
+<hr>
+<h2 id="1-what-nativephp-actually-is-as-of-aug-2026"><a class="anchor" href="#1-what-nativephp-actually-is-as-of-aug-2026">1. What NativePHP actually is (as of Aug 2026)</a></h2>
+<p>It is <strong>two unrelated products</strong> that share a brand, not one framework with two targets.</p>
+<h3 id="11-nativephpdesktop-repo-nativephpdesktop-★422"><a class="anchor" href="#11-nativephpdesktop-repo-nativephpdesktop-★422">1.1 <code>nativephp/desktop</code> (repo <code>NativePHP/desktop</code>, ★422)</a></h3>
+<p>The current desktop monorepo. It absorbed three now-<strong>archived</strong> repos: <code>laravel</code>
+(★3.9k), <code>electron</code> (★516), <code>electron-plugin</code> (★54). Anything you read about
+<code>nativephp/laravel</code> or <code>nativephp/electron</code> is historical — do not build against it.</p>
+<p>Architecture — <strong>two OS processes</strong>:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>┌─────────────────────────────── Electron main process ───────────────────────────────┐
+│  resources/electron/electron-plugin/  (TypeScript)                                  │
+│    • express server on 127.0.0.1:&lt;apiPort&gt;, mounted at /api/*   ← PHP calls IN       │
+│      auth: X-NativePHP-Secret header (random per boot)                              │
+│    • spawns PHP:  php -S 127.0.0.1:&lt;phpPort&gt; &lt;routerScript&gt;     → app HTML           │
+│    • spawns PHP:  php artisan &lt;cmd&gt;                              → config/migrate    │
+│    • pushes runtime events OUT to the app: POST /_native/api/events                  │
+└─────────────────────────────────────────────────────────────────────────────────────┘
+                                    ▲   │
+                       116 JSON endpoints │ HTTP over localhost
+                                    │   ▼
+┌──────────────────────────────── the PHP app (Laravel today) ────────────────────────┐
+│  vendor/nativephp/desktop/src/   Facades → Client → POST /api/window/resize etc.     │
+└─────────────────────────────────────────────────────────────────────────────────────┘</code></pre>
+</figure>
+<p><strong>The boundary is already framework-agnostic.</strong> It is localhost HTTP + JSON.
+Nothing in the Electron process knows what a Laravel is <em>except</em> in a handful of
+specific places (see §2.2). That is the whole opportunity.</p>
+<p>Endpoint surface, from <code>resources/electron/electron-plugin/src/server/api/*.ts</code>
+— 116 endpoints across 22 modules:</p>
+<div class="table-scroll"><table><thead><tr><th>module</th><th>eps</th><th>module</th><th>eps</th><th>module</th><th>eps</th></tr></thead><tbody>
+<tr><td>window</td><td>21</td><td>clipboard</td><td>7</td><td>dialog</td><td>2</td></tr>
+<tr><td>app</td><td>19</td><td>shell</td><td>4</td><td>contextMenu</td><td>2</td></tr>
+<tr><td>system</td><td>10</td><td>settings</td><td>4</td><td>alert</td><td>2</td></tr>
+<tr><td>menuBar</td><td>9</td><td>screen</td><td>4</td><td>progressBar</td><td>1</td></tr>
+<tr><td>dock</td><td>8</td><td>powerMonitor</td><td>4</td><td>process</td><td>1</td></tr>
+<tr><td>childProcess</td><td>8</td><td>globalShortcut</td><td>3</td><td>notification</td><td>1</td></tr>
+<tr><td></td><td></td><td>autoUpdater</td><td>3</td><td>menu / debug / broadcasting</td><td>1 each</td></tr>
+</tbody></table></div>
+<h3 id="12-nativephpmobile-repo-nativephpmobile-air-★1134"><a class="anchor" href="#12-nativephpmobile-repo-nativephpmobile-air-★1134">1.2 <code>nativephp/mobile</code> (repo <code>NativePHP/mobile-air</code>, ★1134)</a></h3>
+<p>Completely different. PHP is <strong>compiled into</strong> the iOS/Android app bundle:</p>
+<ul>
+<li><code>resources/androidstudio/app/src/main/cpp/</code> — PHP embedded via NDK, <code>bridge_jni.cpp</code></li>
+<li><code>bootstrap/{ios,android}/native.php</code> — hand-rolled SAPI: builds <code>$_GET/$_POST/$_COOKIE</code>
+from <code>$_SERVER</code>, <code>require bootstrap/app.php</code>, <code>$kernel-&gt;handle()</code>, echoes a raw
+HTTP response</li>
+<li><code>bootstrap/{ios,android}/persistent.php</code> + <code>src/Runtime.php</code> — long-lived interpreter,
+requests dispatched via <code>zend_eval_string()</code> into <code>Runtime::dispatch()</code></li>
+<li>Native calls go through a <strong>PHP extension function</strong>, not HTTP:
+<code>nativephp_call(&#39;Dialog.Toast&#39;, $json)</code></li>
+<li>UI is a native element tree (SwiftUI / Jetpack Compose) driven from <strong>Blade</strong>:
+<code>resources/views/native/*.blade.php</code> with <code>&lt;*&gt;</code> elements → <code>mobile-ui</code>&#39;s
+<code>resources/android/*Renderer.kt</code> + iOS equivalents. See <code>NativePHP/super-native</code>
+(the UI kitchen sink) for what this DX looks like in practice.</li>
+<li>~20 satellite plugin packages: <code>mobile-camera</code>, <code>mobile-file</code>, <code>mobile-dialog</code>,
+<code>mobile-shader</code>, <code>mobile-vibe</code>, …, each with its own Kotlin/Swift renderers.</li>
+</ul>
+<hr>
+<h2 id="2-coupling-audit--where-laravel-actually-leaks"><a class="anchor" href="#2-coupling-audit--where-laravel-actually-leaks">2. Coupling audit — where Laravel actually leaks</a></h2>
+<h3 id="21-php-side-nativephpdesktopsrc-178-files"><a class="anchor" href="#21-php-side-nativephpdesktopsrc-178-files">2.1 PHP side: <code>nativephp/desktop/src</code> (178 files)</a></h3>
+<p>Measured, not estimated:</p>
+<ul>
+<li><strong>51 files (29%) have zero framework coupling at all.</strong> Enums, DataObjects,
+Menu items, Contracts, Support.</li>
+<li>The largest apparent coupling is <strong>mechanical and cheap</strong>:<ul>
+<li>45 × <code>Illuminate\Foundation\Events\Dispatchable</code> + <code>SerializesModels</code></li>
+<li>44 × <code>ShouldBroadcastNow</code> + <code>Broadcasting\Channel</code></li>
+<li>20 × <code>Support\Facades\Facade</code></li>
+<li>13 × <code>Console\Command</code>
+These are ~120 files of pure boilerplate around plain data. Porting them is
+find-and-replace, not design work.</li>
+</ul>
+</li>
+<li><strong>The real coupling is 6 places:</strong></li>
+</ul>
+<div class="table-scroll"><table><thead><tr><th>#</th><th>Where</th><th>What it does</th><th>Symfony analogue</th></tr></thead><tbody>
+<tr><td>1</td><td><code>NativeServiceProvider</code></td><td>rewrites <code>storage_path</code>, forces <code>session.driver=file</code>, <code>queue.default=database</code>, injects a <code>nativephp</code> sqlite connection + WAL pragmas, pushes HTTP middleware, swaps <code>ExceptionHandler</code>, registers 11 commands, boots queue workers</td><td><code>NativeBundle</code> + DI extension + compiler pass; env-driven <code>%kernel.cache_dir%</code>, a DBAL connection, an EventSubscriber</td></tr>
+<tr><td>2</td><td><code>Client\Client</code></td><td><code>Illuminate\Support\Facades\Http</code> → base URL + secret header</td><td><code>Symfony\Contracts\HttpClient\HttpClientInterface</code> (or PSR-18). ~30 lines.</td></tr>
+<tr><td>3</td><td><code>Events\EventWatcher</code></td><td>wildcard <code>Event::listen(&#39;*&#39;)</code>, forwards anything broadcasting on channel <code>nativephp</code> to <code>POST /api/broadcast</code></td><td>Symfony has no wildcard listener — needs an explicit marker interface + a dispatcher decorator</td></tr>
+<tr><td>4</td><td><code>Http/</code> — 3 controllers, 2 middleware, <code>routes/api.php</code></td><td><code>_native/api/{booted,events,cookie}</code>; <code>PreventRegularBrowserAccess</code></td><td>3 controllers + bundle-loaded routes + firewall/EventSubscriber</td></tr>
+<tr><td>5</td><td><code>Builder/</code> + <code>Drivers/Electron/</code></td><td>bundle the app, prune vendor, copy Electron project to <code>base_path(&#39;nativephp/electron&#39;)</code>, run electron-builder</td><td>mostly reusable; <code>base_path()</code> → a <code>ProjectPaths</code> service</td></tr>
+<tr><td>6</td><td>93 × <code>config()</code>, 21 × <code>base_path()</code>, 15 × <code>app()</code>, 12 × <code>event()</code></td><td>Laravel&#39;s <em>runtime-mutable</em> config is the deepest mismatch — Symfony&#39;s container is compiled and frozen</td><td>env vars + a <code>NativeConfig</code> value object resolved at boot; anything that must change per-boot goes through env, which the Electron side already sets</td></tr>
+</tbody></table></div>
+<p>Note <code>Drivers/Electron/</code> — <strong>a driver seam already exists</strong> (Electron is one driver;
+Tauri has been discussed). That directory layout is the natural place a
+<code>Drivers/</code> abstraction for the <em>runtime</em> lives — it is not a framework seam, but it
+proves the maintainers already think in terms of swappable backends.</p>
+<h3 id="22-node-side-the-whole-laravel-assumption-is-10-lines"><a class="anchor" href="#22-node-side-the-whole-laravel-assumption-is-10-lines">2.2 Node side: the whole Laravel assumption is ~10 lines</a></h3>
+<p>Every Laravel-ism in the Electron plugin, all in
+<code>resources/electron/electron-plugin/src/server/php.ts</code>:</p>
+<ol>
+<li><code>[&#39;artisan&#39;, &#39;native:php-ini&#39;]</code> and <code>[&#39;artisan&#39;, &#39;native:config&#39;]</code> — CLI entrypoint</li>
+<li><code>[&#39;artisan&#39;, &#39;schedule:run&#39; | &#39;optimize&#39; | &#39;migrate --force&#39;]</code></li>
+<li>router script hardcoded to
+<code>vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php</code>, cwd <code>public/</code></li>
+<li><code>LARAVEL_STORAGE_PATH</code> env + mkdir of <code>storage/framework/{cache,sessions,views,testing}</code></li>
+<li><code>bootstrap/cache</code> + <code>APP_{SERVICES,PACKAGES,CONFIG,ROUTES,EVENTS}_CACHE</code> env vars</li>
+<li><code>vendor/laravel/nightwatch</code> detection (optional, ignorable)</li>
+</ol>
+<p>Plus <code>api/childProcess.ts:174</code> special-casing <code>settings.cmd[0] === &#39;artisan&#39;</code>.</p>
+<p><strong>That&#39;s it.</strong> Six touch points, all in one file, all trivially parameterisable.
+(Running it later turned up a seventh in the same function — <code>APP_ENV</code> is set to
+Laravel&#39;s <code>local</code>/<code>production</code>. See <code>ANALYSIS.md</code> §6 item 8.)</p>
+<h3 id="23-the-decisive-asymmetry"><a class="anchor" href="#23-the-decisive-asymmetry">2.3 The decisive asymmetry</a></h3>
+<div class="table-scroll"><table><thead><tr><th></th><th>desktop</th><th>mobile</th></tr></thead><tbody>
+<tr><td>PHP↔native transport</td><td>localhost HTTP/JSON — already agnostic</td><td>PHP ext <code>nativephp_call()</code> — also agnostic</td></tr>
+<tr><td>Framework leak in the native layer</td><td>~10 lines, 1 file</td><td><code>bootstrap/*/native.php</code> hard-requires <code>bootstrap/app.php</code> + <code>Illuminate\Contracts\Http\Kernel</code>; <code>Runtime::boot($app)</code></td></tr>
+<tr><td>UI layer to port</td><td>none — it&#39;s a WebView, your Twig already works</td><td><strong>Blade → native element tree.</strong> A Twig equivalent means reimplementing the whole <code>mobile-ui</code> renderer driver</td></tr>
+<tr><td>Native toolchain needed</td><td>none</td><td>Xcode + Android Studio + NDK + Kotlin/Swift</td></tr>
+<tr><td>Upstream churn</td><td>slow, stable</td><td>very high — this is where all the energy is</td></tr>
+<tr><td>Licensing</td><td>MIT, clean</td><td>check before investing: NativePHP Mobile ships under a paid license model</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="3-decision-start-with-desktop-do-not-touch-mobile-yet"><a class="anchor" href="#3-decision-start-with-desktop-do-not-touch-mobile-yet">3. Decision: <strong>start with desktop.</strong> Do not touch mobile yet.</a></h2>
+<p>Rationale: desktop&#39;s native side is a separate process behind a JSON API, needs no
+native toolchain, has six identifiable Laravel-isms, and its UI story for Symfony is
+<em>already solved</em> — a Symfony app in a WebView is just a Symfony app. Mobile requires
+re-implementing Blade-driven native UI rendering for Twig, and its bootstrap layer is
+genuinely Laravel-shaped. Mobile is milestone 5+, if ever.</p>
+<h3 id="the-single-best-first-move"><a class="anchor" href="#the-single-best-first-move">The single best first move</a></h3>
+<p><strong>Not</strong> a fork, and <strong>not</strong> the big <code>nativephp/core</code> refactor.</p>
+<p>Start by <strong>writing down the contract</strong>, then <strong>spiking against the unmodified Electron
+runtime</strong>. Reason: the contract is currently <em>implicit</em>, spread across 22 TS files and
+one PHP <code>Client</code>. Every path forward — a Symfony bundle, an upstream <code>core</code> package,
+a Tauri driver — needs that document to exist, and producing it costs nothing
+politically. It is also the artifact that makes an upstream PR reviewable instead of
+a 5,000-line &quot;trust me&quot;.</p>
+<p><strong>Key unlock discovered during the audit:</strong> <code>native:install</code> copies the entire Electron
+project into the <em>user&#39;s</em> project at <code>base_path(&#39;nativephp/electron&#39;)</code>. So a Symfony
+bundle can ship its own patched <code>php.ts</code>/<code>dist/</code> <strong>without forking upstream and without
+waiting for a merge.</strong> The spike is unblocked today.</p>
+<hr>
+<h2 id="4-plan"><a class="anchor" href="#4-plan">4. Plan</a></h2>
+<h3 id="m0--contractmd-no-code--✅-done"><a class="anchor" href="#m0--contractmd-no-code--✅-done">M0 — <code>CONTRACT.md</code> (no code) — ✅ DONE</a></h3>
+<p>Deliverables:</p>
+<ul>
+<li>All 116 endpoints: method, path, request JSON shape, response JSON shape.
+Source: <code>resources/electron/electron-plugin/src/server/api/*.ts</code>.</li>
+<li>The reverse channel: every event the runtime POSTs to <code>_native/api/events</code>,
+mapped to the 45 event classes in <code>src/Events/</code>.</li>
+<li>The environment contract: <code>getDefaultEnvironmentVariables()</code> in <code>php.ts</code> — all 20
+<code>NATIVEPHP_*</code> vars + the Laravel-specific ones that need generalising.</li>
+<li>The bootstrap contract: what the runtime requires of <em>any</em> PHP app —
+a CLI entrypoint, a router script, a writable cache dir, a writable log dir,
+a sqlite path, an events endpoint, a booted endpoint, a cookie endpoint.</li>
+</ul>
+<p>This doc is the spec for M2 and the justification for M4.</p>
+<h3 id="m1--hello-symfony-desktop-spike--✅-done-see-spike-resultsmd"><a class="anchor" href="#m1--hello-symfony-desktop-spike--✅-done-see-spike-resultsmd">M1 — &quot;Hello Symfony Desktop&quot; spike — ✅ DONE (see <code>SPIKE-RESULTS.md</code>)</a></h3>
+<p>Goal: an unmodified-upstream Electron runtime rendering a Symfony 7 page, calling
+<code>Window::resize()</code> from a Symfony controller.</p>
+<p>Blockers and their fixes:</p>
+<div class="table-scroll"><table><thead><tr><th>Blocker</th><th>Spike fix</th><th>Real fix (M4)</th></tr></thead><tbody>
+<tr><td>runtime calls <code>php artisan …</code></td><td>drop a root <code>artisan</code> shim that forwards to <code>bin/console</code></td><td>manifest-declared CLI entrypoint</td></tr>
+<tr><td>router script path hardcoded to Laravel&#39;s <code>server.php</code></td><td>patch the vendored <code>nativephp/electron/</code> copy in the project</td><td>manifest-declared router script</td></tr>
+<tr><td><code>artisan native:config</code> / <code>native:php-ini</code> expected</td><td>implement as Symfony commands emitting the same JSON</td><td>unchanged</td></tr>
+<tr><td><code>optimize</code>, <code>migrate --force</code></td><td>map to <code>cache:warmup</code>, <code>doctrine:migrations:migrate</code> (or no-op)</td><td>manifest-declared lifecycle hooks</td></tr>
+<tr><td><code>storage/framework/*</code>, <code>bootstrap/cache</code></td><td>let it mkdir them, ignore; point Symfony at <code>var/</code> via env</td><td>generalised path contract</td></tr>
+</tbody></table></div>
+<p>Exit criterion: a screenshot. Nothing more. <strong>Met</strong> — Symfony 8.1.4 on PHP 8.4.24 in
+a native window, all three channels verified, plus a sixth patch hunk (<code>APP_ENV</code>) and
+three new upstream bugs that only surfaced by running it.</p>
+<h3 id="m2--nativephpsymfony-bundle-the-real-work--✅-done-see-m2-resultsmd"><a class="anchor" href="#m2--nativephpsymfony-bundle-the-real-work--✅-done-see-m2-resultsmd">M2 — <code>nativephp/symfony</code> bundle (the real work) — ✅ DONE (see <code>M2-RESULTS.md</code>)</a></h3>
+<ul>
+<li><code>NativeBundle</code>, DI extension, <code>native:</code> config tree, autowired services (no facades)</li>
+<li>Transport: <code>HttpClientInterface</code>-backed <code>Client</code> implementing the M0 contract</li>
+<li>API services: Window, Menu, MenuBar, Dialog, Notification, Clipboard, Shell, System,
+Screen, Settings, ChildProcess, GlobalShortcut, PowerMonitor, ProgressBar, Alert,
+App, Dock, AutoUpdater</li>
+<li>Events: 45 plain event classes + <code>_native/api/events</code> controller →
+<code>EventDispatcherInterface</code>. Reverse direction (app → runtime broadcast) needs an
+explicit <code>BroadcastsToRuntime</code> marker interface, since Symfony has no <code>Event::listen(&#39;*&#39;)</code>.</li>
+<li>Commands: <code>native:install</code>, <code>native:serve</code>, <code>native:build</code>, <code>native:config</code>,
+<code>native:php-ini</code>, <code>native:migrate</code>, <code>native:debug</code></li>
+<li>Security: port <code>PreventRegularBrowserAccess</code> + the security-cookie handshake</li>
+<li>Order of implementation: <strong>Window → App → Dialog/Notification → Menu → the rest.</strong>
+Window+App is 40 of the 116 endpoints and covers every real app&#39;s first hour.
+Phase 1 delivered Window (21) and App (19) plus the event bridge, security model and
+install/run tooling. <strong>Phase 2 completed the surface: all 116 endpoints and all 44
+events</strong>, with 222 tests and a live diagnostics run. Contract drift is now a test
+failure, not a discovery.</li>
+</ul>
+<h3 id="m3--build-pipeline--demo--✅-done-see-m3-resultsmd"><a class="anchor" href="#m3--build-pipeline--demo--✅-done-see-m3-resultsmd">M3 — build pipeline + demo — ✅ DONE (see <code>M3-RESULTS.md</code>)</a></h3>
+<p>The build pipeline landed first, since it answers a real open question. <code>native:build</code>
+stages, prunes, cleans and packages; the resulting app has been run from
+<code>dist/linux-unpacked</code> on the static <code>php-bin</code> binary. The unprotected build path works
+for Symfony; the Bifrost-protected one still needs @simonhamp.</p>
+<h4 id="original-scope--a-symfony-starter-demo"><a class="anchor" href="#original-scope--a-symfony-starter-demo">Original scope — a <code>symfony-starter</code> demo</a></h4>
+<p>The <code>super-native</code> / <code>kitchen-sink</code> equivalent: Twig + Turbo/Stimulus, exercising each
+API group. This is what convinces Symfony devs the thing is real, and it doubles as the
+integration test suite.</p>
+<h3 id="m4--upstream-path-to-nativephpcore--six-desktop-prs-open-mobile-patches-held"><a class="anchor" href="#m4--upstream-path-to-nativephpcore--six-desktop-prs-open-mobile-patches-held">M4 — upstream path to <code>nativephp/core</code> — six desktop PRs <strong>open</strong>, mobile patches held</a></h3>
+<p><code>upstream-patches/0002</code>–<code>0007</code> are open as NativePHP/desktop <strong>#136–#141</strong> (independent
+bug fixes, no review yet). Patch <code>0001</code> (the manifest) is deliberately held until the
+small ones land. <code>0008</code>–<code>0011</code> (mobile-air) are written and verified but unsubmitted —
+they need Sadiq&#39;s go-ahead and the mobile licensing read below.</p>
+<p>Only attempt this <em>with M1–M3 in hand</em>. Sequence of small, individually-reviewable PRs
+against <code>NativePHP/desktop</code>:</p>
+<ol>
+<li><strong>php.ts parameterisation</strong> — replace the six hardcoded Laravel-isms with values read
+from a manifest file (the org already uses this pattern: <code>mobile-ui</code>&#39;s
+<code>extra.nativephp.manifest → nativephp.json</code>). Zero behaviour change for Laravel;
+ships a default manifest that reproduces today&#39;s values exactly. <strong>This is the only
+PR that strictly must land upstream.</strong></li>
+<li><strong>Extract <code>nativephp/core</code></strong> — Contracts, Enums, DataObjects, Menu items, event
+payload DTOs. Start with the 51 already-uncoupled files: literally a package move.</li>
+<li><strong><code>nativephp/desktop</code> becomes the Laravel adapter</strong> over core. Facades and the
+service provider stay exactly where they are.</li>
+<li><code>nativephp/symfony</code> declares <code>nativephp/core</code> and drops its duplicated contracts.</li>
+</ol>
+<h3 id="m5--mobile-webview-path--✅-done-see-mobile-bundlereadmemd"><a class="anchor" href="#m5--mobile-webview-path--✅-done-see-mobile-bundlereadmemd">M5 — mobile, WebView path — ✅ DONE (see <code>mobile-bundle/README.md</code>)</a></h3>
+<p>The original entry here said Blade→native rendering was a project in its own right and
+mobile should wait. That is still true of the <em>native-UI</em> path, and false of mobile as a
+whole: <code>BootPlanner</code> on both platforms falls back to a WebView whenever an app registers no
+<code>Route::native</code> patterns, and <code>NATIVEPHP_BOOT_MODE=web</code> forces it. Twig in a WebView needs
+no Edge port at all.</p>
+<p>So mobile splits in two:</p>
+<ul>
+<li><strong>M5 — WebView path. Done.</strong> <code>mobile-bundle/</code> ships the SAPI shim, the persistent
+runtime, a patcher for the three hardcoded bootstrap paths, and wrappers for all 54
+<code>nativephp_call</code> methods. 55 tests — but <strong>no device verification</strong>, which is a weaker
+standard of evidence than desktop&#39;s and is flagged wherever mobile is described.</li>
+<li><strong>M6 — native UI for Twig — ✅ DONE.</strong> The <code>super-native</code> equivalent: element trees
+(36 wire types byte-compared against upstream&#39;s <code>Edge</code> classes), the Tailwind-subset
+parser plus <code>StyleApplier</code>, <code>#[NativeScreen]</code> routing, the component lifecycle, and
+<code>ComponentScreenRenderer</code> joining the two. Wire format in <code>NATIVE-UI-CONTRACT.md</code>;
+upstream&#39;s renderers are reused as-is, only the tree <em>producer</em> is new.</li>
+</ul>
+<p>Licensing still needs reading before anything mobile ships publicly — unlike desktop,
+NativePHP Mobile is a commercial product.</p>
+<hr>
+<h2 id="5-political--process-notes"><a class="anchor" href="#5-political--process-notes">5. Political / process notes</a></h2>
+<ul>
+<li>Discussion #504 has <strong>four volunteers</strong> who offered to help: @cedric-r-mycelium,
+@recchia, @darrenwilly, @Rom1Bastide. @Rom1Bastide independently proposed
+substantially this same <code>core</code> + adapters architecture in Feb 2026. Re-open that
+thread with the M0 contract doc attached — a spec plus a working spike is a very
+different ask from &quot;please make it agnostic&quot;.</li>
+<li><strong>No maintainer has responded to #504 in 18 months.</strong> Assume no upstream help.
+Plan so that only PR #1 of M4 depends on @simonhamp saying yes, and so that M1–M3
+ship with or without him.</li>
+<li>Naming: <code>desktop</code> is MIT so adapting the code is fine, but &quot;NativePHP&quot; is their
+brand. Ask before publishing under a <code>nativephp/*</code> composer vendor; ship as
+something neutral until then.</li>
+</ul>
+<hr>
+<h2 id="6-reference--local-checkouts-used-for-this-study"><a class="anchor" href="#6-reference--local-checkouts-used-for-this-study">6. Reference — local checkouts used for this study</a></h2>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>np-desktop/   github.com/NativePHP/desktop      (depth 1)  — 178 PHP files, 4.2M
+np-mobile/    github.com/NativePHP/mobile-air   (depth 1)  — embedded PHP, 25M</code></pre>
+</figure>
+<p>Files worth re-reading before starting M0:</p>
+<ul>
+<li><code>np-desktop/resources/electron/electron-plugin/src/server/php.ts</code> ← all 6 Laravel-isms</li>
+<li><code>np-desktop/resources/electron/electron-plugin/src/server/api.ts</code> ← the mount table</li>
+<li><code>np-desktop/src/NativeServiceProvider.php</code> ← everything the bundle must replicate</li>
+<li><code>np-desktop/src/Client/Client.php</code> ← the transport, in 40 lines</li>
+<li><code>np-desktop/config/nativephp-internal.php</code> ← the env contract</li>
+<li><code>np-mobile/bootstrap/ios/native.php</code> ← why mobile is hard</li>
+</ul>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="mobile-analysis.html"><span>← Previous</span><strong>Mobile analysis</strong></a>
+            <a class="pager-link next" href="desktop-bundle.html"><span>Next →</span><strong>Desktop bundle</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/PLAN.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#1-what-nativephp-actually-is-as-of-aug-2026">1. What NativePHP actually is (as of Aug 2026)</a></li><li class="lvl3"><a href="#11-nativephpdesktop-repo-nativephpdesktop-★422">1.1 nativephp/desktop (repo NativePHP/desktop, ★422)</a></li><li class="lvl3"><a href="#12-nativephpmobile-repo-nativephpmobile-air-★1134">1.2 nativephp/mobile (repo NativePHP/mobile-air, ★1134)</a></li><li class="lvl2"><a href="#2-coupling-audit--where-laravel-actually-leaks">2. Coupling audit — where Laravel actually leaks</a></li><li class="lvl3"><a href="#21-php-side-nativephpdesktopsrc-178-files">2.1 PHP side: nativephp/desktop/src (178 files)</a></li><li class="lvl3"><a href="#22-node-side-the-whole-laravel-assumption-is-10-lines">2.2 Node side: the whole Laravel assumption is ~10 lines</a></li><li class="lvl3"><a href="#23-the-decisive-asymmetry">2.3 The decisive asymmetry</a></li><li class="lvl2"><a href="#3-decision-start-with-desktop-do-not-touch-mobile-yet">3. Decision: start with desktop. Do not touch mobile yet.</a></li><li class="lvl3"><a href="#the-single-best-first-move">The single best first move</a></li><li class="lvl2"><a href="#4-plan">4. Plan</a></li><li class="lvl3"><a href="#m0--contractmd-no-code--✅-done">M0 — CONTRACT.md (no code) — ✅ DONE</a></li><li class="lvl3"><a href="#m1--hello-symfony-desktop-spike--✅-done-see-spike-resultsmd">M1 — &quot;Hello Symfony Desktop&quot; spike — ✅ DONE (see SPIKE-RESULTS.md)</a></li><li class="lvl3"><a href="#m2--nativephpsymfony-bundle-the-real-work--✅-done-see-m2-resultsmd">M2 — nativephp/symfony bundle (the real work) — ✅ DONE (see M2-RESULTS.md)</a></li><li class="lvl3"><a href="#m3--build-pipeline--demo--✅-done-see-m3-resultsmd">M3 — build pipeline + demo — ✅ DONE (see M3-RESULTS.md)</a></li><li class="lvl3"><a href="#m4--upstream-path-to-nativephpcore--six-desktop-prs-open-mobile-patches-held">M4 — upstream path to nativephp/core — six desktop PRs open, mobile patches held</a></li><li class="lvl3"><a href="#m5--mobile-webview-path--✅-done-see-mobile-bundlereadmemd">M5 — mobile, WebView path — ✅ DONE (see mobile-bundle/README.md)</a></li><li class="lvl2"><a href="#5-political--process-notes">5. Political / process notes</a></li><li class="lvl2"><a href="#6-reference--local-checkouts-used-for-this-study">6. Reference — local checkouts used for this study</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desktop bundle · NativePHP for Symfony</title>
+<meta name="description" content="What ships in native-symfony/desktop-bundle — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item active" href="desktop-bundle.html" aria-current="page"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="native-symfonydesktop-bundle"><a class="anchor" href="#native-symfonydesktop-bundle">native-symfony/desktop-bundle</a></h1>
+<p>Build desktop applications with Symfony, on NativePHP&#39;s Electron runtime.</p>
+<p>Status: <strong>M3 complete.</strong> All <strong>116 runtime endpoints</strong> and all <strong>44 events</strong> are
+implemented, and <code>native:build</code> produces a distributable app that has been <strong>built and
+run</strong> — see <code>../M3-RESULTS.md</code>. 357 tests.</p>
+<p>Not done yet: installer targets beyond <code>--dir</code>, and code signing (the env plumbing is
+there, untested without real credentials).</p>
+<p>The vendor name is provisional — <code>nativephp/*</code> is someone else&#39;s brand, and asking
+comes before claiming it.</p>
+<h2 id="what-it-gives-you"><a class="anchor" href="#what-it-gives-you">What it gives you</a></h2>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bootstrapper</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AppBootstrapper</span>
+</span>{
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> WindowManager <span class="hljs-variable">$windows</span></span>) </span>{}
+
+    <span class="hljs-comment">// The runtime POSTs /_native/api/booted at the end of its boot and this</span>
+    <span class="hljs-comment">// decides what appears. That is the entire app-startup contract.</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">boot</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span>
+    </span>{
+        <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-string">&#x27;main&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">url</span>(<span class="hljs-string">&#x27;/&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">size</span>(<span class="hljs-number">1000</span>, <span class="hljs-number">720</span>)
+            -&gt;<span class="hljs-title function_ invoke__">title</span>(<span class="hljs-string">&#x27;My App&#x27;</span>)
+            -&gt;<span class="hljs-title function_ invoke__">rememberState</span>()
+            -&gt;<span class="hljs-title function_ invoke__">open</span>();
+    }
+}</code></pre>
+</figure>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
+<span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onResized</span>(<span class="hljs-params">WindowResized <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
+</span>{
+    <span class="hljs-comment">// Typed, not an array: $event-&gt;id, $event-&gt;width, $event-&gt;height</span>
+}</code></pre>
+</figure>
+<p>Autowired services, no facades: <code>WindowManager</code>, <code>AppManager</code>, <code>NativePaths</code>,
+<code>ClientInterface</code>, <code>RuntimeBroadcaster</code>.</p>
+<h2 id="install"><a class="anchor" href="#install">Install</a></h2>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">composer require native-symfony/desktop-bundle
+
+<span class="hljs-comment"># The runtime lives in your project, not in vendor/ — see &quot;Why patch?&quot; below.</span>
+git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop
+bin/console native:install --<span class="hljs-built_in">source</span>=/tmp/np-desktop/resources/electron
+
+bin/console native:manifest   <span class="hljs-comment"># declare the app&#x27;s paths for the runtime</span>
+bin/console native:run</code></pre>
+</figure>
+<p><code>native:install</code> patches the runtime, and skips it automatically when it detects one
+that already reads a <code>nativephp.json</code> — so once the upstream manifest change lands,
+<code>native:manifest</code> is the whole story and nothing is patched.</p>
+<p>Then implement <code>Native\Symfony\Desktop\Contract\AppBootstrapper</code> on any service. The bundle
+autoconfigures and aliases it — no wiring needed.</p>
+<p>Routes cannot be auto-registered (Symfony bundles cannot register their own), so
+<code>native:install</code> writes the import for you:</p>
+<figure class="code">
+<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-yaml"><span class="hljs-comment"># config/routes/native_desktop.yaml — written by native:install</span>
+<span class="hljs-attr">native_desktop:</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">&#x27;@NativeDesktopBundle/src/Resources/config/routes.php&#x27;</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">php</span></code></pre>
+</figure>
+<p>It only ever creates the file, never rewrites an edited one without <code>--force</code>, and warns
+instead of guessing if there is no <code>config/routes/</code>. Without this import the app boots into
+a window that shows nothing, because <code>/booted</code> 404s and <code>boot()</code> is never called.</p>
+<h2 id="configuration"><a class="anchor" href="#configuration">Configuration</a></h2>
+<figure class="code">
+<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-yaml"><span class="hljs-attr">native_desktop:</span>
+    <span class="hljs-attr">app_id:</span> <span class="hljs-string">com.example.app</span>        <span class="hljs-comment"># the runtime passes this to setAppUserModelId()</span>
+    <span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;1.0.0&#x27;</span>
+    <span class="hljs-attr">deeplink_scheme:</span> <span class="hljs-string">myapp</span>         <span class="hljs-comment"># enables the OpenedFromURL event</span>
+    <span class="hljs-attr">base_url:</span> <span class="hljs-string">~</span>                    <span class="hljs-comment"># fallback for absolute window URLs outside a request</span>
+    <span class="hljs-attr">php_ini:</span>
+        <span class="hljs-attr">memory_limit:</span> <span class="hljs-string">512M</span>
+    <span class="hljs-attr">updater:</span>
+        <span class="hljs-attr">enabled:</span> <span class="hljs-literal">false</span>
+    <span class="hljs-attr">events:</span>
+        <span class="hljs-attr">allowed_namespaces:</span> []     <span class="hljs-comment"># see &quot;Security&quot; below</span>
+    <span class="hljs-attr">block_browser_access:</span> <span class="hljs-literal">true</span>     <span class="hljs-comment"># leave this on</span></code></pre>
+</figure>
+<h2 id="commands"><a class="anchor" href="#commands">Commands</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>native:run</code></td><td>Start the app in development</td></tr>
+<tr><td><code>native:install --source=…</code></td><td>Copy, patch and build the Electron runtime</td></tr>
+<tr><td><code>native:config</code></td><td>Print the startup config as JSON — <strong>the runtime calls this</strong></td></tr>
+<tr><td><code>native:php-ini</code></td><td>Print PHP ini overrides as JSON — <strong>the runtime calls this</strong></td></tr>
+<tr><td><code>native:build [os] [arch]</code></td><td>Package for distribution; <code>--dir</code> skips installer generation</td></tr>
+<tr><td><code>native:schedule-tick</code></td><td>Once-a-minute tick the runtime drives; no-op by default</td></tr>
+</tbody></table></div>
+<p>The two marked commands are part of the wire contract. They print nothing but JSON on
+stdout, and they run before the runtime&#39;s API server exists — so they must never
+assume <code>NATIVEPHP_API_URL</code> is set.</p>
+<h2 id="why-patch-the-runtime"><a class="anchor" href="#why-patch-the-runtime">Why patch the runtime?</a></h2>
+<p>The runtime hardcodes eight Laravel-specific values as string literals in its
+TypeScript: the <code>artisan</code> CLI name (six call sites), the router script path
+(<code>vendor/laravel/framework/.../server.php</code>), a <code>storage/</code> directory it copies
+unconditionally, <code>APP_ENV=local</code>, and <code>schedule:run</code>. <code>RuntimePatcher</code> rewrites them.</p>
+<p>This is not a fork. <code>native:install --publish</code> upstream already mirrors the whole
+Electron project into the application&#39;s own <code>nativephp/electron/</code>, and the runtime
+prefers that copy whenever a <code>package.json</code> exists there. The proper fix is a manifest
+file declaring those eight values, which is a small behaviour-preserving PR — see
+<code>../ANALYSIS.md</code> §6. Until then, each app patches its own copy. <code>RuntimePatcher</code> is
+idempotent and <strong>fails loudly</strong> if a hunk&#39;s target has moved, because silently skipping
+one produces an app that boots into a Laravel router path and 404s everything.</p>
+<h2 id="building"><a class="anchor" href="#building">Building</a></h2>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">composer require nativephp/php-bin       <span class="hljs-comment"># static PHP binaries + cacert.pem, no PHP deps</span>
+bin/console native:build linux x64       <span class="hljs-comment"># or mac / win, x64 / arm64</span>
+bin/console native:build linux x64 --<span class="hljs-built_in">dir</span> <span class="hljs-comment"># unpacked directory, much faster to check</span></code></pre>
+</figure>
+<p>Two things to know before you ship.</p>
+<p><strong>Builds contain readable source.</strong> Upstream&#39;s protected build needs a bundle from
+Bifrost, NativePHP&#39;s hosted service, which currently targets Laravel&#39;s entry points.
+<code>native:build</code> warns rather than letting it pass unnoticed.</p>
+<p><strong><code>APP_SECRET</code> is protected from your own config.</strong> The <code>build.env_keep</code> list wins over
+<code>build.env_remove</code>, and defaults to <code>APP_SECRET</code>. Laravel&#39;s upstream cleanup list globs
+<code>*_SECRET</code>, which is safe there (its key is <code>APP_KEY</code>) and fatal here — <code>framework.yaml</code>
+reads <code>%env(APP_SECRET)%</code>, so a stripped one means the packaged app cannot boot. Adding a
+broad glob must not let you break your own build.</p>
+<p>Also worth knowing: the static PHP binary cannot load opcache, so packaged apps — Laravel&#39;s
+too — run without it. Warm <code>var/cache</code> at build time rather than relying on runtime caching.</p>
+<h2 id="security"><a class="anchor" href="#security">Security</a></h2>
+<p>Two deliberate divergences from the Laravel implementation.</p>
+<p><strong>Event instantiation.</strong> Upstream&#39;s controller does
+<code>class_exists($event) ? new $event(...$payload)</code> straight from the request body — any
+autoloadable class, with attacker-chosen constructor arguments, if the shared secret
+leaks. Here only the known event map and namespaces you list in
+<code>events.allowed_namespaces</code> are constructed; everything else becomes a <code>NativeEvent</code>
+carrying the payload as data. Identical behaviour for legitimate traffic.</p>
+<p><strong>Browser access.</strong> <code>RuntimeAccessSubscriber</code> rejects any request carrying neither the
+<code>_php_native</code> cookie nor the <code>X-NativePHP-Secret</code> header, at priority 4096 — above the
+firewall. The app is served by PHP&#39;s built-in server on a real loopback port; that
+secret is the only thing keeping other local processes out. It fails <em>open</em> when the
+runtime supplied no secret at all, since 403ing every request would leave no way to
+diagnose the misconfiguration.</p>
+<h2 id="two-behaviours-worth-knowing"><a class="anchor" href="#two-behaviours-worth-knowing">Two behaviours worth knowing</a></h2>
+<p><strong>Your own resizes do not emit <code>WindowResized</code>.</strong> The runtime listens for Electron&#39;s
+<code>resized</code>, which fires for user drags but not <code>setSize()</code>. <code>window/resize</code> succeeds and
+<code>window/get</code> reflects it; no event arrives.</p>
+<p><strong><code>window/open</code> is idempotent by id.</strong> An existing id is shown and focused and nothing
+is created, which is why calling it from <code>boot()</code> is safe even though the runtime posts
+<code>/booted</code> again on macOS <code>activate</code>.</p>
+<h2 id="tests"><a class="anchor" href="#tests">Tests</a></h2>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">composer install &amp;&amp; vendor/bin/phpunit</code></pre>
+</figure>
+<p>357 tests, 780 assertions. <code>ContractCoverageTest</code> parses the runtime&#39;s own express
+routers and fails if an endpoint goes uncovered or an event name goes unmapped, so
+upstream drift breaks the suite rather than surfacing a release later.</p>
+<p>The ones that matter most cover the dual argument spreading (list payloads
+positionally, string-keyed payloads as named arguments — get this wrong and half the 44
+runtime events break), the <code>_windowId</code> Referer-before-URL order, the patcher&#39;s
+idempotency and its refusal to skip a hunk, that an unlisted class is never
+instantiated from a request body, that <code>confirm()</code> binds <code>cancelId</code> so a dismissed
+dialog cannot mean &quot;yes&quot;, and that the dock is a no-op off macOS.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="plan.html"><span>← Previous</span><strong>Plan</strong></a>
+            <a class="pager-link next" href="mobile-bundle.html"><span>Next →</span><strong>Mobile bundle</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/bundle/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#what-it-gives-you">What it gives you</a></li><li class="lvl2"><a href="#install">Install</a></li><li class="lvl2"><a href="#configuration">Configuration</a></li><li class="lvl2"><a href="#commands">Commands</a></li><li class="lvl2"><a href="#why-patch-the-runtime">Why patch the runtime?</a></li><li class="lvl2"><a href="#building">Building</a></li><li class="lvl2"><a href="#security">Security</a></li><li class="lvl2"><a href="#two-behaviours-worth-knowing">Two behaviours worth knowing</a></li><li class="lvl2"><a href="#tests">Tests</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

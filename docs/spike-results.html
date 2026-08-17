@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M1 — the spike · NativePHP for Symfony</title>
+<meta name="description" content="Proving it possible at all — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item active" href="spike-results.html" aria-current="page"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="m1-spike--symfony-8-running-under-the-nativephp-desktop-runtime"><a class="anchor" href="#m1-spike--symfony-8-running-under-the-nativephp-desktop-runtime">M1 Spike — Symfony 8 running under the NativePHP desktop runtime</a></h1>
+<p><strong>Result: it works.</strong> A Symfony 8.1.4 app on PHP 8.4.24, in a native Electron window,
+driving the runtime&#39;s API and receiving its events. No Laravel anywhere in the app.</p>
+<p>Reproduce with <code>spike/README.md</code>. Screenshots: <code>spike/shot.png</code> (first success, with
+devtools), <code>spike/shot-final.png</code> (final, after a programmatic resize).</p>
+<hr>
+<h2 id="what-was-proven"><a class="anchor" href="#what-was-proven">What was proven</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Channel</th><th>Proof</th></tr></thead><tbody>
+<tr><td><strong>Boot handshake</strong></td><td>The runtime POSTed <code>/_native/api/booted</code>; the Symfony controller answered by calling <code>window/open</code>. The window in the screenshot exists <em>only</em> because Symfony asked for it.</td></tr>
+<tr><td><strong>A — app → runtime (write)</strong></td><td><code>window/open</code> created the window at exactly the requested 1000×720 with the requested title. Then <code>/resize/760/520</code> → <code>window/resize</code> → <code>200</code>.</td></tr>
+<tr><td><strong>A — app → runtime (read)</strong></td><td><code>window/get/main</code> read back into Twig: id <code>main</code>, size, position, title, focused. After the resize the same read returned <strong>760 × 520</strong> — verified numerically, not from pixels.</td></tr>
+<tr><td><strong>B — runtime → app</strong></td><td>Symfony&#39;s log recorded <code>native-event Native\Desktop\Events\Windows\WindowShown {&quot;payload&quot;:[&quot;main&quot;]}</code> and the same for <code>WindowFocused</code>. Positional payload spreading exercised.</td></tr>
+<tr><td><strong>C — runtime → renderer</strong></td><td>The page printed <code>window.Native present — listening</code> and then <code>WindowFocused [&quot;main&quot;]</code>. <strong>No Livewire, no bridge shim</strong> — the preload&#39;s <code>window.Native</code> is framework-agnostic and works in a plain Twig page as-is.</td></tr>
+<tr><td><strong>Security model</strong></td><td>Request carrying <code>X-NativePHP-Secret</code> → <code>200</code>. Same request without it → <strong>403</strong>, from the ported <code>PreventRegularBrowserAccessSubscriber</code>.</td></tr>
+<tr><td><strong>Env contract</strong></td><td><code>NATIVEPHP_RUNNING=true</code> reached Symfony (the page&#39;s green badge). <code>native:php-ini</code>&#39;s <code>{&quot;memory_limit&quot;:&quot;512M&quot;}</code> came back through the runtime and appeared in the spawned server&#39;s <code>-d</code> flags.</td></tr>
+</tbody></table></div>
+<p>Total app-side code: <strong>7 PHP classes + 1 router script + 1 Twig template.</strong> No bundle,
+no abstraction layer, no <code>illuminate/*</code>.</p>
+<hr>
+<h2 id="the-diff-against-the-runtime"><a class="anchor" href="#the-diff-against-the-runtime">The diff against the runtime</a></h2>
+<p>Five hunks, two files, all inside <code>electron-plugin/src/server/</code>
+(<code>spike/patch-runtime.py</code> is the executable version):</p>
+<div class="table-scroll"><table><thead><tr><th>Hunk</th><th>Change</th><th>Why</th></tr></thead><tbody>
+<tr><td>1</td><td><code>[&#39;artisan&#39;, …]</code> → <code>[&#39;bin/console&#39;, …]</code> (6 sites) + the two <code>argv[0] === &#39;artisan&#39;</code> guards</td><td>CLI entrypoint</td></tr>
+<tr><td>2</td><td>router script <code>vendor/laravel/framework/…/server.php</code> → <code>public/nativephp-router.php</code></td><td>Symfony has no built-in-server router script</td></tr>
+<tr><td>3</td><td>guard <code>copySync(appPath/storage, …)</code> with <code>existsSync</code></td><td>Symfony has no <code>storage/</code> dir</td></tr>
+<tr><td>4</td><td><code>settings.cmd[0] === &#39;artisan&#39;</code> in <code>childProcess.ts</code></td><td>same as 1</td></tr>
+<tr><td>5</td><td><code>APP_ENV</code> <code>local</code>/<code>production</code> → <code>dev</code>/<code>prod</code></td><td><strong>found by running it</strong> — see below</td></tr>
+</tbody></table></div>
+<p><strong>No upstream changes were needed.</strong> <code>native:install --publish</code> mirrors the whole
+Electron project into the app&#39;s own <code>nativephp/electron/</code>, and
+<code>ElectronServiceProvider::electronPath()</code> prefers that copy whenever a <code>package.json</code>
+exists there. So an adapter can ship a patched runtime today and treat the upstream
+manifest PR as hygiene rather than a blocker — as predicted in <code>ANALYSIS.md</code> §6.</p>
+<hr>
+<h2 id="new-findings--things-only-running-it-revealed"><a class="anchor" href="#new-findings--things-only-running-it-revealed">New findings — things only running it revealed</a></h2>
+<h3 id="1-app_envlocal-is-a-hard-boot-failure-on-symfony-8-an-8th-laravel-ism"><a class="anchor" href="#1-app_envlocal-is-a-hard-boot-failure-on-symfony-8-an-8th-laravel-ism">1. <code>APP_ENV=local</code> is a hard boot failure on Symfony 8 (an 8th Laravel-ism)</a></h3>
+<p><code>php.ts::getDefaultEnvironmentVariables()</code> hardcodes Laravel&#39;s environment names:</p>
+<figure class="code">
+<span class="code-lang">ts</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-ts"><span class="hljs-attr">APP_ENV</span>: process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span> ? <span class="hljs-string">&#x27;local&#x27;</span> : <span class="hljs-string">&#x27;production&#x27;</span>,</code></pre>
+</figure>
+<p>Symfony 8 whitelists <code>APP_ENV</code> in <code>App\Kernel::getAllowedEnvs()</code> (<code>[&#39;prod&#39;,&#39;dev&#39;,&#39;test&#39;]</code>)
+and throws on anything else:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>In KernelTrait.php line 587:
+  [InvalidArgumentException]
+  The environment &quot;local&quot; is not registered as allowed by &quot;App\Kernel::getAllowedEnvs()&quot;.</code></pre>
+</figure>
+<p>Both <code>native:config</code> and <code>native:php-ini</code> died on this. I had catalogued seven
+Laravel-isms in <code>php.ts</code> from reading; this is the eighth, and it is the only one that
+is a <em>hard</em> failure rather than a wrong path. Belongs in the manifest as <code>env.{dev,prod}</code>.</p>
+<h3 id="2-a-missing-storage-directory-takes-the-whole-boot-down"><a class="anchor" href="#2-a-missing-storage-directory-takes-the-whole-boot-down">2. A missing <code>storage/</code> directory takes the whole boot down</a></h3>
+<p><code>ensureAppFoldersAreAvailable()</code> calls <code>copySync(join(appPath,&#39;storage&#39;), storagePath)</code>
+unconditionally. <code>fs-extra</code>&#39;s <code>copySync</code> throws on a missing source, so <strong>any app
+without a top-level <code>storage/</code> dir dies at boot step 9a</strong> — before the PHP server
+starts. Not Symfony-specific: a Laravel app whose storage lives elsewhere hits it too.
+One <code>existsSync</code> guard fixes it. Add to the upstream findings list.</p>
+<h3 id="3-failures-in-nativeconfig--nativephp-ini-are-silently-swallowed"><a class="anchor" href="#3-failures-in-nativeconfig--nativephp-ini-are-silently-swallowed">3. Failures in <code>native:config</code> / <code>native:php-ini</code> are silently swallowed</a></h3>
+<p><code>index.ts::loadConfig()</code> and <code>loadPhpIni()</code> both wrap the <code>execFile</code> in
+<code>try { … } catch (error) { console.error(error) }</code> and return <code>{}</code>. On my first run
+both commands were failing and <strong>boot continued to completion</strong> — with no app id, no
+deep-link registration, and no updater, because every config key was missing. The app
+window still opened, so nothing looked wrong.</p>
+<p>This is the same class of problem as the swallowed <code>notifyLaravel</code> errors
+(<code>ANALYSIS.md</code> §8.2): the runtime treats &quot;PHP did not answer&quot; as &quot;PHP said nothing&quot;.
+For a porter it is the single most expensive behaviour to debug, because a totally
+broken config command and a correct one are visually identical.</p>
+<h3 id="4-schedulerun-is-hardcoded-and-unconditional"><a class="anchor" href="#4-schedulerun-is-hardcoded-and-unconditional">4. <code>schedule:run</code> is hardcoded and unconditional</a></h3>
+<p>The runtime spawns <code>&lt;cli&gt; schedule:run</code> every 60s from the first minute boundary, with
+no check that the command exists. For any app without it that is a failing process
+every minute, silently. The spike ships a no-op stub. Lifecycle commands belong in the
+manifest as optional.</p>
+<h3 id="5-programmatic-resizes-do-not-emit-windowresized"><a class="anchor" href="#5-programmatic-resizes-do-not-emit-windowresized">5. Programmatic resizes do not emit <code>WindowResized</code></a></h3>
+<p>Confirmed empirically: after <code>window/resize</code> succeeded and <code>window/get</code> reported the
+new 760×520, <strong>no <code>WindowResized</code> event arrived</strong> — Symfony&#39;s log for that run contains
+only <code>WindowShown</code> and <code>WindowFocused</code>. <code>window.ts</code> listens for Electron&#39;s <code>resized</code>,
+which fires for user-driven resizes, not <code>setSize()</code>. Not a bug, but it means an app
+cannot rely on the event to observe its own resizes, and any port&#39;s tests must not
+expect it. Worth stating in <code>CONTRACT.md</code> §1.</p>
+<hr>
+<h2 id="notes-on-the-harness"><a class="anchor" href="#notes-on-the-harness">Notes on the harness</a></h2>
+<ul>
+<li>No PHP and only Node 12 on the host, so everything runs in a container
+(<code>spike/Dockerfile</code>: PHP 8.4 + Node 22 + Electron&#39;s system libs + Xvfb).</li>
+<li><code>npm run dev</code> is <code>node php.js &amp;&amp; electron-vite dev --watch</code>. <strong><code>php.js</code> is skipped</strong>:
+it exists only to unzip a static binary out of the <code>nativephp/php-bin</code> composer
+package into <code>$NATIVEPHP_BUILD_PATH/php/php</code>. Dropping a real PHP at that path is
+equivalent and removes the dependency on <code>php-bin</code> entirely for development.</li>
+<li><code>$NATIVEPHP_BUILD_PATH</code> needs three things: <code>icon.png</code>, <code>cacert.pem</code>, <code>php/php</code>.</li>
+<li>Electron needs <code>ELECTRON_DISABLE_SANDBOX=1</code> in a container. The D-Bus and WebGL
+errors in the log are Xvfb artefacts, not runtime problems.</li>
+<li>The shared secret is never logged — the harness lifts it from the PHP dev server&#39;s
+<code>/proc/&lt;pid&gt;/environ</code> to make an authenticated request. In a real app the renderer
+gets it via <code>webRequest.onBeforeSendHeaders</code> and the <code>_php_native</code> cookie.</li>
+</ul>
+<hr>
+<h2 id="what-this-changes-about-the-plan"><a class="anchor" href="#what-this-changes-about-the-plan">What this changes about the plan</a></h2>
+<p>M1&#39;s exit criterion is met, and two assumptions are now facts rather than inferences:</p>
+<ul>
+<li>The runtime really is framework-agnostic at the boundary. The Laravel coupling is a
+handful of string literals in one file, not an architecture.</li>
+<li>The adapter needs no upstream cooperation to be <em>useful</em>, only to be <em>tidy</em>.</li>
+</ul>
+<p><code>PLAN.md</code> M2 (the bundle proper) can start from the spike&#39;s seven classes. The upstream
+manifest PR now has eight concrete parameters to propose, plus three independent bug
+fixes (findings 2, 3, 4 here and §8 in <code>ANALYSIS.md</code>) that are worth submitting first
+on their own merits.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="upstream-patches.html"><span>← Previous</span><strong>Upstream patches</strong></a>
+            <a class="pager-link next" href="m2-results.html"><span>Next →</span><strong>M2 — the bundle</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/SPIKE-RESULTS.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#what-was-proven">What was proven</a></li><li class="lvl2"><a href="#the-diff-against-the-runtime">The diff against the runtime</a></li><li class="lvl2"><a href="#new-findings--things-only-running-it-revealed">New findings — things only running it revealed</a></li><li class="lvl3"><a href="#1-app_envlocal-is-a-hard-boot-failure-on-symfony-8-an-8th-laravel-ism">1. APP_ENV=local is a hard boot failure on Symfony 8 (an 8th Laravel-ism)</a></li><li class="lvl3"><a href="#2-a-missing-storage-directory-takes-the-whole-boot-down">2. A missing storage/ directory takes the whole boot down</a></li><li class="lvl3"><a href="#3-failures-in-nativeconfig--nativephp-ini-are-silently-swallowed">3. Failures in native:config / native:php-ini are silently swallowed</a></li><li class="lvl3"><a href="#4-schedulerun-is-hardcoded-and-unconditional">4. schedule:run is hardcoded and unconditional</a></li><li class="lvl3"><a href="#5-programmatic-resizes-do-not-emit-windowresized">5. Programmatic resizes do not emit WindowResized</a></li><li class="lvl2"><a href="#notes-on-the-harness">Notes on the harness</a></li><li class="lvl2"><a href="#what-this-changes-about-the-plan">What this changes about the plan</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

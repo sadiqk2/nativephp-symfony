@@ -4,100 +4,75 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mobile API · NativePHP for Symfony</title>
-<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<meta name="description" content="54 bridge methods and the native-UI layers — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
 </head>
 <body>
-<a class="skip" href="#content">Skip to content</a>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="layout">
-    <aside class="sidebar">
-        <a class="brand" href="index.html">
-            <span class="brand-mark" aria-hidden="true">NS</span>
-            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
-        </a>
-        <nav class="nav" aria-label="Documentation">
-<a class="nav-link" href="index.html">
-            <span class="nav-title">Overview</span>
-            <span class="nav-blurb">What is here, and what is authoritative</span>
-        </a>
-<p class="nav-section">Using it</p>
-<a class="nav-link" href="getting-started-desktop.html">
-            <span class="nav-title">Desktop</span>
-            <span class="nav-blurb">From composer require to a window</span>
-        </a>
-<a class="nav-link" href="getting-started-mobile.html">
-            <span class="nav-title">Mobile</span>
-            <span class="nav-blurb">Both render paths, and what is verified</span>
-        </a>
-<p class="nav-section">Reference</p>
-<a class="nav-link" href="desktop-api.html">
-            <span class="nav-title">Desktop API</span>
-            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
-        </a>
-<a class="nav-link current" href="mobile-api.html" aria-current="page">
-            <span class="nav-title">Mobile API</span>
-            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
-        </a>
-<p class="nav-section">Working with it</p>
-<a class="nav-link" href="recipes.html">
-            <span class="nav-title">Recipes</span>
-            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
-        </a>
-<a class="nav-link" href="testing.html">
-            <span class="nav-title">Testing</span>
-            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
-        </a>
-<a class="nav-link" href="troubleshooting.html">
-            <span class="nav-title">Troubleshooting</span>
-            <span class="nav-blurb">Symptom → cause → fix</span>
-        </a>
-        </nav>
-        <div class="sidebar-foot">
-            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
-            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
         </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item active" href="mobile-api.html" aria-current="page"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
     </aside>
 
-    <main id="content">
-        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
-<li class="d2"><a href="#the-bridge">The bridge</a></li>
-<li class="d3"><a href="#where-do-the-results-arrive">Where do the results arrive?</a></li>
-<li class="d2"><a href="#the-groups">The groups</a></li>
-<li class="d3"><a href="#camera--apicamera">Camera — Api\Camera</a></li>
-<li class="d3"><a href="#device--apidevice">Device — Api\Device</a></li>
-<li class="d3"><a href="#secure-storage--apisecurestorage">Secure storage — Api\SecureStorage</a></li>
-<li class="d3"><a href="#geolocation--apigeolocation">Geolocation — Api\Geolocation</a></li>
-<li class="d3"><a href="#microphone--apimicrophone">Microphone — Api\Microphone</a></li>
-<li class="d3"><a href="#biometric--apibiometric">Biometric — Api\Biometric</a></li>
-<li class="d3"><a href="#push-notifications--apipushnotifications">Push notifications — Api\PushNotifications</a></li>
-<li class="d3"><a href="#browser--apibrowser">Browser — Api\Browser</a></li>
-<li class="d3"><a href="#share--apishare">Share — Api\Share</a></li>
-<li class="d3"><a href="#dialog--apidialog">Dialog — Api\Dialog</a></li>
-<li class="d3"><a href="#files--apifiles">Files — Api\Files</a></li>
-<li class="d3"><a href="#network--apinetwork">Network — Api\Network</a></li>
-<li class="d3"><a href="#system--apisystem">System — Api\System</a></li>
-<li class="d3"><a href="#wallet--apimobilewallet">Wallet — Api\MobileWallet</a></li>
-<li class="d3"><a href="#performance--apiperformance">Performance — Api\Performance</a></li>
-<li class="d3"><a href="#native-ui-transitions--apinativeui">Native UI transitions — Api\NativeUi</a></li>
-<li class="d2"><a href="#testing-the-bridge">Testing the bridge</a></li>
-<li class="d2"><a href="#native-ui">Native UI</a></li>
-<li class="d3"><a href="#elements">Elements</a></li>
-<li class="d3"><a href="#publishing-a-frame">Publishing a frame</a></li>
-<li class="d3"><a href="#callbacks">Callbacks</a></li>
-<li class="d3"><a href="#components">Components</a></li>
-<li class="d3"><a href="#twig-authoring">Twig authoring</a></li>
-<li class="d3"><a href="#styling">Styling</a></li>
-<li class="d2"><a href="#commands">Commands</a></li>
-</ul></nav>
+    <main id="main">
         <article class="prose">
 <h1 id="mobile-api-reference"><a class="anchor" href="#mobile-api-reference">Mobile API reference</a></h1>
 <p>All classes live under <code>Native\Symfony\Mobile\</code>. The sixteen API services are registered
 <code>public</code> and autowirable; they are thin, typed wrappers over
 <code>nativephp_call($method, $jsonPayload)</code>.</p>
 <p>For the native-UI wire format — node shapes, hashes, callback ids, style vocabulary — read
-<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/NATIVE-UI-CONTRACT.md" target="_blank" rel="noopener"><code>../NATIVE-UI-CONTRACT.md</code></a>. This page is the guide to using it.</p>
+<a href="native-ui-contract.html"><code>../NATIVE-UI-CONTRACT.md</code></a>. This page is the guide to using it.</p>
 <hr>
 <h2 id="the-bridge"><a class="anchor" href="#the-bridge">The bridge</a></h2>
 <p><code>Bridge/BridgeInterface</code> has four methods, and the distinction between two of them is the
@@ -126,38 +101,46 @@ that when you design a flow around <code>Camera</code>, <code>Biometric</code>, 
 <hr>
 <h2 id="the-groups"><a class="anchor" href="#the-groups">The groups</a></h2>
 <h3 id="camera--apicamera"><a class="anchor" href="#camera--apicamera">Camera — <code>Api\Camera</code></a></h3>
-<pre><code class="language-php">$camera-&gt;photo(quality: 85, front: false);          // quality clamped to 1–100
-$camera-&gt;pickMedia(type: &#39;image&#39;, multiple: true);  // &#39;image&#39; | &#39;video&#39; | &#39;any&#39;
-$camera-&gt;recordVideo(maxSeconds: 30, front: true);
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">photo</span>(<span class="hljs-attr">quality</span>: <span class="hljs-number">85</span>, <span class="hljs-attr">front</span>: <span class="hljs-literal">false</span>);          <span class="hljs-comment">// quality clamped to 1–100</span>
+<span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">pickMedia</span>(<span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;image&#x27;</span>, <span class="hljs-attr">multiple</span>: <span class="hljs-literal">true</span>);  <span class="hljs-comment">// &#x27;image&#x27; | &#x27;video&#x27; | &#x27;any&#x27;</span>
+<span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">recordVideo</span>(<span class="hljs-attr">maxSeconds</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">front</span>: <span class="hljs-literal">true</span>);</code></pre>
+</figure>
 <p>All three are dispatches. Nothing is returned but &quot;the UI was presented&quot;.</p>
 <h3 id="device--apidevice"><a class="anchor" href="#device--apidevice">Device — <code>Api\Device</code></a></h3>
-<pre><code class="language-php">$device-&gt;info();          // array&lt;string,mixed&gt;; [] when the bridge is absent
-$device-&gt;id();            // ?string
-$device-&gt;batteryInfo();   // array
-$device-&gt;vibrate(250);
-$device-&gt;toggleFlashlight(true);   // null argument toggles
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">info</span>();          <span class="hljs-comment">// array&lt;string,mixed&gt;; [] when the bridge is absent</span>
+<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">id</span>();            <span class="hljs-comment">// ?string</span>
+<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">batteryInfo</span>();   <span class="hljs-comment">// array</span>
+<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">vibrate</span>(<span class="hljs-number">250</span>);
+<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">toggleFlashlight</span>(<span class="hljs-literal">true</span>);   <span class="hljs-comment">// null argument toggles</span></code></pre>
+</figure>
 <h3 id="secure-storage--apisecurestorage"><a class="anchor" href="#secure-storage--apisecurestorage">Secure storage — <code>Api\SecureStorage</code></a></h3>
 <p>iOS Keychain and Android Keystore. Values survive app updates but not a reinstall or a move
 to another device — suitable for tokens, not for anything a user would be upset to lose.</p>
-<pre><code class="language-php">$storage-&gt;set(&#39;token&#39;, $jwt, accessibility: null);   // bool
-$storage-&gt;get(&#39;token&#39;);                              // ?string
-$storage-&gt;has(&#39;token&#39;);
-$storage-&gt;delete(&#39;token&#39;);
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$storage</span>-&gt;<span class="hljs-title function_ invoke__">set</span>(<span class="hljs-string">&#x27;token&#x27;</span>, <span class="hljs-variable">$jwt</span>, <span class="hljs-attr">accessibility</span>: <span class="hljs-literal">null</span>);   <span class="hljs-comment">// bool</span>
+<span class="hljs-variable">$storage</span>-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;token&#x27;</span>);                              <span class="hljs-comment">// ?string</span>
+<span class="hljs-variable">$storage</span>-&gt;<span class="hljs-title function_ invoke__">has</span>(<span class="hljs-string">&#x27;token&#x27;</span>);
+<span class="hljs-variable">$storage</span>-&gt;<span class="hljs-title function_ invoke__">delete</span>(<span class="hljs-string">&#x27;token&#x27;</span>);</code></pre>
+</figure>
 <p><strong>Dots in a key are not part of the key</strong> — the same dot-prop behaviour the desktop settings
 store has. Use a flat separator if you care.</p>
 <h3 id="geolocation--apigeolocation"><a class="anchor" href="#geolocation--apigeolocation">Geolocation — <code>Api\Geolocation</code></a></h3>
 <p>This reads unlike a browser&#39;s geolocation API on purpose. Background positions are buffered
 natively, because a phone can accumulate thousands while the app is asleep and waking PHP for
 each would drain the battery.</p>
-<pre><code class="language-php">$geo-&gt;backgroundWatchStatus();      // array — active? permission state?
-$geo-&gt;drainWatchBuffer(limit: 500); // list&lt;array&gt; — DESTRUCTIVE, the buffer is emptied
-$geo-&gt;trimWatchBuffer(keep: 0);     // drop without reading
-$geo-&gt;stopBackgroundWatch();
-$geo-&gt;clearWatch();
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">backgroundWatchStatus</span>();      <span class="hljs-comment">// array — active? permission state?</span>
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">drainWatchBuffer</span>(<span class="hljs-attr">limit</span>: <span class="hljs-number">500</span>); <span class="hljs-comment">// list&lt;array&gt; — DESTRUCTIVE, the buffer is emptied</span>
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">trimWatchBuffer</span>(<span class="hljs-attr">keep</span>: <span class="hljs-number">0</span>);     <span class="hljs-comment">// drop without reading</span>
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">stopBackgroundWatch</span>();
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">clearWatch</span>();</code></pre>
+</figure>
 <p><code>drainWatchBuffer()</code> removes what it returns. Persist before doing anything that might fail.</p>
 <p>There is no <code>start</code>/<code>request</code> method here — starting a background watch is not one of the 54
 bridge methods.</p>
@@ -165,8 +148,10 @@ bridge methods.</p>
 <p><code>start()</code>, <code>stop()</code>, <code>pause()</code>, <code>resume()</code> (dispatches), <code>status()</code>, <code>isRecording()</code>,
 <code>recording()</code> (reads).</p>
 <h3 id="biometric--apibiometric"><a class="anchor" href="#biometric--apibiometric">Biometric — <code>Api\Biometric</code></a></h3>
-<pre><code class="language-php">$biometric-&gt;prompt(&#39;Unlock your vault&#39;, fallbackTitle: &#39;Use passcode&#39;);
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$biometric</span>-&gt;<span class="hljs-title function_ invoke__">prompt</span>(<span class="hljs-string">&#x27;Unlock your vault&#x27;</span>, <span class="hljs-attr">fallbackTitle</span>: <span class="hljs-string">&#x27;Use passcode&#x27;</span>);</code></pre>
+</figure>
 <p>Asynchronous. See the warning above.</p>
 <h3 id="push-notifications--apipushnotifications"><a class="anchor" href="#push-notifications--apipushnotifications">Push notifications — <code>Api\PushNotifications</code></a></h3>
 <p><code>token()</code> (<code>?string</code>), <code>checkPermission()</code> (array), <code>isAuthorised()</code>, <code>clearBadge()</code>.</p>
@@ -187,13 +172,15 @@ filesystem functions.</p>
 <p><code>appearance()</code> (string), <code>isDarkMode()</code>, <code>minimize()</code>, <code>openAppSettings()</code>,
 <code>setBackground($color)</code>.</p>
 <h3 id="wallet--apimobilewallet"><a class="anchor" href="#wallet--apimobilewallet">Wallet — <code>Api\MobileWallet</code></a></h3>
-<pre><code class="language-php">if ($wallet-&gt;isAvailable()) {
-    $intent = $wallet-&gt;createPaymentIntent(1999, &#39;EUR&#39;, [&#39;order&#39; =&gt; &#39;123&#39;]);
-    $wallet-&gt;presentPaymentSheet($intent[&#39;id&#39;] ?? &#39;&#39;);
-    // …later, from a route the page calls back:
-    $status = $wallet-&gt;paymentStatus($intentId);
-}
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">if</span> (<span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">isAvailable</span>()) {
+    <span class="hljs-variable">$intent</span> = <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">createPaymentIntent</span>(<span class="hljs-number">1999</span>, <span class="hljs-string">&#x27;EUR&#x27;</span>, [<span class="hljs-string">&#x27;order&#x27;</span> =&gt; <span class="hljs-string">&#x27;123&#x27;</span>]);
+    <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">presentPaymentSheet</span>(<span class="hljs-variable">$intent</span>[<span class="hljs-string">&#x27;id&#x27;</span>] ?? <span class="hljs-string">&#x27;&#x27;</span>);
+    <span class="hljs-comment">// …later, from a route the page calls back:</span>
+    <span class="hljs-variable">$status</span> = <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">paymentStatus</span>(<span class="hljs-variable">$intentId</span>);
+}</code></pre>
+</figure>
 <p><code>presentPaymentSheet()</code> returning <code>true</code> is <strong>not</strong> a completed payment. Always read the
 status back; never infer it from the presentation call.</p>
 <h3 id="performance--apiperformance"><a class="anchor" href="#performance--apiperformance">Performance — <code>Api\Performance</code></a></h3>
@@ -208,22 +195,26 @@ native UI for instrumentation.</p>
 complete rather than looking like an oversight.</p>
 <hr>
 <h2 id="testing-the-bridge"><a class="anchor" href="#testing-the-bridge">Testing the bridge</a></h2>
-<pre><code class="language-php">use Native\Symfony\Mobile\Api\SecureStorage;
-use Native\Symfony\Mobile\Bridge\FakeBridge;
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Api</span>\<span class="hljs-title">SecureStorage</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">FakeBridge</span>;
 
-$bridge = new FakeBridge();
-$bridge-&gt;willReturn(&#39;SecureStorage.Get&#39;, [&#39;value&#39; =&gt; &#39;tok_123&#39;]);
+<span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FakeBridge</span>();
+<span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">willReturn</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, [<span class="hljs-string">&#x27;value&#x27;</span> =&gt; <span class="hljs-string">&#x27;tok_123&#x27;</span>]);
 
-self::assertSame(&#39;tok_123&#39;, (new SecureStorage($bridge))-&gt;get(&#39;token&#39;));
-self::assertSame(&#39;SecureStorage.Get&#39;, $bridge-&gt;lastCall()[&#39;method&#39;]);
-self::assertContains(&#39;SecureStorage.Get&#39;, $bridge-&gt;methods());
-</code></pre>
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;tok_123&#x27;</span>, (<span class="hljs-keyword">new</span> <span class="hljs-title class_">SecureStorage</span>(<span class="hljs-variable">$bridge</span>))-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;token&#x27;</span>));
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, <span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">lastCall</span>()[<span class="hljs-string">&#x27;method&#x27;</span>]);
+<span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertContains</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, <span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">methods</span>());</code></pre>
+</figure>
 <p><code>new FakeBridge(available: false)</code> models being outside a packaged app. Set
 <code>native_mobile.fake_bridge: true</code> to use it through the container instead.</p>
 <p>The real <code>Bridge</code> also takes an <code>$invoker</code> callable standing in for the extension function,
 which is how the bundle tests the real class rather than only the fake:</p>
-<pre><code class="language-php">$bridge = new Bridge(null, fn (string $method, string $json): string =&gt; &#39;{&quot;value&quot;:1}&#39;);
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Bridge</span>(<span class="hljs-literal">null</span>, <span class="hljs-function"><span class="hljs-keyword">fn</span> (<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$method</span>, <span class="hljs-keyword">string</span> <span class="hljs-variable">$json</span></span>): <span class="hljs-title">string</span> =&gt;</span> <span class="hljs-string">&#x27;{&quot;value&quot;:1}&#x27;</span>);</code></pre>
+</figure>
 <hr>
 <h2 id="native-ui"><a class="anchor" href="#native-ui">Native UI</a></h2>
 <p>Only relevant on the native-UI render path. Skip this if your app renders Twig into a
@@ -231,17 +222,19 @@ WebView.</p>
 <h3 id="elements"><a class="anchor" href="#elements">Elements</a></h3>
 <p>37 element classes covering all 36 wire types (<code>Fab</code> shares <code>pressable</code>) under
 <code>Ui\Elements\</code>. Containers take children, leaves take their content:</p>
-<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Elements\Button;
-use Native\Symfony\Mobile\Ui\Elements\Column;
-use Native\Symfony\Mobile\Ui\Elements\Text;
-use Native\Symfony\Mobile\Ui\Elements\TextInput;
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Button</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Column</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Text</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">TextInput</span>;
 
-$tree = Column::make(
-    Text::make(&#39;Hello&#39;)-&gt;fontSize(24)-&gt;fontWeight(&#39;bold&#39;),
-    TextInput::make()-&gt;placeholder(&#39;Name&#39;)-&gt;onChange(&#39;rename&#39;),
-    Button::make(&#39;Save&#39;)-&gt;onPress(&#39;save&#39;),
-)-&gt;layout([&#39;gap&#39; =&gt; 8, &#39;padding&#39; =&gt; 16]);
-</code></pre>
+<span class="hljs-variable">$tree</span> = <span class="hljs-title class_">Column</span>::<span class="hljs-title function_ invoke__">make</span>(
+    <span class="hljs-title class_">Text</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Hello&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">fontSize</span>(<span class="hljs-number">24</span>)-&gt;<span class="hljs-title function_ invoke__">fontWeight</span>(<span class="hljs-string">&#x27;bold&#x27;</span>),
+    <span class="hljs-title class_">TextInput</span>::<span class="hljs-title function_ invoke__">make</span>()-&gt;<span class="hljs-title function_ invoke__">placeholder</span>(<span class="hljs-string">&#x27;Name&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">onChange</span>(<span class="hljs-string">&#x27;rename&#x27;</span>),
+    <span class="hljs-title class_">Button</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Save&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">onPress</span>(<span class="hljs-string">&#x27;save&#x27;</span>),
+)-&gt;<span class="hljs-title function_ invoke__">layout</span>([<span class="hljs-string">&#x27;gap&#x27;</span> =&gt; <span class="hljs-number">8</span>, <span class="hljs-string">&#x27;padding&#x27;</span> =&gt; <span class="hljs-number">16</span>]);</code></pre>
+</figure>
 <p>Shared on every element: <code>key()</code>, <code>ref()</code>, <code>onPress()</code>, <code>onLongPress()</code>, <code>navigate()</code>,
 <code>child()</code>, <code>layout()</code>, <code>style()</code>, <code>props()</code>.</p>
 <p>Container and canvas setters, each byte-compared against upstream&#39;s equivalent:</p>
@@ -266,9 +259,11 @@ part of the wire format rather than an implementation detail.</p>
 <code>ScrollView</code>&#39;s <code>overflow=2</code> and <code>Circle</code>&#39;s <code>border_radius=9999</code>. <code>Spacer</code> defaults
 <code>flex_grow=1</code>, so it works dropped in bare.</p>
 <h3 id="publishing-a-frame"><a class="anchor" href="#publishing-a-frame">Publishing a frame</a></h3>
-<pre><code class="language-php">$tree = $publisher-&gt;publish($root, $callbacks);   // array&lt;string,mixed&gt;, the published tree
-$publisher-&gt;resetDiffState();                     // on navigation — see below
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$tree</span> = <span class="hljs-variable">$publisher</span>-&gt;<span class="hljs-title function_ invoke__">publish</span>(<span class="hljs-variable">$root</span>, <span class="hljs-variable">$callbacks</span>);   <span class="hljs-comment">// array&lt;string,mixed&gt;, the published tree</span>
+<span class="hljs-variable">$publisher</span>-&gt;<span class="hljs-title function_ invoke__">resetDiffState</span>();                     <span class="hljs-comment">// on navigation — see below</span></code></pre>
+</figure>
 <p><code>ElementPublisher</code> keeps the previous frame&#39;s node hashes, which is what makes subtree reuse
 work: an interaction that changes one label republishes one node and marks the rest
 <code>flags: 1</code>. Upstream leaves that to the caller, and without it every frame is a full repaint.</p>
@@ -285,32 +280,34 @@ a signed Kotlin <code>Int</code>), so a registry can be rebuilt and the ids stay
 joined to the expression with <code>\x1F</code> — is what keeps two screens&#39; <code>save</code> handlers apart.</p>
 <p><code>0</code> is never a valid id: the native side reads 0 as &quot;no callback&quot;.</p>
 <h3 id="components"><a class="anchor" href="#components">Components</a></h3>
-<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Component\NativeAction;
-use Native\Symfony\Mobile\Ui\Component\NativeComponent;
-use Native\Symfony\Mobile\Ui\Element;
-use Native\Symfony\Mobile\Ui\Elements\Button;
-use Native\Symfony\Mobile\Ui\Elements\Column;
-use Native\Symfony\Mobile\Ui\Elements\Text;
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">NativeAction</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">NativeComponent</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Element</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Button</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Column</span>;
+<span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Text</span>;
 
-final class Counter extends NativeComponent
-{
-    private int $count = 0;
+<span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">NativeComponent</span>
+</span>{
+    <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-variable">$count</span> = <span class="hljs-number">0</span>;
 
-    #[NativeAction]
-    public function increment(): void
-    {
-        ++$this-&gt;count;
+    <span class="hljs-meta">#[NativeAction</span><span class="hljs-meta">]</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">increment</span>(<span class="hljs-params"></span>): <span class="hljs-title">void</span>
+    </span>{
+        ++<span class="hljs-variable language_">$this</span>-&gt;count;
     }
 
-    protected function render(): Element
-    {
-        return Column::make(
-            Text::make(&quot;Count: {$this-&gt;count}&quot;),
-            Button::make(&#39;+&#39;)-&gt;onPress(&#39;increment&#39;),
+    <span class="hljs-keyword">protected</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">render</span>(<span class="hljs-params"></span>): <span class="hljs-title">Element</span>
+    </span>{
+        <span class="hljs-keyword">return</span> <span class="hljs-title class_">Column</span>::<span class="hljs-title function_ invoke__">make</span>(
+            <span class="hljs-title class_">Text</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&quot;Count: <span class="hljs-subst">{$this-&gt;count}</span>&quot;</span>),
+            <span class="hljs-title class_">Button</span>::<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;+&#x27;</span>)-&gt;<span class="hljs-title function_ invoke__">onPress</span>(<span class="hljs-string">&#x27;increment&#x27;</span>),
         );
     }
-}
-</code></pre>
+}</code></pre>
+</figure>
 <ul>
 <li>State is ordinary typed properties. The PHP process is long-lived in persistent mode, so
 there is nothing to serialise and nothing to rehydrate — unlike Livewire, which must,
@@ -333,13 +330,15 @@ dispatches, and they arrive at <code>onNavigate()</code>. Nothing else happens.<
 reuse would carry state and children across invisibly.</li>
 </ul>
 <p>Driving a screen through routing — what a device does, and what the bundle wires by default:</p>
-<pre><code class="language-php">// ScreenRendererInterface is aliased to ComponentScreenRenderer, so this needs no glue.
-$frame = $responder-&gt;respond(&#39;/counter&#39;);                        // first paint
-$id    = $responder-&gt;callbacks()-&gt;idFor(&#39;increment&#39;);            // expression → id
-$renderer-&gt;dispatch(&#39;/counter&#39;, InteractionEvent::press($id));   // false = nothing mounted
-$frame = $responder-&gt;republish();                                // repaint, as a delta
-$renderer-&gt;forget(&#39;/counter&#39;);                                   // navigating away
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-comment">// ScreenRendererInterface is aliased to ComponentScreenRenderer, so this needs no glue.</span>
+<span class="hljs-variable">$frame</span> = <span class="hljs-variable">$responder</span>-&gt;<span class="hljs-title function_ invoke__">respond</span>(<span class="hljs-string">&#x27;/counter&#x27;</span>);                        <span class="hljs-comment">// first paint</span>
+<span class="hljs-variable">$id</span>    = <span class="hljs-variable">$responder</span>-&gt;<span class="hljs-title function_ invoke__">callbacks</span>()-&gt;<span class="hljs-title function_ invoke__">idFor</span>(<span class="hljs-string">&#x27;increment&#x27;</span>);            <span class="hljs-comment">// expression → id</span>
+<span class="hljs-variable">$renderer</span>-&gt;<span class="hljs-title function_ invoke__">dispatch</span>(<span class="hljs-string">&#x27;/counter&#x27;</span>, <span class="hljs-title class_">InteractionEvent</span>::<span class="hljs-title function_ invoke__">press</span>(<span class="hljs-variable">$id</span>));   <span class="hljs-comment">// false = nothing mounted</span>
+<span class="hljs-variable">$frame</span> = <span class="hljs-variable">$responder</span>-&gt;<span class="hljs-title function_ invoke__">republish</span>();                                <span class="hljs-comment">// repaint, as a delta</span>
+<span class="hljs-variable">$renderer</span>-&gt;<span class="hljs-title function_ invoke__">forget</span>(<span class="hljs-string">&#x27;/counter&#x27;</span>);                                   <span class="hljs-comment">// navigating away</span></code></pre>
+</figure>
 <p>The renderer keeps one component instance per route pattern, and binds it to the registry the
 responder handed it. Both matter and both fail silently otherwise: a per-frame instance gives a
 screen whose state resets on every tap, and a self-made registry gives one whose buttons do
@@ -347,12 +346,14 @@ nothing. A screen with constructor dependencies is resolved from the container �
 <code>NativeComponent</code> is autoconfigured with the <code>native.screen</code> tag — and route parameters reach a
 screen that declares <code>withRouteParameters(array $params)</code>.</p>
 <p>Driving one directly, without routing:</p>
-<pre><code class="language-php">$screen = $factory-&gt;open(new Counter());          // ComponentScreenFactory
-$frame  = $screen-&gt;frame();                       // first paint
-$frame  = $screen-&gt;handle($eventArrayFromDevice); // ?array — null when the id is unknown
-$id     = $screen-&gt;callbackId(&#39;increment&#39;);       // for tests: expression → id
-$screen-&gt;close();                                 // unmounts the graph, drops diff state
-</code></pre>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$screen</span> = <span class="hljs-variable">$factory</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Counter</span>());          <span class="hljs-comment">// ComponentScreenFactory</span>
+<span class="hljs-variable">$frame</span>  = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">frame</span>();                       <span class="hljs-comment">// first paint</span>
+<span class="hljs-variable">$frame</span>  = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">handle</span>(<span class="hljs-variable">$eventArrayFromDevice</span>); <span class="hljs-comment">// ?array — null when the id is unknown</span>
+<span class="hljs-variable">$id</span>     = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">callbackId</span>(<span class="hljs-string">&#x27;increment&#x27;</span>);       <span class="hljs-comment">// for tests: expression → id</span>
+<span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">close</span>();                                 <span class="hljs-comment">// unmounts the graph, drops diff state</span></code></pre>
+</figure>
 <p><code>handle()</code> returning <code>null</code> is routine, not an error: the device may still be showing a
 superseded frame and tap a node that has since gone away. A registered id that cannot be
 dispatched throws <code>CallbackRefused</code>.</p>
@@ -367,12 +368,14 @@ receives depends on the event type, which is not known until the interaction arr
 <code>TAB_CHANGE = 13</code>, <code>SHEET_DISMISS = 14</code>. A text handler cannot be handed an array, a toggle
 handler cannot receive the string <code>&quot;false&quot;</code>, and an unknown type carries nothing at all.</p>
 <h3 id="twig-authoring"><a class="anchor" href="#twig-authoring">Twig authoring</a></h3>
-<pre><code class="language-twig">{% set tree = native(&#39;column&#39;, {layout: {gap: 8}}, [
-    native(&#39;text&#39;,   {text: &#39;Hello&#39;, fontSize: 24}),
-    native(&#39;button&#39;, {label: &#39;Tap me&#39;, onPress: &#39;save&#39;}),
-    native(&#39;spacer&#39;),
-]) %}
-</code></pre>
+<figure class="code">
+<span class="code-lang">twig</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-twig"><span class="hljs-template-tag">{%</span> <span class="hljs-name">set</span> tree = native(<span class="hljs-string">&#x27;column&#x27;</span>, {layout: {gap: <span class="hljs-number">8</span>}}, [
+    native(<span class="hljs-string">&#x27;text&#x27;</span>,   {text: <span class="hljs-string">&#x27;Hello&#x27;</span>, fontSize: <span class="hljs-number">24</span>}),
+    native(<span class="hljs-string">&#x27;button&#x27;</span>, {label: <span class="hljs-string">&#x27;Tap me&#x27;</span>, onPress: <span class="hljs-string">&#x27;save&#x27;</span>}),
+    native(<span class="hljs-string">&#x27;spacer&#x27;</span>),
+]) <span class="hljs-template-tag">%}</span></code></pre>
+</figure>
 <p><code>native(type, options, children)</code> and <code>native_types()</code> are the two Twig functions;
 <code>children</code> may be one element, a list, or nothing. Passing a string where an element belongs
 throws with the child&#39;s index and the type it was in, rather than failing deep in the tree
@@ -390,11 +393,13 @@ is a working one.</p>
 <p><code>Ui\Style\StyleParser</code> parses a Tailwind class string into the canonical camelCase map from
 the contract&#39;s §4d — verified token-for-token against upstream across 684 tokens and 1,336
 class strings, plus a 48,849-parse differential sweep:</p>
-<pre><code class="language-php">$parser-&gt;parse(&#39;flex-1 p-4 gap-2&#39;);
-// [&#39;flexGrow&#39; =&gt; 1, &#39;flexShrink&#39; =&gt; 1, &#39;flexBasis&#39; =&gt; 0, &#39;padding&#39; =&gt; 16, &#39;gap&#39; =&gt; 8]
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$parser</span>-&gt;<span class="hljs-title function_ invoke__">parse</span>(<span class="hljs-string">&#x27;flex-1 p-4 gap-2&#x27;</span>);
+<span class="hljs-comment">// [&#x27;flexGrow&#x27; =&gt; 1, &#x27;flexShrink&#x27; =&gt; 1, &#x27;flexBasis&#x27; =&gt; 0, &#x27;padding&#x27; =&gt; 16, &#x27;gap&#x27; =&gt; 8]</span>
 
-$parser-&gt;parse(&#39;bg-theme-surface&#39;, $dropped);   // $dropped lists tokens that produced nothing
-</code></pre>
+<span class="hljs-variable">$parser</span>-&gt;<span class="hljs-title function_ invoke__">parse</span>(<span class="hljs-string">&#x27;bg-theme-surface&#x27;</span>, <span class="hljs-variable">$dropped</span>);   <span class="hljs-comment">// $dropped lists tokens that produced nothing</span></code></pre>
+</figure>
 <p>Two things to be careful about:</p>
 <p><strong>That map is not the wire vocabulary.</strong> Layout keys on the wire are snake_case
 (<code>flex_grow</code>), element props are camelCase (<code>fontSize</code>) — upstream&#39;s inconsistency, which the
@@ -411,7 +416,7 @@ variants (<code>ios:</code> / <code>android:</code>) drop unless <code>native_mo
 <p>There is one intentional divergence from upstream, and it is a bug fix: upstream&#39;s
 theme-border branch emits <code>borderWidth: 1</code> unconditionally, so <code>border-2 border-theme-outline</code>
 renders a 1pt border while the reverse order gives 2. Here both orderings give 2. See patch
-<code>0008</code> in <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/upstream-patches/README.md" target="_blank" rel="noopener"><code>../upstream-patches/</code></a>.</p>
+<code>0008</code> in <a href="upstream-patches.html"><code>../upstream-patches/</code></a>.</p>
 <h2 id="commands"><a class="anchor" href="#commands">Commands</a></h2>
 <div class="table-scroll"><table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
 <tr><td><code>native:mobile:install --source=…</code></td><td>Copy <code>androidstudio/</code> and <code>xcode/</code> into the app and retarget their bootstrap paths</td></tr>
@@ -420,14 +425,25 @@ renders a 1pt border while the reverse order gives 2. Here both orderings give 2
 <tr><td><code>native:mobile:build &lt;android|ios&gt;</code></td><td>Stage the app and produce an APK/AAB or an iOS archive; <code>--stage-only</code> stops before Gradle/Xcode</td></tr>
 <tr><td><code>native:mobile:run &lt;android|ios&gt;</code></td><td>Debug build, install and launch; <code>--dry-run</code> prints the plan</td></tr>
 </tbody></table></div>
-<p>See <a href="getting-started-mobile.html#building-and-running">getting started</a> for what those commands
+<p>See <a href="mobile.html#building-and-running">getting started</a> for what those commands
 have and have not actually executed in this environment.</p>
 
         </article>
-        <footer class="foot">
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="desktop-api.html"><span>← Previous</span><strong>Desktop API</strong></a>
+            <a class="pager-link next" href="contract.html"><span>Next →</span><strong>Wire protocol</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/mobile-api.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#the-bridge">The bridge</a></li><li class="lvl3"><a href="#where-do-the-results-arrive">Where do the results arrive?</a></li><li class="lvl2"><a href="#the-groups">The groups</a></li><li class="lvl3"><a href="#camera--apicamera">Camera — Api\Camera</a></li><li class="lvl3"><a href="#device--apidevice">Device — Api\Device</a></li><li class="lvl3"><a href="#secure-storage--apisecurestorage">Secure storage — Api\SecureStorage</a></li><li class="lvl3"><a href="#geolocation--apigeolocation">Geolocation — Api\Geolocation</a></li><li class="lvl3"><a href="#microphone--apimicrophone">Microphone — Api\Microphone</a></li><li class="lvl3"><a href="#biometric--apibiometric">Biometric — Api\Biometric</a></li><li class="lvl3"><a href="#push-notifications--apipushnotifications">Push notifications — Api\PushNotifications</a></li><li class="lvl3"><a href="#browser--apibrowser">Browser — Api\Browser</a></li><li class="lvl3"><a href="#share--apishare">Share — Api\Share</a></li><li class="lvl3"><a href="#dialog--apidialog">Dialog — Api\Dialog</a></li><li class="lvl3"><a href="#files--apifiles">Files — Api\Files</a></li><li class="lvl3"><a href="#network--apinetwork">Network — Api\Network</a></li><li class="lvl3"><a href="#system--apisystem">System — Api\System</a></li><li class="lvl3"><a href="#wallet--apimobilewallet">Wallet — Api\MobileWallet</a></li><li class="lvl3"><a href="#performance--apiperformance">Performance — Api\Performance</a></li><li class="lvl3"><a href="#native-ui-transitions--apinativeui">Native UI transitions — Api\NativeUi</a></li><li class="lvl2"><a href="#testing-the-bridge">Testing the bridge</a></li><li class="lvl2"><a href="#native-ui">Native UI</a></li><li class="lvl3"><a href="#elements">Elements</a></li><li class="lvl3"><a href="#publishing-a-frame">Publishing a frame</a></li><li class="lvl3"><a href="#callbacks">Callbacks</a></li><li class="lvl3"><a href="#components">Components</a></li><li class="lvl3"><a href="#twig-authoring">Twig authoring</a></li><li class="lvl3"><a href="#styling">Styling</a></li><li class="lvl2"><a href="#commands">Commands</a></li></ul></nav>
 </div>
+
+<script src="assets/site.js" defer></script>
 </body>
 </html>

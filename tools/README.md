@@ -1,72 +1,87 @@
 # tools/
 
-## `build-docs.mjs` — the documentation site
+## The documentation site
 
-Turns `docs/*.md` into a static site in `docs/` that GitHub Pages serves as-is. The Markdown
-stays the source of truth and stays readable on GitHub; each file gets an `.html` twin beside
-it, plus `docs/assets/site.css` and `docs/.nojekyll`.
+`build-docs.mjs` renders **every** Markdown document in the repository — the guides in `docs/`,
+the specifications and analysis at the root, the two bundle READMEs, the demo and the upstream
+patches — into a static site in `docs/`, which GitHub Pages serves as-is.
 
 ```bash
-npm install marked                       # the one dependency, not vendored
-DOCS_ROOT="$PWD" node tools/build-docs.mjs
+npm install marked highlight.js
+DOCS_ROOT="$PWD" node tools/build-docs.mjs      # 21 pages + a 404
+php -S 127.0.0.1:8000 -t docs                   # look at it before publishing
 ```
 
-`DOCS_ROOT` exists because ESM resolves a bare `import 'marked'` from the *importing file's*
-directory upwards, so the script has to be able to run from wherever `marked` was installed
+`DOCS_ROOT` exists because ESM resolves a bare `import 'marked'` from the importing file's
+directory upwards, so the script has to be runnable from wherever the modules were installed
 while still writing into this repository.
 
-**Preview it before publishing.** There is no build step at deploy time, so what you see
-locally is what Pages serves:
+Publishing: **Settings → Pages → Deploy from a branch → `main` / `/docs`**. Pages on a private
+repository needs a paid plan; on a public one it is free. `.nojekyll` is what stops Pages
+trying to process the directory as a Jekyll project.
 
-```bash
-php -S 127.0.0.1:8000 -t docs        # then open http://127.0.0.1:8000/
-```
+### What the site has
 
-Publishing: repository **Settings → Pages → Deploy from a branch → `main` / `/docs`**. Pages
-on a private repository needs a paid plan; on a public one it is free. `.nojekyll` is what
-stops Pages trying to process the directory as a Jekyll project, which would otherwise ignore
-`assets/` and mangle the Markdown.
+| | |
+|---|---|
+| Navigation | Grouped in reading order — *Start here*, *Reference*, *Working with it*, *How it works*, *The packages*, *Record* — not alphabetically, and not derived from the filesystem |
+| Search | Client-side over a prebuilt 54 KB index; `/` focuses it, arrows and Enter work, hits show the matching heading and a highlighted excerpt |
+| Themes | Light, dark, or follow the system — three states, cycled by the toggle, applied before first paint so nothing flashes |
+| Code | Highlighted at build time by highlight.js, so no script runs in the reader's browser to colour it; every block has a copy button |
+| Reading aids | On-this-page index that tracks the section you are in, previous/next pager, edit-on-GitHub per page |
+| Offline | No CDN, no webfont, no analytics, no external request of any kind |
 
 ### Design decisions worth knowing before editing
 
-- **Generated HTML rather than Jekyll or a theme.** Jekyll cannot be run in this environment
-  (no Ruby), so its first rendering would have been the published site. Generated files can be
-  opened and read locally first. The trade is that the site is rebuilt by running the script —
-  so if you change a `.md`, re-run it.
-- **No external requests at all**: system fonts, an inline SVG favicon, one local stylesheet.
-  Documentation gets read while something is broken, sometimes behind a proxy.
+- **Generated HTML rather than Jekyll or a remote theme.** Jekyll cannot run in this
+  environment (no Ruby), so its first rendering would have been the published site. Generated
+  files can be opened, screenshotted and read first — the same reason this project screenshots
+  the demo instead of trusting its tests. The trade is a rebuild step: change a `.md`, re-run
+  the script.
 - **Heading ids match GitHub's slugger exactly**, including the two details that are easy to
-  miss: each space becomes its own hyphen (`## Desktop — boot`, whose em dash is stripped,
-  gives `desktop--boot`) and underscores survive (`_windowId` → `_windowid`). This is
-  deliberate in both directions — a link written against GitHub keeps working here, and a link
-  that is broken *there* stays broken here rather than being quietly repaired. It found one:
-  `recipes.md` linked to `#a-multi-window-app-and-the-windowid-convention`, which never
-  resolved on GitHub either.
-- **Links above `docs/` go to GitHub**, not into the site: the analysis and specification
-  documents at the repository root are not part of it.
-- Light and dark are both first-class, from `prefers-color-scheme`. Tokens are defined for
-  light on `:root` and redefined for dark, never the other way round, so a page always has a
-  complete palette.
+  miss: each space becomes its own hyphen (`## Desktop — boot`, em dash stripped, gives
+  `desktop--boot`) and underscores survive (`_windowId` → `_windowid`). Deliberate in both
+  directions — a link written against GitHub keeps working, and a link that is broken *there*
+  stays broken here rather than being quietly repaired. It has found two so far, both dead on
+  GitHub as well.
+- **Links resolve against the document they live in.** A link to something the site carries
+  becomes a page link; anything else — a source file, a directory — goes to GitHub rather than
+  404ing inside the site.
+- **Headerless Markdown tables** (`| | |`, used as two-column layout throughout these
+  documents) render without an empty header band, and their first column is treated as the
+  label.
+- Light and dark are both first-class: tokens for light on `:root`, redefined under
+  `prefers-color-scheme: dark` (guarded so an explicit light choice wins), and again under
+  `[data-theme="dark"]` so the toggle wins in both directions. No colour is declared only
+  inside a media query.
 
 ### Checking the output
 
-`docs/` has no tests, but the site is mechanically checkable and worth checking — every
-internal link and in-page anchor should resolve:
+There are no tests for a stylesheet, but links and anchors are mechanically checkable and
+worth checking after every build — that is how both broken anchors were found:
 
 ```bash
 python3 - <<'PY'
 import re
 from pathlib import Path
-docs = Path('docs')
+docs, bad = Path('docs'), 0
 for p in sorted(docs.glob('*.html')):
-    s = p.read_text()
-    ids = set(re.findall(r'id="([^"]+)"', s))
+    s = p.read_text(); ids = set(re.findall(r'id="([^"]+)"', s))
     for href in re.findall(r'href="([^"]+)"', s):
-        if href.startswith('#') and href[1:] not in ids:
-            print(f'{p.name}: dead anchor {href}')
-        elif not href.startswith(('http', 'mailto', 'data:', '#')):
-            target = href.split('#')[0]
-            if target and target != 'assets/site.css' and not (docs / target).exists():
-                print(f'{p.name}: dead link {href}')
+        if href.startswith(('http', 'mailto', 'data:')): continue
+        if href.startswith('#'):
+            if href[1:] not in ids: bad += 1; print('dead anchor', p.name, href)
+            continue
+        target, _, frag = href.partition('#')
+        if target and target not in ('assets/site.css', 'assets/site.js') and not (docs / target).exists():
+            bad += 1; print('dead link', p.name, href)
+        elif frag and target.endswith('.html') and f'id="{frag}"' not in (docs / target).read_text():
+            bad += 1; print('dead cross-page anchor', p.name, href)
+print('problems:', bad)
 PY
 ```
+
+And to see it, rather than trust it: `php -S 127.0.0.1:8000 -t docs`. In this container the
+pages can also be rendered headlessly through the demo's Electron —
+`ELECTRON_DISABLE_SANDBOX=1` and a disabled D-Bus address are the two things without which it
+silently never paints.

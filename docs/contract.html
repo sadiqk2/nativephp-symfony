@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wire protocol · NativePHP for Symfony</title>
+<meta name="description" content="All 116 endpoints and 44 events, exactly — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item active" href="contract.html" aria-current="page"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="nativephp-desktop--runtime-contract"><a class="anchor" href="#nativephp-desktop--runtime-contract">NativePHP Desktop — Runtime Contract</a></h1>
+<p>The wire protocol between a PHP application and the NativePHP Electron runtime.
+Extracted from <code>NativePHP/desktop</code> @ HEAD (2026-08-14), <code>resources/electron/electron-plugin/src/</code>.
+Framework-neutral by construction: nothing below mentions Laravel except where the
+current implementation leaks it, and those leaks are called out as such.</p>
+<p>This is the spec a <code>nativephp/symfony</code> adapter implements, and the spec a
+<code>nativephp/core</code> package would encode. See <code>ANALYSIS.md</code> for the boot sequence and
+<code>PLAN.md</code> for the roadmap.</p>
+<hr>
+<h2 id="0-transport-and-conventions"><a class="anchor" href="#0-transport-and-conventions">0. Transport and conventions</a></h2>
+<h3 id="channel-a--app-→-runtime"><a class="anchor" href="#channel-a--app-→-runtime">Channel A — app → runtime</a></h3>
+<ul>
+<li><strong>Base URL</strong> <code>http://127.0.0.1:{apiPort}/api/</code> — supplied to the PHP process as
+<code>NATIVEPHP_API_URL</code> (already includes the trailing <code>/api/</code>).</li>
+<li><strong>Port</strong> first free port in <code>4000–5000</code>, chosen at runtime boot.</li>
+<li><strong>Auth</strong> <code>X-NativePHP-Secret: {secret}</code> on <em>every</em> request, from <code>NATIVEPHP_SECRET</code>.
+Mismatch → <code>403</code> with an empty body, before any routing (<code>api/middleware.ts</code>).</li>
+<li><strong>Body</strong> JSON (<code>body-parser.json()</code>). Send <code>Content-Type: application/json</code>.</li>
+<li><strong>Timeout</strong> the reference client uses 3600s. Several endpoints block on native UI
+(<code>dialog/*</code>, <code>alert/message</code>, <code>system/prompt-touch-id</code>) and will not return until
+the user acts. Do not set a short timeout.</li>
+<li><strong><code>/api/debug/*</code> is mounted only when <code>NODE_ENV === &#39;development&#39;</code></strong> (<code>api.ts</code>).
+In production those requests 404. Treat as fire-and-forget.</li>
+</ul>
+<h3 id="response-conventions"><a class="anchor" href="#response-conventions">Response conventions</a></h3>
+<p>Three shapes, and they are not consistent — a port must handle all three:</p>
+<ol>
+<li><code>200</code> whose body is the status <strong>phrase</strong>, not JSON and not empty — most mutations.
+<code>res.sendStatus(200)</code> makes express send <code>text/plain</code> <code>OK</code>; a <code>404</code> from
+<code>window/get/:id</code> arrives as <code>Not Found</code>. Treat a body equal to the reason phrase for
+its status code as &quot;no data&quot; — and <em>only</em> that, so a genuine HTML error page is still
+visible as a problem. (This entry originally read &quot;no body&quot;; corrected after a client
+logged a JSON parse error on every successful mutation.)</li>
+<li><code>200</code> with a JSON object — all reads, plus a few mutations.</li>
+<li><strong><code>200</code> sent <em>before</em> the work happens.</strong> Every <code>menu-bar/*</code> endpoint and both
+<code>context</code> endpoints call <code>res.sendStatus(200)</code> as their first statement, then act.
+A <code>200</code> from those is an acknowledgement of receipt, <strong>not</strong> of success — errors
+there are unobservable by the caller.</li>
+</ol>
+<p>Error responses that do exist: <code>400</code> (<code>{error: string}</code>) from the encrypt/decrypt,
+print-to-pdf, and clipboard-image paths; <code>404</code> from <code>window/get/:id</code>; <code>410</code> from
+<code>child-process/get/:alias</code> and <code>child-process/restart</code> when the alias is unknown;
+<code>500</code> from <code>shell/open-external</code> and <code>system/print</code>.</p>
+<h3 id="channel-b--runtime-→-app"><a class="anchor" href="#channel-b--runtime-→-app">Channel B — runtime → app</a></h3>
+<ul>
+<li><code>POST http://127.0.0.1:{phpPort}/_native/api/{events|booted}</code>, same
+<code>X-NativePHP-Secret</code> header. Only those two endpoints exist.</li>
+<li><strong>Failures are silently swallowed</strong> (<code>utils.ts::notifyLaravel</code>, empty <code>catch {}</code>).</li>
+<li>Every <code>events</code> post is <em>also</em> pushed to all renderers as an IPC <code>native-event</code>.</li>
+</ul>
+<h3 id="channel-c--runtime-→-renderer"><a class="anchor" href="#channel-c--runtime-→-renderer">Channel C — runtime → renderer</a></h3>
+<p>Exposed by <code>preload/index.mts</code> via <code>contextBridge</code>, framework-agnostic:</p>
+<div class="table-scroll"><table><thead><tr><th>Surface</th><th>Signature</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>window.Native.on</code></td><td><code>(event: string, cb: (payload, event) =&gt; void)</code></td><td>Leading backslashes stripped from both sides before comparison.</td></tr>
+<tr><td><code>window.Native.contextMenu</code></td><td><code>(template: MenuTemplate[]) =&gt; void</code></td><td>Popped over the current window via <code>@electron/remote</code>.</td></tr>
+<tr><td><code>window</code> event <code>native:init</code></td><td><code>CustomEvent</code></td><td>Fired once when preload finishes evaluating.</td></tr>
+<tr><td><code>window.postMessage</code></td><td><code>{type:&#39;native-event&#39;, event, payload}</code></td><td>For code that cannot use <code>contextBridge</code>.</td></tr>
+<tr><td>IPC <code>log</code></td><td><code>{level, message, context}</code></td><td>Written to the devtools console by preload.</td></tr>
+</tbody></table></div>
+<hr>
+<h2 id="1-window--21-endpoints"><a class="anchor" href="#1-window--21-endpoints">1. Window — 21 endpoints</a></h2>
+<p><code>state.windows</code> is a <code>Record&lt;developerId, BrowserWindow&gt;</code>. The <code>id</code> in every request
+is the <strong>developer-assigned string id</strong>, not Electron&#39;s numeric id. Unknown ids are
+silently ignored (<code>state.windows[id]?.…</code>) — no error.</p>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>window/open</code></td><td>see below</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/close</code></td><td><code>{id}</code></td><td><code>200</code> — also deletes from <code>state.windows</code></td></tr>
+<tr><td>POST</td><td><code>window/show</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/hide</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/maximize</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/unmaximize</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/minimize</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/reload</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/resize</code></td><td><code>{id, width, height}</code></td><td><code>200</code> — <code>parseInt</code>&#39;d</td></tr>
+<tr><td>POST</td><td><code>window/position</code></td><td><code>{id, x, y, animate}</code></td><td><code>200</code> — <code>parseInt</code>&#39;d</td></tr>
+<tr><td>POST</td><td><code>window/title</code></td><td><code>{id, title}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/url</code></td><td><code>{id, url}</code></td><td><code>200</code> — <code>?_windowId={id}</code> appended</td></tr>
+<tr><td>POST</td><td><code>window/closable</code></td><td><code>{id, closable: bool}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/always-on-top</code></td><td><code>{id, alwaysOnTop: bool}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/window-button-visibility</code></td><td><code>{id, windowButtonVisibility: bool}</code></td><td><code>200</code> — macOS only</td></tr>
+<tr><td>POST</td><td><code>window/set-zoom-factor</code></td><td><code>{id, zoomFactor: float}</code></td><td><code>200</code> — <code>parseFloat</code>&#39;d</td></tr>
+<tr><td>POST</td><td><code>window/show-dev-tools</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/hide-dev-tools</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>GET</td><td><code>window/current</code></td><td>—</td><td><code>WindowData</code></td></tr>
+<tr><td>GET</td><td><code>window/all</code></td><td>—</td><td><code>WindowData[]</code></td></tr>
+<tr><td>GET</td><td><code>window/get/{id}</code></td><td>—</td><td><code>WindowData</code>, or <code>404</code></td></tr>
+</tbody></table></div>
+<p><strong><code>WindowData</code></strong> — 24 fields: <code>id</code>, <code>x</code>, <code>y</code>, <code>width</code>, <code>height</code>, <code>title</code>,
+<code>alwaysOnTop</code>, <code>url</code>, <code>autoHideMenuBar</code>, <code>fullscreen</code>, <code>fullscreenable</code>, <code>kiosk</code>,
+<code>devToolsOpen</code>, <code>resizable</code>, <code>movable</code>, <code>minimizable</code>, <code>maximizable</code>, <code>closable</code>,
+<code>focusable</code>, <code>focused</code>, <code>hasShadow</code>. (<code>frame</code>, <code>titleBarStyle</code> and
+<code>trafficLightPosition</code> are commented out upstream — do not expose them.)</p>
+<blockquote>
+<p>⚠️ <code>window/current</code> calls <code>BrowserWindow.getFocusedWindow().id</code> with no null guard.
+When no window is focused (app backgrounded) it throws. Any client must treat this
+endpoint as fallible — see <code>ANALYSIS.md</code> §8.3.</p>
+</blockquote>
+<p><strong><code>window/open</code> request</strong> — 39 keys, all optional except <code>id</code>, <code>url</code>, <code>width</code>, <code>height</code>
+— and <code>zoomFactor</code>, which is optional only on paper: the runtime runs
+<code>setZoomFactor(parseFloat(zoomFactor))</code> on <code>dom-ready</code> with no guard, so omitting it
+yields <code>NaN</code> and renders the page at an absurd zoom. Always send it (<code>1.0</code> is the
+upstream default). See <code>M2-RESULTS.md</code> finding 2.</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>id  url  x  y  width  height  minWidth  minHeight  maxWidth  maxHeight
+frame  title  backgroundColor  transparency  vibrancy  hasShadow
+alwaysOnTop  resizable  movable  minimizable  maximizable  closable
+focusable  skipTaskbar  hiddenInMissionControl  autoHideMenuBar
+titleBarStyle  trafficLightPosition  windowButtonVisibility
+fullscreen  fullscreenable  kiosk  zoomFactor  showDevTools
+rememberState  webPreferences  preventLeaveDomain  preventLeavePage
+suppressNewWindows</code></pre>
+</figure>
+<p>Behaviour worth porting deliberately:</p>
+<ul>
+<li><strong>Idempotent</strong>: if <code>id</code> already exists, the window is shown and focused and <code>200</code>
+returns — no new window, no error.</li>
+<li><code>rememberState: true</code> persists geometry to <code>window-state-{id}.json</code> via
+<code>electron-window-state</code>; the stored size wins over the requested one <em>only if</em>
+<code>resizable</code> is truthy.</li>
+<li><code>webPreferences</code> is merged, with <code>{sandbox:false, preload:…, contextIsolation:true}</code>
+force-applied last (<code>webPreferences.ts</code>) — those three cannot be overridden.</li>
+<li><code>preventLeaveDomain</code> / <code>preventLeavePage</code> install a <code>will-navigate</code> guard comparing
+hostname / (origin + pathname) against the <em>initial</em> URL.</li>
+<li>The window is created with <code>show:false</code> and shown on <code>did-finish-load</code>, unless
+<code>NATIVEPHP_NO_FOCUS</code> is set and the window is already visible.</li>
+<li><code>page-title-updated</code> is <code>preventDefault()</code>ed — the document <code>&lt;title&gt;</code> never changes
+the native window title. Use <code>window/title</code>.</li>
+<li>Emits 9 events (§12). <strong>But not for its own resizes</strong>: <code>window.ts</code> listens for
+Electron&#39;s <code>resized</code>, which fires on user-driven resizes, not <code>setSize()</code>. A
+<code>window/resize</code> call succeeds and <code>window/get</code> reflects it, yet no
+<code>WindowResized</code> arrives — verified empirically in the M1 spike. An app cannot
+use the event to observe resizes it initiated itself.</li>
+</ul>
+<hr>
+<h2 id="2-app--19-endpoints"><a class="anchor" href="#2-app--19-endpoints">2. App — 19 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>app/quit</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>app/relaunch</code></td><td>—</td><td><strong>no response</strong> — relaunches then quits</td></tr>
+<tr><td>POST</td><td><code>app/show</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>app/hide</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>GET</td><td><code>app/is-hidden</code></td><td>—</td><td><code>{is_hidden: bool}</code></td></tr>
+<tr><td>GET</td><td><code>app/locale</code></td><td>—</td><td><code>{locale: string}</code></td></tr>
+<tr><td>GET</td><td><code>app/locale-country-code</code></td><td>—</td><td><code>{locale_country_code: string}</code></td></tr>
+<tr><td>GET</td><td><code>app/system-locale</code></td><td>—</td><td><code>{system_locale: string}</code></td></tr>
+<tr><td>GET</td><td><code>app/app-path</code></td><td>—</td><td><code>{path: string}</code></td></tr>
+<tr><td>GET</td><td><code>app/path/{name}</code></td><td>—</td><td><code>{path: string}</code></td></tr>
+<tr><td>GET</td><td><code>app/version</code></td><td>—</td><td><code>{version: string}</code></td></tr>
+<tr><td>GET</td><td><code>app/badge-count</code></td><td>—</td><td><code>{count: int}</code></td></tr>
+<tr><td>POST</td><td><code>app/badge-count</code></td><td><code>{count: int}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>app/recent-documents</code></td><td><code>{path}</code></td><td><code>200</code></td></tr>
+<tr><td>DELETE</td><td><code>app/recent-documents</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>GET</td><td><code>app/open-at-login</code></td><td>—</td><td><code>{open: bool}</code></td></tr>
+<tr><td>POST</td><td><code>app/open-at-login</code></td><td><code>{open: bool}</code></td><td><code>200</code></td></tr>
+<tr><td>GET</td><td><code>app/is-emoji-panel-supported</code></td><td>—</td><td><code>{supported: bool}</code></td></tr>
+<tr><td>POST</td><td><code>app/show-emoji-panel</code></td><td>—</td><td><code>200</code></td></tr>
+</tbody></table></div>
+<p><code>app/path/{name}</code> accepts Electron&#39;s <code>app.getPath()</code> names (<code>home</code>, <code>appData</code>,
+<code>userData</code>, <code>sessionData</code>, <code>temp</code>, <code>exe</code>, <code>module</code>, <code>desktop</code>, <code>documents</code>,
+<code>downloads</code>, <code>music</code>, <code>pictures</code>, <code>videos</code>, <code>recent</code>, <code>logs</code>, <code>crashDumps</code>).
+An invalid name throws inside Electron.</p>
+<blockquote>
+<p><code>app/relaunch</code> never sends a response. A client that awaits it will hang until the
+process dies. Fire and forget.</p>
+</blockquote>
+<hr>
+<h2 id="3-system--10-endpoints"><a class="anchor" href="#3-system--10-endpoints">3. System — 10 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>GET</td><td><code>system/can-prompt-touch-id</code></td><td>—</td><td><code>{result: bool}</code></td></tr>
+<tr><td>POST</td><td><code>system/prompt-touch-id</code></td><td><code>{reason}</code></td><td><code>200</code>, or <code>400 {error}</code></td></tr>
+<tr><td>GET</td><td><code>system/can-encrypt</code></td><td>—</td><td><code>{result: bool}</code></td></tr>
+<tr><td>POST</td><td><code>system/encrypt</code></td><td><code>{string}</code></td><td><code>{result: base64}</code>, or <code>400 {error}</code></td></tr>
+<tr><td>POST</td><td><code>system/decrypt</code></td><td><code>{string: base64}</code></td><td><code>{result: string}</code>, or <code>400 {error}</code></td></tr>
+<tr><td>GET</td><td><code>system/printers</code></td><td>—</td><td><code>{printers: PrinterInfo[]}</code></td></tr>
+<tr><td>POST</td><td><code>system/print</code></td><td><code>{printer, html, settings?}</code></td><td><code>200</code> / <code>500</code></td></tr>
+<tr><td>POST</td><td><code>system/print-to-pdf</code></td><td><code>{html, settings?}</code></td><td><code>{result: base64}</code> / <code>400 {error}</code></td></tr>
+<tr><td>GET</td><td><code>system/theme</code></td><td>—</td><td><code>{result: &#39;system&#39;|&#39;light&#39;|&#39;dark&#39;}</code></td></tr>
+<tr><td>POST</td><td><code>system/theme</code></td><td><code>{theme}</code></td><td><code>{result: theme}</code></td></tr>
+</tbody></table></div>
+<p><code>system/printers</code> reads from <code>BrowserWindow.getAllWindows()[0]</code> — <strong>throws if no
+window exists</strong>. Both print endpoints spin up a hidden <code>BrowserWindow</code> and load the
+HTML as a data URL; <code>print</code> merges <code>{silent:true, deviceName:printer}</code> under the
+caller&#39;s <code>settings</code>.</p>
+<blockquote>
+<p><code>print-to-pdf</code> builds its data URL as <code>data:text/html;base64;charset=UTF-8,${html}</code>
+— a malformed media type (<code>;base64;</code> is not a valid parameter and the payload is
+passed unencoded). Send percent-encoded HTML and expect quirks.</p>
+</blockquote>
+<hr>
+<h2 id="4-menu-bar--tray--9-endpoints"><a class="anchor" href="#4-menu-bar--tray--9-endpoints">4. Menu bar / tray — 9 endpoints</a></h2>
+<p><strong>All nine send <code>200</code> before doing anything.</strong> Errors are invisible.</p>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>menu-bar/create</code></td><td>see below</td></tr>
+<tr><td>POST</td><td><code>menu-bar/show</code></td><td>— (throws if no active menu bar)</td></tr>
+<tr><td>POST</td><td><code>menu-bar/hide</code></td><td>— (same)</td></tr>
+<tr><td>POST</td><td><code>menu-bar/resize</code></td><td><code>{width, height}</code></td></tr>
+<tr><td>POST</td><td><code>menu-bar/label</code></td><td><code>{label}</code></td></tr>
+<tr><td>POST</td><td><code>menu-bar/tooltip</code></td><td><code>{tooltip}</code></td></tr>
+<tr><td>POST</td><td><code>menu-bar/icon</code></td><td><code>{icon: path}</code></td></tr>
+<tr><td>POST</td><td><code>menu-bar/context-menu</code></td><td><code>{contextMenu: MenuItem[]}</code></td></tr>
+<tr><td>POST</td><td><code>menu-bar/show-context-menu</code></td><td>—</td></tr>
+</tbody></table></div>
+<p><code>menu-bar/create</code> request: <code>url</code>, <code>label</code>, <code>tooltip</code>, <code>icon</code>, <code>width</code>, <code>height</code>,
+<code>minWidth</code>, <code>minHeight</code>, <code>maxWidth</code>, <code>maxHeight</code>, <code>resizable</code>, <code>alwaysOnTop</code>,
+<code>vibrancy</code>, <code>backgroundColor</code>, <code>transparency</code>, <code>showDockIcon</code>, <code>onlyShowContextMenu</code>,
+<code>windowPosition</code> (default <code>trayCenter</code>), <code>showOnAllWorkspaces</code> (default <code>false</code>),
+<code>contextMenu</code>, <code>webPreferences</code>.</p>
+<p>Two distinct modes:</p>
+<ul>
+<li><code>onlyShowContextMenu: true</code> → a bare <code>Tray</code> with a context menu, no window.
+Hides the dock icon unless <code>showDockIcon</code>.</li>
+<li>otherwise → a <code>menubar()</code> instance (vendored library at <code>libs/menubar/</code>) with
+<code>preloadWindow: true</code>, <code>activateWithApp: false</code>.</li>
+</ul>
+<p>Calling <code>create</code> a second time destroys the existing tray and <strong>suppresses the
+<code>MenuBarCreated</code> event</strong> — so <code>MenuBarCreated</code> fires only on first creation.
+Default icon: <code>state.icon</code> with <code>icon.png</code> → <code>IconTemplate.png</code>.
+Default context menu when none supplied: a single <code>{role:&#39;quit&#39;}</code> item.
+<code>right-click</code> also hides the window and pops the context menu (non-tray-only mode).</p>
+<hr>
+<h2 id="5-menu-dock-context-menu--11-endpoints"><a class="anchor" href="#5-menu-dock-context-menu--11-endpoints">5. Menu, dock, context menu — 11 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>menu</code></td><td><code>{items: MenuItem[]}</code></td><td><code>200</code> — replaces the application menu</td></tr>
+<tr><td>POST</td><td><code>dock</code></td><td><code>{items: MenuItem[]}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>dock/show</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>dock/hide</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>dock/icon</code></td><td><code>{path}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>dock/bounce</code></td><td><code>{type: &#39;critical&#39;|&#39;informational&#39;}</code></td><td><code>200</code> — id stored in state</td></tr>
+<tr><td>POST</td><td><code>dock/cancel-bounce</code></td><td>—</td><td><code>200</code> — cancels the stored id</td></tr>
+<tr><td>GET</td><td><code>dock/badge</code></td><td>—</td><td><code>{label: string}</code></td></tr>
+<tr><td>POST</td><td><code>dock/badge</code></td><td><code>{label}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>context</code></td><td><code>{entries: MenuItem[]}</code></td><td><code>200</code> (sent first)</td></tr>
+<tr><td>DELETE</td><td><code>context</code></td><td>—</td><td><code>200</code> (sent first) — disposes the handler</td></tr>
+<tr><td>POST</td><td><code>progress-bar/update</code></td><td><code>{percent: float}</code></td><td><code>200</code> — applied to <strong>all</strong> windows</td></tr>
+</tbody></table></div>
+<p>All <code>dock/*</code> endpoints call <code>app.dock.*</code>, which <strong>is undefined on Windows and Linux</strong>
+— those requests throw. Guard by platform on the client.</p>
+<p><code>progress-bar/update</code> has no <code>id</code>: it sets the progress bar on every window. <code>-1</code>
+clears it (Electron convention).</p>
+<h3 id="menuitem-shape"><a class="anchor" href="#menuitem-shape">MenuItem shape</a></h3>
+<p>Consumed by <code>api/helper/index.ts::compileMenu</code>, applied recursively to <code>submenu</code>
+(which may be either an array or <code>{submenu: [...]}</code>).</p>
+<div class="table-scroll"><table><thead><tr><th><code>type</code></th><th>Extra keys</th><th>Behaviour</th></tr></thead><tbody>
+<tr><td><code>link</code></td><td><code>url</code>, <code>openInBrowser?</code>, <code>event?</code>, <code>id?</code>, <code>label</code></td><td>Rewritten to <code>normal</code>. On click: fires the event, then either <code>shell.openExternal(url)</code> or navigates the focused window to <code>url</code> (with <code>?_windowId=</code> appended).</td></tr>
+<tr><td><code>checkbox</code> / <code>radio</code></td><td><code>checked</code>, <code>event?</code>, <code>id?</code>, <code>label</code></td><td>Toggles <code>checked</code> <strong>in the runtime&#39;s copy</strong> then fires the event.</td></tr>
+<tr><td><code>role</code></td><td><code>role</code>, <code>label?</code></td><td>Reduced to <code>{role, label?}</code> — every other key is dropped.</td></tr>
+<tr><td>anything else</td><td><code>label</code>, <code>id?</code>, <code>event?</code>, plus any Electron <code>MenuItemConstructorOptions</code></td><td>Default click handler fires the event.</td></tr>
+</tbody></table></div>
+<p>Click payload — <code>{item: {id, label, checked}, combo}</code>, dispatched under
+<code>item.event</code> if set, else <code>\Native\Desktop\Events\Menu\MenuItemClicked</code>.</p>
+<blockquote>
+<p><code>checkbox</code>/<code>radio</code> state is mutated on the runtime side only. The app is told via
+the event payload; it is not queryable afterwards.</p>
+</blockquote>
+<hr>
+<h2 id="6-dialogs-and-alerts--4-endpoints"><a class="anchor" href="#6-dialogs-and-alerts--4-endpoints">6. Dialogs and alerts — 4 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>dialog/open</code></td><td><code>{title?, defaultPath?, buttonLabel?, filters?, message?, properties?, windowReference?}</code></td><td><code>{result: string[] | undefined}</code></td></tr>
+<tr><td>POST</td><td><code>dialog/save</code></td><td>same</td><td><code>{result: string | undefined}</code></td></tr>
+<tr><td>POST</td><td><code>alert/message</code></td><td><code>{message, type?, title?, detail?, buttons?, defaultId?, cancelId?}</code></td><td><code>{result: int}</code> — index of the clicked button</td></tr>
+<tr><td>POST</td><td><code>alert/error</code></td><td><code>{title, message}</code></td><td><code>{result: true}</code></td></tr>
+</tbody></table></div>
+<p>All four are <strong>synchronous and blocking</strong> (<code>showOpenDialogSync</code>, <code>showMessageBoxSync</code>,
+<code>showErrorBox</code>) — the runtime&#39;s event loop is stalled until the user responds, so no
+other API request is served meanwhile. <code>result</code> is <code>undefined</code> on cancel.</p>
+<p><code>windowReference</code> is a window <code>id</code>; when it resolves the dialog is modal to that
+window, otherwise app-modal. Null/undefined keys are stripped before the Electron
+call (<code>utils.ts::trimOptions</code>), so <code>filters</code> etc. can be omitted safely.</p>
+<hr>
+<h2 id="7-clipboard--7-endpoints"><a class="anchor" href="#7-clipboard--7-endpoints">7. Clipboard — 7 endpoints</a></h2>
+<p>All accept an optional <code>?type=clipboard|selection</code> <strong>query</strong> parameter (default
+<code>clipboard</code>; <code>selection</code> is X11-only).</p>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>GET</td><td><code>clipboard/text</code></td><td>—</td><td><code>{text: string}</code></td></tr>
+<tr><td>POST</td><td><code>clipboard/text</code></td><td><code>{text}</code></td><td><code>{text}</code></td></tr>
+<tr><td>GET</td><td><code>clipboard/html</code></td><td>—</td><td><code>{html: string}</code></td></tr>
+<tr><td>POST</td><td><code>clipboard/html</code></td><td><code>{html}</code></td><td><code>{html}</code></td></tr>
+<tr><td>GET</td><td><code>clipboard/image</code></td><td>—</td><td><code>{image: dataURL | null}</code></td></tr>
+<tr><td>POST</td><td><code>clipboard/image</code></td><td><code>{image: dataURL}</code></td><td><code>200</code>, or <code>400 {error}</code></td></tr>
+<tr><td>DELETE</td><td><code>clipboard</code></td><td>—</td><td><code>200</code></td></tr>
+</tbody></table></div>
+<p><code>GET clipboard/image</code> returns <code>null</code> for an empty clipboard, otherwise a PNG data URL.</p>
+<hr>
+<h2 id="8-shell-screen-settings-process--13-endpoints"><a class="anchor" href="#8-shell-screen-settings-process--13-endpoints">8. Shell, screen, settings, process — 13 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>shell/show-item-in-folder</code></td><td><code>{path}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>shell/open-item</code></td><td><code>{path}</code></td><td><code>{result: string}</code> — <code>&#39;&#39;</code> on success, else an error message</td></tr>
+<tr><td>POST</td><td><code>shell/open-external</code></td><td><code>{url}</code></td><td><code>200</code>, or <code>500 {error}</code></td></tr>
+<tr><td>DELETE</td><td><code>shell/trash-item</code></td><td><code>{path}</code></td><td><code>200</code>, or <code>400</code></td></tr>
+<tr><td>GET</td><td><code>screen/displays</code></td><td>—</td><td><code>{displays: Display[]}</code></td></tr>
+<tr><td>GET</td><td><code>screen/primary-display</code></td><td>—</td><td><code>{primaryDisplay: Display}</code></td></tr>
+<tr><td>GET</td><td><code>screen/cursor-position</code></td><td>—</td><td><code>Point</code> — <strong>bare object, not wrapped</strong></td></tr>
+<tr><td>GET</td><td><code>screen/active</code></td><td>—</td><td><code>Display</code> — <strong>bare object</strong>; nearest to the cursor</td></tr>
+<tr><td>GET</td><td><code>settings/{key}</code></td><td>—</td><td><code>{value: any | null}</code></td></tr>
+<tr><td>POST</td><td><code>settings/{key}</code></td><td><code>{value: any}</code></td><td><code>200</code></td></tr>
+<tr><td>DELETE</td><td><code>settings/{key}</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>DELETE</td><td><code>settings</code></td><td>—</td><td><code>200</code> — clears everything</td></tr>
+<tr><td>GET</td><td><code>process</code></td><td>—</td><td><code>{pid, platform, arch, uptime}</code> — the <strong>Electron</strong> process</td></tr>
+</tbody></table></div>
+<p><code>screen/cursor-position</code> and <code>screen/active</code> are the only two endpoints in the whole
+API that return an unwrapped object. Do not assume a wrapper key.</p>
+<p>Settings are backed by <code>electron-store</code> (a JSON file in <code>userData</code>) and are <strong>not</strong>
+the same store as <code>window-state-*.json</code>. Every write fires a <code>SettingChanged</code> event
+per changed key (<code>state.ts</code>), including writes made by the app itself — so a naive
+listener that writes on change will loop.</p>
+<p><strong>Dots in a key are object paths.</strong> electron-store uses dot-prop, so
+<code>POST settings/a.b</code> stores <code>{&quot;a&quot;:{&quot;b&quot;:…}}</code> and <code>GET settings/a.b</code> reads it back — but
+the <code>SettingChanged</code> event carries the <em>root</em> key <code>a</code>, because the store watcher
+diffs top-level keys only. Verified: writing <code>diagnostics.ran</code> produced an event for
+<code>diagnostics</code>.</p>
+<blockquote>
+<p><code>DELETE shell/trash-item</code> responds <code>res.status(400).json()</code> with no argument on
+failure, which express rejects — see <code>ANALYSIS.md</code> §8.4.</p>
+</blockquote>
+<hr>
+<h2 id="8b-global-shortcuts--3-endpoints"><a class="anchor" href="#8b-global-shortcuts--3-endpoints">8b. Global shortcuts — 3 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>global-shortcuts</code></td><td><code>{key, event}</code></td><td><code>200</code></td></tr>
+<tr><td>DELETE</td><td><code>global-shortcuts</code></td><td><code>{key}</code></td><td><code>200</code> — note: body on a DELETE</td></tr>
+<tr><td>GET</td><td><code>global-shortcuts/{key}</code></td><td>—</td><td><code>{isRegistered: bool}</code></td></tr>
+</tbody></table></div>
+<p><code>key</code> is an Electron accelerator (<code>CommandOrControl+Shift+K</code>). <code>event</code> is a
+<strong>caller-chosen event name</strong>, pushed back with payload <code>[key]</code> (positional) whenever
+the accelerator fires — this is the clearest case of the dynamic-event-name path in
+§12 being load-bearing rather than a fallback.</p>
+<p><code>globalShortcut.register()</code> returns <code>false</code> when another application already owns the
+accelerator, but the endpoint discards that and answers <code>200</code> regardless. Confirm with
+<code>GET global-shortcuts/{key}</code> if registration matters.</p>
+<p>Re-registering the same <code>key</code> replaces the previous callback. Shortcuts are process-wide
+and are released on quit.</p>
+<hr>
+<h2 id="9-notifications--1-endpoint"><a class="anchor" href="#9-notifications--1-endpoint">9. Notifications — 1 endpoint</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>notification</code></td><td>see below</td><td><code>{reference: string}</code></td></tr>
+</tbody></table></div>
+<p>Request: <code>title</code>, <code>body</code>, <code>subtitle</code>, <code>silent</code>, <code>icon</code>, <code>hasReply</code>, <code>timeoutType</code>,
+<code>replyPlaceholder</code>, <code>sound</code>, <code>urgency</code>, <code>actions</code>, <code>closeButtonText</code>, <code>toastXml</code>,
+<code>event?</code>, <code>reference?</code>.</p>
+<ul>
+<li><code>reference</code> is the correlation id returned to the caller <strong>and</strong> echoed in all four
+notification events. Supply your own or accept the generated
+<code>{timestamp}.{random}</code>.</li>
+<li><code>event</code> overrides the click event name; the other three are fixed.</li>
+<li><code>sound</code> containing <code>/</code> or <code>\</code> (and not <code>http(s)://</code>) is treated as a **local file**:
+the native sound is silenced and the file is played via <code>play-sound</code>. A missing file
+is reported to renderers as a <code>log</code> IPC message, not to PHP.</li>
+<li>The runtime keeps a strong reference in <code>state.notifications</code> until click or close,
+working around electron#16922 — so a notification that is neither clicked nor
+closed leaks until app exit.</li>
+</ul>
+<hr>
+<h2 id="10-power-monitor--4-endpoints"><a class="anchor" href="#10-power-monitor--4-endpoints">10. Power monitor — 4 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>GET</td><td><code>power-monitor/get-system-idle-state</code></td><td><code>?threshold=</code> (seconds, default 60)</td><td><code>{result: &#39;active&#39;|&#39;idle&#39;|&#39;locked&#39;|&#39;unknown&#39;}</code></td></tr>
+<tr><td>GET</td><td><code>power-monitor/get-system-idle-time</code></td><td>—</td><td><code>{result: int}</code> seconds</td></tr>
+<tr><td>GET</td><td><code>power-monitor/get-current-thermal-state</code></td><td>—</td><td><code>{result: &#39;unknown&#39;|&#39;nominal&#39;|&#39;fair&#39;|&#39;serious&#39;|&#39;critical&#39;}</code></td></tr>
+<tr><td>GET</td><td><code>power-monitor/is-on-battery-power</code></td><td>—</td><td><code>{result: bool}</code></td></tr>
+</tbody></table></div>
+<p>Listeners are registered at <strong>module import time</strong>, not per request — the 8 power
+events flow whether or not the app ever calls these endpoints.</p>
+<hr>
+<h2 id="11-auto-updater-and-child-processes--11-endpoints"><a class="anchor" href="#11-auto-updater-and-child-processes--11-endpoints">11. Auto-updater and child processes — 11 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Path</th><th>Request</th><th>Response</th></tr></thead><tbody>
+<tr><td>POST</td><td><code>auto-updater/check-for-updates</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>auto-updater/download-update</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>auto-updater/quit-and-install</code></td><td>—</td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>child-process/start</code></td><td><code>ProcessSettings</code></td><td><code>ProcessHandle</code></td></tr>
+<tr><td>POST</td><td><code>child-process/start-node</code></td><td><code>ProcessSettings</code></td><td><code>ProcessHandle</code></td></tr>
+<tr><td>POST</td><td><code>child-process/start-php</code></td><td><code>ProcessSettings</code></td><td><code>ProcessHandle</code></td></tr>
+<tr><td>POST</td><td><code>child-process/stop</code></td><td><code>{alias}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>child-process/restart</code></td><td><code>{alias}</code></td><td><code>ProcessHandle</code>, or <code>410</code></td></tr>
+<tr><td>POST</td><td><code>child-process/message</code></td><td><code>{alias, message}</code></td><td><code>200</code> (also <code>200</code> if unknown)</td></tr>
+<tr><td>GET</td><td><code>child-process/get/{alias}</code></td><td>—</td><td><code>ProcessHandle</code>, or <code>410</code></td></tr>
+<tr><td>GET</td><td><code>child-process</code></td><td>—</td><td><code>Record&lt;alias, ProcessHandle&gt;</code></td></tr>
+</tbody></table></div>
+<p><strong><code>ProcessSettings</code></strong>: <code>alias</code> (unique key), <code>cmd: string[]</code>, <code>cwd</code>, <code>env</code>,
+<code>spawnTimeout</code> (default 30000), <code>persistent</code>, <code>handlesOwnShutdown</code>, <code>iniSettings</code>
+(php only).</p>
+<p><strong><code>ProcessHandle</code></strong>: <code>{pid, proc, settings}</code> — <code>proc</code> is an Electron <code>UtilityProcess</code>
+and serialises to a useless object; read <code>pid</code>. On the synchronous return path <code>pid</code>
+is <code>null</code> because <code>spawn</code> has not fired yet, so <strong><code>pid</code> is only reliable via
+<code>GET child-process/get/{alias}</code></strong> or the <code>ProcessSpawned</code> event.</p>
+<p>Semantics:</p>
+<ul>
+<li><code>start</code> runs the command under Electron&#39;s bundled Node via a shim
+(<code>dist/server/childProcess.js</code>); <code>start-node</code> is the same with
+<code>USE_NODE_RUNTIME=1</code>; <code>start-php</code> prepends the PHP binary plus merged
+<code>-d key=value</code> ini flags and injects the full <code>NATIVEPHP_*</code> env.</li>
+<li><strong><code>start*</code> is idempotent by alias</strong> — an existing alias returns the existing handle
+and starts nothing.</li>
+<li><code>persistent: true</code> restarts the process 1s after any exit (a watchdog, not a
+supervisor: no backoff beyond that fixed delay).</li>
+<li><code>stop</code> sets <code>persistent = false</code> first, then either <code>SIGTERM</code>s the single pid
+(<code>handlesOwnShutdown</code>, non-Windows) or tree-kills.</li>
+<li><code>restart</code> stops, polls for deletion up to 5s, then starts with the captured
+settings. Note it captures settings <em>before</em> stopping and <code>{...undefined}</code> yields
+<code>{}</code>, so the <code>410</code> branch is unreachable — an unknown alias starts a process with
+empty settings.</li>
+<li>On quit: framework processes are killed, then <code>stopAllProcesses()</code>, then up to 12s
+of drain waiting for <code>state.processes</code> to empty.</li>
+</ul>
+<p><strong>Laravel leak</strong>: <code>start-php</code> special-cases <code>cmd[0] === &#39;artisan&#39;</code> to prepend the
+secure-bundle path. A framework-neutral runtime keys this off the manifest&#39;s CLI name
+(§14).</p>
+<hr>
+<h2 id="12-reverse-channel--44-events"><a class="anchor" href="#12-reverse-channel--44-events">12. Reverse channel — 44 events</a></h2>
+<p><code>POST /_native/api/events</code> with <code>{event: string, payload?: array|object}</code>.</p>
+<p>Reference dispatch (<code>DispatchEventFromAppController</code>):</p>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-title function_ invoke__">class_exists</span>(<span class="hljs-variable">$event</span>) ? <span class="hljs-title function_ invoke__">event</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable">$event</span>(...<span class="hljs-variable">$payload</span>)) : <span class="hljs-title function_ invoke__">event</span>(<span class="hljs-variable">$event</span>, <span class="hljs-variable">$payload</span>);</code></pre>
+</figure>
+<p>Two behaviours any port <strong>must</strong> reproduce:</p>
+<ol>
+<li><strong><code>...$payload</code> spreads positionally for list payloads and as named arguments for
+string-keyed payloads.</strong> Both appear below. Getting this wrong breaks roughly half
+the events.</li>
+<li><strong>Unknown event names still dispatch</strong>, as a name + array payload. Apps choose
+their own event names for shortcuts, menu items and notifications, so this path is
+load-bearing, not a fallback.</li>
+</ol>
+<p>Event names arrive with inconsistent leading backslashes. Normalise before comparing.</p>
+<div class="table-scroll"><table><thead><tr><th>Event (under <code>Native\Desktop\Events\</code>)</th><th>Payload</th><th>Kind</th></tr></thead><tbody>
+<tr><td><code>Windows\WindowBlurred</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowFocused</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowMinimized</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowMaximized</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowUnmaximized</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowShown</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowHidden</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowClosed</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowResized</code></td><td><code>[id, width, height]</code></td><td>positional</td></tr>
+<tr><td><code>App\OpenedFromURL</code></td><td><code>[url]</code> <strong>or</strong> <code>{url}</code></td><td><strong>both</strong> — <code>open-url</code> sends a list, Windows/Linux <code>second-instance</code> sends an object</td></tr>
+<tr><td><code>App\OpenFile</code></td><td><code>[path]</code></td><td>positional</td></tr>
+<tr><td><code>Menu\MenuItemClicked</code></td><td><code>{item:{id,label,checked}, combo}</code></td><td>named</td></tr>
+<tr><td><code>MenuBar\MenuBarCreated</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>MenuBar\MenuBarShown</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>MenuBar\MenuBarHidden</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>MenuBar\MenuBarClicked</code></td><td><code>{combo, bounds, position}</code></td><td>named</td></tr>
+<tr><td><code>MenuBar\MenuBarRightClicked</code></td><td><code>{combo, bounds}</code></td><td>named</td></tr>
+<tr><td><code>MenuBar\MenuBarDoubleClicked</code></td><td><code>{combo, bounds}</code></td><td>named</td></tr>
+<tr><td><code>MenuBar\MenuBarDroppedFiles</code></td><td><code>[files]</code></td><td>positional (one arg, an array)</td></tr>
+<tr><td><code>Notifications\NotificationClicked</code></td><td><code>{reference, event}</code></td><td>named — overridable name</td></tr>
+<tr><td><code>Notifications\NotificationActionClicked</code></td><td><code>{reference, index, event}</code></td><td>named</td></tr>
+<tr><td><code>Notifications\NotificationReply</code></td><td><code>{reference, reply, event}</code></td><td>named</td></tr>
+<tr><td><code>Notifications\NotificationClosed</code></td><td><code>{reference, event}</code></td><td>named</td></tr>
+<tr><td><code>ChildProcess\ProcessSpawned</code></td><td><code>[alias, pid]</code></td><td><strong>positional</strong></td></tr>
+<tr><td><code>ChildProcess\ProcessExited</code></td><td><code>{alias, code}</code></td><td><strong>named</strong></td></tr>
+<tr><td><code>ChildProcess\MessageReceived</code></td><td><code>{alias, data}</code></td><td>named</td></tr>
+<tr><td><code>ChildProcess\ErrorReceived</code></td><td><code>{alias, data}</code></td><td>named</td></tr>
+<tr><td><code>ChildProcess\StartupError</code></td><td><code>{alias, error}</code></td><td>named</td></tr>
+<tr><td><code>PowerMonitor\PowerStateChanged</code></td><td><code>{state: &#39;on-ac&#39;|&#39;on-battery&#39;}</code></td><td>named</td></tr>
+<tr><td><code>PowerMonitor\ThermalStateChanged</code></td><td><code>{state}</code></td><td>named</td></tr>
+<tr><td><code>PowerMonitor\SpeedLimitChanged</code></td><td><code>{limit}</code></td><td>named</td></tr>
+<tr><td><code>PowerMonitor\ScreenLocked</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>PowerMonitor\ScreenUnlocked</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>PowerMonitor\Shutdown</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>PowerMonitor\UserDidBecomeActive</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>PowerMonitor\UserDidResignActive</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>Settings\SettingChanged</code></td><td><code>{key, value}</code></td><td>named</td></tr>
+<tr><td><code>AutoUpdater\CheckingForUpdate</code></td><td><em>none</em></td><td>—</td></tr>
+<tr><td><code>AutoUpdater\UpdateAvailable</code></td><td><code>{version, files, releaseDate, releaseName, releaseNotes, stagingPercentage, minimumSystemVersion}</code></td><td>named</td></tr>
+<tr><td><code>AutoUpdater\UpdateNotAvailable</code></td><td>same 7 keys</td><td>named</td></tr>
+<tr><td><code>AutoUpdater\UpdateCancelled</code></td><td>same 7 keys</td><td>named</td></tr>
+<tr><td><code>AutoUpdater\UpdateDownloaded</code></td><td>same 7 keys <strong>+ <code>downloadedFile</code></strong></td><td>named</td></tr>
+<tr><td><code>AutoUpdater\DownloadProgress</code></td><td><code>{total, delta, transferred, percent, bytesPerSecond}</code></td><td>named</td></tr>
+<tr><td><code>AutoUpdater\Error</code></td><td><code>{name, message, stack}</code></td><td>named</td></tr>
+</tbody></table></div>
+<p>Note <code>ChildProcess\ProcessSpawned</code> is positional while every other <code>ChildProcess</code>
+event is named — a genuine inconsistency to encode, not to tidy.</p>
+<p><code>App\ApplicationBooted</code> is <strong>not</strong> in this table: it is dispatched by the app itself
+inside the booted handler, never pushed by the runtime.</p>
+<p><strong>Caller-named events</strong> are additional to the 44 and have no fixed names. Three
+sources: <code>global-shortcuts</code> (payload <code>[key]</code>, positional), any MenuItem carrying an
+<code>event</code> key (payload <code>{item, combo}</code>), and <code>notification</code>&#39;s <code>event</code> override (payload
+<code>{reference, event}</code>). A port that only handles the 44 class names will drop all three.</p>
+<h3 id="post-_nativeapibooted"><a class="anchor" href="#post-_nativeapibooted"><code>POST /_native/api/booted</code></a></h3>
+<p>No body. The app must respond by opening its windows. Called at the end of runtime
+boot, and again on macOS <code>activate</code> when no windows are visible. <strong>Must be
+idempotent</strong> — <code>window/open</code> on an existing id is a no-op show+focus, so the natural
+implementation already is.</p>
+<h3 id="post-apibroadcast-app-→-runtime-→-renderers"><a class="anchor" href="#post-apibroadcast-app-→-runtime-→-renderers"><code>POST /api/broadcast</code> (app → runtime → renderers)</a></h3>
+<p><code>{event: string, payload: any}</code> → IPC <code>native-event</code> to every window and the menu bar
+window. Nothing reaches PHP. This is the app&#39;s route to its own front end.</p>
+<hr>
+<h2 id="13-environment-contract"><a class="anchor" href="#13-environment-contract">13. Environment contract</a></h2>
+<p>Set on every PHP process the runtime spawns (<code>php.ts::getDefaultEnvironmentVariables</code>).</p>
+<p><strong>Framework-neutral (17)</strong></p>
+<div class="table-scroll"><table><thead><tr><th>Variable</th><th>Value</th></tr></thead><tbody>
+<tr><td><code>APP_ENV</code></td><td><code>local</code> in dev, else <code>production</code> — <strong>Laravel&#39;s env names</strong>, hardcoded. Symfony 8 rejects <code>local</code> outright (<code>Kernel::getAllowedEnvs()</code>), so this is one of the values a manifest must parameterise.</td></tr>
+<tr><td><code>APP_DEBUG</code></td><td><code>true</code> in dev, else <code>false</code></td></tr>
+<tr><td><code>NATIVEPHP_RUNNING</code></td><td>always <code>true</code> — the flag that says &quot;you are inside the runtime&quot;</td></tr>
+<tr><td><code>NATIVEPHP_API_URL</code></td><td><code>http://127.0.0.1:{apiPort}/api/</code> — only once the API is up</td></tr>
+<tr><td><code>NATIVEPHP_SECRET</code></td><td>the 32-char shared secret — only once the API is up</td></tr>
+<tr><td><code>NATIVEPHP_STORAGE_PATH</code></td><td><code>{userData}/storage</code></td></tr>
+<tr><td><code>NATIVEPHP_DATABASE_PATH</code></td><td><code>{userData}/database/database.sqlite</code></td></tr>
+<tr><td><code>NATIVEPHP_{USER_HOME,APP_DATA,USER_DATA,DESKTOP,DOCUMENTS,DOWNLOADS,MUSIC,PICTURES,VIDEOS,RECENT}_PATH</code></td><td>the matching <code>app.getPath()</code>; empty string if unavailable</td></tr>
+<tr><td><code>NATIVEPHP_EXTRAS_PATH</code></td><td><code>{resources}/../extras</code> packaged, else <code>{APP_PATH}/extras</code></td></tr>
+</tbody></table></div>
+<p><code>NATIVEPHP_API_URL</code> and <code>NATIVEPHP_SECRET</code> are absent from the <code>native:config</code> and
+<code>native:php-ini</code> invocations, which run <em>before</em> the API server exists. A command that
+needs the client must tolerate their absence.</p>
+<p><strong>Laravel-shaped (8)</strong> — these are the ones a manifest should generalise:
+<code>APP_ENV</code>&#39;s values (see above), <code>LARAVEL_STORAGE_PATH</code>, plus (secure builds only) <code>APP_SERVICES_CACHE</code>,
+<code>APP_PACKAGES_CACHE</code>, <code>APP_CONFIG_CACHE</code>, <code>APP_ROUTES_CACHE</code>, <code>APP_EVENTS_CACHE</code>, and
+<code>VIEW_COMPILED_PATH</code> (currently commented out).</p>
+<p><strong>Optional</strong>: <code>NIGHTWATCH_TOKEN</code>, <code>NIGHTWATCH_INGEST_URI</code>.</p>
+<p><strong>Read, not written, by the runtime</strong>: <code>APP_PATH</code> (dev/testing app root),
+<code>NODE_ENV</code>, <code>SHELL_VERBOSITY</code> (&gt;0 enables PHP command logging),
+<code>NATIVEPHP_NO_FOCUS</code>.</p>
+<p><strong>Default PHP ini flags</strong> always passed as <code>-d</code>: <code>memory_limit=512M</code>,
+<code>curl.cainfo={caCert}</code>, <code>openssl.cafile={caCert}</code>, merged under whatever
+<code>native:php-ini</code> returned, merged under a child process&#39;s own <code>iniSettings</code>.</p>
+<hr>
+<h2 id="14-what-the-runtime-requires-of-the-app"><a class="anchor" href="#14-what-the-runtime-requires-of-the-app">14. What the runtime requires of the app</a></h2>
+<p>Seven requirements. Current Laravel values on the left of the arrow, the manifest key
+that should replace them on the right.</p>
+<div class="table-scroll"><table><thead><tr><th>Requirement</th><th>Today</th><th>Proposed manifest key</th></tr></thead><tbody>
+<tr><td>CLI entrypoint</td><td><code>artisan</code></td><td><code>cli</code></td></tr>
+<tr><td>Config command printing JSON to stdout</td><td><code>native:config</code></td><td><code>commands.config</code></td></tr>
+<tr><td>PHP-ini command printing JSON to stdout</td><td><code>native:php-ini</code></td><td><code>commands.phpIni</code></td></tr>
+<tr><td><code>php -S</code> router script</td><td><code>vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php</code></td><td><code>router</code></td></tr>
+<tr><td>Document-root cwd</td><td><code>public</code></td><td><code>docroot</code></td></tr>
+<tr><td>Dirs to create + seed under <code>userData</code></td><td><code>storage/framework/{cache,sessions,views,testing}</code>, <code>storage/logs</code>, <code>bootstrap/cache</code></td><td><code>writableDirs[]</code></td></tr>
+<tr><td>Cache-path env vars (secure builds)</td><td><code>APP_*_CACHE</code></td><td><code>cacheEnv{}</code></td></tr>
+<tr><td>Boot / event endpoints</td><td><code>/_native/api/booted</code>, <code>/_native/api/events</code></td><td>fixed, no key needed</td></tr>
+</tbody></table></div>
+<p>Optional lifecycle commands, skipped cleanly if absent: <code>optimize</code> (pre-serve, prod
+only), <code>migrate --force</code> (pre-serve, prod only, version-gated), <code>schedule:run</code>
+(every 60s), <code>nightwatch:agent</code>.</p>
+<h3 id="config-keys-the-runtime-consumes"><a class="anchor" href="#config-keys-the-runtime-consumes">Config keys the runtime consumes</a></h3>
+<p>Of the whole <code>nativephp</code> config, <code>index.ts</code> reads exactly <strong>five</strong>:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>app_id                                   → setAppUserModelId()
+deeplink_scheme                          → setAsDefaultProtocolClient()
+updater.enabled                          → checkForUpdatesAndNotify()
+updater.default                          → selects the provider key
+updater.providers.{default}.public_url    → setFeedURL({provider:'generic', url})</code></pre>
+</figure>
+<p>Everything else in that file is read by the PHP-side build tooling only. A minimal
+conforming <code>native:config</code> emits those five keys.</p>
+<h3 id="security-model"><a class="anchor" href="#security-model">Security model</a></h3>
+<p>Three layers, all sharing one secret:</p>
+<ol>
+<li>Cookie <code>_php_native = {secret}</code>, set by the runtime into the Electron session for
+<code>http://localhost:{phpPort}</code>.</li>
+<li>Header <code>X-NativePHP-Secret: {secret}</code>, injected into every renderer request to
+<code>http://127.0.0.1:{phpPort}/*</code> via <code>webRequest.onBeforeSendHeaders</code>, and set
+explicitly on <code>notifyLaravel</code> posts.</li>
+<li>App-side middleware: accept if either matches, else <code>403</code>. Exempt the cookie-issuing
+route only.</li>
+</ol>
+<p>The PHP dev server listens on a real loopback TCP port; this secret is the only thing
+separating the app from any local browser or process that can reach it. Port it
+faithfully.</p>
+<hr>
+<h2 id="15-coverage"><a class="anchor" href="#15-coverage">15. Coverage</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Section</th><th>Endpoints</th></tr></thead><tbody>
+<tr><td>Window</td><td>21</td></tr>
+<tr><td>App</td><td>19</td></tr>
+<tr><td>System</td><td>10</td></tr>
+<tr><td>Menu bar</td><td>9</td></tr>
+<tr><td>Menu / dock / context / progress</td><td>12</td></tr>
+<tr><td>Child process</td><td>8</td></tr>
+<tr><td>Global shortcuts</td><td>3</td></tr>
+<tr><td>Clipboard</td><td>7</td></tr>
+<tr><td>Shell</td><td>4</td></tr>
+<tr><td>Screen</td><td>4</td></tr>
+<tr><td>Settings</td><td>4</td></tr>
+<tr><td>Power monitor</td><td>4</td></tr>
+<tr><td>Dialog</td><td>2</td></tr>
+<tr><td>Alert</td><td>2</td></tr>
+<tr><td>Auto-updater</td><td>3</td></tr>
+<tr><td>Notification</td><td>1</td></tr>
+<tr><td>Process</td><td>1</td></tr>
+<tr><td>Broadcast</td><td>1</td></tr>
+<tr><td>Debug (dev only)</td><td>1</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>116</strong></td></tr>
+</tbody></table></div>
+<p>Plus 2 inbound endpoints (<code>_native/api/{events,booted}</code>), 44 runtime-pushed event
+types, 24 environment variables, and 5 consumed config keys.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="mobile-api.html"><span>← Previous</span><strong>Mobile API</strong></a>
+            <a class="pager-link next" href="native-ui-contract.html"><span>Next →</span><strong>Native-UI format</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/CONTRACT.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#0-transport-and-conventions">0. Transport and conventions</a></li><li class="lvl3"><a href="#channel-a--app-→-runtime">Channel A — app → runtime</a></li><li class="lvl3"><a href="#response-conventions">Response conventions</a></li><li class="lvl3"><a href="#channel-b--runtime-→-app">Channel B — runtime → app</a></li><li class="lvl3"><a href="#channel-c--runtime-→-renderer">Channel C — runtime → renderer</a></li><li class="lvl2"><a href="#1-window--21-endpoints">1. Window — 21 endpoints</a></li><li class="lvl2"><a href="#2-app--19-endpoints">2. App — 19 endpoints</a></li><li class="lvl2"><a href="#3-system--10-endpoints">3. System — 10 endpoints</a></li><li class="lvl2"><a href="#4-menu-bar--tray--9-endpoints">4. Menu bar / tray — 9 endpoints</a></li><li class="lvl2"><a href="#5-menu-dock-context-menu--11-endpoints">5. Menu, dock, context menu — 11 endpoints</a></li><li class="lvl3"><a href="#menuitem-shape">MenuItem shape</a></li><li class="lvl2"><a href="#6-dialogs-and-alerts--4-endpoints">6. Dialogs and alerts — 4 endpoints</a></li><li class="lvl2"><a href="#7-clipboard--7-endpoints">7. Clipboard — 7 endpoints</a></li><li class="lvl2"><a href="#8-shell-screen-settings-process--13-endpoints">8. Shell, screen, settings, process — 13 endpoints</a></li><li class="lvl2"><a href="#8b-global-shortcuts--3-endpoints">8b. Global shortcuts — 3 endpoints</a></li><li class="lvl2"><a href="#9-notifications--1-endpoint">9. Notifications — 1 endpoint</a></li><li class="lvl2"><a href="#10-power-monitor--4-endpoints">10. Power monitor — 4 endpoints</a></li><li class="lvl2"><a href="#11-auto-updater-and-child-processes--11-endpoints">11. Auto-updater and child processes — 11 endpoints</a></li><li class="lvl2"><a href="#12-reverse-channel--44-events">12. Reverse channel — 44 events</a></li><li class="lvl3"><a href="#post-_nativeapibooted">POST /_native/api/booted</a></li><li class="lvl3"><a href="#post-apibroadcast-app-→-runtime-→-renderers">POST /api/broadcast (app → runtime → renderers)</a></li><li class="lvl2"><a href="#13-environment-contract">13. Environment contract</a></li><li class="lvl2"><a href="#14-what-the-runtime-requires-of-the-app">14. What the runtime requires of the app</a></li><li class="lvl3"><a href="#config-keys-the-runtime-consumes">Config keys the runtime consumes</a></li><li class="lvl3"><a href="#security-model">Security model</a></li><li class="lvl2"><a href="#15-coverage">15. Coverage</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

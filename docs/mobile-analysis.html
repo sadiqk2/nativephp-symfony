@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobile analysis · NativePHP for Symfony</title>
+<meta name="description" content="Both render paths, and a corrected conclusion — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item active" href="mobile-analysis.html" aria-current="page"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="nativephp-mobile--analysis-and-a-correction"><a class="anchor" href="#nativephp-mobile--analysis-and-a-correction">NativePHP Mobile — analysis, and a correction</a></h1>
+<p><strong>My earlier verdict was wrong.</strong> <code>PLAN.md</code> §2.3 and <code>ANALYSIS.md</code> §10 called mobile a
+different order of magnitude, on the grounds that its UI is a 17,316-LOC native rendering
+engine coupled to Blade. The engine is real and that number is right. What I got wrong is
+that it is <strong>optional</strong>.</p>
+<p>I measured the hard path and treated it as the only path. Reading the actual boot code
+rather than the file listing shows there are two, and the easy one is the one desktop
+already uses.</p>
+<hr>
+<h2 id="1-there-are-two-render-paths-and-one-of-them-is-a-webview"><a class="anchor" href="#1-there-are-two-render-paths-and-one-of-them-is-a-webview">1. There are two render paths, and one of them is a WebView</a></h2>
+<p><code>resources/androidstudio/.../ui/BootPlanner.kt</code> — its own docblock:</p>
+<blockquote>
+<p>Decides how the first screen boots: direct JNI dispatch into the native runloop (no
+WebView, no Chromium) or the legacy WebView path. […] Missing or unparseable manifest ⇒
+WEB_LEGACY — always safe, byte-identical to the pre-native-first behavior.</p>
+</blockquote>
+<p>The decision is data-driven from a native-route manifest that the CLI bakes into
+<code>bundle_meta.json</code>, listing the <code>Route::native</code> URI patterns. The logic:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>entry_mode == &quot;web&quot;            → WEB_LEGACY      (explicit build-time escape hatch)
+no native-route manifest       → WEB_LEGACY
+requested path matches none    → WEB_LEGACY
+otherwise                      → NATIVE_DIRECT</code></pre>
+</figure>
+<p><code>resources/xcode/NativePHP/BootPlanner.swift</code> is the same design, <code>.webLegacy</code> /
+<code>.nativeDirect</code>, same <code>entry_mode == &quot;web&quot;</code> check.</p>
+<p>And the escape hatch is a documented, first-class env var. From
+<code>src/Concerns/PreparesBuild.php</code> and <code>src/Commands/BuildIosAppCommand.php</code>:</p>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-comment">// NATIVEPHP_BOOT_MODE=web forces the legacy path.</span>
+<span class="hljs-variable">$entryMode</span> = <span class="hljs-title function_ invoke__">env</span>(<span class="hljs-string">&#x27;NATIVEPHP_BOOT_MODE&#x27;</span>) === <span class="hljs-string">&#x27;web&#x27;</span> ? <span class="hljs-string">&#x27;web&#x27;</span> : <span class="hljs-string">&#x27;auto&#x27;</span>;</code></pre>
+</figure>
+<p><strong>Consequences for a Symfony port.</strong> A Symfony app has no <code>Route::native</code> patterns, so it
+produces no manifest, so every path falls through to <code>WEB_LEGACY</code> — and <code>NATIVEPHP_BOOT_MODE=web</code>
+makes that explicit rather than incidental. The Edge engine is never entered. Twig renders
+into a WebView exactly as it does on desktop, and <strong>zero of those 17,316 lines need
+porting</strong> for a working mobile app.</p>
+<p>The WebView path is not a deprecated corner either: it has a full supporting stack
+(<code>WebViewManager.kt</code> at 655 lines, <code>WebRenderer.kt</code>, <code>PHPWebViewClient.kt</code>,
+<code>JumpWebViewSession.kt</code>, <code>WebCookieMirror.kt</code>) and its JS bridge exposes
+<code>window.Native.dispatch(eventName, payload)</code> — the same shape as desktop&#39;s preload.</p>
+<hr>
+<h2 id="2-what-mobile-actually-requires-of-the-php-app"><a class="anchor" href="#2-what-mobile-actually-requires-of-the-php-app">2. What mobile actually requires of the PHP app</a></h2>
+<p>Different from desktop in one important way: there is <strong>no HTTP boundary</strong>. PHP is compiled
+into the app and called through JNI (Android) or directly (iOS), so there is no port, no
+secret, no express server. Two mechanisms instead:</p>
+<h3 id="2a-a-hand-rolled-sapi"><a class="anchor" href="#2a-a-hand-rolled-sapi">2a. A hand-rolled SAPI</a></h3>
+<p>The native layer executes a bootstrap script by absolute path and reads its stdout as a raw
+HTTP response. From <code>bridge/PHPBridge.kt</code>:</p>
+<figure class="code">
+<span class="code-lang">kotlin</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-kotlin"><span class="hljs-keyword">get</span>() = <span class="hljs-string">&quot;<span class="hljs-subst">${getLaravelPath()}</span>/vendor/nativephp/mobile/bootstrap/android/native.php&quot;</span>
+<span class="hljs-keyword">get</span>() = <span class="hljs-string">&quot;<span class="hljs-subst">${getLaravelPath()}</span>/vendor/nativephp/mobile/bootstrap/android/persistent.php&quot;</span></code></pre>
+</figure>
+<p>and <code>NativePHPApp.swift</code>:</p>
+<figure class="code">
+<span class="code-lang">swift</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-swift"><span class="hljs-keyword">let</span> phpFilePath <span class="hljs-operator">=</span> appPath <span class="hljs-operator">+</span> <span class="hljs-string">&quot;/vendor/nativephp/mobile/bootstrap/ios/native.php&quot;</span>
+<span class="hljs-keyword">let</span> phpFilePath <span class="hljs-operator">=</span> appPath <span class="hljs-operator">+</span> <span class="hljs-string">&quot;/vendor/nativephp/mobile/bootstrap/ios/artisan.php&quot;</span></code></pre>
+</figure>
+<p><code>bootstrap/{ios,android}/native.php</code> reconstructs <code>$_GET</code>/<code>$_POST</code>/<code>$_COOKIE</code> from
+<code>$_SERVER</code>, boots the framework, resolves <code>Illuminate\Contracts\Http\Kernel</code>, and hand-writes
+the status line, headers and body to stdout. <code>persistent.php</code> keeps the interpreter alive and
+dispatches subsequent requests through <code>Runtime::dispatch()</code> via <code>zend_eval_string()</code>.</p>
+<p><strong>This is the mobile equivalent of desktop&#39;s hardcoded router script</strong>, and it is the same
+kind of problem with the same kind of solution: three hardcoded paths in the native sources.</p>
+<h3 id="2b-the-native-bridge"><a class="anchor" href="#2b-the-native-bridge">2b. The native bridge</a></h3>
+<p><code>nativephp_call($method, $jsonPayload)</code> — a PHP extension function. <strong>54 distinct methods</strong>
+in the current PHP surface:</p>
+<div class="table-scroll"><table><thead><tr><th>Group</th><th>Methods</th></tr></thead><tbody>
+<tr><td>Camera</td><td>GetPhoto, PickMedia, RecordVideo</td></tr>
+<tr><td>Device</td><td>GetInfo, GetId, GetBatteryInfo, Vibrate, ToggleFlashlight</td></tr>
+<tr><td>Microphone</td><td>Start, Stop, Pause, Resume, GetStatus, GetRecording</td></tr>
+<tr><td>Geolocation</td><td>ClearWatch, DrainWatchBuffer, TrimWatchBuffer, StopBackgroundWatch, BackgroundWatchStatus</td></tr>
+<tr><td>SecureStorage</td><td>Get, Set, Delete</td></tr>
+<tr><td>PushNotification</td><td>GetToken, CheckPermission, ClearBadge</td></tr>
+<tr><td>Browser</td><td>Open, OpenInApp, OpenAuth</td></tr>
+<tr><td>Share</td><td>Url, File</td></tr>
+<tr><td>MobileWallet</td><td>IsAvailable, CreatePaymentIntent, ConfirmPayment, PresentPaymentSheet, GetPaymentStatus</td></tr>
+<tr><td>System</td><td>GetAppearance, MinimizeApp, OpenAppSettings</td></tr>
+<tr><td>Biometric</td><td>Prompt</td></tr>
+<tr><td>Dialog</td><td>Toast</td></tr>
+<tr><td>File</td><td>Copy, Move</td></tr>
+<tr><td>Network</td><td>Status</td></tr>
+<tr><td>UI / NativeUI</td><td>SetBackground, Transition.Set</td></tr>
+<tr><td>Perf</td><td>8 instrumentation methods</td></tr>
+</tbody></table></div>
+<p><strong>The bridge itself is entirely framework-agnostic</strong> — a function name and a JSON string. The
+PHP wrappers around it are the same mechanical work as desktop&#39;s endpoint wrappers, and there
+are fewer of them (54 vs 116).</p>
+<hr>
+<h2 id="3-the-same-escape-hatch-exists"><a class="anchor" href="#3-the-same-escape-hatch-exists">3. The same escape hatch exists</a></h2>
+<p>Critically, the native projects are copied into the <em>user&#39;s</em> project, exactly as the Electron
+project is on desktop — <code>src/</code> references <code>base_path(&#39;nativephp/android&#39;)</code> and
+<code>base_path(&#39;nativephp/ios&#39;)</code> throughout (11 and 10 call sites respectively).</p>
+<p>So the three hardcoded bootstrap paths are patchable per-project, with no upstream
+cooperation, by the same <code>RuntimePatcher</code> pattern already built for desktop. The proper
+upstream fix is the same too: declare them in a manifest.</p>
+<hr>
+<h2 id="4-revised-difficulty"><a class="anchor" href="#4-revised-difficulty">4. Revised difficulty</a></h2>
+<div class="table-scroll"><table><thead><tr><th></th><th>desktop</th><th>mobile (WebView path)</th><th>mobile (native UI)</th></tr></thead><tbody>
+<tr><td>Transport</td><td>localhost HTTP, 116 endpoints</td><td><code>nativephp_call</code>, 54 methods</td><td>same</td></tr>
+<tr><td>Framework leak in the native layer</td><td>8 string literals, 1 file</td><td>3 bootstrap paths, 2 files</td><td>plus Blade-coupled rendering</td></tr>
+<tr><td>SAPI shim needed</td><td>no (<code>php -S</code> + router)</td><td><strong>yes, ~100 LOC</strong></td><td>yes</td></tr>
+<tr><td>UI work</td><td>none</td><td><strong>none</strong></td><td>reimplement 17,316 LOC for Twig</td></tr>
+<tr><td>Toolchain to verify</td><td>none</td><td>Xcode / Android SDK+NDK</td><td>same</td></tr>
+<tr><td>Verdict</td><td>done</td><td><strong>tractable — do this</strong></td><td>a project in itself</td></tr>
+</tbody></table></div>
+<p>So mobile splits cleanly in two, and I had been pricing the whole thing at the cost of the
+second half.</p>
+<hr>
+<h2 id="5-plan"><a class="anchor" href="#5-plan">5. Plan</a></h2>
+<h3 id="m5--mobile-webview-path"><a class="anchor" href="#m5--mobile-webview-path">M5 — mobile, WebView path</a></h3>
+<ol>
+<li><strong>A Symfony SAPI shim</strong> — the <code>native.php</code> equivalent: superglobals from <code>$_SERVER</code>, boot
+the kernel, emit a raw HTTP response. Plus a persistent variant that reuses the kernel
+across requests, which is where mobile&#39;s performance comes from.</li>
+<li><strong>A <code>MobileRuntimePatcher</code></strong> — retarget the three hardcoded bootstrap paths in the copied
+Android/iOS projects, and force <code>entry_mode: web</code>.</li>
+<li><strong>PHP wrappers for the 54 bridge methods</strong>, typed, in the shape already established by the
+desktop bundle.</li>
+<li><strong>Build commands</strong> — <code>native:mobile:install</code>, <code>native:mobile:run android|ios</code>.</li>
+</ol>
+<p><strong>Honest limit:</strong> items 1–3 can be unit-tested here; item 4 and any device run cannot. This
+environment has no Xcode and no Android SDK/NDK, so anything mobile ships <strong>verified by
+tests, not by execution</strong> — the opposite of desktop, where the claim is backed by a
+screenshot of a running package. That distinction gets stated wherever mobile is described.</p>
+<h3 id="m6--native-ui-for-twig-the-super-native-equivalent"><a class="anchor" href="#m6--native-ui-for-twig-the-super-native-equivalent">M6 — native UI for Twig (the <code>super-native</code> equivalent)</a></h3>
+<p><code>NativePHP/super-native</code> is the kitchen-sink demo for the native-UI path: Blade templates of
+<code>&lt;native:*&gt;</code> tags rendered as SwiftUI and Jetpack Compose. A Symfony equivalent means a Twig
+front end for the same element protocol:</p>
+<ul>
+<li>A Twig extension or lexer producing the same element tree <code>NativeElementCollector</code> builds
+(the wire format between PHP and the renderers is the tractable part — it is just a tree).</li>
+<li>The Tailwind-subset parser, the Yoga layout model, and the element registry — 92 files.</li>
+<li><code>Route::native</code> / <code>-&gt;layout()</code> equivalents in Symfony routing.</li>
+<li>The renderers themselves are Kotlin and Swift and are <strong>reusable as-is</strong> — 9 + 5 in
+<code>mobile-air</code>, 60+ in <code>mobile-ui</code>. Nothing needs rewriting there, which is the one piece of
+good news about M6.</li>
+</ul>
+<p>The right first step for M6 was not code but pinning down the <strong>element-tree wire format</strong>
+the renderers consume, the same way <code>CONTRACT.md</code> pinned down the HTTP API.</p>
+<p><strong>That is now done — see <a href="native-ui-contract.html"><code>NATIVE-UI-CONTRACT.md</code></a>.</strong> The format is a
+JSON tree of <code>{id, type, _hash, layout?, style?, props?, on_press?, children?}</code>, published
+through its own extension functions (<code>nativephp_element_{init,reset,publish,shutdown}</code>), with
+Merkle content hashes and reuse markers for diffing, and callbacks crossing as integer ids.
+Blade appears nowhere in it: the 17,316 LOC is the <em>authoring</em> layer, and the renderers
+consume this protocol without caring what produced the tree.</p>
+<hr>
+<h2 id="6-still-open"><a class="anchor" href="#6-still-open">6. Still open</a></h2>
+<ul>
+<li><strong>Licensing.</strong> NativePHP Mobile is a commercial product. <code>mobile-air/composer.json</code> says
+MIT, but the product has a paid licence and the docs gate features behind it. Before any of
+M5 ships publicly, that needs reading properly — it is a different question from desktop,
+which is unambiguously MIT.</li>
+<li><strong>Device verification.</strong> Everything above needs a real emulator run to be more than a
+well-argued design.</li>
+</ul>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="analysis.html"><span>← Previous</span><strong>Deep dive</strong></a>
+            <a class="pager-link next" href="plan.html"><span>Next →</span><strong>Plan</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/MOBILE-ANALYSIS.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#1-there-are-two-render-paths-and-one-of-them-is-a-webview">1. There are two render paths, and one of them is a WebView</a></li><li class="lvl2"><a href="#2-what-mobile-actually-requires-of-the-php-app">2. What mobile actually requires of the PHP app</a></li><li class="lvl3"><a href="#2a-a-hand-rolled-sapi">2a. A hand-rolled SAPI</a></li><li class="lvl3"><a href="#2b-the-native-bridge">2b. The native bridge</a></li><li class="lvl2"><a href="#3-the-same-escape-hatch-exists">3. The same escape hatch exists</a></li><li class="lvl2"><a href="#4-revised-difficulty">4. Revised difficulty</a></li><li class="lvl2"><a href="#5-plan">5. Plan</a></li><li class="lvl3"><a href="#m5--mobile-webview-path">M5 — mobile, WebView path</a></li><li class="lvl3"><a href="#m6--native-ui-for-twig-the-super-native-equivalent">M6 — native UI for Twig (the super-native equivalent)</a></li><li class="lvl2"><a href="#6-still-open">6. Still open</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

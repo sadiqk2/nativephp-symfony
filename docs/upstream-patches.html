@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Upstream patches · NativePHP for Symfony</title>
+<meta name="description" content="Eleven fixes, ten of them open PRs — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item active" href="upstream-patches.html" aria-current="page"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="upstream-patches--ten-submitted-one-held"><a class="anchor" href="#upstream-patches--ten-submitted-one-held">Upstream patches — ten submitted, one held</a></h1>
+<p>Eleven patches. Ten are <strong>open pull requests</strong>; the eleventh is held deliberately.</p>
+<div class="table-scroll"><table><thead><tr><th></th><th>repo</th><th>base</th><th>status</th></tr></thead><tbody>
+<tr><td><code>0002</code>–<code>0007</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td><code>main</code> @ <code>653d186</code></td><td><strong>open PRs <a href="https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2" target="_blank" rel="noopener">#136–#141</a></strong>, awaiting review</td></tr>
+<tr><td><code>0008</code>–<code>0011</code></td><td><a href="https://github.com/NativePHP/mobile-air" target="_blank" rel="noopener"><code>NativePHP/mobile-air</code></a></td><td><code>main</code> @ <code>bf4fd2a</code></td><td><strong>open PRs <a href="https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2" target="_blank" rel="noopener">#349–#352</a></strong>, awaiting review</td></tr>
+<tr><td><code>0001</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td><code>main</code> @ <code>653d186</code></td><td>held until the small ones land — it is the one that needs a maintainer conversation</td></tr>
+</tbody></table></div>
+<p>The order is deliberate: ten small, individually reviewable fixes first, so that the
+manifest patch — the only one that asks upstream to change a design — arrives to someone
+who has already merged code from the same author.</p>
+<p>The <code>mobile-air</code> four each carry a regression test in the repo&#39;s own Pest idiom, written
+against its real <code>TailwindParser</code>, <code>NativeRouter</code> and <code>CallbackRegistry</code> rather than a
+stub. Every test was checked against unpatched <code>main</code> first: 3 of 3, 4 of 6, 3 of 6 and 1
+of 3 fail there, which is the only evidence that they test the fix rather than the code.
+The full upstream suite passes at 887 with the same 13 pre-existing failures <code>main</code> has on
+its own (Android splash-screen and release-build cases, unrelated), and <code>pint</code> is clean.</p>
+<p>Writing those tests also found a dead branch in <code>0010</code> — a double quote inside a
+double-quoted literal is caught by the delimiter check above it, so the escape branch for
+that case was unreachable. Removed before submitting.</p>
+<div class="table-scroll"><table><thead><tr><th>Patch</th><th>PR</th></tr></thead><tbody>
+<tr><td><code>0008</code> theme border must not clobber an explicit width</td><td><a href="https://github.com/NativePHP/mobile-air/pull/349" target="_blank" rel="noopener">#349</a></td></tr>
+<tr><td><code>0011</code> <code>dark:</code> variant buries a theme token&#39;s dark value</td><td><a href="https://github.com/NativePHP/mobile-air/pull/350" target="_blank" rel="noopener">#350</a></td></tr>
+<tr><td><code>0009</code> optional route segments never resolved</td><td><a href="https://github.com/NativePHP/mobile-air/pull/351" target="_blank" rel="noopener">#351</a></td></tr>
+<tr><td><code>0010</code> expression parser corrupts and drops arguments</td><td><a href="https://github.com/NativePHP/mobile-air/pull/352" target="_blank" rel="noopener">#352</a></td></tr>
+</tbody></table></div>
+<p>Each patch file here is a <code>git diff</code> of the branch that was pushed, so it includes the
+tests and matches the pull request exactly.</p>
+<p>Every patch applies cleanly to a clean tree, individually and as a series — verified with
+<code>git apply --check</code>, and re-verified against <code>mobile-air</code>&#39;s current <code>main</code> before the four
+were submitted. <code>0001</code> typechecks clean under the project&#39;s own <code>tsc</code>.</p>
+<p><code>0008</code>–<code>0011</code> target the <strong>mobile</strong> repo. An earlier note here called it commercial rather
+than MIT: that was wrong about the repository, which carries an MIT <code>LICENSE.md</code>
+(Bifrost Technology, LLC) and declares <code>&quot;license&quot;: &quot;MIT&quot;</code> in its <code>composer.json</code>. What is
+commercial is NativePHP Mobile as a <em>product</em> — the licence you buy to ship apps — not the
+source these patches touch. Submitting them raises nothing that <code>0002</code>–<code>0007</code> do not.</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/NativePHP/desktop &amp;&amp; <span class="hljs-built_in">cd</span> desktop
+git apply /path/to/upstream-patches/0001-manifest-declared-app-paths.patch</code></pre>
+</figure>
+<h2 id="the-one-that-matters"><a class="anchor" href="#the-one-that-matters">The one that matters</a></h2>
+<p><strong><code>0001-manifest-declared-app-paths.patch</code></strong> — replaces the eight hardcoded Laravel
+values in <code>php.ts</code> with values read from an optional <code>nativephp.json</code>:</p>
+<div class="table-scroll"><table><thead><tr><th></th><th>Laravel default (unchanged)</th></tr></thead><tbody>
+<tr><td><code>cli</code></td><td><code>artisan</code></td></tr>
+<tr><td><code>router</code></td><td><code>vendor/laravel/framework/…/server.php</code></td></tr>
+<tr><td><code>docroot</code></td><td><code>public</code></td></tr>
+<tr><td><code>env.dev</code> / <code>env.prod</code></td><td><code>local</code> / <code>production</code></td></tr>
+<tr><td><code>lifecycle.optimize</code> / <code>.migrate</code> / <code>.schedule</code></td><td><code>optimize</code>, <code>migrate --force</code>, <code>schedule:run</code></td></tr>
+<tr><td><code>writableDirs</code></td><td><code>storage/framework/*</code>, <code>storage/logs</code>, <code>bootstrap/cache</code> (relative to userData)</td></tr>
+<tr><td><code>seedDir</code></td><td><code>storage</code></td></tr>
+<tr><td><code>cacheEnv</code></td><td>the five <code>APP_*_CACHE</code> keys</td></tr>
+</tbody></table></div>
+<p><strong>Zero behaviour change for Laravel.</strong> With no manifest present the defaults are exactly
+the previous literals. <code>extra.nativephp.manifest</code> is already the convention in
+<code>nativephp/mobile-ui</code>, so this follows it rather than inventing a second mechanism.</p>
+<p>Three things the patch also fixes as a consequence, each of which is a real bug for any
+non-Laravel app and was found by running one:</p>
+<ul>
+<li>The <code>storage</code> copy is guarded with <code>existsSync</code>. <code>fs-extra</code>&#39;s <code>copySync</code> throws on a
+missing source, so an app without that directory <strong>died before the PHP server started</strong>.</li>
+<li>Lifecycle commands became optional. <code>schedule:run</code> was spawned every 60 seconds with no
+check that it exists, producing a silently failing process per minute.</li>
+<li>A malformed manifest throws rather than falling back. Falling back to Laravel&#39;s paths
+would boot the app into the wrong router and 404 every route with no clue why.</li>
+</ul>
+<h3 id="revised-after-a-second-implementation-was-written-against-it"><a class="anchor" href="#revised-after-a-second-implementation-was-written-against-it">Revised after a second implementation was written against it</a></h3>
+<p>Emitting a Symfony manifest from the adapter found four problems in the first draft of
+this patch, all now fixed. Worth recording, because they are the kind that only surface
+when something other than Laravel tries to use the interface:</p>
+<ul>
+<li><strong><code>optimize</code> and <code>migrate</code> were not actually optional.</strong> They were spread with a
+non-null assertion (<code>...lifecycle.optimize!</code>), so declaring <code>null</code> — or omitting them,
+which the type permitted — became <code>...null</code> and threw inside <code>serveApp()</code>, <em>before the
+PHP server started</em>. Only <code>schedule</code> was guarded. All three now are.</li>
+<li><strong><code>writableDirs</code> was dead.</strong> It was in the interface and the defaults, but nothing read
+it: the <code>mkdirpSync</code> calls ran unconditionally at module load, creating Laravel&#39;s
+directories for every app whatever framework it was running. Its declared values did not
+even match what the code created. It is now what drives those calls, deferred to first
+use because <code>getManifest()</code> needs <code>getAppPath()</code>, which is not resolvable at module load.</li>
+<li><strong>Nested merging made &quot;none&quot; inexpressible.</strong> Deep-merging <code>cacheEnv</code> meant a declared
+<code>{}</code> still inherited Laravel&#39;s five keys, and there was no way to say &quot;this framework has
+no seed directory&quot;. The merge is now top-level only, so a declared key is authoritative.</li>
+<li><strong><code>seedDir</code> was typed <code>string</code>,</strong> which could not express &quot;none&quot; at all; it is now
+<code>string | null</code>.</li>
+</ul>
+<p><code>LARAVEL_STORAGE_PATH</code> is deliberately left alone — it is the one remaining Laravel-named
+value in the environment contract, and renaming it would be a breaking change for anything
+reading it.</p>
+<h3 id="why-this-is-worth-taking-even-without-a-second-framework"><a class="anchor" href="#why-this-is-worth-taking-even-without-a-second-framework">Why this is worth taking even without a second framework</a></h3>
+<p>It turns eight implicit assumptions into one declared, documented interface. The
+<code>storage</code>-copy crash and the unconditional <code>schedule:run</code> are bugs in the current code
+regardless; the manifest is what makes them expressible rather than special-cased.</p>
+<h2 id="the-independent-fixes"><a class="anchor" href="#the-independent-fixes">The independent fixes</a></h2>
+<p>Each stands alone and is worth submitting on its own merits. None depends on <code>0001</code>.</p>
+<div class="table-scroll"><table><thead><tr><th>Patch</th><th>Fixes</th></tr></thead><tbody>
+<tr><td><code>0002</code></td><td><code>window/current</code> dereferences <code>getFocusedWindow()</code> with no null check. It returns null whenever the app is backgrounded — reachable from any PHP process, e.g. a queue worker calling <code>Window::current()</code> — and threw a bare string. Now 404s.</td></tr>
+<tr><td><code>0003</code></td><td><code>shell/trash-item</code> answers <code>res.status(400).json()</code> with no argument, which express rejects, turning a handled failure into an unhandled one.</td></tr>
+<tr><td><code>0004</code></td><td><code>window/open</code> without <code>zoomFactor</code> calls <code>setZoomFactor(parseFloat(undefined))</code> → <code>NaN</code>, rendering the page at an absurd zoom. Invisible from Laravel because <code>Windows\Window</code> declares a <code>1.0</code> default and always serialises it, so it lands on the first independent client instead.</td></tr>
+<tr><td><code>0005</code></td><td><code>notifyLaravel</code> swallows every error in an empty <code>catch {}</code>, making a crashed, 500ing or 403ing PHP app indistinguishable from a healthy one. Now reported behind <code>SHELL_VERBOSITY</code>.</td></tr>
+<tr><td><code>0006</code></td><td><code>CreateSecurityCookieController</code> reads <code>config(&#39;native-php.secret&#39;)</code> — a namespace that does not exist. The guard therefore compared input against <code>null</code>, passing only when no secret was sent, then issued a cookie with a <code>null</code> value. It is also the one route <code>PreventRegularBrowserAccess</code> deliberately lets through unauthenticated.</td></tr>
+<tr><td><code>0007</code></td><td><code>composer.json</code>: <code>homepage</code> points at the archived <code>nativephp/laravel</code>, and the <code>Updater</code> alias points at <code>Native\Electron\Facades\Updater</code>, a class that moved to <code>Native\Desktop\Drivers\Electron\Facades\Updater</code>.</td></tr>
+</tbody></table></div>
+<h2 id="0008--a-bug-in-the-mobile-tailwind-parser"><a class="anchor" href="#0008--a-bug-in-the-mobile-tailwind-parser"><code>0008</code> — a bug in the mobile Tailwind parser</a></h2>
+<p><code>parseThemeBorder()</code> emits <code>borderWidth: 1</code> unconditionally, and since classes merge in
+order it overwrites an explicit width that came before it:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>BEFORE (upstream)                              AFTER (patched)
+border-2 border-theme-outline → width 1  ✗     → width 2  ✓
+border-theme-outline border-2 → width 2  ✓     → width 2  ✓
+border-theme-outline          → width 1  ✓     → width 1  ✓</code></pre>
+</figure>
+<p>So the same two classes produce different results depending on the order they are written
+in, with nothing to indicate why. <strong>This affects upstream&#39;s own demo:</strong> the pattern occurs
+twice in <code>NativePHP/super-native</code>, which therefore renders a 1px border where the template
+asks for 2px.</p>
+<p>The fix has <code>parseThemeBorder</code> emit <code>borderWidthDefault</code> instead, which <code>parse()</code> resolves
+after merging — so a theme border still gets a visible width on its own, but never
+overrules an explicit one, and the outcome no longer depends on class order.</p>
+<p>Found by extracting every class string from <code>super-native</code> (1,336 distinct strings, 684
+distinct tokens) and running upstream&#39;s parser over all of them.</p>
+<h2 id="0009--optional-route-segments-were-never-resolvable-in-php"><a class="anchor" href="#0009--optional-route-segments-were-never-resolvable-in-php"><code>0009</code> — optional route segments were never resolvable in PHP</a></h2>
+<p><code>NativeRouter::resolve()</code> builds its pattern regex with
+<code>preg_replace(&#39;/\{(\w+)\}/&#39;, &#39;(?P&lt;$1&gt;[^/]+)&#39;, $pattern)</code>. <code>\w</code> does not match <code>?</code>, so a
+<code>{slug?}</code> placeholder survives into the regex literally and the pattern can only ever match
+the string <code>&quot;{slug?}&quot;</code>.</p>
+<p>Verified against upstream&#39;s own code:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>                    BEFORE                        AFTER
+/items/42           params {id: 42}   ✓           params {id: 42}      ✓
+/posts/hello        NULL              ✗           params {slug: hello} ✓
+/posts              NULL              ✗           params {}            ✓
+   (routes: /items/{id}, /posts/{slug?})</code></pre>
+</figure>
+<p><code>BootPlanner</code> on both platforms matches these patterns happily, so <strong>a route using the
+documented <code>{param?}</code> syntax booted into the native runloop and then resolved to no screen
+at all.</strong> The fix handles the optional form first, consuming its leading slash, and drops
+empty captures so an omitted segment reads as absent rather than blank.</p>
+<p>Found by porting <code>BootPlanner.matches()</code> and testing the port against upstream.</p>
+<h2 id="0010--the-callback-expression-parser-corrupts-and-drops-arguments"><a class="anchor" href="#0010--the-callback-expression-parser-corrupts-and-drops-arguments"><code>0010</code> — the callback expression parser corrupts and drops arguments</a></h2>
+<p><code>CallbackRegistry::parse()</code> converts single-quoted argument literals to JSON with
+<code>str_replace(&quot;&#39;&quot;, &#39;&quot;&#39;)</code> — every apostrophe, whatever its role — and then degrades any
+decode failure to <code>$args ?? []</code>. Three distinct silent failures, all verified against
+upstream&#39;s own code:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>                       BEFORE                        AFTER
+save('hello')          [&quot;hello&quot;]        ✓            [&quot;hello&quot;]     ✓
+save(&quot;don't&quot;)          []               ✗ dropped    [&quot;don't&quot;]     ✓
+rename('it\'s fine')   [&quot;it\&quot;s fine&quot;]   ✗ CORRUPTED  [&quot;it's fine&quot;] ✓
+setName('O'Brien')     []               ✗ silent     [] + logged   ✓</code></pre>
+</figure>
+<p>The third is the one that matters: no error, no empty result — the handler runs with a
+value the author never wrote. <code>it&#39;s fine</code> becomes <code>it&quot;s fine</code>. If that is a name on its way
+to a database, it is corrupted with nothing to indicate it.</p>
+<p>The fix tracks which quote actually opened the current string, so an apostrophe inside a
+double-quoted literal is data rather than a delimiter, and <code>\&#39;</code> inside a single-quoted one
+becomes a bare apostrophe rather than a double quote.</p>
+<p><code>args</code> stays <code>[]</code> on a genuine parse failure rather than becoming null, because callers
+spread it (<code>NativeComponent.php:3316</code>, <code>:3371</code>) and a null would be a TypeError —
+tightening that contract deserves its own change. But the failure is no longer silent.</p>
+<h2 id="0011--dark-buries-a-theme-tokens-dark-value"><a class="anchor" href="#0011--dark-buries-a-theme-tokens-dark-value"><code>0011</code> — <code>dark:</code> buries a theme token&#39;s dark value</a></h2>
+<p>A theme token already resolves its own dark companion, so wrapping it in the <code>dark:</code>
+variant nested that companion a level deeper — where <code>parse()</code>&#39;s merge never lifts it —
+and left the <strong>light</strong> hex in the dark slot:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>                        BEFORE                                  AFTER
+bg-theme-surface        {bg:#FFF, dark:{bg:#000}}      ✓        unchanged            ✓
+dark:bg-theme-surface   {dark:{bg:#FFF, dark:{bg:#000}}} ✗      {dark:{bg:#000}}     ✓</code></pre>
+</figure>
+<p>So <code>dark:bg-theme-surface</code> rendered <strong>white in dark mode</strong> — the opposite of what it asks
+for — and dropped the light-mode value entirely. Asking for a theme token under <code>dark:</code>
+can only mean its dark-mode form, so the fix promotes the companion instead of nesting it.</p>
+<p>Present in upstream&#39;s own demo: <code>super-native</code> uses <code>android:dark:bg-theme-surface-variant</code>.</p>
+<p><code>0008</code> and <code>0011</code> both touch <code>TailwindParser.php</code> and apply together cleanly.</p>
+<h2 id="suggested-order"><a class="anchor" href="#suggested-order">Suggested order</a></h2>
+<p>Submit the small fixes first. They are independently valuable, quick to review, and they
+establish that the effort is serious before anything larger is proposed.</p>
+<ol>
+<li><code>0006</code> — smallest, clearest, and a security-adjacent correctness fix.</li>
+<li><code>0002</code>, <code>0003</code>, <code>0004</code> — three small null/argument guards.</li>
+<li><code>0005</code> — the diagnostic; a maintainer may have opinions on the verbosity gate.</li>
+<li><code>0007</code> — metadata.</li>
+<li><code>0001</code> — last, once the others have landed.</li>
+</ol>
+<p><code>0008</code>–<code>0011</code> are independent of the above; all four are in a different repository.
+<code>0008</code> and <code>0011</code> touch the same file but do not conflict.</p>
+<h2 id="what-is-deliberately-not-here"><a class="anchor" href="#what-is-deliberately-not-here">What is deliberately not here</a></h2>
+<ul>
+<li><strong>Anything about mobile beyond <code>0008</code>.</strong> NativePHP Mobile is a commercial product,
+unlike the MIT-licensed desktop runtime. A self-contained bug fix is one thing; the
+bootstrap-path manifest that mobile needs for the same reason desktop does is a larger
+ask that should wait until the licence question is settled.</li>
+<li><strong>The <code>nativephp/core</code> extraction.</strong> A much larger proposal, and it should follow a
+conversation rather than arrive as a diff. <code>../ANALYSIS.md</code> §4 has the reasoning; the
+51 already framework-free files are the natural first move.</li>
+<li><strong>Any opinion about <code>php-bin</code>&#39;s missing opcache.</strong> Real (see <code>../M3-RESULTS.md</code>), but it
+belongs to a different repository.</li>
+</ul>
+<h2 id="provenance"><a class="anchor" href="#provenance">Provenance</a></h2>
+<p>Every item above was found while building a Symfony adapter against this runtime — most of
+them by running it rather than reading it. <code>0004</code> was a window rendering four enormous
+letters; <code>0006</code> came out of grepping for a config key that turned out not to exist.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="demo.html"><span>← Previous</span><strong>The demo app</strong></a>
+            <a class="pager-link next" href="spike-results.html"><span>Next →</span><strong>M1 — the spike</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/upstream-patches/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#the-one-that-matters">The one that matters</a></li><li class="lvl3"><a href="#revised-after-a-second-implementation-was-written-against-it">Revised after a second implementation was written against it</a></li><li class="lvl3"><a href="#why-this-is-worth-taking-even-without-a-second-framework">Why this is worth taking even without a second framework</a></li><li class="lvl2"><a href="#the-independent-fixes">The independent fixes</a></li><li class="lvl2"><a href="#0008--a-bug-in-the-mobile-tailwind-parser">0008 — a bug in the mobile Tailwind parser</a></li><li class="lvl2"><a href="#0009--optional-route-segments-were-never-resolvable-in-php">0009 — optional route segments were never resolvable in PHP</a></li><li class="lvl2"><a href="#0010--the-callback-expression-parser-corrupts-and-drops-arguments">0010 — the callback expression parser corrupts and drops arguments</a></li><li class="lvl2"><a href="#0011--dark-buries-a-theme-tokens-dark-value">0011 — dark: buries a theme token's dark value</a></li><li class="lvl2"><a href="#suggested-order">Suggested order</a></li><li class="lvl2"><a href="#what-is-deliberately-not-here">What is deliberately not here</a></li><li class="lvl2"><a href="#provenance">Provenance</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

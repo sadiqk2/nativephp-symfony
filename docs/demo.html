@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The demo app · NativePHP for Symfony</title>
+<meta name="description" content="Deskpad: both bundles, driven end to end — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item active" href="demo.html" aria-current="page"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="deskpad--the-demo-application"><a class="anchor" href="#deskpad--the-demo-application">Deskpad — the demo application</a></h1>
+<p>A small notes app, built with Symfony 8, running in a native window on NativePHP&#39;s
+Electron runtime. It installs <strong>both</strong> bundles — <code>native-symfony/desktop-bundle</code> and
+<code>native-symfony/mobile-bundle</code> — and it doubles as their integration test: everything
+below was captured by booting the real runtime headlessly and driving it.</p>
+<p><img src="shot-dashboard.png" alt="The dashboard, and a second window"></p>
+<p>Two windows, one PHP process. The application menu at the top is built in PHP. The
+event feed along the bottom is <code>window.Native.on</code>. The <code>notes stored</code> count in the
+second window went from 0 to 1 without a reload, because a PHP event was broadcast to
+every renderer.</p>
+<h2 id="what-to-look-at"><a class="anchor" href="#what-to-look-at">What to look at</a></h2>
+<p>Read these five files and you have seen the whole desktop surface.</p>
+<div class="table-scroll"><table><thead><tr><th>File</th><th>Why</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/Bootstrapper.php" target="_blank" rel="noopener"><code>src/Bootstrapper.php</code></a></td><td>The entire app-startup contract: the runtime POSTs <code>/_native/api/booted</code>, this decides what appears. Opens the main window, builds the application and context menus, registers a global shortcut.</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/EventListener/MenuActionListener.php" target="_blank" rel="noopener"><code>src/EventListener/MenuActionListener.php</code></a></td><td>What menu items <em>do</em>. An item carries a name, not a callback — clicking one comes back as an event over HTTP, and this is the other end of it.</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/EventListener/RuntimeEventLogger.php" target="_blank" rel="noopener"><code>src/EventListener/RuntimeEventLogger.php</code></a></td><td>The reverse channel, typed: <code>$event-&gt;width</code>, not <code>$payload[1]</code>. Ten of the runtime&#39;s 44 events, with the two behaviours that surprise people written down where they bite.</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/Controller/NoteController.php" target="_blank" rel="noopener"><code>src/Controller/NoteController.php</code></a></td><td>The app&#39;s one real feature. Saving a note touches the settings store, a notification and a broadcast; exporting one opens a native save dialog.</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/Event/NoteSaved.php" target="_blank" rel="noopener"><code>src/Event/NoteSaved.php</code></a></td><td>An ordinary Symfony event that also reaches every window&#39;s JavaScript, because it implements <code>BroadcastsToRuntime</code>.</td></tr>
+</tbody></table></div>
+<p>And for mobile, three:</p>
+<div class="table-scroll"><table><thead><tr><th>File</th><th>Why</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/Mobile/CounterScreen.php" target="_blank" rel="noopener"><code>src/Mobile/CounterScreen.php</code></a></td><td>A <code>#[NativeScreen]</code> component: state as a typed property, one <code>#[NativeAction]</code> the device may call, one public method it may not.</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/templates/mobile/profile.html.twig" target="_blank" rel="noopener"><code>templates/mobile/profile.html.twig</code></a></td><td>A native screen authored with the <code>native()</code> and <code>native_publish()</code> Twig functions — no HTML, no WebView. The page prints the wire tree it produced.</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/Mobile/ScreenCatalog.php" target="_blank" rel="noopener"><code>src/Mobile/ScreenCatalog.php</code></a></td><td>Why native screens are listed explicitly instead of scanned for: the build-time list and the runtime list have to be the same list.</td></tr>
+</tbody></table></div>
+<h3 id="the-screens"><a class="anchor" href="#the-screens">The screens</a></h3>
+<p><strong>Dashboard</strong> (<code>/</code>) — every value is a live round trip to the Electron process over
+localhost HTTP. Window geometry, the detected <code>_windowId</code>, the Electron process, the
+system theme, the display, the userData path. Opens and closes the second window.</p>
+<p><strong>Notes</strong> (<code>/notes</code>) — create, copy and delete notes persisted in the runtime&#39;s own
+settings store (electron-store, a JSON file under userData). Saving notifies and
+broadcasts; <strong>Export…</strong> opens a native save sheet.</p>
+<p><img src="shot-notes.png" alt="Notes"></p>
+<p>Exporting one opens a real GTK save sheet, with the app&#39;s own default filename and
+button label — and holds the runtime&#39;s main thread until it is answered:</p>
+<p><img src="shot-dialog.png" alt="The native save dialog"></p>
+<p><strong>Jobs</strong> (<code>/jobs</code>) — child processes. A PHP one-liner and the app&#39;s own
+<code>app:report</code> console command, both spawned by the runtime with its PHP binary and its
+whole <code>NATIVEPHP_*</code> environment. Their stdout arrives as events, in PHP <em>and</em> in the
+page.</p>
+<p><strong>Mobile</strong> (<code>/mobile</code>) — the other bundle: the WebView path, the native-UI path, and a
+stateful component. Read the honesty section below before believing any of it.</p>
+<p><img src="shot-mobile.png" alt="The native-UI wire format"></p>
+<h2 id="running-it"><a class="anchor" href="#running-it">Running it</a></h2>
+<p>There is no PHP and no modern Node on this host, so everything runs in the
+<code>np-symfony-spike</code> container (PHP 8.4, Node 22, Electron&#39;s system libraries, Xvfb,
+ImageMagick). Build it once from <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/spike/README.md" target="_blank" rel="noopener"><code>../spike/Dockerfile</code></a> if it does
+not exist:</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">docker build -t np-symfony-spike ../spike</code></pre>
+</figure>
+<p><code>D</code> is the invocation used throughout — note that the two bundles are installed
+through composer <em>path</em> repositories, so <code>/bundle</code> and <code>/mobile-bundle</code> must be
+mounted at runtime as well as at install time, or <code>vendor/</code> points at nothing:</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash"><span class="hljs-function"><span class="hljs-title">D</span></span>() { docker run --<span class="hljs-built_in">rm</span> -u $(<span class="hljs-built_in">id</span> -u):$(<span class="hljs-built_in">id</span> -g) \
+  -e HOME=/tmp -e COMPOSER_HOME=/tmp/composer -e npm_config_cache=/tmp/npmcache \
+  -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/..&quot;</span>:/np -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/../bundle&quot;</span>:/bundle -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/../mobile-bundle&quot;</span>:/mobile-bundle \
+  -w /np/demo np-symfony-spike bash -lc <span class="hljs-string">&quot;<span class="hljs-variable">$1</span>&quot;</span>; }</code></pre>
+</figure>
+<h3 id="1-dependencies"><a class="anchor" href="#1-dependencies">1. Dependencies</a></h3>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">D <span class="hljs-string">&#x27;composer install&#x27;</span></code></pre>
+</figure>
+<h3 id="2-the-electron-runtime"><a class="anchor" href="#2-the-electron-runtime">2. The Electron runtime</a></h3>
+<p>The runtime lives in the application, not in <code>vendor/</code> — each app patches its own copy,
+because upstream hardcodes eight Laravel-specific strings in its TypeScript and
+<code>native:install --publish</code> upstream already mirrors the project into the app directory.
+This step copies it, patches it, runs <code>npm install</code> (~115MB, several minutes) and
+rebuilds the plugin from the patched sources:</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">D <span class="hljs-string">&#x27;php bin/console native:install --source=/np/upstream/np-desktop/resources/electron&#x27;</span></code></pre>
+</figure>
+<p>If <code>../upstream/np-desktop</code> is not there:
+<code>git clone --depth 1 https://github.com/NativePHP/desktop ../upstream/np-desktop</code>.</p>
+<h3 id="3-start-it"><a class="anchor" href="#3-start-it">3. Start it</a></h3>
+<p>On a machine with a display, that is all <code>native:run</code> needs:</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">D <span class="hljs-string">&#x27;php bin/console native:run&#x27;</span></code></pre>
+</figure>
+<p>Headless — which is how every screenshot in this README was made:</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">docker run --<span class="hljs-built_in">rm</span> -u $(<span class="hljs-built_in">id</span> -u):$(<span class="hljs-built_in">id</span> -g) -e HOME=/tmp -e npm_config_cache=/tmp/npmcache \
+  -e SHOT2=/np/demo/shot-notes.png \
+  -e SHOT3=/np/demo/shot-dialog.png \
+  -e SHOT4=/np/demo/shot-mobile.png \
+  -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/..&quot;</span>:/np -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/../bundle&quot;</span>:/bundle -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/../mobile-bundle&quot;</span>:/mobile-bundle \
+  -w /np/demo np-symfony-spike bash /np/demo/run.sh /np/demo/shot-dashboard.png 45</code></pre>
+</figure>
+<p><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/run.sh" target="_blank" rel="noopener"><code>run.sh</code></a> starts an X server, runs <code>bin/console native:run</code> — the same command
+a developer types, rather than a reimplementation of it — waits for the PHP server, and
+then drives the app. Two things in it are worth understanding:</p>
+<ul>
+<li><strong>It lifts the shared secret out of the running PHP server&#39;s own <code>/proc/*/environ</code>.</strong>
+The secret is generated inside the runtime and handed to PHP as an environment
+variable; it is never logged, and every request without it is rejected with a 403. A
+harness outside both processes has no other way to make a request the app will accept.</li>
+<li><strong>It clicks menu items by POSTing to <code>/_native/api/events</code></strong> with the item&#39;s event
+name, which is byte for byte what the runtime sends when a real item is clicked. That
+is how a menu, a global shortcut and a context menu are verified without a mouse.</li>
+</ul>
+<h3 id="without-a-runtime"><a class="anchor" href="#without-a-runtime">Without a runtime</a></h3>
+<p>Every page renders in a plain browser too, with a <code>plain browser</code> badge instead of
+<code>runtime connected</code> — a native app you cannot open in a browser is a native app you
+cannot develop:</p>
+<figure class="code">
+<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-bash">D <span class="hljs-string">&#x27;php -S 0.0.0.0:8080 -t public public/index.php&#x27;</span></code></pre>
+</figure>
+<h2 id="what-was-actually-verified"><a class="anchor" href="#what-was-actually-verified">What was actually verified</a></h2>
+<p>Everything in this list was observed in a run of this app on this machine. The output
+of that run is what the screenshots are.</p>
+<div class="table-scroll"><table><thead><tr><th>Claim</th><th>Evidence</th></tr></thead><tbody>
+<tr><td>The app boots and paints</td><td><code>shot-dashboard.png</code></td></tr>
+<tr><td>Two windows, distinct <code>_windowId</code> per window</td><td>Same shot: <code>main</code> in one, <code>inspector</code> in the other, both from <code>WindowManager::detectId()</code></td></tr>
+<tr><td>The application menu is real</td><td>The menu bar in every shot, built by <code>Bootstrapper::boot()</code></td></tr>
+<tr><td>Menu items work</td><td><code>App\Menu\OpenInspector</code> opened the second window; <code>App\Menu\Seed</code> wrote three notes and navigated the main window; <code>App\Menu\MobileScreens</code> navigated it again — all driven as events, all visible in the shots</td></tr>
+<tr><td>Settings persistence</td><td><code>_smoke</code> wrote, read back <code>probe</code>, forgot it, and read <code>gone</code>; the four notes in <code>shot-notes.png</code> came out of the store</td></tr>
+<tr><td>Clipboard</td><td><code>_smoke</code> wrote a random marker and read the same string back through the runtime</td></tr>
+<tr><td>A native dialog</td><td><code>shot-dialog.png</code> — a GTK save sheet with the app&#39;s own default filename and button label</td></tr>
+<tr><td>A child process</td><td><code>counter</code> spawned as a real pid, streamed <code>tick 1…5</code> and <code>done</code>, exited 0 — in <code>var/log/dev.log</code> and in the page&#39;s event feed</td></tr>
+<tr><td>Typed events reaching PHP</td><td><code>ApplicationBooted</code>, <code>WindowShown</code>, <code>WindowFocused</code>, <code>WindowClosed</code>, <code>SettingChanged</code>, <code>ProcessSpawned</code>, <code>MessageReceived</code>, <code>ProcessExited</code> all logged by <code>RuntimeEventLogger</code></td></tr>
+<tr><td>Events reaching the renderer</td><td>The feed at the bottom of every screenshot is <code>window.Native.on</code> output</td></tr>
+<tr><td>A PHP event reaching the renderer</td><td>The <code>notes stored</code> count in the second window shows <code>1</code> after the smoke run saved a note — the page was rendered when it was still 0</td></tr>
+<tr><td>The browser gate</td><td><code>GET /</code> with no secret → <strong>403</strong>; with the secret → <strong>200</strong></td></tr>
+<tr><td>Both bundles in one app</td><td>The container builds and every page renders with both registered</td></tr>
+</tbody></table></div>
+<p>The full <code>_smoke</code> output from that run:</p>
+<figure class="code">
+<span class="code-lang">json</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;runtime&quot;</span><span class="hljs-punctuation">:</span>  <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;pid&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">67</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;platform&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;linux&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;arch&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;x64&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;uptime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">12.36</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;windows&quot;</span><span class="hljs-punctuation">:</span>  <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;ids&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;main&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;inspector&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;main_size&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1180x827&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;main_title&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Deskpad&quot;</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;clipboard&quot;</span><span class="hljs-punctuation">:</span><span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;wrote&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;deskpad-7c647923&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;read&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;deskpad-7c647923&quot;</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;settings&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;read&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;probe&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;after_forget&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;gone&quot;</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;notes&quot;</span><span class="hljs-punctuation">:</span>    <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;saved&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Written by the smoke run&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;total&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;notification&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;reference&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1786731436629.kznc3e1&quot;</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;child_process&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;alias&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;smoke&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;pid_on_start&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">null</span></span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;system&quot;</span><span class="hljs-punctuation">:</span>   <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;theme&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;system&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;can_encrypt&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;power&quot;</span><span class="hljs-punctuation">:</span>    <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;idle_state&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;active&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;on_battery&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">false</span></span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;shortcut&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;registered&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-literal"><span class="hljs-keyword">true</span></span><span class="hljs-punctuation">}</span>
+<span class="hljs-punctuation">}</span></code></pre>
+</figure>
+<p><code>shortcut.registered: true</code> is the one to notice: the shortcut is registered in
+<code>Bootstrapper::boot()</code>, so a <code>false</code> there would mean the boot hook never ran.</p>
+<h2 id="what-was-not-verified-and-cannot-be-here"><a class="anchor" href="#what-was-not-verified-and-cannot-be-here">What was not verified, and cannot be here</a></h2>
+<p><strong>Nothing mobile has run on a device.</strong> <code>nativephp_call()</code> is a compiled extension that
+exists only inside a packaged iOS or Android app, and this environment has no Xcode and
+no Android SDK. The mobile screens run against the recording fake the bundle ships
+(<code>native_mobile.fake_bridge: true</code>) and show what <em>would</em> be sent. The element trees are
+byte-compared against upstream&#39;s own collector in the bundle&#39;s test suite, so the wire
+format is verified — the device is not. Treat the desktop and mobile halves as holding
+different grades of evidence, because they do.</p>
+<p><strong>The <code>/mobile/counter</code> page replays taps.</strong> On a device the screen object is held by the
+runloop and <code>$count</code> survives between interactions because the PHP process is long-lived.
+A browser request is a fresh process, so that page calls <code>frame()</code> and then <code>handle()</code>
+once per tap to reach frame N. It demonstrates the frame cycle honestly; it does not
+simulate the device&#39;s lifetime, and the page says so.</p>
+<p><strong>Notifications appear in the log, not on screen.</strong> The container has no D-Bus, so
+<code>notify_notification_show</code> fails with <code>Unknown or unsupported transport &quot;disabled&quot;</code>. The
+call and the reference it returns are real (<code>_smoke</code> shows one); the toast has nowhere to
+go. On a desktop it appears.</p>
+<p><strong><code>can_encrypt</code> is <code>false</code> and there is no keyring.</strong> Same cause. Not a bug.</p>
+<p><strong>Nothing is packaged.</strong> <code>native:build</code> is the desktop bundle&#39;s, and it is proven in
+<code>../M3-RESULTS.md</code> by a packaged app that was built and run. This demo only exercises
+development mode.</p>
+<p><strong>The dialog screenshot wedges the run.</strong> A native dialog holds the runtime&#39;s main
+thread until someone answers it, so <code>run.sh</code> takes that shot last and on purpose. Nothing
+automated touches <code>Export…</code> except that final step.</p>
+<h2 id="how-this-differs-from-spikeapp"><a class="anchor" href="#how-this-differs-from-spikeapp">How this differs from <code>spike/app</code></a></h2>
+<p><code>../spike/app</code> was grown while proving each piece worked, and it shows: one controller
+of buttons, one diagnostics route, one page. It is a harness. This is an application —
+four screens with a reason to exist, a menu whose items do things, an event that travels
+PHP → runtime → every window, and a second window that is not just &quot;a second window&quot;.</p>
+<p>Concretely: <code>_windowId</code> is <em>used</em> here (two windows that report different ones) rather
+than printed; the diagnostics route became <code>/_smoke</code> and asserts values rather than
+listing them; menu items are an enum shared between the builder and the handler instead
+of loose strings; and the runner drives menu events and captures four screenshots
+instead of one.</p>
+<p><code>spike/app</code> is left where it is — it is what <code>../SPIKE-RESULTS.md</code> refers to.</p>
+<h2 id="what-building-this-changed-in-the-bundles"><a class="anchor" href="#what-building-this-changed-in-the-bundles">What building this changed in the bundles</a></h2>
+<p>Three things the demo found. All three were fixed in the bundles rather than worked
+around here, which is the point of building a real application against them.</p>
+<ol>
+<li><p><strong>The two halves of the native-UI path did not join up.</strong>
+<code>NativeScreenResponder</code> resolved a path to a screen class and then asked a
+<code>ScreenRendererInterface</code> for an element — and nothing implemented that interface,
+while <code>ComponentScreenFactory</code> sat next door doing almost exactly the job. So a
+<code>#[NativeScreen]</code> component needed app glue, and this demo wrote some. The mobile
+bundle now ships <code>ComponentScreenRenderer</code>, aliased to the interface, and
+<code>/mobile/counter</code> goes through the routed path instead.</p>
+</li>
+<li><p><strong><code>native:install</code> left the routes import as a manual step.</strong> The command already
+edited the application (the router script), and forgetting the one remaining hand-edit
+produced an app that boots and then shows nothing at all — <code>/booted</code> 404s, so <code>boot()</code>
+never runs. It now writes <code>config/routes/native_desktop.yaml</code> itself, refuses to
+overwrite an edited one without <code>--force</code>, and warns rather than guessing when there is
+no <code>config/routes/</code>.</p>
+</li>
+<li><p><strong>This demo was itself piping parser output straight onto nodes.</strong> Both the counter
+screen and the profile template did <code>layout: styles.parse(...)</code>, which publishes
+<code>flexGrow</code> where the wire wants <code>flex_grow</code> and puts <code>bg</code> in the layout bucket instead
+of the style one — accepted, published, and then silently ignored by every renderer, so
+<code>flex-1</code>, <code>gap-*</code> and <code>bg-white</code> were doing nothing. Both now go through
+<code>StyleApplier</code>: the screen calls <code>applyClasses()</code>, the template uses the <code>class</code> option.
+Worth recording as the exact mistake the applier exists to prevent, made by the person
+who wrote the applier.</p>
+</li>
+</ol>
+<h2 id="layout"><a class="anchor" href="#layout">Layout</a></h2>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>src/Bootstrapper.php              the app-startup contract
+src/Controller/                   four screens, plus /_smoke
+src/Event/                        MenuAction (the names), NoteSaved (the broadcast)
+src/EventListener/                menu actions, and the typed runtime events
+src/Note/                         the feature: notes in the runtime settings store
+src/Command/ReportCommand.php     something for a child process to run
+src/Mobile/                       a native screen component and the screen catalog
+templates/                        base + four screens + three mobile screens
+config/packages/native_*.yaml     both bundles configured
+config/routes/native_desktop.yaml the routes import (written by native:install)
+run.sh                            headless boot, drive, screenshot
+nativephp/                        the patched runtime (gitignored, ~900MB)
+shot-*.png                        captured from a real run</code></pre>
+</figure>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="mobile-bundle.html"><span>← Previous</span><strong>Mobile bundle</strong></a>
+            <a class="pager-link next" href="upstream-patches.html"><span>Next →</span><strong>Upstream patches</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#what-to-look-at">What to look at</a></li><li class="lvl3"><a href="#the-screens">The screens</a></li><li class="lvl2"><a href="#running-it">Running it</a></li><li class="lvl3"><a href="#1-dependencies">1. Dependencies</a></li><li class="lvl3"><a href="#2-the-electron-runtime">2. The Electron runtime</a></li><li class="lvl3"><a href="#3-start-it">3. Start it</a></li><li class="lvl3"><a href="#without-a-runtime">Without a runtime</a></li><li class="lvl2"><a href="#what-was-actually-verified">What was actually verified</a></li><li class="lvl2"><a href="#what-was-not-verified-and-cannot-be-here">What was not verified, and cannot be here</a></li><li class="lvl2"><a href="#how-this-differs-from-spikeapp">How this differs from spike/app</a></li><li class="lvl2"><a href="#what-building-this-changed-in-the-bundles">What building this changed in the bundles</a></li><li class="lvl2"><a href="#layout">Layout</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

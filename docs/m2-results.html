@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M2 — the bundle · NativePHP for Symfony</title>
+<meta name="description" content="The 116-endpoint surface — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item active" href="m2-results.html" aria-current="page"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="m2--the-bundle"><a class="anchor" href="#m2--the-bundle">M2 — the bundle</a></h1>
+<p>A real Symfony bundle, <code>native-symfony/desktop-bundle</code>, replacing the spike&#39;s inline
+classes.</p>
+<p><strong>Phase 2 is complete: all 116 runtime endpoints and all 44 events are implemented</strong>,
+verified by a test that parses the runtime&#39;s own express routers. 222 tests, 400
+assertions. 120 files, ~6,200 LOC of source and ~1,600 of tests.</p>
+<p>Phase 1 (below) delivered Window, App, the event bridge, the security model and the
+install/run tooling. Phase 2 (§&quot;Phase 2&quot; further down) added the remaining 76 endpoints.</p>
+<p>Screenshots: <code>spike/shot-bundle.png</code> (phase 1), <code>spike/shot-full.png</code> (phase 2, with the
+custom application menu). Bundle docs: <code>bundle/README.md</code>.</p>
+<hr>
+<h2 id="phase-1--what-shipped"><a class="anchor" href="#phase-1--what-shipped">Phase 1 — what shipped</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Area</th><th>Contents</th></tr></thead><tbody>
+<tr><td><strong>Contracts</strong> (future <code>nativephp/core</code>)</td><td><code>ClientInterface</code>, <code>Response</code>, <code>AppBootstrapper</code>, <code>ProvidesPhpIni</code>, <code>BroadcastsToRuntime</code></td></tr>
+<tr><td><strong>Transport</strong></td><td><code>Client</code> on <code>HttpClientInterface</code>, with <code>RuntimeNotAvailable</code> / <code>RuntimeCallFailed</code></td></tr>
+<tr><td><strong>Window</strong> — all 21 endpoints</td><td><code>WindowManager</code>, a fluent <code>PendingWindow</code> covering all 39 <code>open</code> keys, a typed <code>Window</code>, <code>UrlResolver</code></td></tr>
+<tr><td><strong>App</strong> — all 19 endpoints</td><td><code>AppManager</code>, <code>AppPath</code> enum, <code>NativePaths</code> (the 13 env-supplied locations)</td></tr>
+<tr><td><strong>Event bridge</strong></td><td><code>EventFactory</code> with the dual spread, 12 typed event classes, <code>NativeEvent</code>, <code>RuntimeBroadcaster</code>, <code>BroadcastingDispatcher</code></td></tr>
+<tr><td><strong>HTTP</strong></td><td><code>BootedController</code>, <code>EventsController</code>, bundle-shipped routes</td></tr>
+<tr><td><strong>Security</strong></td><td><code>RuntimeAccessSubscriber</code> at priority 4096</td></tr>
+<tr><td><strong>DI</strong></td><td><code>NativeDesktopBundle</code> config tree, <code>AliasContractsPass</code>, autoconfiguration</td></tr>
+<tr><td><strong>Tooling</strong></td><td><code>native:install</code> (copy + patch + npm + plugin rebuild), <code>native:run</code>, <code>native:config</code>, <code>native:php-ini</code>, <code>native:schedule-tick</code>, <code>RuntimePatcher</code></td></tr>
+</tbody></table></div>
+<p>The runtime patch is now PHP (<code>RuntimePatcher</code>), replacing the spike&#39;s Python script:
+idempotent, seven hunks, and it throws rather than skip when a target has moved upstream.</p>
+<h2 id="proven-end-to-end"><a class="anchor" href="#proven-end-to-end">Proven end-to-end</a></h2>
+<p>Same harness as M1, now against the bundle. Zero errors and zero criticals in the app log:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>resize -&gt; HTTP 200
+no-secret -&gt; HTTP 403 (expect 403)
+size now: 760 × 520          # window/get read back through the bundle
+native: application booted
+native: window main shown
+native: window main focused   # typed listeners, not arrays</code></pre>
+</figure>
+<p>The page additionally renders <code>_windowId detected: main</code> (Referer-based detection),
+<code>app locale: en-US</code> (<code>GET app/locale</code>), <code>electron app version: 2.0.0</code>
+(<code>GET app/version</code>) and <code>userData path: /tmp/.config/nativephp</code> (<code>NativePaths</code>, from the
+environment, no round-trip).</p>
+<hr>
+<h2 id="phase-1-findings--again-from-running-it"><a class="anchor" href="#phase-1-findings--again-from-running-it">Phase 1 findings — again, from running it</a></h2>
+<h3 id="1-ressendstatus200-sends-the-body-ok-not-an-empty-body"><a class="anchor" href="#1-ressendstatus200-sends-the-body-ok-not-an-empty-body">1. <code>res.sendStatus(200)</code> sends the body <code>&quot;OK&quot;</code>, not an empty body</a></h3>
+<p><code>CONTRACT.md</code> §0 said &quot;200 with no body&quot;. That is wrong: express&#39;s <code>sendStatus</code> sets the
+body to the status <em>phrase</em>, so a successful mutation arrives as <code>200</code> with a
+<code>text/plain</code> body of <code>OK</code>, and a missing window as <code>404</code> with <code>Not Found</code>.</p>
+<p>My client logged a JSON parse error for every mutation until I noticed. The naive fix —
+&quot;treat any non-JSON body as no data&quot; — is too broad; it would also swallow a genuine
+HTML error page, which is the one thing worth reporting. The client now compares the body
+against the exact reason phrase for the status code, so status-phrase bodies are silent
+and anything else is logged. Contract corrected.</p>
+<h3 id="2-windowopen-without-zoomfactor-renders-the-page-at-an-absurd-zoom"><a class="anchor" href="#2-windowopen-without-zoomfactor-renders-the-page-at-an-absurd-zoom">2. <code>window/open</code> without <code>zoomFactor</code> renders the page at an absurd zoom</a></h3>
+<p>The runtime does, on <code>dom-ready</code>, with no guard:</p>
+<figure class="code">
+<span class="code-lang">ts</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-ts"><span class="hljs-variable language_">window</span>.<span class="hljs-property">webContents</span>.<span class="hljs-title function_">setZoomFactor</span>(<span class="hljs-built_in">parseFloat</span>(zoomFactor));</code></pre>
+</figure>
+<p>Omit <code>zoomFactor</code> and that is <code>parseFloat(undefined)</code> → <code>NaN</code>. The first bundle run
+produced a window showing about four enormous letters. Upstream never hits it because
+<code>Native\Desktop\Windows\Window</code> declares <code>protected float $zoomFactor = 1.0</code> and always
+serialises it — so the bug is invisible from the Laravel side and lands on the first
+independent client. The bundle now always sends <code>1.0</code> unless told otherwise; upstream
+should guard the <code>parseFloat</code>.</p>
+<h3 id="3-decorating-event_dispatcher-needs-the-component-interface-not-the-contract"><a class="anchor" href="#3-decorating-event_dispatcher-needs-the-component-interface-not-the-contract">3. Decorating <code>event_dispatcher</code> needs the component interface, not the contract</a></h3>
+<p><code>ANALYSIS.md</code> §4 called this &quot;a decorator, ~40 LOC&quot;. Not quite: the compiled container
+registers every listener and subscriber by calling <code>addListener()</code> / <code>addSubscriber()</code> on
+the <code>event_dispatcher</code> service. A decorator implementing only
+<code>Symfony\Contracts\EventDispatcher\EventDispatcherInterface</code> (which has just <code>dispatch()</code>)
+breaks container compilation with <em>&quot;Attempted to call an undefined method named
+addListener&quot;</em>. It has to implement
+<code>Symfony\Component\EventDispatcher\EventDispatcherInterface</code> and delegate all seven
+methods. Still small, but the analysis undersold it.</p>
+<h3 id="4-symfony-does-not-alias-interfaces-to-implementations"><a class="anchor" href="#4-symfony-does-not-alias-interfaces-to-implementations">4. Symfony does not alias interfaces to implementations</a></h3>
+<p>Implementing <code>AppBootstrapper</code> did nothing at first: <code>service(AppBootstrapper::class)</code>
+had no definition, <code>nullOnInvalid()</code> gave null, and the app booted to no windows. That is
+a Laravel habit showing through — Laravel&#39;s container resolves an interface to its single
+binding; Symfony requires an explicit alias.</p>
+<p>Fixed properly rather than documented away: the bundle calls
+<code>registerForAutoconfiguration()</code> on both contracts and an <code>AliasContractsPass</code> aliases
+each interface to the single tagged service, erroring clearly if there are several.</p>
+<p>Worth recording <em>how</em> it was found: the <code>BootedController</code> logs a warning naming the
+missing contract when no bootstrapper is registered, and that warning is what diagnosed
+it. Writing the diagnostic before needing it paid for itself within the hour — which is
+the same lesson as finding 3 in <code>SPIKE-RESULTS.md</code>, from the other direction.</p>
+<h3 id="5-retarget-the-scheduler-tick-do-not-stub-schedulerun"><a class="anchor" href="#5-retarget-the-scheduler-tick-do-not-stub-schedulerun">5. Retarget the scheduler tick; do not stub <code>schedule:run</code></a></h3>
+<p>The runtime spawns <code>schedule:run</code> every 60s with no existence check. Shipping a no-op
+<code>schedule:run</code> would collide with <code>symfony/scheduler</code>, which defines its own. Instead
+<code>RuntimePatcher</code> retargets the runtime at <code>native:schedule-tick</code>, a command the bundle
+owns. That silences the per-minute console error <em>and</em> leaves an app&#39;s real scheduler
+untouched.</p>
+<hr>
+<h2 id="corrections-applied-to-the-earlier-documents"><a class="anchor" href="#corrections-applied-to-the-earlier-documents">Corrections applied to the earlier documents</a></h2>
+<ul>
+<li><code>CONTRACT.md</code> §0 — response conventions: express sends the status phrase as the body.</li>
+<li><code>CONTRACT.md</code> §1 — <code>window/open</code>: <code>zoomFactor</code> is effectively required.</li>
+<li><code>ANALYSIS.md</code> §4 — the dispatcher decorator must implement the component interface.</li>
+<li><code>ANALYSIS.md</code> §8 — two more upstream bugs (unguarded <code>parseFloat</code>, and the
+already-noted unguarded <code>storage/</code> copy now has a companion).</li>
+</ul>
+<hr>
+<h2 id="phase-2--the-remaining-76-endpoints"><a class="anchor" href="#phase-2--the-remaining-76-endpoints">Phase 2 — the remaining 76 endpoints</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Area</th><th>Endpoints</th><th>Notes</th></tr></thead><tbody>
+<tr><td>Dialogs and alerts</td><td>4</td><td><code>PendingOpenDialog</code> / <code>PendingSaveDialog</code>, plus <code>alert()</code> and a <code>confirm()</code> that binds <code>cancelId</code> so Escape cannot mean &quot;yes&quot;</td></tr>
+<tr><td>Menus</td><td>3</td><td>An immutable <code>Menu</code> builder over 8 <code>MenuItem</code> types, matching <code>compileMenu</code>&#39;s shape exactly</td></tr>
+<tr><td>Dock</td><td>8</td><td>Every method guards on macOS — <code>app.dock</code> is <em>undefined</em> elsewhere and the request throws rather than no-oping</td></tr>
+<tr><td>Menu bar / tray</td><td>9</td><td><code>PendingMenuBar</code>, both modes (popover window vs context-menu-only)</td></tr>
+<tr><td>Notifications</td><td>1</td><td><code>reference</code> correlation, Electron&#39;s <code>{type,text}</code> action shape</td></tr>
+<tr><td>Child processes</td><td>8</td><td><code>ChildProcessManager</code> + <code>MessengerWorker</code></td></tr>
+<tr><td>Clipboard</td><td>7</td><td>Buffer selected by query string, as the runtime requires</td></tr>
+<tr><td>System</td><td>10</td><td>Keychain encryption, printing, theme</td></tr>
+<tr><td>Screen</td><td>4</td><td>Including the two endpoints that return <em>unwrapped</em> objects</td></tr>
+<tr><td>Settings, shell, power monitor, shortcuts, progress bar, process, broadcast, debug</td><td>22</td><td></td></tr>
+</tbody></table></div>
+<p>Plus all 44 event classes, typed — payload shapes taken from the runtime, positional or
+named per event.</p>
+<p><strong>Messenger workers are the piece that makes real apps viable.</strong> <code>MessengerWorker</code> runs
+<code>messenger:consume</code> as a runtime-supervised child process, the Symfony counterpart to
+Laravel&#39;s <code>QueueWorker</code>. Two details that are not obvious: <code>handlesOwnShutdown: true</code> so
+the runtime sends a plain SIGTERM instead of tree-killing the worker mid-message, and an
+ini <code>memory_limit</code> of twice <code>--memory-limit</code>, because otherwise PHP fatals before
+Messenger can notice its own limit and exit cleanly.</p>
+<h3 id="verified-against-the-live-runtime"><a class="anchor" href="#verified-against-the-live-runtime">Verified against the live runtime</a></h3>
+<p>A <code>/diagnostics</code> route exercises every non-blocking API and the headless run asserts on
+the result. Dialogs are excluded on purpose — all four block the runtime&#39;s event loop
+until a human answers, so driving them would hang the run.</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>clipboard      wrote symfony-39c98aed, read back symfony-39c98aed
+settings       set -&gt; &quot;yes&quot;, forget -&gt; &quot;gone&quot;
+notification   reference 1786719963732.9h984lv
+child_process  alias diag, pid_on_start null   (as documented)
+screen         1 display, cursor {x:700, y:450}
+system         theme &quot;system&quot;, can_encrypt false   (no keyring in the container)
+power          idle_state &quot;active&quot;, on_battery false
+shortcut       registered true
+runtime        pid 61, linux, x64, uptime 7.29s</code></pre>
+</figure>
+<p>Events that arrived, all through typed listeners, zero errors in the log:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>native: application booted
+native: window main shown / focused
+native: process diag spawned pid 179        (positional [alias, pid])
+native: process diag said hello from a child (named {alias, data})
+native: process diag exited 0                (named {alias, code})
+native: setting diagnostics changed          (x2 — set and forget)</code></pre>
+</figure>
+<p>And the screenshot shows a custom application menu — <strong>App | Demo | Edit</strong> — replacing
+Electron&#39;s default, so the <code>Menu</code> builder&#39;s template is one <code>compileMenu</code> accepts.</p>
+<h3 id="two-more-findings"><a class="anchor" href="#two-more-findings">Two more findings</a></h3>
+<p><strong>6. Dots in a setting key are object paths, not part of the key.</strong> electron-store uses
+dot-prop, so <code>set(&#39;diagnostics.ran&#39;, …)</code> stores <code>{&quot;diagnostics&quot;:{&quot;ran&quot;:…}}</code>. <code>get()</code> reads
+it back correctly, but the <code>SettingChanged</code> event reports the <strong>root</strong> key
+(<code>diagnostics</code>), because the runtime&#39;s store watcher diffs top-level keys only. Observed
+in the run above. Documented in <code>SettingsManager</code> and <code>CONTRACT.md</code> §8.</p>
+<p><strong>7. A caller-named event cannot reach both a targeted and a class-typed listener from
+one dispatch.</strong> Symfony notifies only the listeners registered for the name passed to
+<code>dispatch()</code>. Since caller-named events have no class to key on, <code>EventsController</code>
+dispatches them twice — under <code>native.{name}</code> for a listener that wants one specific
+action, and under <code>NativeEvent::class</code> for a catch-all, which is what you want while
+porting. Register for one or the other; both would run a listener twice.</p>
+<h3 id="contract-drift-is-now-a-test-failure"><a class="anchor" href="#contract-drift-is-now-a-test-failure">Contract drift is now a test failure</a></h3>
+<p><code>ContractCoverageTest</code> parses the runtime&#39;s own <code>api/*.ts</code> routers and asserts that every
+one of the 116 endpoints is called somewhere in the bundle, and that every
+<code>Native\Desktop\Events\*</code> name the runtime pushes is mapped. A new upstream endpoint
+fails the suite instead of being noticed a release later. Where the runtime sources are
+not checked out, those cases skip and the pinned counts still catch a deletion on our
+side.</p>
+<hr>
+<h2 id="what-is-left"><a class="anchor" href="#what-is-left">What is left</a></h2>
+<ul>
+<li><strong>M3</strong> — a demo app worth showing, and the build pipeline (<code>native:build</code>), which is
+where the Bifrost question in <code>ANALYSIS.md</code> §9 has to be answered.</li>
+<li><strong>M4</strong> — the upstream manifest PR: eight concrete parameters, plus seven independent bug
+fixes now (§8 of <code>ANALYSIS.md</code>), each worth submitting on its own merits.</li>
+</ul>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="spike-results.html"><span>← Previous</span><strong>M1 — the spike</strong></a>
+            <a class="pager-link next" href="m3-results.html"><span>Next →</span><strong>M3 — the build</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M2-RESULTS.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#phase-1--what-shipped">Phase 1 — what shipped</a></li><li class="lvl2"><a href="#proven-end-to-end">Proven end-to-end</a></li><li class="lvl2"><a href="#phase-1-findings--again-from-running-it">Phase 1 findings — again, from running it</a></li><li class="lvl3"><a href="#1-ressendstatus200-sends-the-body-ok-not-an-empty-body">1. res.sendStatus(200) sends the body &quot;OK&quot;, not an empty body</a></li><li class="lvl3"><a href="#2-windowopen-without-zoomfactor-renders-the-page-at-an-absurd-zoom">2. window/open without zoomFactor renders the page at an absurd zoom</a></li><li class="lvl3"><a href="#3-decorating-event_dispatcher-needs-the-component-interface-not-the-contract">3. Decorating event_dispatcher needs the component interface, not the contract</a></li><li class="lvl3"><a href="#4-symfony-does-not-alias-interfaces-to-implementations">4. Symfony does not alias interfaces to implementations</a></li><li class="lvl3"><a href="#5-retarget-the-scheduler-tick-do-not-stub-schedulerun">5. Retarget the scheduler tick; do not stub schedule:run</a></li><li class="lvl2"><a href="#corrections-applied-to-the-earlier-documents">Corrections applied to the earlier documents</a></li><li class="lvl2"><a href="#phase-2--the-remaining-76-endpoints">Phase 2 — the remaining 76 endpoints</a></li><li class="lvl3"><a href="#verified-against-the-live-runtime">Verified against the live runtime</a></li><li class="lvl3"><a href="#two-more-findings">Two more findings</a></li><li class="lvl3"><a href="#contract-drift-is-now-a-test-failure">Contract drift is now a test failure</a></li><li class="lvl2"><a href="#what-is-left">What is left</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

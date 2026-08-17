@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture · NativePHP for Symfony</title>
+<meta name="description" content="Desktop vs mobile, and the shared traps — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item active" href="architecture.html" aria-current="page"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="architecture--how-the-two-halves-fit-together"><a class="anchor" href="#architecture--how-the-two-halves-fit-together">Architecture — how the two halves fit together</a></h1>
+<p>Desktop and mobile are separate products upstream that happen to share a brand. This
+project ports both, and the shapes are genuinely different — worth seeing side by side
+before reading either bundle.</p>
+<hr>
+<h2 id="the-one-line-difference"><a class="anchor" href="#the-one-line-difference">The one-line difference</a></h2>
+<p><strong>Desktop is two processes talking over a socket. Mobile is one process with PHP compiled
+into it.</strong></p>
+<p>Everything else follows from that.</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>DESKTOP                                    MOBILE
+┌──────────────────────────┐               ┌──────────────────────────────┐
+│ Electron (Node)          │               │ App process (Kotlin / Swift) │
+│  express :4000-5000      │               │                              │
+│  ├── 116 JSON endpoints  │◀──HTTP────┐   │  ┌────────────────────────┐  │
+│  └── pushes 44 events ───┼──HTTP───┐ │   │  │ PHP, compiled in       │  │
+│                          │         │ │   │  │                        │  │
+│  spawns: php -S          │         │ │   │  │  nativephp_call()   ───┼──┼─▶ 54 methods
+└──────────────────────────┘         │ │   │  │  nativephp_element_*───┼──┼─▶ element tree
+                                     ▼ │   │  │                        │  │
+┌──────────────────────────┐         │ │   │  │  JNI / direct dispatch │  │
+│ PHP: Symfony             │─────────┘ │   │  └────────────────────────┘  │
+│  bundle/                 │───────────┘   │     mobile-bundle/           │
+└──────────────────────────┘               └──────────────────────────────┘
+   shared secret in a header                  same address space, no auth</code></pre>
+</figure>
+<div class="table-scroll"><table><thead><tr><th></th><th>desktop</th><th>mobile</th></tr></thead><tbody>
+<tr><td>Transport</td><td>localhost HTTP + JSON</td><td>PHP extension functions</td></tr>
+<tr><td>Auth</td><td><code>X-NativePHP-Secret</code> on every call</td><td>none needed — same process</td></tr>
+<tr><td>Surface</td><td>116 endpoints, 44 pushed events</td><td>54 bridge methods</td></tr>
+<tr><td>PHP lifecycle</td><td><code>php -S</code>, one process per request</td><td>compiled in; one-shot <strong>or</strong> persistent</td></tr>
+<tr><td>Needs a SAPI shim</td><td>no (<code>php -S</code> + a router script)</td><td><strong>yes</strong> — the host reads stdout as HTTP</td></tr>
+<tr><td>UI</td><td>WebView, always</td><td>WebView <strong>or</strong> native element tree</td></tr>
+<tr><td>Framework leak in the native layer</td><td>8 string literals, 1 file</td><td>3 bootstrap paths, 2 files</td></tr>
+<tr><td>Verified by</td><td>a <strong>running packaged app</strong></td><td>tests only — no Xcode, no Android SDK here</td></tr>
+</tbody></table></div>
+<p>That last row is the one to keep in mind. The two halves are not held to the same standard
+of evidence, and this project says so wherever mobile is described rather than letting the
+reader assume parity.</p>
+<hr>
+<h2 id="what-the-two-bundles-share-and-what-they-dont"><a class="anchor" href="#what-the-two-bundles-share-and-what-they-dont">What the two bundles share, and what they don&#39;t</a></h2>
+<p>Almost nothing, and that is the right answer rather than a missed opportunity.</p>
+<p><strong>Not shared, because the mechanisms genuinely differ:</strong> the transport (HTTP client vs
+extension function), the security model (a shared secret vs same-address-space), the event
+model (44 pushed classes vs 54 synchronous or event-returning calls), the build pipeline
+(electron-builder vs Gradle and Xcode).</p>
+<p><strong>Genuinely common,</strong> and the natural content of a future <code>nativephp/core</code>:</p>
+<ul>
+<li><code>AppBootstrapper</code> — &quot;the runtime is up, decide what appears&quot;. Identical on both.</li>
+<li>The dispatch discipline: a call that <em>presents</em> UI is separated from one that <em>returns</em>
+a result, so a <code>true</code> can never be mistaken for an outcome.</li>
+<li>The diagnostic discipline: never let &quot;the runtime did not answer&quot; look like &quot;the runtime
+said nothing&quot;. Both bundles log rather than swallow, and both were bitten by upstream
+doing the opposite.</li>
+<li>The patcher pattern: upstream copies its native project into the app&#39;s own directory, so
+each app patches a local copy and needs no upstream cooperation. <code>RuntimePatcher</code> and
+<code>MobileRuntimePatcher</code> are the same idea twice.</li>
+</ul>
+<p>A shared package is deferred deliberately. Two implementations that agree is evidence the
+abstraction is real; one implementation plus a guess is not.</p>
+<hr>
+<h2 id="the-three-verification-techniques"><a class="anchor" href="#the-three-verification-techniques">The three verification techniques</a></h2>
+<p>The interesting part of this project is not the code, it is how each claim is checked. All
+three are reusable.</p>
+<h3 id="1-run-it-do-not-reason-about-it-desktop"><a class="anchor" href="#1-run-it-do-not-reason-about-it-desktop">1. Run it, do not reason about it (desktop)</a></h3>
+<p>A container with PHP, Node, Electron and Xvfb boots the real runtime headlessly and
+screenshots it. Every desktop claim traces to a screenshot or a captured HTTP exchange.</p>
+<p>This is what caught <code>APP_ENV=local</code> (a hard boot failure on Symfony 8, invisible from
+reading), <code>zoomFactor</code> → <code>NaN</code>, express&#39;s <code>sendStatus</code> sending <code>&quot;OK&quot;</code> as a body, and
+<code>APP_SECRET</code> being stripped by a pattern list inherited from Laravel.</p>
+<h3 id="2-byte-compare-against-upstreams-own-implementation-mobile-native-ui"><a class="anchor" href="#2-byte-compare-against-upstreams-own-implementation-mobile-native-ui">2. Byte-compare against upstream&#39;s own implementation (mobile native UI)</a></h3>
+<p>Upstream&#39;s <code>Edge</code> classes have no framework dependencies — their only mentions of Blade are
+in comments — so a stub PSR-4 autoloader loads them standalone and their output is compared
+directly against ours. <code>TailwindParser</code> needs one extra stub.</p>
+<p>This caught FNV-1a-vs-md5 for callback ids (which would have silently resolved the wrong
+handler), two different bit masks for two id spaces, and two element defaults whose absence
+would have made a <code>scroll_view</code> quietly not scroll.</p>
+<p><strong>Reach for this before reimplementing anything from upstream.</strong> It is cheap and it turns
+guesses into diffs.</p>
+<h3 id="3-parse-upstreams-source-as-a-test-both"><a class="anchor" href="#3-parse-upstreams-source-as-a-test-both">3. Parse upstream&#39;s source as a test (both)</a></h3>
+<p><code>ContractCoverageTest</code> reads the runtime&#39;s express routers and fails if an endpoint is
+uncovered. <code>BridgeCoverageTest</code> and <code>UiElementCoverageTest</code> do the same for the 54 bridge
+methods and the 36 element types — the last asserting in <strong>both</strong> directions, since a type
+the renderers do not know produces a missing region on the device with no error anywhere.</p>
+<p>Upstream drift becomes a failing test rather than a discovery.</p>
+<hr>
+<h2 id="where-the-bodies-are-buried"><a class="anchor" href="#where-the-bodies-are-buried">Where the bodies are buried</a></h2>
+<p>Things that cost real time, collected so they cost no one else any:</p>
+<ul>
+<li><strong>Laravel&#39;s defaults do not translate, they collide.</strong> <code>*_SECRET</code> in a cleanup list is
+harmless for <code>APP_KEY</code> and fatal for <code>APP_SECRET</code>.</li>
+<li><strong><code>res.sendStatus(200)</code> sends the body <code>&quot;OK&quot;</code>.</strong> Not an empty body. Match the reason
+phrase exactly, or a genuine HTML error page gets swallowed too.</li>
+<li><strong>Symfony does not alias interfaces to implementations.</strong> A Laravel habit; needs
+autoconfiguration plus a compiler pass.</li>
+<li><strong>Decorating <code>event_dispatcher</code> needs the component interface</strong>, not the contract — the
+container registers listeners <em>through</em> that service.</li>
+<li><strong>A programmatic resize emits no <code>WindowResized</code>.</strong> The runtime listens for Electron&#39;s
+<code>resized</code>, which fires on user drags only.</li>
+<li><strong>Dots are object paths</strong> in the desktop settings store and mobile&#39;s secure storage
+alike, so the change event reports the root key, not the one you wrote.</li>
+<li><strong>Packaged apps have no opcache.</strong> The static binary cannot load it, so every request
+pays full compile cost — Laravel&#39;s too.</li>
+</ul>
+<hr>
+<h2 id="reading-order"><a class="anchor" href="#reading-order">Reading order</a></h2>
+<p><code>PLAN.md</code> → <code>ANALYSIS.md</code> → <code>CONTRACT.md</code> for desktop; <code>MOBILE-ANALYSIS.md</code> →
+<code>NATIVE-UI-CONTRACT.md</code> for mobile. <code>SPIKE-RESULTS.md</code>, <code>M2-RESULTS.md</code> and
+<code>M3-RESULTS.md</code> are the desktop milestones, each ending in a list of what running it
+taught. <code>upstream-patches/README.md</code> is what would go back.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="troubleshooting.html"><span>← Previous</span><strong>Troubleshooting</strong></a>
+            <a class="pager-link next" href="analysis.html"><span>Next →</span><strong>Deep dive</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#the-one-line-difference">The one-line difference</a></li><li class="lvl2"><a href="#what-the-two-bundles-share-and-what-they-dont">What the two bundles share, and what they don't</a></li><li class="lvl2"><a href="#the-three-verification-techniques">The three verification techniques</a></li><li class="lvl3"><a href="#1-run-it-do-not-reason-about-it-desktop">1. Run it, do not reason about it (desktop)</a></li><li class="lvl3"><a href="#2-byte-compare-against-upstreams-own-implementation-mobile-native-ui">2. Byte-compare against upstream's own implementation (mobile native UI)</a></li><li class="lvl3"><a href="#3-parse-upstreams-source-as-a-test-both">3. Parse upstream's source as a test (both)</a></li><li class="lvl2"><a href="#where-the-bodies-are-buried">Where the bodies are buried</a></li><li class="lvl2"><a href="#reading-order">Reading order</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

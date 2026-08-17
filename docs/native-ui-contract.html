@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Native-UI format · NativePHP for Symfony</title>
+<meta name="description" content="What SwiftUI and Compose consume — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%235b53f0%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item active" href="native-ui-contract.html" aria-current="page"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="nativephp-mobile--the-native-ui-wire-format"><a class="anchor" href="#nativephp-mobile--the-native-ui-wire-format">NativePHP Mobile — the native-UI wire format</a></h1>
+<p>The protocol between PHP and the SwiftUI / Jetpack Compose renderers, extracted from
+<code>NativePHP/mobile-air</code>. This is what a Twig front end would have to produce — the
+foundation for M6, the <code>super-native</code> equivalent.</p>
+<p><strong>Verified, not just read.</strong> <code>mobile-bundle/</code> now contains a second implementation of
+this format, and <code>UiWireFormatTest</code> byte-compares its output against upstream&#39;s own
+collector — trees, content hashes, callback ids and navigation keys. Upstream&#39;s <code>Edge</code>
+classes have no framework dependencies (their only mentions of Blade are in comments),
+so they load through a stub autoloader and run standalone. Three of the details below
+were wrong in the first draft of this document and the comparison test is what caught
+them; they are marked ⚠.</p>
+<p>The headline: <strong>the format is framework-neutral.</strong> It is a JSON tree with content
+hashes. Blade appears nowhere in it. The 17,316 LOC of <code>src/Edge/</code> is the <em>authoring</em>
+layer — a Blade tag precompiler, a Tailwind-subset parser, element classes, a component
+lifecycle — sitting on top of a protocol that has no opinion about how the tree was
+built.</p>
+<p>That is the difference between &quot;port a rendering engine&quot; and &quot;write a second front end
+for a documented protocol&quot;, and it is why M6 is a real project rather than an
+impossible one.</p>
+<hr>
+<h2 id="1-transport"><a class="anchor" href="#1-transport">1. Transport</a></h2>
+<p>Not <code>nativephp_call()</code>. The element tree has its own extension functions:</p>
+<div class="table-scroll"><table><thead><tr><th>Function</th><th>When</th></tr></thead><tbody>
+<tr><td><code>nativephp_element_init()</code></td><td>once, when the native runloop starts</td></tr>
+<tr><td><code>nativephp_element_reset()</code></td><td>before building each frame</td></tr>
+<tr><td><code>nativephp_element_publish(array $tree)</code></td><td>once per frame, with the root node</td></tr>
+<tr><td><code>nativephp_element_shutdown()</code></td><td>when the runloop stops</td></tr>
+</tbody></table></div>
+<p>From <code>src/Edge/NativeRouter.php</code>. So a frame is: reset → build → publish. Interactions
+arrive from the native side carrying a callback id, which PHP resolves, runs, and then
+publishes a new frame.</p>
+<p><code>nativephp_call(&#39;NativeUI.Transition.Set&#39;, …)</code> is used alongside this to set the screen
+transition — the one bridge method that belongs to this path rather than the WebView one.</p>
+<hr>
+<h2 id="2-the-node"><a class="anchor" href="#2-the-node">2. The node</a></h2>
+<p>From <code>Element::toArray()</code>. Every key except <code>id</code>, <code>type</code> and <code>_hash</code> is omitted when
+empty, which keeps frames small:</p>
+<figure class="code">
+<span class="code-lang">jsonc</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-jsonc"><span class="hljs-punctuation">{</span>
+  <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span>                    <span class="hljs-comment">// stable node identity — see §3</span>
+  <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;column&quot;</span><span class="hljs-punctuation">,</span>           <span class="hljs-comment">// element type — see §6</span>
+  <span class="hljs-attr">&quot;_hash&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;9f2c…&quot;</span><span class="hljs-punctuation">,</span>           <span class="hljs-comment">// xxh3 content hash, folds children (Merkle) — see §4</span>
+  <span class="hljs-attr">&quot;flags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span>                 <span class="hljs-comment">// optional: NPHP_NODE_FLAG_REUSE — see §4</span>
+  <span class="hljs-attr">&quot;layout&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">{</span> … <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>            <span class="hljs-comment">// Yoga layout properties</span>
+  <span class="hljs-attr">&quot;style&quot;</span><span class="hljs-punctuation">:</span>  <span class="hljs-punctuation">{</span> … <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>            <span class="hljs-comment">// resolved visual style</span>
+  <span class="hljs-attr">&quot;props&quot;</span><span class="hljs-punctuation">:</span>  <span class="hljs-punctuation">{</span> … <span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>            <span class="hljs-comment">// element-specific properties</span>
+  <span class="hljs-attr">&quot;on_press&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">42</span><span class="hljs-punctuation">,</span>             <span class="hljs-comment">// callback id — see §5</span>
+  <span class="hljs-attr">&quot;on_long_press&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">43</span><span class="hljs-punctuation">,</span>
+  <span class="hljs-attr">&quot;ref&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;my-input&quot;</span><span class="hljs-punctuation">,</span>          <span class="hljs-comment">// element ref, for imperative access</span>
+  <span class="hljs-attr">&quot;children&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span> <span class="hljs-punctuation">{</span> … <span class="hljs-punctuation">}</span> <span class="hljs-punctuation">]</span>       <span class="hljs-comment">// recursive</span>
+<span class="hljs-punctuation">}</span></code></pre>
+</figure>
+<p><code>layout</code>, <code>style</code> and <code>props</code> are deliberately separate. A renderer applies layout to
+its Yoga node, style to its view, and props to the widget — three different consumers,
+so mixing them would force every renderer to re-partition them.</p>
+<hr>
+<h2 id="3-node-identity"><a class="anchor" href="#3-node-identity">3. Node identity</a></h2>
+<p>Four rules, in precedence order, and getting this wrong is what makes a list lose its
+scroll position or an input lose focus mid-typing:</p>
+<ol>
+<li>An explicit <code>nodeId</code> set by the caller wins.</li>
+<li>A <code>key</code> hashes <code>parentKeyPath + &#39;/&#39; + key</code>.</li>
+<li>Inside a keyed subtree, an unkeyed node takes its <strong>positional index within the
+keyed parent</strong> — so unkeyed siblings stay stable as long as their parent is keyed.</li>
+<li>Otherwise a sequential counter, which is the pre-keying legacy behaviour.</li>
+</ol>
+<p>The consequence worth stating: identity is stable across frames only where keys are
+used. An unkeyed list that reorders will reuse the wrong nodes.</p>
+<hr>
+<h2 id="4-diffing--merkle-hashes-and-reuse-markers"><a class="anchor" href="#4-diffing--merkle-hashes-and-reuse-markers">4. Diffing — Merkle hashes and reuse markers</a></h2>
+<p><code>_hash</code> is <code>xxh3</code> over a <strong><code>serialize()</code></strong> of <code>[type, layout, style, props, on_press, on_long_press, ref, childHashes]</code> — in that order. Both the order and the PHP types are
+part of the format, since <code>serialize()</code> encodes them. Because child hashes are folded in, an unchanged subtree has an unchanged
+root hash.</p>
+<p>When the caller maintains a <code>lastNodeHashes</code> map across frames and a node&#39;s hash is
+unchanged, the node is emitted as a marker instead of in full:</p>
+<figure class="code">
+<span class="code-lang">json</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-json"><span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;column&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;flags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;_hash&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;9f2c…&quot;</span> <span class="hljs-punctuation">}</span></code></pre>
+</figure>
+<p><code>flags: 1</code> is <code>NPHP_NODE_FLAG_REUSE</code>: the renderer splices its previous subtree for that
+id. No layout, style, props or children are sent.</p>
+<p>Two notes from the upstream source, both worth carrying into any reimplementation:</p>
+<ul>
+<li>Subtree memoisation is <strong>opt-in</strong> — it only fires when the caller maintains the hash
+map between frames.</li>
+<li>The hash must cover everything a renderer reacts to. Upstream&#39;s own comment says that
+if a mutation ever fails to repaint, the missing field is the one absent from this
+hash. That makes the hash input list a compatibility surface, not an implementation
+detail.</li>
+</ul>
+<hr>
+<h2 id="4b-⚠-id-derivation--fnv-1a-and-two-different-masks"><a class="anchor" href="#4b-⚠-id-derivation--fnv-1a-and-two-different-masks">4b. ⚠ Id derivation — FNV-1a, and two different masks</a></h2>
+<p>The first draft of this document said &quot;a hash&quot;, and a reimplementation using md5 produced
+ids that diverged silently. Both id spaces use <strong>FNV-1a 32-bit</strong>:</p>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-variable">$hash</span> = <span class="hljs-number">0x811C9DC5</span>;                              <span class="hljs-comment">// offset basis</span>
+<span class="hljs-keyword">foreach</span> (bytes) { <span class="hljs-variable">$hash</span> ^= <span class="hljs-variable">$byte</span>; <span class="hljs-variable">$hash</span> = (<span class="hljs-variable">$hash</span> * <span class="hljs-number">0x01000193</span>) &amp; <span class="hljs-number">0xFFFFFFFF</span>; }
+<span class="hljs-keyword">return</span> <span class="hljs-number">0</span> === <span class="hljs-variable">$hash</span> ? <span class="hljs-number">1</span> : <span class="hljs-variable">$hash</span>;                  <span class="hljs-comment">// 0 means &quot;unset&quot; natively</span></code></pre>
+</figure>
+<p>And they mask differently, which matters:</p>
+<div class="table-scroll"><table><thead><tr><th></th><th>mask</th><th>why</th></tr></thead><tbody>
+<tr><td><strong>Node ids</strong> (<code>deriveNodeIdFromKeyPath</code>)</td><td>full 32 bits</td><td>travel as unsigned</td></tr>
+<tr><td><strong>Callback ids</strong> (<code>CallbackRegistry::deriveId</code>)</td><td><code>&amp; 0x7FFFFFFF</code> (31 bits)</td><td>Kotlin reads them as a signed <code>Int</code>; a full-u32 id wraps negative on the round trip and resolution misses <strong>silently</strong></td></tr>
+</tbody></table></div>
+<p>Collisions in both are resolved by rehashing <code>$input . &quot;\x00&quot; . $salt</code>, salt from 1. A
+registry scope, when set, is joined to the expression with <code>\x1F</code> — a separator that
+cannot occur in an expression, so two scopes cannot collide by concatenation.</p>
+<hr>
+<h2 id="4c-⚠-layout-defaults-and-two-naming-conventions"><a class="anchor" href="#4c-⚠-layout-defaults-and-two-naming-conventions">4c. ⚠ Layout defaults, and two naming conventions</a></h2>
+<p>The base element exposes <code>layoutDefaults()</code> and <code>styleDefaults()</code>, merged <strong>under</strong>
+whatever the author set:</p>
+<figure class="code">
+<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLayout</span>(<span class="hljs-params"></span>): <span class="hljs-title">array</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">array_merge</span>(<span class="hljs-variable">$this</span>-&gt;<span class="hljs-title function_ invoke__">layoutDefaults</span>(), <span class="hljs-variable">$this</span>-&gt;layout); }</code></pre>
+</figure>
+<p>A default has to appear in the emitted layout for the renderer to apply it, but must lose
+to an explicit value. <code>Spacer</code> is the canonical case — <code>[&#39;flex_grow&#39; =&gt; 1]</code>, so it works
+dropped in bare. Missing this made an otherwise byte-identical tree diverge at the root,
+because the default feeds the content hash.</p>
+<p><strong>A <code>dark:</code> prefix on a theme token inverts it.</strong> A theme token resolves its own dark
+companion, and the <code>dark:</code> wrapper nests that companion a level deeper than the merge lifts
+— so the light hex ends up in the dark slot and the dark one is unreachable. See patch
+<code>0011</code>. Worth knowing even once patched, because any second implementation of the variant
+logic will make the same mistake independently.</p>
+<p>And note the two conventions living side by side: <strong>layout keys are snake_case</strong>
+(<code>flex_grow</code>) while <strong>element props are camelCase</strong> (<code>fontSize</code>, <code>maxLines</code>). That is
+upstream&#39;s inconsistency, not a transcription error, and a reimplementation has to
+reproduce it.</p>
+<hr>
+<h2 id="4d-the-styling-pipeline"><a class="anchor" href="#4d-the-styling-pipeline">4d. The styling pipeline</a></h2>
+<p>A class string does not reach the wire directly. It goes through a canonical
+intermediate vocabulary, which is what resolves the naming inconsistency in §4c:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>&quot;flex-1 px-3 bg-slate-900 text-2xl&quot;
+        │
+        ▼  TailwindParser::parse()  →  a flat camelCase map
+{ flexGrow: 1, flexShrink: 1, flexBasis: 0, paddingLeft: 12, paddingRight: 12,
+  bg: '#0F172A', fontSize: 24 }
+        │
+        ├─▶ Element::applyAttributes()                → element-specific props (fontSize)
+        ├─▶ NativeElementCollector::applyLayout()     → layout, via element setters
+        ├─▶ NativeElementCollector::applyStyle()      → style
+        ├─▶ NativeElementCollector::applyElementProps()
+        └─▶ buildDarkProps() / mergeDarkProps()       → `dark:` variants as dark_* props</code></pre>
+</figure>
+<p>So the parser emits <strong>camelCase</strong> (<code>flexGrow</code>), and <code>applyLayout</code> dispatches each key
+through an element <em>setter</em> (<code>-&gt;fillWidth()</code>, <code>-&gt;width()</code>, <code>-&gt;flexDirection()</code>) whose
+implementation writes the <strong>snake_case</strong> wire name into <code>$layout</code>. The translation lives
+in the setters, not in a lookup table — which is why grepping for a key map finds
+nothing.</p>
+<p>Measured outputs, from running upstream&#39;s parser standalone (only <code>Illuminate\Support\Facades\Log</code>
+needs stubbing):</p>
+<div class="table-scroll"><table><thead><tr><th>classes</th><th>parser output</th></tr></thead><tbody>
+<tr><td><code>flex-1</code></td><td><code>{flexGrow: 1, flexShrink: 1, flexBasis: 0}</code></td></tr>
+<tr><td><code>p-4</code></td><td><code>{padding: 16}</code></td></tr>
+<tr><td><code>px-2 py-3</code></td><td><code>{paddingLeft: 8, paddingRight: 8, paddingTop: 12, paddingBottom: 12}</code></td></tr>
+<tr><td><code>gap-2</code></td><td><code>{gap: 8}</code></td></tr>
+<tr><td><code>bg-slate-900</code></td><td><code>{bg: &#39;#0F172A&#39;}</code></td></tr>
+<tr><td><code>text-white</code></td><td><code>{color: &#39;#FFFFFF&#39;}</code></td></tr>
+<tr><td><code>text-2xl font-bold</code></td><td><code>{fontSize: 24, fontWeight: 6}</code></td></tr>
+<tr><td><code>rounded-lg</code></td><td><code>{borderRadius: 8}</code></td></tr>
+<tr><td><code>items-center justify-between</code></td><td><code>{alignItems: 1, justifyContent: 3}</code></td></tr>
+<tr><td><code>w-full h-12</code></td><td><code>{fillWidth: true, height: 48}</code></td></tr>
+<tr><td><code>opacity-50</code></td><td><code>{opacity: 0.5}</code></td></tr>
+<tr><td><code>shadow-md</code></td><td><code>{elevation: 6}</code></td></tr>
+<tr><td><code>border border-slate-700</code></td><td><code>{borderWidth: 1, borderColor: &#39;#334155&#39;}</code></td></tr>
+</tbody></table></div>
+<p>Note the scale: Tailwind&#39;s spacing unit is 4px (<code>p-4</code> → 16), enums arrive as <strong>integers</strong>
+(<code>alignItems: 1</code>), shadows become <code>elevation</code>, and <code>w-full</code> becomes a boolean <code>fillWidth</code>
+rather than a width value.</p>
+<h3 id="a-decision-not-a-task"><a class="anchor" href="#a-decision-not-a-task">A decision, not a task</a></h3>
+<p><code>TailwindParser</code> is 1,407 lines. Reproducing it is not like the tree builder, where the
+rules were short enough to reimplement and verify. Two options, and they are a judgement
+call rather than an engineering one:</p>
+<ul>
+<li><strong>Reimplement</strong>, verified the same way — run both parsers over a corpus of class strings
+and diff. Costly, but no dependency on someone else&#39;s internals.</li>
+<li><strong>Reuse it.</strong> <code>mobile-air</code> is MIT, the class needs one stub to run standalone, and the
+mapping is a specification more than an implementation. Cheaper, but it means tracking
+upstream&#39;s changes and taking a dependency on a commercial product&#39;s internals.</li>
+</ul>
+<p>Either way the corpus diff is the mechanism that keeps it honest. What should <em>not</em> happen
+is a partial hand-written subset that silently disagrees on <code>p-3.5</code> or <code>bg-slate-850</code>.</p>
+<p><code>CallbackRegistry::register(string $expression, ?string $kind): int</code> returns an integer id
+derived as in §4b. The node carries the id; the native side sends it back on interaction; PHP looks
+up the expression and runs it.</p>
+<p>Navigation is content-addressed instead: <code>registerNavigation(array $config)</code> returns
+<code>&#39;n&#39; + substr(md5(json_encode($config)), 0, 8)</code>, and a navigating press is registered as
+the expression <code>__navigate(&#39;&lt;key&gt;&#39;)</code>.</p>
+<p>The important property for a second front end: <strong>callbacks cross the boundary as ids, not
+closures.</strong> Nothing about the registry requires Blade — it requires a way to name a
+callable and resolve it again on the next request.</p>
+<hr>
+<h2 id="6-element-types"><a class="anchor" href="#6-element-types">6. Element types</a></h2>
+<p>37 element classes plus 17 native components in <code>mobile-air</code>, and 60+ more renderers in
+the separate <code>nativephp/mobile-ui</code> package. The types in <code>mobile-air</code>:</p>
+<figure class="code">
+<button class="copy" type="button">Copy</button>
+<pre><code>Layout      column  row  stack  spacer  scroll_view  lazy_grid  divider
+Content     text  image  icon  canvas  rect  circle  line
+Input       button  text_input  toggle  pressable  gesture_area
+Navigation  native_root_stack  native_root_tabs  top_bar  top_bar_action
+            top_bar_title  bottom_bar  bottom_nav  bottom_nav_item
+            side_nav  side_nav_group  side_nav_header  side_nav_item
+            tab_accessory  navigate  replace  search_item
+Feedback    activity_indicator  bottom_sheet  refreshable</code></pre>
+</figure>
+<p><strong>The renderers are reusable as-is.</strong> They are Kotlin and Swift, they consume this JSON,
+and they neither know nor care that a Blade compiler produced it. Nothing in
+<code>resources/androidstudio/…/nativerender/</code> or <code>resources/xcode/</code> needs rewriting for a
+Twig front end — which is the single most important fact in this document.</p>
+<hr>
+<h2 id="7-what-m6-would-actually-involve"><a class="anchor" href="#7-what-m6-would-actually-involve">7. What M6 would actually involve</a></h2>
+<p>Not a port of <code>src/Edge/</code>. A second producer of this format:</p>
+<ol>
+<li><strong>A tree builder</strong> — the equivalent of <code>NativeElementCollector</code>: an element stack,
+<code>open</code>/<code>close</code>, child attachment, and <code>toArray()</code> with the identity and hashing rules
+above. This is the core, and it is small; the rules are in §§3–4.</li>
+<li><strong>A Twig authoring layer.</strong> Twig has no equivalent of Blade&#39;s tag precompiler, but it
+does not need one: a Twig extension providing functions or tags (<code>{% native_column %}</code>
+… or <code>{{ native_text(…) }}</code>) can drive the builder directly. Arguably cleaner than
+upstream&#39;s approach, which compiles <code>&lt;native:*&gt;</code> tags into collector calls
+specifically to <em>bypass</em> Blade&#39;s component lifecycle for speed — a cost Twig would not
+be paying in the first place.</li>
+<li><strong>A style parser.</strong> <code>TailwindParser</code> maps a Tailwind-like class subset onto
+layout/style values. The mapping is the specification; a reimplementation needs the
+same output shape, not the same code.</li>
+<li><strong>A callback registry</strong> — §5. Straightforward.</li>
+<li><strong>Routing</strong> — the equivalent of <code>Route::native()</code> / <code>-&gt;layout()</code>, which in Symfony is
+a route attribute or a controller convention rather than a router macro.</li>
+<li><strong>A component lifecycle</strong> — state, re-render on interaction. Symfony has no native
+equivalent of a Livewire-style component, so this is the most open design question,
+and the place to look hardest for prior art before inventing anything.</li>
+</ol>
+<h3 id="progress"><a class="anchor" href="#progress">Progress</a></h3>
+<p>Items 1 and 4 are <strong>done and verified</strong>: <code>mobile-bundle/src/Ui/</code> contains the tree
+builder, the element base with the identity, hashing and defaults rules, a callback
+registry, 13 element types and an <code>ElementPublisher</code> wrapping the four extension
+functions. <code>UiWireFormatTest</code> proves the output is byte-identical to upstream&#39;s.</p>
+<p>That leaves the authoring layer (2), the style parser (3), routing (5) and the component
+lifecycle (6) — of which the lifecycle is the real design question, since Symfony has no
+Livewire-shaped equivalent to borrow from.</p>
+<p>Also still open, and more important than any of them: <strong>the licence question.</strong> M6 is a
+large investment and NativePHP Mobile is a commercial product. That should be settled
+before more is built, not after.</p>
+<h3 id="honest-assessment"><a class="anchor" href="#honest-assessment">Honest assessment</a></h3>
+<p>M6 is the largest remaining piece of work in this project, larger than desktop was. But
+the earlier framing — &quot;reimplement 17,316 LOC&quot; — was wrong twice over: the engine is
+optional (see <code>MOBILE-ANALYSIS.md</code>), and where you <em>do</em> want it, the renderers are reused
+and only the producer is new.</p>
+<hr>
+<h2 id="7b-native-routing-and-the-manifest"><a class="anchor" href="#7b-native-routing-and-the-manifest">7b. Native routing and the manifest</a></h2>
+<p>Which paths boot into the native runloop is decided on the device, from a manifest the
+CLI bakes in. Getting this wrong strands a screen: the native side boots it and PHP cannot
+serve it, or the reverse. Eight behaviours matter — established by porting
+<code>BootPlanner.matches()</code> line by line and testing the port against it, then by writing the
+build pipeline that produces the manifest.</p>
+<p><strong>1. <code>{param?}</code> makes the entire remaining tail optional, not just itself.</strong> <code>matches()</code>
+short-circuits on the <em>first</em> missing segment:</p>
+<figure class="code">
+<span class="code-lang">kotlin</span><button class="copy" type="button">Copy</button>
+<pre><code class="language-kotlin"><span class="hljs-keyword">else</span> -&gt; <span class="hljs-keyword">return</span> isOptional || (i until p.size).all { … }</code></pre>
+</figure>
+<p>So <code>/items/{a?}/edit</code> matches <code>/items</code>, and <code>/items/{a?}/{b}</code> matches <code>/items</code> — a
+<em>required</em> <code>{b}</code> is skippable if an optional segment precedes it. This contradicts
+BootPlanner&#39;s own doc comment (&quot;optional trailing matches&quot;), and it makes the <code>all()</code>
+branch <strong>dead code</strong>: a required first-missing segment fails that same test anyway. True
+on both platforms. Whether the code or the comment is wrong is upstream&#39;s call, which is
+why this is written down rather than patched.</p>
+<p><strong>2. Optional segments were never resolvable in PHP at all</strong> — see patch <code>0009</code> in
+<code>upstream-patches/</code>. <code>NativeRouter::resolve()</code> builds its regex with
+<code>preg_replace(&#39;/\{(\w+)\}/&#39;, …)</code>, and <code>\w</code> does not match <code>?</code>, so a <code>{slug?}</code>
+placeholder survived literally and the pattern could only match the string <code>&quot;{slug?}&quot;</code>.
+Verified: <code>/posts/{slug?}</code> matched neither <code>/posts/hello</code> nor <code>/posts</code>. Meanwhile
+BootPlanner matches both, so such a screen booted natively and then resolved to nothing.</p>
+<p><strong>3. The same list has two different key names.</strong> <code>native_routes</code> in the baked
+<code>bundle_meta.json</code>; <code>routes</code> in the runtime dump. Both readers depend on their own.</p>
+<p><strong>4. The runtime dump is honoured only when its <code>version</code> string-equals the baked one —
+and the platforms disagree about what counts as a string.</strong> iOS reads both with
+<code>as? String</code>, so a JSON <em>number</em> fails the cast and compares as <code>&quot;&quot;</code>. Android&#39;s
+<code>optString(&quot;version&quot;)</code> coerces the same number to a string and matches.</p>
+<p>So a numeric version does not fail symmetrically: <strong>Android honours the runtime dump while
+iOS ignores it, and the two platforms boot different route lists from the same build.</strong>
+That is considerably worse than a shared failure, and it is why <code>native_mobile.version</code>
+rejects a non-string rather than coercing one — by the time PHP has parsed <code>1.0</code> as a float
+the difference between <code>1.0</code> and <code>1</code> is already gone, so normalising would just pick one
+silently.</p>
+<p>An empty version is equally dangerous, since it equals the missing-key fallback.</p>
+<p>Related, on the write side: <code>version_code</code> is read by Kotlin (via <code>.toString()</code>) and by no
+Swift source at all, so it is Android-only.</p>
+<p><strong>5. The platforms diverge on a missing <code>bundle_meta.json</code>.</strong> Kotlin tolerates it and can
+boot <code>NATIVE_DIRECT</code> from the runtime dump alone; Swift&#39;s <code>plan()</code> guards and returns
+<code>.webLegacy</code>. <strong>So <code>native_routes</code> must always be baked</strong> — never treat the dump as the
+only source.</p>
+<p><strong>6. The dump path is fixed</strong> at <code>storage/framework/native_routes.json</code>, under
+<code>app_storage/persisted_data/</code> on Android and Application Support on iOS. Upstream relies
+on Laravel&#39;s <code>storage/framework</code> already existing; a Symfony app has no such directory, and
+a failed write leaves the device on a stale baked list with nothing logged.</p>
+<p><strong>6b. The staged <code>.env</code> must carry both version keys, or every cold boot re-extracts the
+app.</strong> iOS&#39;s <code>AppUpdateManager.getVersionFromZip()</code> prefers <code>NATIVEPHP_APP_VERSION</code> plus
+<code>NATIVEPHP_APP_VERSION_CODE</code> from the staged <code>.env</code> over the <code>.version</code> file. A missing code
+yields <code>…b0</code> where the metadata says <code>…b1</code>, the versions compare unequal, and the app
+re-extracts hundreds of megabytes on launch — the exact trap Android&#39;s own comment
+documents, but reached from the write side.</p>
+<p><strong>7. Matching is segment-wise with empty segments dropped</strong>, so <code>/items//42</code> matches
+<code>/items/{id}</code> and leading or trailing slashes are insignificant — but a trailing slash does
+miss upstream&#39;s exact-match fast path and falls through to the pattern scan.</p>
+<hr>
+<h2 id="8-caveats"><a class="anchor" href="#8-caveats">8. Caveats</a></h2>
+<p>The format is verified against upstream&#39;s own PHP implementation, which is a real check —
+but <strong>not</strong> against a running device. This environment has no Xcode or Android SDK, so
+whether the Kotlin and Swift renderers accept these trees in practice is still untested. The
+format is also internal: unlike the desktop HTTP API, which is stable enough that
+upstream&#39;s own client depends on it across versions, <code>_hash</code>, <code>flags</code> and the id rules
+are implementation details that upstream is free to change. Any Twig front end should
+expect to track them, and the byte-comparison test above is how that stays cheap.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="contract.html"><span>← Previous</span><strong>Wire protocol</strong></a>
+            <a class="pager-link next" href="recipes.html"><span>Next →</span><strong>Recipes</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/NATIVE-UI-CONTRACT.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#1-transport">1. Transport</a></li><li class="lvl2"><a href="#2-the-node">2. The node</a></li><li class="lvl2"><a href="#3-node-identity">3. Node identity</a></li><li class="lvl2"><a href="#4-diffing--merkle-hashes-and-reuse-markers">4. Diffing — Merkle hashes and reuse markers</a></li><li class="lvl2"><a href="#4b-⚠-id-derivation--fnv-1a-and-two-different-masks">4b. ⚠ Id derivation — FNV-1a, and two different masks</a></li><li class="lvl2"><a href="#4c-⚠-layout-defaults-and-two-naming-conventions">4c. ⚠ Layout defaults, and two naming conventions</a></li><li class="lvl2"><a href="#4d-the-styling-pipeline">4d. The styling pipeline</a></li><li class="lvl3"><a href="#a-decision-not-a-task">A decision, not a task</a></li><li class="lvl2"><a href="#6-element-types">6. Element types</a></li><li class="lvl2"><a href="#7-what-m6-would-actually-involve">7. What M6 would actually involve</a></li><li class="lvl3"><a href="#progress">Progress</a></li><li class="lvl3"><a href="#honest-assessment">Honest assessment</a></li><li class="lvl2"><a href="#7b-native-routing-and-the-manifest">7b. Native routing and the manifest</a></li><li class="lvl2"><a href="#8-caveats">8. Caveats</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>
