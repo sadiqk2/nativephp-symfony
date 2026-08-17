@@ -11,6 +11,30 @@ final class MobilePatchFailed extends \RuntimeException
         return new self(sprintf('Expected native source file "%s" is missing.', $path));
     }
 
+    /**
+     * The retarget was computed but could not be stored. Same reasoning as everything else
+     * in this class: an unwritten patch is indistinguishable, on a device, from one that
+     * was never attempted.
+     */
+    public static function writeFailed(string $path): self
+    {
+        return new self(sprintf(
+            'Retargeted %s in memory but could not write it back. Check the file\'s permissions '.
+            'and ownership — an unwritten patch leaves an app that launches to a blank screen.',
+            $path,
+        ));
+    }
+
+    public static function unreadableBundleMeta(string $path): self
+    {
+        return new self(sprintf(
+            'The bundle manifest at %s is not a JSON object, so entry_mode cannot be set without '.
+            'discarding whatever it does contain. Rebuild it with native:mobile:build rather than '.
+            'letting this overwrite it.',
+            $path,
+        ));
+    }
+
     public static function noIosSources(string $projectPath): self
     {
         return new self(sprintf(

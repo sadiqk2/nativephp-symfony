@@ -171,6 +171,24 @@ final class RuntimePatcherTest extends TestCase
         self::assertStringContainsString('assuming it is fixed upstream', $applied);
     }
 
+    public function testAPatchThatCannotBeWrittenIsAnError(): void
+    {
+        // The one outcome this class exists to prevent is a patch that is reported as
+        // applied but is not on disk: the app then launches with Laravel's hardcoded
+        // paths and shows a window that never does anything. An unwritable file used to
+        // produce exactly that, because the write's return value was discarded.
+        chmod($this->serverDir().'/php.ts', 0o444);
+
+        try {
+            $this->expectException(PatchFailed::class);
+            $this->expectExceptionMessageMatches('/could not write it back/');
+
+            (new RuntimePatcher())->patch($this->root);
+        } finally {
+            chmod($this->serverDir().'/php.ts', 0o644);
+        }
+    }
+
     private function read(string $relative): string
     {
         return (string) file_get_contents($this->root.'/electron-plugin/src/'.$relative);

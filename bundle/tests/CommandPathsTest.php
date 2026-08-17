@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Native\Symfony\Tests;
 
 use Native\Symfony\Command\BuildCommand;
+use Native\Symfony\Command\ManifestCommand;
 use Native\Symfony\Command\RunCommand;
+use Native\Symfony\Manifest\Manifest;
+use Native\Symfony\Manifest\ManifestSupportDetector;
+use Native\Symfony\Manifest\ManifestWriter;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
@@ -13,13 +17,15 @@ use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
- * How `native:run` and `native:build` turn `--electron-path` into a path.
+ * How `native:run`, `native:build` and `native:manifest` turn `--electron-path`
+ * into a path.
  *
- * Neither command had a test of its own, which is how a `Path::` call shipped in
+ * None of the three had a test of its own, which is how a `Path::` call shipped in
  * `RunCommand` with no import for it — every invocation of the command would have
  * died on `Native\Symfony\Command\Path` before printing anything, and 349 green
- * tests said nothing about it. These run the commands far enough to hit the
- * resolution and read the path back out of the error message.
+ * tests said nothing about it. `native:manifest` then turned out to still carry the
+ * POSIX-only check the other two had just had removed. These run the commands far
+ * enough to hit the resolution and read the path back out of the output.
  */
 final class CommandPathsTest extends TestCase
 {
@@ -50,6 +56,29 @@ final class CommandPathsTest extends TestCase
 
         self::assertSame(Command::INVALID, $tester->getStatusCode());
         self::assertStringContainsString($this->project.'/nativephp/electron', $this->flatten($tester));
+    }
+
+    public function testManifestResolvesARelativeElectronPathAgainstTheProject(): void
+    {
+        // native:manifest resolves --electron-path too, and had the same POSIX-only test
+        // as the other two — found only by grepping for the pattern after fixing them,
+        // which is the lesson: when a fix ships, sweep the tree for what it replaced.
+        $tester = $this->execute($this->manifestCommand(), []);
+
+        self::assertStringContainsString($this->project.'/nativephp/electron', $this->flatten($tester));
+    }
+
+    #[DataProvider('absolutePaths')]
+    public function testManifestLeavesAnAbsoluteElectronPathAlone(string $path, string $expected, bool $windowsOnly): void
+    {
+        if ($windowsOnly && '\\' !== \DIRECTORY_SEPARATOR) {
+            self::markTestSkipped('Drive letters and UNC paths are only absolute on Windows.');
+        }
+
+        $output = $this->flatten($this->execute($this->manifestCommand(), ['--electron-path' => $path]));
+
+        self::assertStringContainsString($expected, $output);
+        self::assertStringNotContainsString($this->project.'/'.$path, $output);
     }
 
     /**
@@ -84,8 +113,30 @@ final class CommandPathsTest extends TestCase
     {
         // Path normalises separators, so the expectation is the forward-slash form.
         yield 'posix' => ['/opt/electron', '/opt/electron', false];
+        // Runs everywhere, and is the only row that does: the drive-letter and UNC
+        // forms are only absolute on Windows, so on any other platform a stream
+        // wrapper is the one input where Path::isAbsolute and the old leading-slash
+        // test disagree — which is what keeps this suite able to fail here at all.
+        yield 'stream wrapper' => ['file:///opt/electron', 'file:///opt/electron', false];
         yield 'windows drive' => ['C:\\dev\\electron', 'C:/dev/electron', true];
         yield 'windows unc' => ['\\\\server\\share\\electron', '//server/share/electron', true];
+    }
+
+    /**
+     * `native:manifest` with the real collaborators — only the report is under test, and
+     * it is reached through the write, so the command is run with --dry-run nowhere: the
+     * write goes to the throwaway project directory.
+     */
+    private function manifestCommand(): ManifestCommand
+    {
+        $manifest = new Manifest();
+
+        return new ManifestCommand(
+            new ManifestWriter($this->project, $manifest),
+            $manifest,
+            new ManifestSupportDetector(),
+            $this->project,
+        );
     }
 
     /** @param array<string, string> $input */

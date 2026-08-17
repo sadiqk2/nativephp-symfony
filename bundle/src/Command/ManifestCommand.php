@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Path;
 
 /**
  * Writes the `nativephp.json` that tells a manifest-aware Electron runtime where
@@ -96,9 +97,14 @@ final class ManifestCommand extends Command
      */
     private function reportRuntime(string $electronPath, SymfonyStyle $io): void
     {
-        $electron = str_starts_with($electronPath, '/')
+        // Path::isAbsolute rather than a leading slash — the same reason native:run and
+        // native:build use it. Here the consequence is only advisory, but it is advice
+        // pointing the wrong way: a Windows --electron-path was joined onto the project
+        // directory, so an installed runtime was reported missing and the fix suggested
+        // was to install it again.
+        $electron = Path::isAbsolute($electronPath)
             ? $electronPath
-            : rtrim($this->projectDir, '/').'/'.$electronPath;
+            : Path::join($this->projectDir, $electronPath);
 
         if (!is_dir($electron)) {
             $io->comment(sprintf('No runtime at %s yet; run native:install when you need one.', $electron));

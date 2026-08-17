@@ -82,8 +82,19 @@ final class MobileRuntimePatcher
             return false;
         }
 
+        $decoded = json_decode((string) file_get_contents($bundleMetaPath), true);
+
+        // `?: []` here would turn a malformed or truncated manifest into an empty one and
+        // then write it back, silently dropping the version and bundle identity the hosts
+        // compare to decide whether to re-extract — a device left running the previous
+        // build with nothing to explain it. A scalar was worse still: assigning an offset
+        // to one is a TypeError mid-install.
+        if (!\is_array($decoded)) {
+            throw MobilePatchFailed::unreadableBundleMeta($bundleMetaPath);
+        }
+
         /** @var array<string, mixed> $meta */
-        $meta = json_decode((string) file_get_contents($bundleMetaPath), true) ?: [];
+        $meta = $decoded;
 
         if ('web' === ($meta['entry_mode'] ?? null)) {
             return false;
@@ -92,7 +103,13 @@ final class MobileRuntimePatcher
         $meta['entry_mode'] = 'web';
         $meta['native_routes'] = [];
 
-        file_put_contents($bundleMetaPath, json_encode($meta, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES));
+        // THROW_ON_ERROR because json_encode returns false on failure, and writing false
+        // truncates the manifest to nothing — the one outcome worse than not writing.
+        $json = json_encode($meta, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR);
+
+        if (false === @file_put_contents($bundleMetaPath, $json)) {
+            throw MobilePatchFailed::writeFailed($bundleMetaPath);
+        }
 
         return true;
     }
@@ -138,8 +155,10 @@ final class MobileRuntimePatcher
             throw MobilePatchFailed::hunkDidNotMatch($label, $path);
         }
 
-        if ($text !== $original) {
-            file_put_contents($path, $text);
+        // Checked, because this class promises to throw rather than skip and an ignored
+        // write is a skip with a success message attached.
+        if ($text !== $original && false === @file_put_contents($path, $text)) {
+            throw MobilePatchFailed::writeFailed($path);
         }
 
         return $applied;

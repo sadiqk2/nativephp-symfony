@@ -333,7 +333,14 @@ is `undefined` on Windows and Linux and the request would throw rather than no-o
 ### `debug/*` calls do nothing in the packaged app
 
 `/api/debug/*` is mounted only when `NODE_ENV === 'development'`. In a packaged app those
-requests 404. `DebugLogger` is fire-and-forget by design.
+requests 404, and `DebugLogger` stops posting after the first one — the routes are mounted
+at boot or never, so there is nothing to retry and every attempt is a blocking round trip.
+
+It also refuses to forward a record logged *while it is forwarding one*. That is not
+theoretical tidiness: an unrouted POST comes back as express's default HTML page rather than
+a status phrase, `Client` reports that it could not read the reply through the `native`
+channel, and a `DebugLogger` handler on that channel would post that report — 404, report,
+post, for as long as the request lasts.
 
 ### The log says "Runtime returned non-JSON for POST …"
 

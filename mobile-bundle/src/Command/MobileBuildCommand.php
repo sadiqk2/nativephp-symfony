@@ -20,6 +20,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Filesystem\Path;
 
 /**
  * Release build: stage the application, bake it into the native project, and produce an
@@ -194,7 +195,15 @@ final class MobileBuildCommand extends Command
         $io->text(sprintf('%d entries, %s → %s', $entries, $this->humanSize($zipPath), $zipPath));
 
         if (null !== $versionFile = $platform->bundledVersionPath($this->projectDir)) {
-            file_put_contents($versionFile, MobileBuilder::versionId($this->version, $versionCode));
+            // Checked: this file is what the host compares against the archive to decide
+            // whether to re-extract. A silently unwritten one leaves a device running the
+            // previous build after an update, which presents as "my changes did nothing".
+            if (false === @file_put_contents($versionFile, MobileBuilder::versionId($this->version, $versionCode))) {
+                $io->error(sprintf('Could not write %s. Check its permissions — without it the device will keep the previous bundle.', $versionFile));
+
+                return Command::FAILURE;
+            }
+
             $io->text(' • bundled.version → '.$versionFile);
         }
 
@@ -387,7 +396,14 @@ final class MobileBuildCommand extends Command
         // Per-platform, because the two archives are not identical: the staged .env carries
         // platform-independent values today, but a shared directory would make any future
         // divergence a silent cross-contamination between builds.
-        return (str_starts_with($dir, '/') ? $dir : $this->projectDir.'/'.$dir).'/'.$platform->value;
+        //
+        // Path::isAbsolute, not a leading slash: `--stage-dir=D:\builds` is absolute on the
+        // platform iOS development cannot happen on but Android's can, and treating it as
+        // relative would assemble several hundred megabytes inside the project directory
+        // instead — silently, since staging creates whatever directory it is given.
+        $base = Path::isAbsolute($dir) ? $dir : Path::join($this->projectDir, $dir);
+
+        return Path::join($base, $platform->value);
     }
 
     private function humanSize(string $path): string

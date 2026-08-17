@@ -19,6 +19,23 @@ final class PatchFailed extends \RuntimeException
         return new self(sprintf('Expected runtime source file "%s" is missing.', $path));
     }
 
+    /**
+     * The patch was computed but could not be stored.
+     *
+     * Worth its own error rather than an ignored return value: an unwritable file leaves
+     * the runtime with Laravel's hardcoded paths while the installer reports the hunks as
+     * applied, which is the blank-window-with-no-diagnostic failure this class exists to
+     * make impossible.
+     */
+    public static function writeFailed(string $path): self
+    {
+        return new self(sprintf(
+            'Patched %s in memory but could not write it back. Check the file\'s permissions '.
+            'and ownership — an unwritten patch leaves an app that launches and shows nothing.',
+            $path,
+        ));
+    }
+
     public static function hunkDidNotMatch(string $hunk, string $path): self
     {
         return new self(sprintf(

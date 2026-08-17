@@ -154,8 +154,8 @@ final class RuntimePatcher
             }
         }
 
-        if ($text !== $original) {
-            file_put_contents($path, $text);
+        if ($text !== $original && false === @file_put_contents($path, $text)) {
+            throw PatchFailed::writeFailed($path);
         }
 
         return $applied;

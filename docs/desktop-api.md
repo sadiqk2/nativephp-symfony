@@ -424,7 +424,7 @@ An app ported from Laravel must add this interface to events that previously onl
 | `Shortcut\GlobalShortcutManager` | `register($accelerator, $event)`, `registerChecked()`, `unregister()`, `isRegistered()` | `register()` cannot fail visibly — another app may own the accelerator. Use `registerChecked()`. The event arrives as a `NativeEvent` under the name you chose |
 | `System\ProgressBar` | `update(float $percent)`, `clear()` | Taskbar/dock progress |
 | `System\RuntimeInfo` | `get()` — pid, platform, arch, uptime | |
-| `System\DebugLogger` | A PSR-3 logger writing to the devtools console | `/api/debug/*` exists **only** when `NODE_ENV=development`; in a packaged app these 404. Fire-and-forget |
+| `System\DebugLogger` | A PSR-3 logger writing to the devtools console | `/api/debug/*` exists **only** when `NODE_ENV=development`. In a packaged app the first record 404s and the logger latches off, so the rest cost nothing. Re-entrant records are dropped, which is what stops the runtime's own "could not read the reply" error from posting another one |
 | `Updater\UpdaterManager` | `checkForUpdates()`, `downloadUpdate()`, `quitAndInstall()` | Needs `native_desktop.updater.enabled: true` and a provider; results arrive as the seven `AutoUpdater\*` events |
 | `Contract\ClientInterface` | `isAvailable()`, `get()`, `post()`, `delete()` | The escape hatch for an endpoint with no wrapper. `Response` has `$status`, `$data`, `successful()`, `array()`, `value($key, $default)` |
 

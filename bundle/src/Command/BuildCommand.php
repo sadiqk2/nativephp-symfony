@@ -244,10 +244,14 @@ final class BuildCommand extends Command
         $json['author'] = (string) ($this->config['author'] ?? '');
         $json['homepage'] = (string) ($this->config['website'] ?? '');
 
-        file_put_contents(
-            $path,
-            json_encode($json, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES).\PHP_EOL,
-        );
+        $encoded = json_encode($json, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_THROW_ON_ERROR).\PHP_EOL;
+
+        // Reporting the new name and version without checking the write would describe a
+        // package.json that is still upstream's — and the installer names the artifact
+        // from this file, so the whole build would carry the wrong identity quietly.
+        if (false === @file_put_contents($path, $encoded)) {
+            throw new \RuntimeException(sprintf('Could not write %s. Check its permissions.', $path));
+        }
 
         $io->text(sprintf('package.json: %s %s', $json['name'], $json['version']));
     }
