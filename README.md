@@ -235,7 +235,10 @@ the rule above holding in a stock app.
 
 ## Using it
 
-**[`docs/`](docs/README.md) is the documentation for building an application with this.**
+**[`docs/`](docs/README.md) is the documentation for building an application with this**, and
+it is also a static site — `tools/build-docs.mjs` renders it into `docs/*.html` with a
+stylesheet and no external requests, ready for GitHub Pages (Settings → Pages → `main` /
+`/docs`). See [`tools/README.md`](tools/README.md) to rebuild or preview it.
 Getting started for [desktop](docs/getting-started-desktop.md) and
 [mobile](docs/getting-started-mobile.md), an API reference by area for
 [desktop](docs/desktop-api.md) and [mobile](docs/mobile-api.md),

@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobile · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link" href="index.html">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link" href="getting-started-desktop.html">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link current" href="getting-started-mobile.html" aria-current="page">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link" href="desktop-api.html">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link" href="mobile-api.html">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link" href="recipes.html">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link" href="testing.html">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link" href="troubleshooting.html">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d3"><a href="#can-you-build-an-android-or-ios-app-today">Can you build an Android or iOS app today?</a></li>
+<li class="d2"><a href="#the-one-architectural-difference-from-desktop">The one architectural difference from desktop</a></li>
+<li class="d2"><a href="#1-install">1. Install</a></li>
+<li class="d2"><a href="#2-the-four-bootstrap-shims">2. The four bootstrap shims</a></li>
+<li class="d2"><a href="#path-a--the-webview-render-path-what-most-apps-want">Path A — the WebView render path (what most apps want)</a></li>
+<li class="d3"><a href="#developing-without-a-device">Developing without a device</a></li>
+<li class="d2"><a href="#path-b--the-native-ui-render-path">Path B — the native-UI render path</a></li>
+<li class="d2"><a href="#building-and-running">Building and running</a></li>
+<li class="d2"><a href="#configuration">Configuration</a></li>
+<li class="d2"><a href="#commands">Commands</a></li>
+</ul></nav>
+        <article class="prose">
+<h1 id="getting-started--mobile"><a class="anchor" href="#getting-started--mobile">Getting started — mobile</a></h1>
+<p>Two things to know before you write any code.</p>
+<p><strong>Nothing here has run on a phone.</strong> Every claim in the mobile bundle is backed by tests —
+including tests that byte-compare element trees against upstream&#39;s own collector and parse
+upstream&#39;s Kotlin and Swift to check coverage — but no build has been produced by Xcode or
+Gradle in this project, and no screen has been rendered on a device. The desktop side is
+backed by a screenshot of a running packaged app; mobile is not held to that standard yet.
+Treat it as a well-tested design awaiting device verification.</p>
+<p><strong>Check the licensing yourself.</strong> NativePHP Mobile is sold as a product, but the
+<code>NativePHP/mobile-air</code> repository these host projects come from carries an MIT <code>LICENSE.md</code>
+(Bifrost Technology, LLC) and declares <code>&quot;license&quot;: &quot;MIT&quot;</code> in its <code>composer.json</code> — so read
+the terms rather than trusting a summary, this one included. <code>native:mobile:install</code> prints
+the same caution deliberately. The desktop runtime is MIT.</p>
+<h3 id="can-you-build-an-android-or-ios-app-today"><a class="anchor" href="#can-you-build-an-android-or-ios-app-today">Can you build an Android or iOS app today?</a></h3>
+<p>Yes — on a machine with the platform toolchain. Nothing in this bundle is a stub, and no
+step is waiting on unwritten code. What it needs from you is the half no PHP package can
+provide:</p>
+<div class="table-scroll"><table><thead><tr><th>You need</th><th>Why</th></tr></thead><tbody>
+<tr><td>A clone of <code>NativePHP/mobile-air</code>, and whatever its terms require of you</td><td>The iOS and Android host projects live there. <code>native:mobile:install</code> copies and retargets them; it cannot fetch them for you.</td></tr>
+<tr><td>Android Studio / the Android SDK, or Xcode</td><td><code>native:mobile:build</code> produces the APK/AAB or the iOS archive by invoking <code>./gradlew</code> or <code>xcodebuild</code>. Neither exists in a PHP container, and neither runs in CI without a licence.</td></tr>
+<tr><td>A keystore or a provisioning profile</td><td>Signing is deliberately not handled here — see below.</td></tr>
+</tbody></table></div>
+<p>Everything on this side of that line runs and is covered by tests: staging, <code>.env</code> cleaning,
+the app archive, <code>bundle_meta.json</code>, the native-route manifest, toolchain detection, and the
+exact command plan. <code>--stage-only</code> stops precisely at the boundary; <code>--dry-run</code> prints the
+toolchain commands for you to run on a machine that has them.</p>
+<p>The honest caveat is verification, not capability: <strong>no build produced by these commands has
+been opened by Xcode or Gradle, and no screen has been rendered on a device.</strong> The desktop
+side is backed by a screenshot of a running packaged app; this is not, yet. If you have a Mac
+or an Android SDK, that is the single most valuable thing anyone can contribute here.</p>
+<hr>
+<h2 id="the-one-architectural-difference-from-desktop"><a class="anchor" href="#the-one-architectural-difference-from-desktop">The one architectural difference from desktop</a></h2>
+<p>Desktop is two processes over localhost HTTP. Mobile is <strong>one process with PHP compiled
+into it</strong>: no port, no shared secret, no express server. The app calls
+<code>nativephp_call(&#39;Camera.Photo&#39;, $json)</code> — a function that exists only inside a packaged app
+— and the host answers in the same address space. Outside a packaged app the bridge is
+always unavailable and every call returns <code>null</code> or <code>false</code>.</p>
+<p>Consequently there is no dev-server loop like <code>native:run</code>. What replaces it is
+<code>native_mobile.fake_bridge: true</code>, plus tests.</p>
+<h2 id="1-install"><a class="anchor" href="#1-install">1. Install</a></h2>
+<pre><code class="language-bash">composer require native-symfony/mobile-bundle:^0.1
+</code></pre>
+<p><strong>Not on Packagist yet</strong> — clone this repository and add a path repository pointing at
+<code>mobile-bundle/</code> with <code>&quot;symlink&quot;: true</code>. The block is in the
+<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/README.md#0-install-the-packages" target="_blank" rel="noopener">root README</a>; <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/composer.json" target="_blank" rel="noopener"><code>demo/composer.json</code></a>
+is a working example.</p>
+<pre><code class="language-php">// config/bundles.php
+return [
+    // …
+    Native\Symfony\Mobile\NativeMobileBundle::class =&gt; [&#39;all&#39; =&gt; true],
+];
+</code></pre>
+<p>Then copy the two native projects into your application and retarget them:</p>
+<pre><code class="language-bash">git clone --depth 1 https://github.com/NativePHP/mobile-air /tmp/np-mobile
+bin/console native:mobile:install --source=/tmp/np-mobile/resources
+bin/console native:mobile:doctor
+</code></pre>
+<p><code>native:mobile:install</code> mirrors <code>resources/androidstudio</code> to <code>nativephp/android</code> and
+<code>resources/xcode</code> to <code>nativephp/ios</code>, then patches the two places each host hardcodes a
+path into <code>vendor/nativephp/mobile/bootstrap/…/native.php</code> so they point at this bundle&#39;s
+shims instead. <code>--platform=android|ios|both</code>, <code>--force</code> to overwrite. The patcher throws
+rather than skipping a path, because a missed one is a launch to a blank screen with no
+diagnostic.</p>
+<p>From there you build with Android Studio or Xcode. There is no headless path: both
+toolchains are required, and neither runs in CI without a licence.</p>
+<p><code>native:mobile:doctor</code> reports the project dir, the PHP version and SAPI, whether the
+bridge is available, whether the persistent runtime has booted and how many dispatches it
+has served, whether opcache exists, whether both native projects are installed, and whether
+all four bootstrap shims are present. Run it <em>through the console shim on a device</em> and read
+it in logcat or the Xcode console — that is the only place it tells you anything you did not
+already know.</p>
+<h2 id="2-the-four-bootstrap-shims"><a class="anchor" href="#2-the-four-bootstrap-shims">2. The four bootstrap shims</a></h2>
+<p>The host executes PHP by absolute path and reads stdout as a complete HTTP message. That is
+what these are:</p>
+<div class="table-scroll"><table><thead><tr><th>Shim</th><th>Role</th></tr></thead><tbody>
+<tr><td><code>native.php</code></td><td>One-shot: autoloader → env → kernel → one request → emit. Pays for everything per request.</td></tr>
+<tr><td><code>persistent.php</code></td><td>Booted once. Builds the kernel and hands it to <code>MobileRuntime::boot()</code>, then the interpreter stays alive.</td></tr>
+<tr><td><code>dispatch.php</code></td><td>Per-request in persistent mode. Evaluated in a fresh scope, so it reaches the runtime through <code>MobileRuntime::instance()</code>.</td></tr>
+<tr><td><code>console.php</code></td><td>Console entry point — what the host runs for migrations, cache warming, anything scheduled. Replaces upstream&#39;s <code>artisan.php</code>.</td></tr>
+</tbody></table></div>
+<p><strong>Prefer the persistent pair.</strong> The autoloader, the container and every bundle&#39;s boot cost
+once instead of per screen, and on a phone that is the difference between a native-feeling
+app and a sluggish one. <code>MobileRuntime</code> resets everything tagged <code>kernel.reset</code> after each
+dispatch through <code>services_resetter</code> — the same mechanism <code>messenger:consume</code> uses — so
+Doctrine, the profiler, the validator and security token storage are all handled, including
+bundles this code has never heard of.</p>
+<p>Both shims read <code>COMPOSER_AUTOLOADER_PATH</code> from <code>$_SERVER</code> (falling back to a path walk),
+load <code>.env</code> via Dotenv with <code>usePutenv(false)</code>, and instantiate <code>App\Kernel</code> unless
+<code>NATIVEPHP_KERNEL_CLASS</code> says otherwise. A failure before the kernel exists is written with
+<code>error_log()</code> prefixed <code>[NATIVE_EXCEPTION]</code> and answered with a hand-built 500, because at
+that point there is no logger and no error page.</p>
+<hr>
+<h2 id="path-a--the-webview-render-path-what-most-apps-want"><a class="anchor" href="#path-a--the-webview-render-path-what-most-apps-want">Path A — the WebView render path (what most apps want)</a></h2>
+<p>Both platforms&#39; <code>BootPlanner</code> decides per launch: native direct dispatch, or a WebView. It
+falls back to the WebView whenever there is no native-route manifest, or the requested path
+matches none of its patterns — its own docblock calls that path <em>&quot;always safe,
+byte-identical to the pre-native-first behavior&quot;</em>. A Symfony app that declares no
+<code>#[NativeScreen]</code> produces no manifest, so <strong>every path takes the WebView by construction</strong>,
+and <code>NATIVEPHP_BOOT_MODE=web</code> at build time forces it.</p>
+<p>That means the 17,316-line native-UI engine is never entered, and Twig in a WebView is just
+Twig. Your controllers and templates are ordinary Symfony. The only new thing is the device
+API:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Controller;
+
+use Native\Symfony\Mobile\Api\Camera;
+use Native\Symfony\Mobile\Api\Device;
+use Native\Symfony\Mobile\Api\SecureStorage;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+final class ProfileController extends AbstractController
+{
+    public function __construct(
+        private readonly Camera $camera,
+        private readonly SecureStorage $storage,
+        private readonly Device $device,
+    ) {
+    }
+
+    #[Route(&#39;/profile/photo&#39;, name: &#39;profile_photo&#39;)]
+    public function photo(): Response
+    {
+        // Asynchronous. `true` means the camera UI was presented, nothing more —
+        // the picture arrives later as a native event.
+        $this-&gt;camera-&gt;photo(quality: 85);
+
+        return $this-&gt;redirectToRoute(&#39;profile&#39;);
+    }
+
+    #[Route(&#39;/profile&#39;, name: &#39;profile&#39;)]
+    public function show(): Response
+    {
+        return $this-&gt;render(&#39;profile.html.twig&#39;, [
+            &#39;token&#39; =&gt; $this-&gt;storage-&gt;get(&#39;token&#39;),   // null when absent
+            &#39;device&#39; =&gt; $this-&gt;device-&gt;info(),         // [] when the bridge is absent
+        ]);
+    }
+}
+</code></pre>
+<p>All sixteen API services are autowired and public: <code>Biometric</code>, <code>Browser</code>, <code>Camera</code>,
+<code>Device</code>, <code>Dialog</code>, <code>Files</code>, <code>Geolocation</code>, <code>Microphone</code>, <code>MobileWallet</code>, <code>NativeUi</code>,
+<code>Network</code>, <code>Performance</code>, <code>PushNotifications</code>, <code>SecureStorage</code>, <code>Share</code>, <code>System</code>. See the
+<a href="mobile-api.html">mobile API reference</a>.</p>
+<h3 id="developing-without-a-device"><a class="anchor" href="#developing-without-a-device">Developing without a device</a></h3>
+<pre><code class="language-yaml"># config/packages/test/native_mobile.yaml
+native_mobile:
+    fake_bridge: true
+</code></pre>
+<p>That aliases <code>BridgeInterface</code> to <code>FakeBridge</code>, which records every call and answers with
+whatever you scripted. It is a shipped part of the bundle rather than a test fixture, so it
+works in <code>dev</code> in a browser too.</p>
+<h2 id="path-b--the-native-ui-render-path"><a class="anchor" href="#path-b--the-native-ui-render-path">Path B — the native-UI render path</a></h2>
+<p>Only if you want SwiftUI and Jetpack Compose rather than a WebView. This path is
+implemented — element trees, the Tailwind-subset style parser, <code>#[NativeScreen]</code> routing, a
+component lifecycle — and byte-verified against upstream wherever a comparison exists. It is
+also the least device-verified part of the project.</p>
+<p>Declare a screen:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Screen;
+
+use Native\Symfony\Mobile\Ui\Routing\NativeScreen;
+
+#[NativeScreen(&#39;/items/{id}&#39;)]
+final class ItemScreen
+{
+    // …
+}
+</code></pre>
+<p>The path uses <strong>Laravel</strong> placeholder syntax (<code>{id}</code>, <code>{id?}</code>), not Symfony&#39;s. That string
+is copied verbatim into the app bundle and matched on the device by Kotlin&#39;s and Swift&#39;s
+<code>BootPlanner</code>, so inventing a Symfony flavour would make the two sides disagree about which
+paths boot natively — a WebView flash on a device and nothing at all in a test suite.</p>
+<p>Discovery is explicit, never a scan of everything autoloadable, because the manifest is only
+correct if the build-time walk and the runtime walk produce the same list:</p>
+<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Routing\NativeScreenAttributeLoader;
+
+// One class at a time…
+$loader-&gt;loadClass(\App\Screen\ItemScreen::class);
+
+// …or a PSR-4 root, sorted so two manifests are diffable.
+$loader-&gt;loadDirectory(__DIR__.&#39;/../src/Screen&#39;, &#39;App\\Screen&#39;);
+</code></pre>
+<p>Both fill the <code>NativeRouteRegistry</code>. <code>NativeRouteManifest</code> then exports the patterns in the
+two shapes the device reads — the baked <code>bundle_meta.json</code> fragment (<code>native_routes</code>,
+<code>entry_mode</code>) and the runtime dump at <code>storage/framework/native_routes.json</code> (<code>routes</code>).
+Three failure modes there are silent and each costs a fallback to the WebView: the two
+<code>version</code> values must be equal <em>as strings</em>, iOS needs the baked manifest to exist at all,
+and the dump&#39;s directory must exist (<code>writeRuntimeDump()</code> creates it and throws on failure).</p>
+<p>A screen&#39;s URI is not an HTTP route unless you make it one. If you want the same URI to work
+in a browser — a shared link, a smoke test — register <code>NativeScreenRouteLoader</code> yourself as a
+service tagged <code>routing.loader</code> and import it:</p>
+<pre><code class="language-yaml"># config/routes.yaml
+native_screens:
+    resource: .
+    type: native_screens
+</code></pre>
+<p>It is not registered by the bundle, deliberately: an app that already puts <code>#[Route]</code> next
+to <code>#[NativeScreen]</code> needs nothing from it.</p>
+<p>Rendering is behind a seam, and the bundle fills it. <code>NativeScreenResponder</code> turns a path
+into a published frame by asking a <code>ScreenRendererInterface</code> for the root element — routing&#39;s
+job ends at &quot;this path is screen X with these parameters&quot;, and turning X into an element tree
+is the component lifecycle&#39;s job. <code>ComponentScreenRenderer</code> is that implementation, aliased to
+the interface, so a <code>#[NativeScreen]</code> component works with no glue:</p>
+<pre><code class="language-php">$frame = $responder-&gt;respond(&#39;/counter&#39;);                                  // first paint
+$id    = $responder-&gt;callbacks()-&gt;idFor(&#39;increment&#39;);                      // what the device sends back
+$renderer-&gt;dispatch(&#39;/counter&#39;, InteractionEvent::press($id));             // tap
+$frame = $responder-&gt;republish();                                          // repaint, as a delta
+</code></pre>
+<p>Two things it does that are easy to get wrong and silent when wrong: it keeps the <em>same</em>
+component instance across frames of one screen (re-instantiating per frame gives a screen
+whose state resets on every tap), and it binds that component to the registry the responder
+handed it (a registry of its own makes every incoming callback id miss). Navigating away and
+back is a new visit and does start fresh; call <code>forget($pattern)</code> when a screen closes so its
+component is unmounted rather than held for the life of the app.</p>
+<p><strong>A visit is a path, not a pattern.</strong> <code>/user/1</code> and <code>/user/2</code> share one route pattern but are
+two screens, so moving between them mounts a new component and hands it the new parameters.
+Reusing on the pattern alone produced a byte-identical tree, which the frame diff then
+reported as unchanged — the device kept showing the first user, and nothing logged anything.</p>
+<p>A screen with constructor dependencies just needs to be a service — the bundle autoconfigures
+every <code>NativeComponent</code> with the <code>native.screen</code> tag, and the renderer resolves the class
+through that locator. A screen with no dependencies needs no registration at all. Route
+parameters are handed over only if the screen declares <code>withRouteParameters(array $params)</code>.</p>
+<p>Screens are registered <strong>non-shared</strong>, and that matters: a component may be bound to one
+component tree only, so the renderer builds a fresh one per mount, and a shared service would
+hand back the instance it had just unmounted. The bundle enforces this both through
+autoconfiguration and through a compiler pass over the <code>native.screen</code> tag, so you get it
+without asking. If you declare <code>shared: true</code> on a screen yourself the container leaves your
+choice alone and the renderer refuses the second mount with a message naming the fix — on a
+device the alternative is a 500 on the frame request, i.e. a screen that works once and is
+blank ever after.</p>
+<p>To render something other than a component — a Twig template, a controller action — implement
+<code>ScreenRendererInterface</code> yourself and override the alias in your own configuration, which is
+loaded after the bundle&#39;s. <code>ComponentScreenFactory</code> remains available for driving a screen
+directly, without routing:</p>
+<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Component\ComponentScreenFactory;
+
+$screen = $factory-&gt;open(new Counter());   // a fresh component instance, once per screen
+$frame  = $screen-&gt;frame();                // first paint
+$frame  = $screen-&gt;handle([&#39;callback_id&#39; =&gt; $id, &#39;type&#39; =&gt; 0]);  // tap → repaint
+</code></pre>
+<p>See <a href="recipes.html#a-native-ui-screen-with-state">Recipes</a> for a complete component, and
+<a href="mobile-api.html#native-ui">the mobile API reference</a> for elements, callbacks and styling.</p>
+<h2 id="building-and-running"><a class="anchor" href="#building-and-running">Building and running</a></h2>
+<pre><code class="language-bash">bin/console native:mobile:manifest --dry-run        # what would the device boot?
+bin/console native:mobile:build android --stage-only  # everything up to Gradle
+bin/console native:mobile:build android --dry-run     # print the whole plan, touch nothing
+bin/console native:mobile:build android --aab         # …then Gradle
+bin/console native:mobile:build ios --export-options=auto --team-id=ABCDE12345
+bin/console native:mobile:run android --list-devices
+bin/console native:mobile:run android --device=emulator-5554
+bin/console native:mobile:run ios --udid=…
+</code></pre>
+<p>These are split honestly in two, and the commands say so in their own output.</p>
+<p><strong>What runs and is tested here:</strong> staging the app (the same exclusion walk as desktop, the
+same <code>.env</code> cleaning whose keep list beats its remove list so <code>APP_SECRET</code> survives, the CA
+bundle, warming <code>var/cache</code> — which matters more here because the packaged PHP cannot load
+opcache at all), the app archive, <code>bundle_meta.json</code> and the runtime route dump, the toolchain
+detection with its remediation advice, and the exact plan of commands. <code>--stage-only</code> stops
+precisely at that boundary and <code>--dry-run</code> executes nothing by construction.</p>
+<p><strong>What has never been executed by these commands:</strong> <code>./gradlew</code>, <code>adb</code>, <code>xcodebuild</code>,
+<code>simctl</code>. There is no Android SDK and no Xcode in this environment. That is why <code>--dry-run</code> is
+the primary interface for <code>native:mobile:run</code> rather than a convenience — it prints commands
+you can paste into a terminal on a machine that does have the toolchain.</p>
+<p><strong>Signing is not handled.</strong> Gradle reads a keystore from the project&#39;s own <code>signingConfigs</code>
+and Xcode from a provisioning profile. Passing either on a command line would put a password
+in the process table, and a signing flow that cannot be tested here would be a liability sold
+as a feature.</p>
+<p><code>native:mobile:run</code> does not stage — it assumes <code>native:mobile:build --stage-only</code> has run, or
+that the project&#39;s existing bundle is current. Silently re-zipping a few hundred megabytes
+would be the wrong default for a &quot;change one file, look at the screen&quot; loop.</p>
+<p><code>native:mobile:manifest</code> exists for the two cases a build does not cover: refreshing the route
+list into an already-built project without a rebuild, and inspecting what the device would
+boot. It fails rather than reporting success when there is no native project to bake into,
+because Android can boot native from the runtime dump alone and iOS cannot — a dump without a
+bake is a silent fallback to the WebView.</p>
+<h2 id="configuration"><a class="anchor" href="#configuration">Configuration</a></h2>
+<pre><code class="language-yaml"># config/packages/native_mobile.yaml
+native_mobile:
+    app_id: com.example.app     # bundle identifier / Android application id
+    name: App
+    version: &#39;1.0.0&#39;            # QUOTE IT — see below
+    fake_bridge: false          # true swaps in the recording fake
+    platform: ~                 # &#39;ios&#39; or &#39;android&#39;, for platform-variant style classes
+    collect_garbage: false      # gc_collect_cycles() after each persistent request
+</code></pre>
+<p><strong><code>version</code> must be a quoted string.</strong> YAML <code>version: 1.0</code> is a float, and the container
+coerces it to <code>&quot;1&quot;</code>. The hosts compare this value by string equality to decide whether to trust
+the runtime route dump, so a coerced version silently disables it — and on iOS a non-string
+version fails an <code>as? String</code> cast, compares as <code>&quot;&quot;</code>, and does the same. The bundle rejects a
+non-string here rather than normalising it, because by then PHP has already lost the difference
+between <code>1.0</code> and <code>1</code>.</p>
+<p><code>platform: ~</code> drops every <code>ios:</code> / <code>android:</code> style variant. That is the safe default off a
+device and the wrong one on it — set it from the device info if you use those variants.</p>
+<p><code>collect_garbage</code> is read into the container parameter <code>native_mobile.collect_garbage</code>, but
+the shipped <code>persistent.php</code> calls <code>MobileRuntime::boot($kernel)</code> without it, so today it
+only takes effect if you boot the runtime yourself.</p>
+<h2 id="commands"><a class="anchor" href="#commands">Commands</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>native:mobile:install --source=…</code></td><td>Copy <code>androidstudio/</code> and <code>xcode/</code> into the app and retarget their bootstrap paths</td></tr>
+<tr><td><code>native:mobile:doctor</code></td><td>Report what the integration can see; most useful run on a device</td></tr>
+<tr><td><code>native:mobile:manifest</code></td><td>Write <code>bundle_meta.json</code> and the runtime route dump</td></tr>
+<tr><td><code>native:mobile:build &lt;android|ios&gt;</code></td><td>Stage the app and produce an APK/AAB or an iOS archive</td></tr>
+<tr><td><code>native:mobile:run &lt;android|ios&gt;</code></td><td>Debug build, install and launch</td></tr>
+</tbody></table></div>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

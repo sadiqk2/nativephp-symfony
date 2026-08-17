@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Troubleshooting · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link" href="index.html">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link" href="getting-started-desktop.html">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link" href="getting-started-mobile.html">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link" href="desktop-api.html">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link" href="mobile-api.html">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link" href="recipes.html">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link" href="testing.html">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link current" href="troubleshooting.html" aria-current="page">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d2"><a href="#desktop--boot">Desktop — boot</a></li>
+<li class="d3"><a href="#my-app-boots-to-a-blank-window-or-to-no-window-at-all">My app boots to a blank window, or to no window at all</a></li>
+<li class="d3"><a href="#anything-under-public-is-readable-by-any-local-process">Anything under public/ is readable by any local process</a></li>
+<li class="d3"><a href="#every-route-in-the-packaged-or-dev-app-returns-404">Every route in the packaged or dev app returns 404</a></li>
+<li class="d3"><a href="#the-boot-dies-with-the-environment-local-is-not-registered-as-allowed">The boot dies with "The environment "local" is not registered as allowed"</a></li>
+<li class="d3"><a href="#a-packaged-app-logs-failed-to-cache-view-and-routes-at-every-launch">A packaged app logs "Failed to cache view and routes" at every launch</a></li>
+<li class="d3"><a href="#the-boot-dies-before-the-php-server-starts-mentioning-storage">The boot dies before the PHP server starts, mentioning storage</a></li>
+<li class="d3"><a href="#something-i-configured-is-being-ignored--app-id-deep-links-the-updater">Something I configured is being ignored — app id, deep links, the updater</a></li>
+<li class="d3"><a href="#i-get-403-from-every-request-when-i-open-the-app-url-in-a-browser">I get 403 from every request when I open the app URL in a browser</a></li>
+<li class="d3"><a href="#runtimecallfailed-…-rejected-with-403--the-x-nativephp-secret-header-did-not-match">RuntimeCallFailed: … rejected with 403 — the X-NativePHP-Secret header did not match</a></li>
+<li class="d3"><a href="#runtimenotavailable-…-nativephp_api_url-is-not-set">RuntimeNotAvailable: … NATIVEPHP_API_URL is not set</a></li>
+<li class="d3"><a href="#logicexception-cannot-build-an-absolute-window-url-outside-an-http-request">LogicException: Cannot build an absolute window URL outside an HTTP request</a></li>
+<li class="d2"><a href="#desktop--windows-and-events">Desktop — windows and events</a></li>
+<li class="d3"><a href="#my-resize-does-not-fire-an-event">My resize does not fire an event</a></li>
+<li class="d3"><a href="#windows-current-returns-null">$windows->current() returns null</a></li>
+<li class="d3"><a href="#the-page-renders-enormous--about-four-letters-fill-the-window">The page renders enormous — about four letters fill the window</a></li>
+<li class="d3"><a href="#the-window-title-never-changes-when-the-pages--does">The window title never changes when the page's <title> does</a></li>
+<li class="d3"><a href="#my-settings-change-event-has-the-wrong-key">My settings change event has the wrong key</a></li>
+<li class="d3"><a href="#my-settings-listener-loops-forever">My settings listener loops forever</a></li>
+<li class="d3"><a href="#my-listener-never-runs--runs-twice">My listener never runs / runs twice</a></li>
+<li class="d3"><a href="#an-events-payload-does-not-match-the-class-or-arrives-with-__error">An event's payload does not match the class, or arrives with __error</a></li>
+<li class="d3"><a href="#my-child-process-does-nothing-or-restart-on-a-dead-alias-succeeds">My child process does nothing, or restart() on a dead alias "succeeds"</a></li>
+<li class="d3"><a href="#my-global-shortcut-never-fires">My global shortcut never fires</a></li>
+<li class="d3"><a href="#dock-calls-do-nothing">Dock calls do nothing</a></li>
+<li class="d3"><a href="#debug-calls-do-nothing-in-the-packaged-app">debug/* calls do nothing in the packaged app</a></li>
+<li class="d3"><a href="#the-log-says-runtime-returned-non-json-for-post-…">The log says "Runtime returned non-JSON for POST …"</a></li>
+<li class="d2"><a href="#desktop--packaging">Desktop — packaging</a></li>
+<li class="d3"><a href="#the-packaged-app-cannot-make-https-calls">The packaged app cannot make HTTPS calls</a></li>
+<li class="d3"><a href="#the-packaged-app-does-not-boot-at-all--envnotfoundexception">The packaged app does not boot at all — EnvNotFoundException</a></li>
+<li class="d3"><a href="#the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request">The packaged app is slow, and logs an opcache warning on every request</a></li>
+<li class="d3"><a href="#the-packaged-app-fails-writing-cache-or-logs">The packaged app fails writing cache or logs</a></li>
+<li class="d3"><a href="#the-build-contains-readable-php-source">The build contains readable PHP source</a></li>
+<li class="d2"><a href="#desktop--tooling">Desktop — tooling</a></li>
+<li class="d3"><a href="#nativeinstall-says-the-source-does-not-look-like-a-nativephp-electron-project">native:install says the source does not look like a NativePHP Electron project</a></li>
+<li class="d3"><a href="#nativeinstall-fails-with-could-not-apply-the-…-patch">native:install fails with "Could not apply the … patch"</a></li>
+<li class="d3"><a href="#i-edited-the-runtimes-typescript-and-nothing-changed">I edited the runtime's TypeScript and nothing changed</a></li>
+<li class="d3"><a href="#nativerun-says-the-electron-project-has-no-node_modules">native:run says the Electron project has no node_modules</a></li>
+<li class="d3"><a href="#nativerun-cannot-find-an-icon-or-a-ca-bundle">native:run cannot find an icon or a CA bundle</a></li>
+<li class="d3"><a href="#a-failing-process-every-minute">A failing process every minute</a></li>
+<li class="d2"><a href="#mobile">Mobile</a></li>
+<li class="d3"><a href="#every-mobile-api-call-returns-null-false-or-an-empty-array">Every mobile API call returns null, false, or an empty array</a></li>
+<li class="d3"><a href="#my-callback-runs-with-no-arguments">My callback runs with no arguments</a></li>
+<li class="d3"><a href="#a-button-on-the-device-does-nothing-at-all">A button on the device does nothing at all</a></li>
+<li class="d3"><a href="#the-device-shows-a-stale-or-spliced-in-subtree-after-navigating">The device shows a stale or spliced-in subtree after navigating</a></li>
+<li class="d3"><a href="#a-reordered-list-loses-scroll-position-or-input-focus">A reordered list loses scroll position or input focus</a></li>
+<li class="d3"><a href="#my-component-state-resets-at-random">My component state resets at random</a></li>
+<li class="d3"><a href="#a-native-screen-boots-into-the-webview-instead">A native screen boots into the WebView instead</a></li>
+<li class="d3"><a href="#a-nativescreen-renders-but-its-state-resets-on-every-tap">A #[NativeScreen] renders, but its state resets on every tap</a></li>
+<li class="d3"><a href="#nativescreenresponder-cannot-be-instantiated">NativeScreenResponder cannot be instantiated</a></li>
+<li class="d3"><a href="#theme--classes-produce-no-colour-or-ios-classes-vanish">theme-* classes produce no colour, or ios: classes vanish</a></li>
+<li class="d3"><a href="#my-parsed-styles-have-no-effect-on-the-device">My parsed styles have no effect on the device</a></li>
+<li class="d3"><a href="#the-app-launches-to-a-blank-screen-with-nothing-in-the-log">The app launches to a blank screen with nothing in the log</a></li>
+</ul></nav>
+        <article class="prose">
+<h1 id="troubleshooting"><a class="anchor" href="#troubleshooting">Troubleshooting</a></h1>
+<p>The dominant failure mode of this runtime is <strong>silence</strong>. It carries on with an empty config
+when <code>native:config</code> fails, and it ignores unknown window ids. So most entries below are
+symptom-first, because the symptom is usually all you get.</p>
+<p>The worst of it — <code>notifyLaravel</code> swallowing every failed callback, which made a crashed,
+500ing or 403ing app indistinguishable from a healthy one — is <strong>fixed in the copy of the
+runtime this bundle installs</strong>. <code>RuntimePatcher</code> carries that fix and four others; see
+<a href="getting-started-desktop.html#what-the-bundle-fixes-in-the-runtime">what the bundle patches</a>.
+So under <code>native:run -v</code> a failed callback now says so.</p>
+<p>Two things to do before reading further:</p>
+<pre><code class="language-bash">bin/console native:run -v      # sets SHELL_VERBOSITY=1 — the runtime then logs every
+                               # PHP command it spawns, with its full argv and env
+</code></pre>
+<p>and watch your own log (<code>var/log/dev.log</code>). The bundle logs deliberately where the runtime
+would swallow: a missing bootstrapper, a non-JSON response, a failed broadcast.</p>
+<ul>
+<li><a href="#desktop--boot">Desktop — boot</a></li>
+<li><a href="#desktop--windows-and-events">Desktop — windows and events</a></li>
+<li><a href="#desktop--packaging">Desktop — packaging</a></li>
+<li><a href="#desktop--tooling">Desktop — tooling</a></li>
+<li><a href="#mobile">Mobile</a></li>
+</ul>
+<hr>
+<h2 id="desktop--boot"><a class="anchor" href="#desktop--boot">Desktop — boot</a></h2>
+<h3 id="my-app-boots-to-a-blank-window-or-to-no-window-at-all"><a class="anchor" href="#my-app-boots-to-a-blank-window-or-to-no-window-at-all">My app boots to a blank window, or to no window at all</a></h3>
+<p>Five distinct causes. <code>native:doctor</code> checks for the first — and the second is handled for
+you by default:</p>
+<pre><code class="language-bash">bin/console native:doctor
+</code></pre>
+<p><strong>The routes are not imported.</strong> Symfony bundles cannot register routes, so the runtime&#39;s
+<code>POST /_native/api/booted</code> 404s and nothing ever asks for a window.</p>
+<pre><code class="language-bash">bin/console debug:router | grep _native
+# native_desktop_booted   POST   /_native/api/booted
+# native_desktop_events   POST   /_native/api/events
+</code></pre>
+<p>If they are missing, add the import shown in
+<a href="getting-started-desktop.html#2-import-the-bundles-routes--this-is-not-automatic">getting started</a>.</p>
+<p><strong>Your firewall covers the runtime&#39;s own endpoints.</strong> <strong>The bundle handles this for you by
+default</strong> — but it is worth knowing about, because the symptom is indistinguishable from the
+one above and the cause is in a file you wrote.</p>
+<p><code>RuntimeAccessSubscriber</code> runs at priority 4096 and returns <em>without stopping propagation</em> —
+it cannot do otherwise, since the router listens at 32 and your app may have listeners of its
+own below the firewall. So the firewall still evaluates, and an <code>access_control</code> rule of <code>^/</code>
+— which is what most authenticated apps have — answers the runtime&#39;s
+<code>POST /_native/api/booted</code> with a <strong>401</strong> that the runtime discards. Laravel is not exposed
+to this: there the two routes are registered outside the app&#39;s middleware groups entirely.</p>
+<p><code>native_desktop.exempt_runtime_firewall</code> (on by default) decorates Symfony&#39;s
+<code>security.access_map</code> so those paths carry no attributes <strong>while running inside the runtime</strong>.
+Outside it — the same codebase deployed as an ordinary web application — your firewall still
+applies in full, which matters: <code>/_native/api/events</code> dispatches events by name, and
+<code>RuntimeAccessSubscriber</code> lets everything through when <code>NATIVEPHP_RUNNING</code> is unset.</p>
+<p>A bundle cannot fix this as configuration, which is why it is done with a decorator:
+<code>security.firewalls</code> rejects keys from a second config file outright, and
+<code>security.access_control</code> throws <code>ForbiddenOverwriteException</code>. Both are single-source by
+design.</p>
+<p>If you turn the option off, write the equivalent yourself — but note that a firewall
+stanza is <strong>unconditional</strong>, where the bundle&#39;s decorator applies only inside the runtime.
+Put it in a runtime-only config environment, or you have opened on the web exactly the hole
+the option is careful not to:</p>
+<pre><code class="language-yaml"># config/packages/security.yaml
+security:
+    firewalls:
+        native:
+            pattern: ^/_native/api/
+            security: false
+</code></pre>
+<p>Firewalls match in declaration order and the first match wins, so <code>native</code> has to come
+<em>before</em> your main firewall — appended after it, it never matches and nothing changes.</p>
+<p>With the option off, <code>native:doctor</code> checks this by asking Symfony&#39;s own
+<code>security.firewall.map</code> and <code>security.access_map</code> what covers those two paths, rather than
+grepping your YAML. Both are needed: an <code>access_control</code> rule stays in the access map even
+when a <code>security: false</code> firewall covers the path, because the rule is applied by the
+firewall&#39;s <code>AccessListener</code> and that listener never runs — reading the map alone warns at the
+one person who has already fixed it.</p>
+<p><strong>No <code>AppBootstrapper</code> is registered.</strong> The window exists only because your code asked for
+one. <code>BootedController</code> logs a warning naming the contract and answers 500 — and the runtime
+throws that 500 away, so the log line is the only symptom:</p>
+<blockquote>
+<p>The NativePHP runtime booted but no Native\Symfony\Desktop\Contract\AppBootstrapper service is
+registered, so no window will open.</p>
+</blockquote>
+<p>Implement <code>Native\Symfony\Desktop\Contract\AppBootstrapper</code> on any service; autoconfiguration and
+<code>AliasContractsPass</code> do the wiring. (If you register two implementations, the compiler pass
+fails with both class names — that is deliberate.)</p>
+<p><strong>Your <code>boot()</code> threw.</strong> The runtime discards the response, so an exception in <code>boot()</code> looks
+identical to no bootstrapper at all. Check the log; if you need a visible failure, use
+<code>DialogManager::error()</code>, which is the only dialog that works before the app is ready and
+needs no window.</p>
+<p><strong>The window opened but the page is blank.</strong> Open the devtools —
+<code>$windows-&gt;open(&#39;main&#39;)-&gt;showDevTools()</code> or <code>$windows-&gt;showDevTools()</code> — and look at the
+console and network tabs. This is now an ordinary Symfony debugging problem.</p>
+<h3 id="anything-under-public-is-readable-by-any-local-process"><a class="anchor" href="#anything-under-public-is-readable-by-any-local-process">Anything under <code>public/</code> is readable by any local process</a></h3>
+<p><code>nativephp-router.php</code> serves an existing file under <code>public/</code> by returning <code>false</code> before
+the kernel boots, so <code>RuntimeAccessSubscriber</code> never sees the request and the shared secret
+does not apply:</p>
+<pre><code>GET /app.css    (no secret) -&gt; 200
+GET /index.php  (no secret) -&gt; 403   # goes through the kernel, so the gate applies
+</code></pre>
+<p>That is correct for assets and matches Laravel. It also means uploads, generated exports and
+anything else written under <code>public/</code> are readable by every process on the machine, because
+the app is served on a real loopback port. Put user data somewhere else and serve it through
+a controller.</p>
+<h3 id="every-route-in-the-packaged-or-dev-app-returns-404"><a class="anchor" href="#every-route-in-the-packaged-or-dev-app-returns-404">Every route in the packaged or dev app returns 404</a></h3>
+<p>The runtime is serving Laravel&#39;s router path. <code>RuntimePatcher</code> rewrites the router script
+literal (<code>vendor/laravel/framework/.../server.php</code> → <code>public/nativephp-router.php</code>); if that
+patch did not apply, or you installed a <em>manifest-aware</em> runtime without writing
+<code>nativephp.json</code>, the runtime resolves Laravel&#39;s paths and 404s everything with nothing in
+the log.</p>
+<pre><code class="language-bash">bin/console native:manifest              # writes nativephp.json and reports what the runtime supports
+bin/console native:install --source=… -f # or reinstall and re-patch
+ls public/nativephp-router.php           # must exist
+</code></pre>
+<p><code>native:manifest</code> tells you which case you are in: <em>Supported</em>, <em>Absent</em> (today&#39;s upstream —
+the patches are what make it work) or <em>Unknown</em>.</p>
+<h3 id="the-boot-dies-with-the-environment-local-is-not-registered-as-allowed"><a class="anchor" href="#the-boot-dies-with-the-environment-local-is-not-registered-as-allowed">The boot dies with &quot;The environment &quot;local&quot; is not registered as allowed&quot;</a></h3>
+<p><code>php.ts</code> hardcodes Laravel&#39;s environment names, and Symfony 8&#39;s
+<code>Kernel::getAllowedEnvs()</code> throws on anything outside <code>dev</code>/<code>prod</code>/<code>test</code>. This is the one
+Laravel-ism that is a hard failure rather than a wrong path, and it kills <code>native:config</code> and
+<code>native:php-ini</code> before the window exists.</p>
+<p>Fix: install the patched runtime (<code>native:install</code>), or write <code>nativephp.json</code> on a
+manifest-aware runtime — its <code>env.dev</code>/<code>env.prod</code> keys are <code>dev</code>/<code>prod</code>.</p>
+<h3 id="a-packaged-app-logs-failed-to-cache-view-and-routes-at-every-launch"><a class="anchor" href="#a-packaged-app-logs-failed-to-cache-view-and-routes-at-every-launch">A packaged app logs &quot;Failed to cache view and routes&quot; at every launch</a></h3>
+<p>The runtime runs Laravel&#39;s <code>optimize</code> and <code>migrate --force</code> in a packaged build. Neither is
+a Symfony command, so each throws <code>CommandNotFoundException</code>, and the runtime records its
+<code>optimized_version</code> only on success — so it never records one and retries on every launch.</p>
+<p>Both are skipped by <code>RuntimePatcher</code>. If you see this, you are on an unpatched runtime:
+reinstall with <code>native:install --force</code>. The packaged build already ships a warmed prod
+cache, and Doctrine migrations are yours to run — from <code>AppBootstrapper::boot()</code>, if you
+want them at startup.</p>
+<h3 id="the-boot-dies-before-the-php-server-starts-mentioning-storage"><a class="anchor" href="#the-boot-dies-before-the-php-server-starts-mentioning-storage">The boot dies before the PHP server starts, mentioning <code>storage</code></a></h3>
+<p><code>ensureAppFoldersAreAvailable()</code> calls <code>copySync(appPath + &#39;/storage&#39;, …)</code> unconditionally,
+and <code>fs-extra</code>&#39;s <code>copySync</code> throws on a missing source. Any app without a top-level
+<code>storage/</code> directory dies there. The patcher guards it with an <code>existsSync</code>; if you are on an
+unpatched runtime, either patch it or create an empty <code>storage/</code>.</p>
+<h3 id="something-i-configured-is-being-ignored--app-id-deep-links-the-updater"><a class="anchor" href="#something-i-configured-is-being-ignored--app-id-deep-links-the-updater">Something I configured is being ignored — app id, deep links, the updater</a></h3>
+<p><code>native:config</code> is failing. <code>index.ts::loadConfig()</code> wraps it in
+<code>try { … } catch (e) { console.error(e) }</code> and returns <code>{}</code>, then boot continues to
+completion: no app id, no deep-link registration, no updater, and a window that looks
+perfectly normal. A totally broken config command and a correct one are visually identical.</p>
+<pre><code class="language-bash">bin/console native:config    # must print exactly one line of JSON, nothing else
+bin/console native:php-ini
+</code></pre>
+<p>Anything else on stdout — a banner, a deprecation notice, a <code>dump()</code>, a log line written
+during console boot — breaks <code>JSON.parse</code>. Also make sure nothing in that path calls the
+runtime: at that point <code>NATIVEPHP_API_URL</code> is unset and the client throws
+<code>RuntimeNotAvailable</code>.</p>
+<h3 id="i-get-403-from-every-request-when-i-open-the-app-url-in-a-browser"><a class="anchor" href="#i-get-403-from-every-request-when-i-open-the-app-url-in-a-browser">I get 403 from every request when I open the app URL in a browser</a></h3>
+<p>That is <code>RuntimeAccessSubscriber</code> doing its job: while running inside the runtime it rejects
+any request carrying neither the <code>_php_native</code> cookie nor the <code>X-NativePHP-Secret</code> header, at
+priority 4096 (above the firewall). Your app is on a real loopback port and that secret is the
+only thing keeping other local processes out.</p>
+<p>To debug in a browser, either send the header, or set <code>native_desktop.block_browser_access: false</code> temporarily. Note the subscriber fails <em>open</em> when the runtime supplied no secret at
+all, so if you are seeing 403s the secret exists and simply did not match.</p>
+<h3 id="runtimecallfailed-…-rejected-with-403--the-x-nativephp-secret-header-did-not-match"><a class="anchor" href="#runtimecallfailed-…-rejected-with-403--the-x-nativephp-secret-header-did-not-match"><code>RuntimeCallFailed: … rejected with 403 — the X-NativePHP-Secret header did not match</code></a></h3>
+<p><code>NATIVEPHP_SECRET</code> is generated per boot and handed only to processes the runtime spawns. A
+stale value usually means this process outlived the runtime that started it — a child process
+still running after a restart, most often.</p>
+<h3 id="runtimenotavailable-…-nativephp_api_url-is-not-set"><a class="anchor" href="#runtimenotavailable-…-nativephp_api_url-is-not-set"><code>RuntimeNotAvailable: … NATIVEPHP_API_URL is not set</code></a></h3>
+<p>The code is running in a process the runtime did not start: a plain CLI invocation, an
+ordinary web request, or a test. Guard it:</p>
+<pre><code class="language-php">if ($this-&gt;client-&gt;isAvailable()) { … }
+</code></pre>
+<p>Or, in tests, use <code>FakeRuntime::available()</code> — see <a href="testing.html">Testing</a>.</p>
+<h3 id="logicexception-cannot-build-an-absolute-window-url-outside-an-http-request"><a class="anchor" href="#logicexception-cannot-build-an-absolute-window-url-outside-an-http-request"><code>LogicException: Cannot build an absolute window URL outside an HTTP request</code></a></h3>
+<p><code>UrlResolver</code> builds window URLs from the current request because the PHP server&#39;s port is
+chosen by the runtime at boot and never published to PHP. From a console command or a worker
+there is nothing to derive it from. Pass an absolute URL, or set <code>native_desktop.base_url</code>.</p>
+<h2 id="desktop--windows-and-events"><a class="anchor" href="#desktop--windows-and-events">Desktop — windows and events</a></h2>
+<h3 id="my-resize-does-not-fire-an-event"><a class="anchor" href="#my-resize-does-not-fire-an-event">My resize does not fire an event</a></h3>
+<p>Expected, and not fixable from PHP. The runtime listens for Electron&#39;s <code>resized</code>, which fires
+for user drags but not for <code>setSize()</code>. <code>window/resize</code> succeeds and <code>window/get</code> reflects the
+new size — no <code>WindowResized</code> arrives.</p>
+<p>If you need to know your own resizes happened, act at the call site rather than in a listener.
+Any test that expects the event will fail against a real runtime too.</p>
+<h3 id="windows-current-returns-null"><a class="anchor" href="#windows-current-returns-null"><code>$windows-&gt;current()</code> returns null</a></h3>
+<p>Also expected. The runtime calls <code>BrowserWindow.getFocusedWindow().id</code> with no null guard, so
+when no window is focused (the app is backgrounded) it throws on its side and answers 500.
+<code>current()</code> returns <code>null</code> rather than propagating that. Never write
+<code>$windows-&gt;current()-&gt;id</code>.</p>
+<p>If you want &quot;the window this request came from&quot; rather than &quot;the focused window&quot;, use
+<code>detectId()</code>, which is what every mutation already falls back to.</p>
+<h3 id="the-page-renders-enormous--about-four-letters-fill-the-window"><a class="anchor" href="#the-page-renders-enormous--about-four-letters-fill-the-window">The page renders enormous — about four letters fill the window</a></h3>
+<p><code>zoomFactor</code> reached the runtime as <code>undefined</code>, and <code>setZoomFactor(parseFloat(undefined))</code> is
+<code>NaN</code>. <code>PendingWindow::open()</code> always sends <code>1.0</code>, so this only happens if you post
+<code>window/open</code> through <code>ClientInterface</code> yourself. Include <code>zoomFactor</code>.</p>
+<h3 id="the-window-title-never-changes-when-the-pages--does"><a class="anchor" href="#the-window-title-never-changes-when-the-pages--does">The window title never changes when the page&#39;s <code>&lt;title&gt;</code> does</a></h3>
+<p>The runtime <code>preventDefault()</code>s Electron&#39;s <code>page-title-updated</code>. Use
+<code>$windows-&gt;title(&#39;…&#39;)</code> — it is the only route to the native title bar.</p>
+<h3 id="my-settings-change-event-has-the-wrong-key"><a class="anchor" href="#my-settings-change-event-has-the-wrong-key">My settings change event has the wrong key</a></h3>
+<p>You wrote <code>a.b</code>; the event reports <code>a</code>. Dots are <strong>object paths</strong>, not part of the key:
+electron-store uses dot-prop, so <code>set(&#39;a.b&#39;, 1)</code> stores <code>{&quot;a&quot;:{&quot;b&quot;:1}}</code>. <code>get(&#39;a.b&#39;)</code> reads it
+back correctly, but the runtime&#39;s store watcher diffs top-level keys only, so
+<code>SettingChanged</code> names the root.</p>
+<p>Fix: use a flat separator such as <code>:</code> (<code>set(&#39;a:b&#39;, 1)</code>) if the event key must match the key
+you wrote. Same behaviour in mobile&#39;s <code>SecureStorage</code>.</p>
+<h3 id="my-settings-listener-loops-forever"><a class="anchor" href="#my-settings-listener-loops-forever">My settings listener loops forever</a></h3>
+<p><code>SettingChanged</code> fires for writes your own app makes, because the runtime watches the store
+rather than the caller. A listener that writes on change will re-enter. Guard on the key, or
+do not write from that listener.</p>
+<h3 id="my-listener-never-runs--runs-twice"><a class="anchor" href="#my-listener-never-runs--runs-twice">My listener never runs / runs twice</a></h3>
+<p>Which name an event dispatches under depends on the event:</p>
+<div class="table-scroll"><table><thead><tr><th>Source</th><th>Arrives as</th><th>Listener</th></tr></thead><tbody>
+<tr><td>One of the 44 runtime events</td><td>its typed class</td><td><code>#[AsEventListener]</code> on the typed parameter</td></tr>
+<tr><td>A menu item <strong>with</strong> <code>event: &#39;X&#39;</code></td><td><code>NativeEvent</code></td><td><code>#[AsEventListener(event: &#39;native.X&#39;)]</code></td></tr>
+<tr><td>A menu item <strong>without</strong> one</td><td><code>MenuItemClicked</code></td><td>typed listener; read <code>$event-&gt;id()</code></td></tr>
+<tr><td>A global shortcut</td><td><code>NativeEvent</code> under the name you registered</td><td><code>#[AsEventListener(event: &#39;native.…&#39;)]</code></td></tr>
+<tr><td>A notification with <code>event()</code></td><td><code>NativeEvent</code></td><td>same</td></tr>
+</tbody></table></div>
+<p>Caller-named events are dispatched <strong>twice</strong> — under <code>native.&lt;name&gt;</code> and under
+<code>NativeEvent::class</code> — because Symfony notifies only the listeners registered for the name
+passed to <code>dispatch()</code>, and one call cannot serve both a targeted and a catch-all listener.
+Register for one or the other; a listener registered for both runs twice.</p>
+<p>If a typed listener never fires, put a catch-all <code>NativeEvent</code> listener in temporarily and log
+<code>$event-&gt;name</code> and <code>$event-&gt;payload</code> — that shows exactly what the runtime is sending.</p>
+<h3 id="an-events-payload-does-not-match-the-class-or-arrives-with-__error"><a class="anchor" href="#an-events-payload-does-not-match-the-class-or-arrives-with-__error">An event&#39;s payload does not match the class, or arrives with <code>__error</code></a></h3>
+<p><code>EventFactory</code> degrades to a <code>NativeEvent</code> carrying <code>[...payload, &#39;__error&#39; =&gt; …]</code> when a
+payload cannot satisfy its event class constructor. That means a contract mismatch: a runtime
+upgrade changed a payload shape, or the map is wrong. It degrades rather than 500ing because
+the runtime swallows the answer anyway.</p>
+<p>Note the dual spreading it relies on: list payloads spread positionally
+(<code>WindowResized: [id, width, height]</code>), string-keyed payloads spread as <strong>named arguments</strong>
+(<code>ProcessExited: {alias, code}</code>). If you dispatch your own event classes by class name via
+<code>events.allowed_namespaces</code>, your constructor parameter names are part of the contract.</p>
+<h3 id="my-child-process-does-nothing-or-restart-on-a-dead-alias-succeeds"><a class="anchor" href="#my-child-process-does-nothing-or-restart-on-a-dead-alias-succeeds">My child process does nothing, or <code>restart()</code> on a dead alias &quot;succeeds&quot;</a></h3>
+<ul>
+<li><code>message()</code> answers <code>200</code> even for an unknown alias, so it cannot confirm delivery.</li>
+<li><code>restart()</code> on an unknown alias is meant to 410, but the runtime captures the settings
+before stopping and <code>{...undefined}</code> is <code>{}</code> in JavaScript — you get a process with empty
+settings instead of an error. Check the returned handle.</li>
+<li><code>ProcessHandle::$pid</code> is often <code>null</code> immediately after starting; the <code>ProcessSpawned</code>
+event carries the real pid.</li>
+<li>Starting an existing alias is a no-op that returns the existing handle.</li>
+</ul>
+<h3 id="my-global-shortcut-never-fires"><a class="anchor" href="#my-global-shortcut-never-fires">My global shortcut never fires</a></h3>
+<p><code>register()</code> cannot report failure — another application may already own the accelerator.
+Use <code>registerChecked()</code>, which asks the OS afterwards and returns <code>false</code> if the registration
+did not take.</p>
+<h3 id="dock-calls-do-nothing"><a class="anchor" href="#dock-calls-do-nothing">Dock calls do nothing</a></h3>
+<p><code>DockManager</code> guards every method on macOS and returns quietly elsewhere, because <code>app.dock</code>
+is <code>undefined</code> on Windows and Linux and the request would throw rather than no-op.</p>
+<h3 id="debug-calls-do-nothing-in-the-packaged-app"><a class="anchor" href="#debug-calls-do-nothing-in-the-packaged-app"><code>debug/*</code> calls do nothing in the packaged app</a></h3>
+<p><code>/api/debug/*</code> is mounted only when <code>NODE_ENV === &#39;development&#39;</code>. In a packaged app those
+requests 404, and <code>DebugLogger</code> stops posting after the first one — the routes are mounted
+at boot or never, so there is nothing to retry and every attempt is a blocking round trip.</p>
+<p>It also refuses to forward a record logged <em>while it is forwarding one</em>. That is not
+theoretical tidiness: an unrouted POST comes back as express&#39;s default HTML page rather than
+a status phrase, <code>Client</code> reports that it could not read the reply through the <code>native</code>
+channel, and a <code>DebugLogger</code> handler on that channel would post that report — 404, report,
+post, for as long as the request lasts.</p>
+<h3 id="the-log-says-runtime-returned-non-json-for-post-…"><a class="anchor" href="#the-log-says-runtime-returned-non-json-for-post-…">The log says &quot;Runtime returned non-JSON for POST …&quot;</a></h3>
+<p>That message means the body was neither JSON nor the status reason phrase — most often a
+genuine HTML error page. It is a real signal, not noise: the client matches the exact reason
+phrase for the status code (express&#39;s <code>res.sendStatus(200)</code> sends the body <code>OK</code>, a 404 sends
+<code>Not Found</code>) precisely so that a real error page still gets reported.</p>
+<h2 id="desktop--packaging"><a class="anchor" href="#desktop--packaging">Desktop — packaging</a></h2>
+<h3 id="the-packaged-app-cannot-make-https-calls"><a class="anchor" href="#the-packaged-app-cannot-make-https-calls">The packaged app cannot make HTTPS calls</a></h3>
+<p>No CA bundle. The runtime passes <code>$NATIVEPHP_BUILD_PATH/cacert.pem</code> to every PHP process as
+<code>curl.cainfo</code> and <code>openssl.cafile</code>; without it every outbound TLS handshake fails.</p>
+<pre><code class="language-bash">composer require nativephp/php-bin    # ships cacert.pem; zero PHP dependencies
+bin/console native:build linux x64
+</code></pre>
+<p><code>native:build</code> warns rather than failing when it cannot find one — check the build output for
+&quot;The packaged app will have no CA bundle&quot;.</p>
+<h3 id="the-packaged-app-does-not-boot-at-all--envnotfoundexception"><a class="anchor" href="#the-packaged-app-does-not-boot-at-all--envnotfoundexception">The packaged app does not boot at all — <code>EnvNotFoundException</code></a></h3>
+<p><code>APP_SECRET</code> was stripped from the staged <code>.env</code>. <code>framework.yaml</code> reads
+<code>%env(APP_SECRET)%</code>, so without it the container cannot even be built. This is the collision
+between Laravel&#39;s defaults and Symfony&#39;s names: Laravel&#39;s cleanup list globs <code>*_SECRET</code>, which
+is harmless there (its key is <code>APP_KEY</code>).</p>
+<p>The bundle defends against this with <code>build.env_keep</code>, which <strong>wins over</strong> <code>build.env_remove</code>
+and defaults to <code>[&#39;APP_SECRET&#39;]</code>. If you see this, you have removed <code>APP_SECRET</code> from
+<code>env_keep</code>. Put it back.</p>
+<h3 id="the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request"><a class="anchor" href="#the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request">The packaged app is slow, and logs an opcache warning on every request</a></h3>
+<pre><code>Warning: Failed loading Zend extension &#39;opcache&#39; (… Dynamic loading not supported)
+</code></pre>
+<p>The static musl PHP binary cannot dynamically load extensions and its baked-in ini asks for
+opcache anyway. <strong>Packaged NativePHP apps have no opcache</strong> — Laravel&#39;s too — so every request
+pays full compile cost.</p>
+<p>Warm <code>var/cache</code> at build time rather than relying on runtime caching. On a manifest-aware
+runtime the manifest&#39;s <code>optimize</code> step (<code>cache:warmup</code>) does this on first serve; otherwise add
+it to <code>native_desktop.prebuild</code> or run it in the staged directory.</p>
+<h3 id="the-packaged-app-fails-writing-cache-or-logs"><a class="anchor" href="#the-packaged-app-fails-writing-cache-or-logs">The packaged app fails writing cache or logs</a></h3>
+<p><code>var/cache</code> and <code>var/log</code> are excluded from the copy (a dev machine&#39;s cache must not ship) and
+listed in <code>build.keep</code>, which plants a placeholder because electron-builder prunes empty
+directories and dotfiles do not stop it. If you have edited <code>build.keep</code>, put them back —
+Symfony will not boot without both.</p>
+<h3 id="the-build-contains-readable-php-source"><a class="anchor" href="#the-build-contains-readable-php-source">The build contains readable PHP source</a></h3>
+<p>It does, and <code>native:build</code> warns on every run. Upstream&#39;s protected build needs a bundle from
+Bifrost, NativePHP&#39;s hosted service, which currently targets Laravel&#39;s entry points; whether
+that bundler can target <code>bin/console</code> is not answerable from the open-source client. There is
+no workaround in this project today.</p>
+<h2 id="desktop--tooling"><a class="anchor" href="#desktop--tooling">Desktop — tooling</a></h2>
+<h3 id="nativeinstall-says-the-source-does-not-look-like-a-nativephp-electron-project"><a class="anchor" href="#nativeinstall-says-the-source-does-not-look-like-a-nativephp-electron-project"><code>native:install</code> says the source does not look like a NativePHP Electron project</a></h3>
+<p>It checks for <code>electron-plugin/src/server</code> under <code>--source</code>. Point it at
+<code>&lt;checkout&gt;/resources/electron</code>, not at the repository root.</p>
+<h3 id="nativeinstall-fails-with-could-not-apply-the-…-patch"><a class="anchor" href="#nativeinstall-fails-with-could-not-apply-the-…-patch"><code>native:install</code> fails with &quot;Could not apply the … patch&quot;</a></h3>
+<p><code>PatchFailed::hunkDidNotMatch</code> — the upstream code a hunk targets has changed. The patcher
+throws rather than skipping, because a skipped hunk produces an app that boots into a Laravel
+router path and 404s everything. Either pin an older <code>NativePHP/desktop</code> checkout, update
+<code>RuntimePatcher</code>, or move to a manifest-aware runtime and <code>native:manifest</code>.</p>
+<h3 id="i-edited-the-runtimes-typescript-and-nothing-changed"><a class="anchor" href="#i-edited-the-runtimes-typescript-and-nothing-changed">I edited the runtime&#39;s TypeScript and nothing changed</a></h3>
+<p>The runtime loads <code>electron-plugin/dist/</code>, which ships pre-compiled. Rebuild:</p>
+<pre><code class="language-bash">cd nativephp/electron &amp;&amp; npm run plugin:build
+</code></pre>
+<p><code>native:install</code> does this for you after patching, which is why <code>--skip-npm</code> leaves the
+patched sources inert.</p>
+<h3 id="nativerun-says-the-electron-project-has-no-node_modules"><a class="anchor" href="#nativerun-says-the-electron-project-has-no-node_modules"><code>native:run</code> says the Electron project has no <code>node_modules</code></a></h3>
+<p>Run <code>native:install</code> without <code>--skip-npm</code>, or <code>npm install</code> in <code>nativephp/electron</code> yourself.</p>
+<h3 id="nativerun-cannot-find-an-icon-or-a-ca-bundle"><a class="anchor" href="#nativerun-cannot-find-an-icon-or-a-ca-bundle"><code>native:run</code> cannot find an icon or a CA bundle</a></h3>
+<p><code>$NATIVEPHP_BUILD_PATH</code> needs exactly three things: <code>icon.png</code>, <code>cacert.pem</code> and <code>php/php</code>.
+<code>native:run</code> copies the first from the Electron project&#39;s <code>build/icon.png</code>, the second from
+your <code>openssl.cafile</code> / <code>curl.cainfo</code> / <code>/etc/ssl/certs/ca-certificates.crt</code>, and the third
+from the PHP binary running the command. If it cannot find one it says which, and you can drop
+the file into <code>nativephp/build/</code> by hand.</p>
+<h3 id="a-failing-process-every-minute"><a class="anchor" href="#a-failing-process-every-minute">A failing process every minute</a></h3>
+<p>The runtime spawns a scheduler tick every 60 seconds from the first minute boundary and does
+not check the command exists. On a patched runtime that is <code>native:schedule-tick</code>, which the
+bundle ships as a no-op. On an unpatched one it is <code>schedule:run</code>, which your app probably does
+not have. Patch the runtime, or write the manifest (<code>lifecycle.schedule</code>).</p>
+<p>Do not ship your own <code>schedule:run</code> — it would collide with <code>symfony/scheduler</code>&#39;s.</p>
+<h2 id="mobile"><a class="anchor" href="#mobile">Mobile</a></h2>
+<h3 id="every-mobile-api-call-returns-null-false-or-an-empty-array"><a class="anchor" href="#every-mobile-api-call-returns-null-false-or-an-empty-array">Every mobile API call returns null, false, or an empty array</a></h3>
+<p><code>nativephp_call()</code> is a compiled extension that exists <strong>only inside a packaged app</strong>, so
+outside one <code>Bridge::isAvailable()</code> is false and every call no-ops. That includes your dev
+machine, your test suite and CI.</p>
+<pre><code class="language-yaml"># config/packages/test/native_mobile.yaml (or dev)
+native_mobile:
+    fake_bridge: true
+</code></pre>
+<p><code>bin/console native:mobile:doctor</code> states it plainly, and says so again in a note.</p>
+<h3 id="my-callback-runs-with-no-arguments"><a class="anchor" href="#my-callback-runs-with-no-arguments">My callback runs with no arguments</a></h3>
+<p>Mobile native UI, and there are three separate causes.</p>
+<p><strong>The event type carries no payload.</strong> <code>InteractionEvent::fromArray()</code> narrows the payload
+<em>by type</em>: <code>TEXT_CHANGE</code>/<code>SUBMIT</code> yield one string, <code>TOGGLE_CHANGE</code>/<code>CHECKBOX_CHANGE</code> one
+bool, <code>SLIDER_CHANGE</code> one float, <code>RADIO_CHANGE</code>/<code>SELECT_CHANGE</code> one string, <code>TAB_CHANGE</code> one
+int — and <strong>everything else, including a plain press, carries nothing</strong>. A handler bound to
+<code>-&gt;onPress()</code> receives only the literal arguments in its expression. If you need a value on
+press, put it in the expression: <code>-&gt;onPress(&quot;remove({$index})&quot;)</code>.</p>
+<p><strong>An unrecognised type code.</strong> An unknown type degrades to a plain press and carries nothing,
+deliberately, rather than leaking its payload into an argument slot.</p>
+<p><strong>Your handler declares more parameters than the call can fill.</strong> Arguments are
+<code>[...expression literals, ...event payload]</code>, truncated to the slots the method actually has.
+A mismatch throws <code>CallbackRefused</code> at dispatch — argument counts are deliberately <em>not</em>
+checked at publish time, because how many values arrive depends on the event type, which is
+unknown until the interaction happens.</p>
+<h3 id="a-button-on-the-device-does-nothing-at-all"><a class="anchor" href="#a-button-on-the-device-does-nothing-at-all">A button on the device does nothing at all</a></h3>
+<p>The expression names a method that cannot be dispatched — a typo (<code>&#39;incremnt&#39;</code>), or a method
+missing <code>#[NativeAction]</code>. Only <code>#[NativeAction]</code> methods are reachable, default-deny.</p>
+<p><code>ComponentScreen::frame()</code> calls <code>assertCallbacksDispatchable()</code> right after publishing and
+throws <code>CallbackRefused</code> for exactly this case, so <strong>render the screen in a test</strong> and the dead
+handler becomes an exception instead of a silent no-op on a device. The check runs after the
+publish because expressions are registered while the tree is serialised, not while it is
+built.</p>
+<h3 id="the-device-shows-a-stale-or-spliced-in-subtree-after-navigating"><a class="anchor" href="#the-device-shows-a-stale-or-spliced-in-subtree-after-navigating">The device shows a stale or spliced-in subtree after navigating</a></h3>
+<p>Diff state was carried across screens. <code>_hash</code> reuse markers are keyed by node id, and node ids
+are only meaningful within one screen&#39;s tree — a colliding id lets the renderer splice a
+subtree it still has cached, producing a wrong-but-plausible screen.</p>
+<p><code>ComponentScreen</code> (in its constructor and <code>close()</code>) and <code>NativeScreenResponder</code> (on a pattern
+change) call <code>ElementPublisher::resetDiffState()</code> for you. If you drive the publisher yourself,
+call it on every navigation.</p>
+<h3 id="a-reordered-list-loses-scroll-position-or-input-focus"><a class="anchor" href="#a-reordered-list-loses-scroll-position-or-input-focus">A reordered list loses scroll position or input focus</a></h3>
+<p>Unkeyed nodes take positional identity, so reordering hands row 2&#39;s native state to row 1. Call
+<code>-&gt;key(&#39;…&#39;)</code> on anything in a list that can reorder. The same rule applies to
+<code>mount(Child::class, …, key: $k)</code>.</p>
+<h3 id="my-component-state-resets-at-random"><a class="anchor" href="#my-component-state-resets-at-random">My component state resets at random</a></h3>
+<p>Something is resetting it. <code>MobileRuntime</code> resets every service tagged <code>kernel.reset</code> after
+each dispatch — so a component, a <code>ComponentScreen</code> or a <code>ComponentScreenFactory</code> registered
+with that tag would be cleared under a live screen. That reads as a random UI reset on a device
+and never reproduces in a test. The bundle deliberately does not tag them; do not add it.</p>
+<p>Also check you are not calling <code>$factory-&gt;open(new X())</code> per request for a screen that is
+supposed to persist — a fresh instance is fresh state. And a component instance cannot be
+rebound: reusing one throws.</p>
+<h3 id="a-native-screen-boots-into-the-webview-instead"><a class="anchor" href="#a-native-screen-boots-into-the-webview-instead">A native screen boots into the WebView instead</a></h3>
+<p><code>BootPlanner</code> fell back, and every reason is silent. In order of likelihood:</p>
+<ol>
+<li><code>entry_mode</code> is <code>web</code> — <code>NATIVEPHP_BOOT_MODE=web</code> at build time forces the WebView.</li>
+<li>No baked manifest. <strong>iOS requires <code>bundle_meta.json</code> to exist</strong>; Android can boot native
+off the runtime dump alone, so this reproduces on one platform only.</li>
+<li>The two <code>version</code> values are not equal <strong>as strings</strong>. iOS reads both through
+<code>as? String</code>, so a JSON <em>number</em> version fails the cast, compares as <code>&quot;&quot;</code>, and the runtime
+dump is ignored. <code>NativeRouteManifest::version()</code> is a string and refuses an empty one for
+this reason.</li>
+<li>The dump&#39;s directory does not exist. Upstream writes into Laravel&#39;s <code>storage/framework</code>,
+which always exists there; <code>writeRuntimeDump()</code> creates it and throws on failure rather than
+leaving the device on a stale baked list.</li>
+<li>The requested path matches none of the declared patterns — check you used Laravel
+placeholder syntax (<code>{id}</code>, <code>{id?}</code>), which is what the device matches.</li>
+</ol>
+<h3 id="a-nativescreen-renders-but-its-state-resets-on-every-tap"><a class="anchor" href="#a-nativescreen-renders-but-its-state-resets-on-every-tap">A <code>#[NativeScreen]</code> renders, but its state resets on every tap</a></h3>
+<p>The screen is being re-instantiated per frame rather than kept alive. <code>ComponentScreenRenderer</code>
+caches one instance per route pattern for exactly this reason, so this points at a custom
+<code>ScreenRendererInterface</code> that builds a fresh component in <code>renderScreen()</code>. State lives in
+ordinary properties, so a new instance is a new screen — and nothing logs it.</p>
+<p>The same shape with the opposite symptom: if taps do nothing at all, the component was bound
+to a registry it created itself instead of the one <code>renderScreen()</code> was handed. The id the
+device sends back was minted by the previous frame and only resolves in the registry that
+holds it, so the lookup misses silently.</p>
+<h3 id="nativescreenresponder-cannot-be-instantiated"><a class="anchor" href="#nativescreenresponder-cannot-be-instantiated"><code>NativeScreenResponder</code> cannot be instantiated</a></h3>
+<p>Only reachable now if the alias has been overridden with something that does not resolve — the
+bundle aliases <code>ScreenRendererInterface</code> to <code>ComponentScreenRenderer</code>, and the responder&#39;s
+renderer argument is wired <code>nullOnInvalid()</code>. If you overrode it, check your service is
+registered and public enough to be aliased; otherwise the responder throws a <code>LogicException</code>
+naming the interface at the point a native screen is actually requested.</p>
+<h3 id="theme--classes-produce-no-colour-or-ios-classes-vanish"><a class="anchor" href="#theme--classes-produce-no-colour-or-ios-classes-vanish"><code>theme-*</code> classes produce no colour, or <code>ios:</code> classes vanish</a></h3>
+<p><code>StyleParser</code> needs a <code>ThemeColorResolverInterface</code> — without one, every
+<code>bg-/text-/border-theme-*</code> class drops rather than guessing (31 of the 684 corpus tokens).
+<code>ArrayThemeColorResolver</code> is the simple implementation. Platform variants drop unless
+<code>native_mobile.platform</code> is <code>ios</code> or <code>android</code>; <code>null</code> means &quot;neither&quot;, which is the safe
+default off a device and the wrong one on it.</p>
+<p>Pass the out-param to see exactly what was dropped:</p>
+<pre><code class="language-php">$style = $parser-&gt;parse($classes, $dropped);   // $dropped: list&lt;string&gt;
+</code></pre>
+<p>Note that intentional no-ops (a variant aimed at the <em>other</em> platform) are excluded from
+<code>$dropped</code>, since they are not typos.</p>
+<h3 id="my-parsed-styles-have-no-effect-on-the-device"><a class="anchor" href="#my-parsed-styles-have-no-effect-on-the-device">My parsed styles have no effect on the device</a></h3>
+<p><code>StyleParser::parse()</code> returns the canonical <strong>camelCase</strong> intermediate vocabulary
+(<code>flexGrow</code>), not the wire format (layout keys are snake_case, <code>flex_grow</code>). Upstream has an
+<code>applyLayout()</code> that routes each key through the right element setter; this bundle does not
+implement that dispatcher yet. So <code>-&gt;layout($parser-&gt;parse(&#39;flex-1&#39;))</code> puts keys on the wire
+that the renderers do not read.</p>
+<p>Until an applier exists, set wire keys directly (<code>-&gt;layout([&#39;flex_grow&#39; =&gt; 1])</code>) or route the
+parsed values through the typed setters yourself.</p>
+<h3 id="the-app-launches-to-a-blank-screen-with-nothing-in-the-log"><a class="anchor" href="#the-app-launches-to-a-blank-screen-with-nothing-in-the-log">The app launches to a blank screen with nothing in the log</a></h3>
+<p>Look in logcat (Android) or the Xcode console (iOS) for <code>[NATIVE_EXCEPTION]</code> — that prefix is
+how the bootstrap shims report a failure that happens before there is a logger, an error page,
+or a parseable HTTP response. <code>BOOT_FATAL:</code> on stdout means <code>persistent.php</code> failed to boot the
+kernel at all.</p>
+<p>If nothing appears at all, the host is probably still executing
+<code>vendor/nativephp/mobile/bootstrap/…/native.php</code> — i.e. <code>native:mobile:install</code> did not patch
+the projects you are actually building. Re-run it against the copies under <code>nativephp/android</code>
+and <code>nativephp/ios</code>.</p>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

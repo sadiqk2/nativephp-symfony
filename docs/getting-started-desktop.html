@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desktop · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link" href="index.html">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link current" href="getting-started-desktop.html" aria-current="page">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link" href="getting-started-mobile.html">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link" href="desktop-api.html">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link" href="mobile-api.html">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link" href="recipes.html">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link" href="testing.html">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link" href="troubleshooting.html">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d2"><a href="#1-install-the-bundle">1. Install the bundle</a></li>
+<li class="d2"><a href="#2-import-the-bundles-routes">2. Import the bundle's routes</a></li>
+<li class="d2"><a href="#3-implement-appbootstrapper">3. Implement AppBootstrapper</a></li>
+<li class="d2"><a href="#4-install-the-electron-runtime-into-your-project">4. Install the Electron runtime into your project</a></li>
+<li class="d3"><a href="#why-the-runtime-needs-patching">Why the runtime needs patching</a></li>
+<li class="d3"><a href="#what-the-bundle-fixes-in-the-runtime">What the bundle fixes in the runtime</a></li>
+<li class="d3"><a href="#check-it-before-you-run-it">Check it before you run it</a></li>
+<li class="d2"><a href="#5-run-it">5. Run it</a></li>
+<li class="d2"><a href="#6-two-commands-that-must-print-nothing-but-json">6. Two commands that must print nothing but JSON</a></li>
+<li class="d2"><a href="#7-optional-write-a-manifest">7. Optional: write a manifest</a></li>
+<li class="d2"><a href="#8-configuration">8. Configuration</a></li>
+<li class="d2"><a href="#9-where-to-go-next">9. Where to go next</a></li>
+</ul></nav>
+        <article class="prose">
+<h1 id="getting-started--desktop"><a class="anchor" href="#getting-started--desktop">Getting started — desktop</a></h1>
+<p>From <code>composer require</code> to a Symfony application in a native window.</p>
+<p>You need PHP 8.3+, Symfony 7 or 8, Node 20+ (the runtime is an Electron project and is
+built with npm), and a working <code>git</code>. Nothing about your application changes: it is an
+ordinary Symfony app served by PHP&#39;s built-in server, and Electron points a <code>BrowserWindow</code>
+at it.</p>
+<hr>
+<h2 id="1-install-the-bundle"><a class="anchor" href="#1-install-the-bundle">1. Install the bundle</a></h2>
+<pre><code class="language-bash">composer require native-symfony/desktop-bundle:^0.1
+</code></pre>
+<p><strong>Not on Packagist yet</strong>, so that resolves only once Composer knows where to find it: clone
+this repository and add a path repository pointing at <code>bundle/</code>, with <code>&quot;symlink&quot;: true</code> (a
+copy goes stale and edits to the bundle appear to do nothing). The exact block is in the
+<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/README.md#0-install-the-packages" target="_blank" rel="noopener">root README</a>, and <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/composer.json" target="_blank" rel="noopener"><code>demo/composer.json</code></a>
+is a working example. Everything after this step is unaffected by how the package arrived.</p>
+<p>Flex registers the bundle for you: it derives candidate class names from the PSR-4 namespace,
+and <code>Native\Symfony\Desktop\</code> yields <code>Native\Symfony\Desktop\NativeDesktopBundle</code>. That is
+what the namespace is shaped for — the bundle used to be <code>Native\Symfony\</code>, where the
+candidates are <code>SymfonyBundle</code> and <code>NativeSymfonyBundle</code> and the real class matched neither,
+so every application had to register it by hand.</p>
+<p>Without Flex, add it yourself:</p>
+<pre><code class="language-php">// config/bundles.php
+return [
+    // …
+    Native\Symfony\Desktop\NativeDesktopBundle::class =&gt; [&#39;all&#39; =&gt; true],
+];
+</code></pre>
+<h2 id="2-import-the-bundles-routes"><a class="anchor" href="#2-import-the-bundles-routes">2. Import the bundle&#39;s routes</a></h2>
+<p><code>native:install</code> (step 4) writes this file for you, so you can skip ahead — it is documented
+here because it is worth knowing what it does and why, and because an application that is not
+Flex-shaped has to write it by hand.</p>
+<p>Symfony bundles cannot register routes on their own. The runtime posts to two fixed paths,
+<code>/_native/api/booted</code> and <code>/_native/api/events</code>, and until they are imported the app boots
+into a window that never opens and receives no events:</p>
+<pre><code class="language-yaml"># config/routes/native_desktop.yaml
+native_desktop:
+    resource: &#39;@NativeDesktopBundle/src/Resources/config/routes.php&#39;
+    type: php
+</code></pre>
+<p>The installer only ever creates this file; it will not rewrite one you have edited unless you
+pass <code>--force</code>, and if there is no <code>config/routes/</code> directory it warns rather than writing
+somewhere nothing loads.</p>
+<p>Verify with <code>bin/console debug:router | grep _native</code> — you want
+<code>native_desktop_booted</code> and <code>native_desktop_events</code>.</p>
+<h2 id="3-implement-appbootstrapper"><a class="anchor" href="#3-implement-appbootstrapper">3. Implement <code>AppBootstrapper</code></a></h2>
+<p>The runtime finishes its own boot and then POSTs <code>/_native/api/booted</code>. Whatever that
+handler does <em>is</em> your application&#39;s startup. Nothing appears on screen unless you ask
+for it:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Native;
+
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Window\WindowManager;
+
+final class Bootstrapper implements AppBootstrapper
+{
+    public function __construct(private readonly WindowManager $windows)
+    {
+    }
+
+    public function boot(): void
+    {
+        $this-&gt;windows-&gt;open(&#39;main&#39;)
+            -&gt;url(&#39;/&#39;)
+            -&gt;size(1000, 720)
+            -&gt;title(&#39;My App&#39;)
+            -&gt;rememberState()
+            -&gt;open();
+    }
+}
+</code></pre>
+<p>You do not wire anything. The bundle calls <code>registerForAutoconfiguration()</code> on
+<code>AppBootstrapper</code> and a compiler pass aliases the interface to your single implementation.
+If you register two, the pass fails at compile time with both class names.</p>
+<p><code>/booted</code> can fire more than once — macOS posts it again on <code>activate</code> when no windows are
+visible — so <code>boot()</code> must be idempotent. <code>window/open</code> is idempotent by id (an existing id
+is shown and focused, nothing is created), so a <code>boot()</code> that only opens windows needs no
+guard of its own.</p>
+<p>If no bootstrapper is registered, <code>BootedController</code> logs a warning naming the missing
+contract and answers 500. The runtime swallows that response, so the log line is the only
+symptom you will get.</p>
+<h2 id="4-install-the-electron-runtime-into-your-project"><a class="anchor" href="#4-install-the-electron-runtime-into-your-project">4. Install the Electron runtime into your project</a></h2>
+<pre><code class="language-bash">git clone --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop
+bin/console native:install --source=/tmp/np-desktop/resources/electron
+</code></pre>
+<p>This copies <code>resources/electron</code> to <code>your-project/nativephp/electron</code>, patches it, installs
+the router script into <code>public/nativephp-router.php</code>, runs <code>npm install</code> (this downloads
+Electron — expect minutes), and rebuilds the plugin from the patched TypeScript. Add
+<code>--skip-npm</code> to copy and patch only, <code>--force</code> to overwrite an existing install, <code>-v</code> to see
+npm&#39;s output.</p>
+<p>The bundle does not vendor the runtime. Requiring <code>nativephp/desktop</code> would pull
+<code>illuminate/contracts</code>, <code>laravel/prompts</code> and <code>spatie/laravel-package-tools</code> into a Symfony
+application, so you point at a checkout instead.</p>
+<h3 id="why-the-runtime-needs-patching"><a class="anchor" href="#why-the-runtime-needs-patching">Why the runtime needs patching</a></h3>
+<p>The runtime resolves the PHP side of the app through ten hardcoded Laravel string
+literals in one TypeScript file: the CLI name <code>artisan</code> (six call sites), the <code>php -S</code>
+router script inside <code>vendor/laravel/framework</code>, an unconditional copy of a <code>storage/</code>
+directory, <code>APP_ENV=local</code> (which Symfony 8 rejects outright — <code>getAllowedEnvs()</code> throws),
+<code>schedule:run</code>, and the <code>optimize</code> and <code>migrate --force</code> a packaged app runs at every
+launch. Those last two exist in no Symfony application, and their failure is not quiet:
+each logs a stack trace on every boot, and because the runtime only records its
+<code>optimized_version</code> when the call <em>succeeds</em>, it retried them forever. They are skipped —
+the build already ships a warmed production cache, and Doctrine migrations belong to the
+app rather than to the runtime. <code>RuntimePatcher</code> rewrites them in <strong>your</strong> copy: upstream&#39;s
+<code>native:install --publish</code> already mirrors the whole Electron project into the app&#39;s own
+directory and the runtime prefers that copy, so this is a local edit rather than a fork.
+The patcher is idempotent and fails loudly when a hunk&#39;s target has moved upstream, because
+silently skipping one produces an app that serves Laravel&#39;s router path and 404s everything.</p>
+<p>The permanent fix is a manifest file — see <a href="#7-optional-write-a-manifest"><code>native:manifest</code></a>
+— which is patch <code>0001</code> in <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/upstream-patches/README.md" target="_blank" rel="noopener"><code>../upstream-patches/</code></a>. It is
+not merged upstream yet.</p>
+<h3 id="what-the-bundle-fixes-in-the-runtime"><a class="anchor" href="#what-the-bundle-fixes-in-the-runtime">What the bundle fixes in the runtime</a></h3>
+<p><code>native:install</code> does not copy the runtime verbatim. Besides rewriting the Laravel-isms, it
+carries five bug fixes into your copy:</p>
+<div class="table-scroll"><table><thead><tr><th>Fix</th><th>Why it matters here</th></tr></thead><tbody>
+<tr><td><code>notifyLaravel</code> reports failures under <code>SHELL_VERBOSITY</code> instead of swallowing them (<a href="https://github.com/NativePHP/desktop/pull/140" target="_blank" rel="noopener">#140</a>)</td><td>The single largest cause of &quot;it just does nothing&quot;: a crashed, 500ing or 403ing app looked exactly like a healthy one</td></tr>
+<tr><td><code>window/current</code> 404s instead of dereferencing a null focused window (<a href="https://github.com/NativePHP/desktop/pull/138" target="_blank" rel="noopener">#138</a>)</td><td><code>getFocusedWindow()</code> is null whenever the app is in the background — a Messenger worker calling it threw a bare string</td></tr>
+<tr><td><code>window/open</code> defaults the zoom factor instead of passing <code>NaN</code> (<a href="https://github.com/NativePHP/desktop/pull/137" target="_blank" rel="noopener">#137</a>)</td><td>Laravel&#39;s <code>Window</code> always serialises a default, so this never surfaced there; every other client hits it on the first window</td></tr>
+<tr><td><code>shell/trash-item</code> sends a body with its 400 (<a href="https://github.com/NativePHP/desktop/pull/139" target="_blank" rel="noopener">#139</a>)</td><td><code>res.json()</code> with no argument is rejected by express, turning a handled failure into an unhandled one</td></tr>
+<tr><td>The preload dispatches native events from one listener rather than one per subscription</td><td>Past ten <code>Native.on()</code> calls Node prints a MaxListenersExceededWarning that reads like a leak. The demo trips it with eleven</td></tr>
+</tbody></table></div>
+<p>The first four are filed upstream and unreviewed; the fifth was found here. Patching your own
+copy is what <code>--publish</code> is for, and it means none of this waits on a merge. Every hunk is
+non-strict: if a target has moved — most likely because the fix landed upstream — the install
+says so and carries on.</p>
+<h3 id="check-it-before-you-run-it"><a class="anchor" href="#check-it-before-you-run-it">Check it before you run it</a></h3>
+<pre><code class="language-bash">bin/console native:doctor
+</code></pre>
+<p>The runtime talks to your app over HTTP, so a call that never lands is logged by Electron and
+nowhere you would look. The commonest way to get a dead app is the routes import missing,
+which gives a window that opens and then does nothing forever. <code>native:doctor</code> asks the router
+directly and exits non-zero if the runtime&#39;s calls would not land, then reports your
+bootstrapper and the inputs <code>native:build</code> needs.</p>
+<p>The other way — your own firewall covering <code>/_native/api/</code> — the bundle handles by default;
+see <code>exempt_runtime_firewall</code> in <a href="troubleshooting.html#desktop--boot">troubleshooting</a>.</p>
+<h2 id="5-run-it"><a class="anchor" href="#5-run-it">5. Run it</a></h2>
+<pre><code class="language-bash">bin/console native:run
+</code></pre>
+<p><code>native:run</code> prepares <code>nativephp/build</code> with the three things the runtime insists on — an
+<code>icon.png</code>, a <code>cacert.pem</code> and a PHP binary — then runs <code>npx electron-vite dev</code> in the
+Electron project with <code>APP_PATH</code> pointing at your app. Useful options:</p>
+<div class="table-scroll"><table><thead><tr><th>Option</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>--php-binary=/path/to/php</code></td><td>PHP for the runtime to spawn; defaults to the one running the command</td></tr>
+<tr><td><code>--electron-path=…</code></td><td>Electron project location; defaults to <code>nativephp/electron</code></td></tr>
+<tr><td><code>--no-focus</code></td><td>Do not steal focus when the app restarts on a file change</td></tr>
+<tr><td><code>-v</code></td><td>Sets <code>SHELL_VERBOSITY=1</code>, which makes the runtime log every PHP command it spawns</td></tr>
+</tbody></table></div>
+<p>That last one is the single most useful debugging flag in the project.</p>
+<h2 id="6-two-commands-that-must-print-nothing-but-json"><a class="anchor" href="#6-two-commands-that-must-print-nothing-but-json">6. Two commands that must print nothing but JSON</a></h2>
+<p>Before anything else, the runtime runs <code>bin/console native:config</code> and
+<code>bin/console native:php-ini</code>, captures stdout with <code>execFile</code>, and <code>JSON.parse</code>s the result.
+Both rules that follow are absolute:</p>
+<ul>
+<li><strong>Nothing but JSON on stdout.</strong> No banner, no <code>dump()</code>, no deprecation notice, no
+startup log line. Both commands write with <code>OutputInterface::OUTPUT_RAW</code> so no formatter
+interferes on their side — but anything <em>your</em> app echoes during console boot lands in the
+same stream and breaks the parse.</li>
+<li><strong>Never assume <code>NATIVEPHP_API_URL</code> or <code>NATIVEPHP_SECRET</code> exist.</strong> At this point in the
+boot the runtime&#39;s API server does not exist. Any service that calls the runtime from a
+console-boot path will throw <code>RuntimeNotAvailable</code> here.</li>
+</ul>
+<p>If either command fails, the runtime logs the error and <strong>carries on with an empty config</strong>.
+No app id, no deep links, no updater, no visible symptom. Check them by hand whenever
+something configured seems to be ignored:</p>
+<pre><code class="language-bash">bin/console native:config   # {&quot;app_id&quot;:&quot;com.example.app&quot;,&quot;version&quot;:&quot;1.0.0&quot;,…}
+bin/console native:php-ini  # {&quot;memory_limit&quot;:&quot;512M&quot;}
+</code></pre>
+<p>Both should print one line of JSON and nothing else.</p>
+<h2 id="7-optional-write-a-manifest"><a class="anchor" href="#7-optional-write-a-manifest">7. Optional: write a manifest</a></h2>
+<pre><code class="language-bash">bin/console native:manifest            # writes nativephp.json
+bin/console native:manifest --dry-run  # print it instead
+</code></pre>
+<p><code>nativephp.json</code> declares this app&#39;s entry points — CLI, router, docroot, the dev/prod
+<code>APP_ENV</code> names, the lifecycle commands, the writable directories — so that a
+manifest-aware runtime needs no patching at all. The command reports what it wrote and
+whether the runtime you have installed will actually read it:</p>
+<ul>
+<li><strong>Supported</strong> — the runtime reads manifests; <code>native:install</code> skips every patch.</li>
+<li><strong>Absent</strong> — today&#39;s upstream runtime. The file is ignored and the patches are what make
+your app work. Harmless to keep.</li>
+<li><strong>Unknown</strong> — could not tell (half-patched, hand-edited, refactored upstream).
+<code>native:install</code> patches to be safe, because guessing &quot;supported&quot; wrongly gives you an app
+that 404s every route with nothing in the log.</li>
+</ul>
+<p>Defaults are Symfony&#39;s, including <code>doctrine:migrations:migrate --no-interaction --allow-no-migration</code> for the migrate step. If you have no Doctrine Migrations, define the
+<code>Native\Symfony\Desktop\Manifest\Manifest</code> service yourself with <code>migrate: null</code>.</p>
+<h2 id="8-configuration"><a class="anchor" href="#8-configuration">8. Configuration</a></h2>
+<p>Every key, with its default:</p>
+<pre><code class="language-yaml"># config/packages/native_desktop.yaml
+native_desktop:
+    app_id: com.example.app     # passed to setAppUserModelId()
+    name: App                   # slugged for the package filename
+    version: &#39;1.0.0&#39;
+    author: ~
+    copyright: ~
+    description: ~
+    website: ~
+    deeplink_scheme: ~          # &#39;myapp&#39;, without &#39;://&#39; — enables OpenedFromURL
+    base_url: ~                 # fallback for absolute window URLs outside a request
+    block_browser_access: true  # leave this on
+    exempt_runtime_firewall: true  # keep your access_control off /_native/api/ in the runtime
+    testing: false              # true swaps the transport for FakeRuntime — test/ only
+    php_ini:
+        memory_limit: 512M      # merged over the runtime&#39;s defaults, passed as -d flags
+    updater:
+        enabled: false
+        default: github
+        providers: {}
+    events:
+        allowed_namespaces: []  # classes instantiable from a runtime event push
+    prebuild: []                # shell commands run before staging
+    postbuild: []               # shell commands run after packaging
+    nsis:
+        delete_app_data_on_uninstall: false
+    build:
+        exclude: […]            # fnmatch patterns never copied into the build
+        keep: [&#39;var/cache&#39;, &#39;var/log&#39;]
+        env_remove: […]         # .env keys stripped from the staged copy
+        env_keep: [&#39;APP_SECRET&#39;]  # …and the ones that survive anyway; this list wins
+        env_defaults:
+            APP_ENV: prod
+            APP_DEBUG: &#39;0&#39;
+</code></pre>
+<p>Run <code>bin/console config:dump-reference native_desktop</code> for the annotated tree.</p>
+<p>Three of these are security-relevant and worth reading before you change them:</p>
+<p><strong><code>block_browser_access</code></strong> registers a subscriber at priority 4096 — above the firewall —
+that rejects any request carrying neither the <code>_php_native</code> cookie nor the
+<code>X-NativePHP-Secret</code> header while the app runs inside the runtime. Your app is served on a
+real loopback port; that secret is the only thing keeping other local processes out. It
+fails <em>open</em> when the runtime supplied no secret at all, so that a misconfiguration is
+diagnosable rather than a wall of 403s.</p>
+<p><strong><code>exempt_runtime_firewall</code></strong> decorates Symfony&#39;s <code>security.access_map</code> so the runtime&#39;s two
+endpoints carry no access-control attributes — but <strong>only while running inside the runtime</strong>,
+where <code>RuntimeAccessSubscriber</code> has already checked the shared secret. Deployed as an ordinary
+web application the same code keeps your firewall over those paths in full, which matters:
+<code>/_native/api/events</code> dispatches events by name. Without this an <code>access_control</code> rule of <code>^/</code>
+answers the runtime&#39;s <code>POST /_native/api/booted</code> with a 401 that the runtime discards, and the
+app boots to a window that never does anything. Turn it off only if you write the equivalent
+<code>security: false</code> firewall yourself.</p>
+<p><strong><code>events.allowed_namespaces</code></strong> is empty by default and should stay empty unless you
+dispatch your own event classes by class name. Upstream&#39;s Laravel controller does
+<code>class_exists($event) ? new $event(...$payload)</code> straight from the request body; here only
+the 44 known runtime events and namespaces you list are constructed, and anything else
+becomes a <code>NativeEvent</code> carrying the payload as data.</p>
+<h2 id="9-where-to-go-next"><a class="anchor" href="#9-where-to-go-next">9. Where to go next</a></h2>
+<p><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/" target="_blank" rel="noopener"><code>../demo/</code></a> is a working application using both bundles — bootstrapper,
+multi-window inspector, notes over the settings store, a jobs page, a routed menu, and a
+native-UI screen. Copy from it rather than from this page where the two differ.</p>
+<ul>
+<li><a href="desktop-api.html">Desktop API reference</a> — the manager services, area by area.</li>
+<li><a href="recipes.html">Recipes</a> — multi-window apps, Messenger workers, typed listeners, packaging.</li>
+<li><a href="testing.html">Testing</a> — <code>FakeRuntime</code>, assertions, pushing events without a device.</li>
+<li><a href="troubleshooting.html">Troubleshooting</a> — read this the first time something is silently
+wrong, which with this runtime is the usual failure mode.</li>
+</ul>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

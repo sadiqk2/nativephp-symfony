@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Testing · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link" href="index.html">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link" href="getting-started-desktop.html">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link" href="getting-started-mobile.html">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link" href="desktop-api.html">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link" href="mobile-api.html">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link" href="recipes.html">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link current" href="testing.html" aria-current="page">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link" href="troubleshooting.html">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d2"><a href="#wiring-one-flag-and-one-trait">Wiring: one flag and one trait</a></li>
+<li class="d2"><a href="#faking-the-desktop-runtime">Faking the desktop runtime</a></li>
+<li class="d3"><a href="#scripting-replies">Scripting replies</a></li>
+<li class="d3"><a href="#scripting-the-user">Scripting the user</a></li>
+<li class="d3"><a href="#scripting-windows">Scripting windows</a></li>
+<li class="d3"><a href="#inspecting-the-log">Inspecting the log</a></li>
+<li class="d2"><a href="#asserting-what-the-app-asked-for">Asserting what the app asked for</a></li>
+<li class="d2"><a href="#pushing-events-into-the-app">Pushing events into the app</a></li>
+<li class="d2"><a href="#mobile">Mobile</a></li>
+<li class="d3"><a href="#native-ui-screens">Native-UI screens</a></li>
+<li class="d2"><a href="#what-these-tests-cannot-tell-you">What these tests cannot tell you</a></li>
+</ul></nav>
+        <article class="prose">
+<h1 id="testing"><a class="anchor" href="#testing">Testing</a></h1>
+<p>Desktop apps are testable without Electron, and mobile apps without a device. Both bundles
+put the double at the <em>transport</em> seam rather than in front of each manager, which is the
+difference between testing your payloads and testing a stub.</p>
+<p>Everything here needs <code>phpunit/phpunit</code>, which your app already has wherever you would use it.</p>
+<ul>
+<li><a href="#wiring-one-flag-and-one-trait">Wiring: one flag and one trait</a></li>
+<li><a href="#faking-the-desktop-runtime">Faking the desktop runtime</a></li>
+<li><a href="#asserting-what-the-app-asked-for">Asserting what the app asked for</a></li>
+<li><a href="#pushing-events-into-the-app">Pushing events into the app</a></li>
+<li><a href="#mobile">Mobile</a></li>
+<li><a href="#what-these-tests-cannot-tell-you">What these tests cannot tell you</a></li>
+</ul>
+<hr>
+<h2 id="wiring-one-flag-and-one-trait"><a class="anchor" href="#wiring-one-flag-and-one-trait">Wiring: one flag and one trait</a></h2>
+<pre><code class="language-yaml"># config/packages/test/native_desktop.yaml
+native_desktop:
+    testing: true
+</code></pre>
+<p>That re-points the <code>ClientInterface</code> alias at <code>FakeRuntime</code> and <strong>nothing else</strong>: every
+manager, every controller and the event bridge stay exactly as they are in production, so a
+functional test exercises the real payload building against a runtime that records instead of
+one that has to be running. It also registers <code>RuntimeEventSimulator</code>, and
+<code>RuntimeExpectations</code> when PHPUnit is present — all three public.</p>
+<p>Set it in <code>config/packages/test/</code> only. With it on, nothing reaches a real runtime.</p>
+<p>The trait wires the three pieces in one <code>use</code>, and works both ways round:</p>
+<pre><code class="language-php">use Native\Symfony\Desktop\Testing\InteractsWithNativeRuntime;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+
+final class BootstrapperTest extends KernelTestCase
+{
+    use InteractsWithNativeRuntime;
+
+    public function testItOpensTheMainWindow(): void
+    {
+        self::bootKernel();
+
+        self::getContainer()-&gt;get(\App\Native\Bootstrapper::class)-&gt;boot();
+
+        $this-&gt;nativeExpects()-&gt;assertWindowOpened(&#39;main&#39;, [&#39;width&#39; =&gt; 1100]);
+    }
+}
+</code></pre>
+<ul>
+<li>In a <code>KernelTestCase</code> with <code>testing: true</code>, <code>nativeRuntime()</code> finds the fake the container
+already injected everywhere — so the services under test are asserted against the same call
+log without the test handing any of them a double. Two fakes in one test, with assertions
+made against the one nobody called, is the failure mode this avoids.</li>
+<li>In a plain <code>TestCase</code> it builds its own <code>FakeRuntime</code>, and you construct managers with
+<code>new</code>. <code>nativeWindows()</code> is provided because <code>WindowManager</code> needs a <code>UrlResolver</code> and a
+<code>RequestStack</code>; every other manager is just <code>new XManager($this-&gt;nativeRuntime())</code>.</li>
+</ul>
+<p>The trait&#39;s surface:</p>
+<div class="table-scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><code>nativeRuntime(): FakeRuntime</code></td><td>The fake every native call goes through</td></tr>
+<tr><td><code>nativeExpects(): RuntimeExpectations</code></td><td>Assertions</td></tr>
+<tr><td><code>nativeEvents(?EventDispatcherInterface): RuntimeEventSimulator</code></td><td>Push events; defaults to the container&#39;s dispatcher so the app&#39;s real listeners run</td></tr>
+<tr><td><code>nativeDispatcher(): EventDispatcher</code></td><td>A dispatcher owned by the test, for a listener in isolation</td></tr>
+<tr><td><code>nativeWindows(?string $baseUrl = &#39;http://localhost&#39;): WindowManager</code></td><td></td></tr>
+<tr><td><code>nativeRequestFromWindow(string $windowId, string $uri = &#39;/&#39;)</code></td><td>Pretend this request came from that window</td></tr>
+<tr><td><code>nativeRequests(): RequestStack</code></td><td></td></tr>
+</tbody></table></div>
+<p><code>nativeRequestFromWindow()</code> matters more than it looks: the runtime appends <code>?_windowId=</code> to
+everything it navigates, and every manager method with an optional id falls back to it.
+Without a request carrying the parameter, an id-less call resolves to <code>&#39;main&#39;</code> and the test
+cannot distinguish a correct fallback from a lost id.</p>
+<h2 id="faking-the-desktop-runtime"><a class="anchor" href="#faking-the-desktop-runtime">Faking the desktop runtime</a></h2>
+<p><code>Native\Symfony\Desktop\Testing\FakeRuntime</code> implements <code>ClientInterface</code>, records every request, and
+answers with whatever the test scripted. Because only the transport is faked, the real
+<code>WindowManager</code> and the real <code>PendingWindow</code> build the payload — so what you assert on is the
+wire, not a stub. All 116 endpoints are covered the day they are added, including the ones
+with no manager.</p>
+<p>Overriding the alias by hand still works if you prefer it:</p>
+<pre><code class="language-php">self::getContainer()-&gt;set(ClientInterface::class, FakeRuntime::available());
+</code></pre>
+<p><code>FakeRuntime::unavailable()</code> models a process the runtime did not start: every call throws
+<code>RuntimeNotAvailable</code>, exactly as the real client does, so <code>isAvailable()</code> guards are testable.</p>
+<h3 id="scripting-replies"><a class="anchor" href="#scripting-replies">Scripting replies</a></h3>
+<pre><code class="language-php">$fake = FakeRuntime::available()
+    -&gt;willReturn(&#39;app/version&#39;, [&#39;version&#39; =&gt; &#39;1.2.3&#39;])
+    -&gt;willReturnStatus(&#39;window/get/ghost&#39;, 404)
+    -&gt;willRespondWith(&#39;settings/theme&#39;, new Response(200, [&#39;value&#39; =&gt; &#39;dark&#39;]))
+    -&gt;willRespondUsing(&#39;clipboard&#39;, fn (RecordedCall $c) =&gt; new Response(200, $c-&gt;payload));
+</code></pre>
+<ul>
+<li>Endpoints may be exact or <code>*</code> wildcards (<code>window/get/*</code>). Exact wins over wildcard, and
+among wildcards the longest — so <code>window/*</code> cannot shadow <code>window/get/main</code> by declaration
+order.</li>
+<li><code>willRespondWith()</code> takes several responses; consecutive calls get consecutive ones and the
+last repeats, so polling an endpoint twice needs only one script entry.</li>
+<li><strong>An unscripted endpoint answers a bare 200 with no data.</strong> That is deliberate: it is
+contract shape 1 (express sends the status phrase, which the real client normalises to &quot;no
+data&quot;), so reads return their zero values unless you script them. Smoothing that would let a
+test pass against a runtime that would fail.</li>
+</ul>
+<h3 id="scripting-the-user"><a class="anchor" href="#scripting-the-user">Scripting the user</a></h3>
+<p>Dialogs cannot be tested any other way — they block the runtime&#39;s event loop and their return
+value <em>is</em> a human decision. These are <code>willReturn()</code> with the runtime&#39;s exact response shape
+filled in:</p>
+<pre><code class="language-php">$fake-&gt;userPicksFiles(&#39;/tmp/a.csv&#39;, &#39;/tmp/b.csv&#39;);
+$fake-&gt;userCancelsFileSelection();     // {result: undefined} — a MISSING key, not []
+$fake-&gt;userSavesFileAs(&#39;/tmp/out.pdf&#39;);
+$fake-&gt;userCancelsSave();
+$fake-&gt;userClicksAlertButton(2);
+$fake-&gt;userConfirms();                 // index 0 — confirm() builds [confirm, cancel]
+$fake-&gt;userDeclines();                 // index 1
+</code></pre>
+<p><strong>An unscripted dialog is a dismissal, not an answer.</strong> <code>dialog/open</code> degrades to cancelled,
+<code>dialog/save</code> to null, and a message box answers with the payload&#39;s own <code>cancelId</code> — which is
+what Electron returns for Escape and the window close button, and which <code>confirm()</code> sets to
+the <em>declining</em> button for exactly that reason. So a <code>confirm()</code> nobody scripted comes back
+<code>false</code>. Answering with button 0 instead would make &quot;deleting requires confirmation&quot; — the
+most valuable test anyone writes against this kit — pass against code missing the guard
+altogether.</p>
+<h3 id="scripting-windows"><a class="anchor" href="#scripting-windows">Scripting windows</a></h3>
+<pre><code class="language-php">$fake-&gt;windowIs(&#39;main&#39;, [&#39;width&#39; =&gt; 800, &#39;height&#39; =&gt; 600]);   // window/get/main + window/all
+$fake-&gt;currentWindowIs(&#39;main&#39;);                               // …and window/current
+$fake-&gt;windowDoesNotExist(&#39;ghost&#39;);                           // 404 — and drops it from window/all
+$fake-&gt;noCurrentWindow();                                     // window/current answers 500
+</code></pre>
+<p><code>noCurrentWindow()</code> is not an edge case: it is <code>window/current</code>&#39;s documented behaviour when
+the app is backgrounded, since the runtime dereferences <code>getFocusedWindow().id</code> with no null
+guard. Any code that reads the current window should have a test for it.</p>
+<h3 id="inspecting-the-log"><a class="anchor" href="#inspecting-the-log">Inspecting the log</a></h3>
+<pre><code class="language-php">$fake-&gt;calls();                    // list&lt;RecordedCall&gt;, in order
+$fake-&gt;callsTo(&#39;child-process/*&#39;); // filtered
+$fake-&gt;forgetCalls();              // keep the script, clear the log — for multi-phase tests
+</code></pre>
+<p><code>RecordedCall</code> carries <code>$sequence</code>, <code>$method</code>, <code>$endpoint</code>, <code>$payload</code>, plus
+<code>matchesEndpoint($pattern)</code>, <code>payloadContains($subset)</code> and <code>describe()</code>.</p>
+<h2 id="asserting-what-the-app-asked-for"><a class="anchor" href="#asserting-what-the-app-asked-for">Asserting what the app asked for</a></h2>
+<p><code>RuntimeExpectations</code> wraps a <code>FakeRuntime</code> and phrases assertions as intents. When one fails
+it prints the whole call log, because the question a red test has to answer is &quot;then what did
+it do instead?&quot;.</p>
+<pre><code class="language-php">$expect = $this-&gt;nativeExpects();   // or new RuntimeExpectations($fake)
+
+// …exercise the app…
+
+$expect-&gt;assertWindowOpened(&#39;main&#39;, [&#39;width&#39; =&gt; 1000]);
+$expect-&gt;assertWindowTitled(&#39;Ledger&#39;);
+$expect-&gt;assertWindowResized(760, 520, &#39;main&#39;);
+$expect-&gt;assertWindowNavigatedTo(&#39;/reports&#39;);
+$expect-&gt;assertNoWindowClosed();
+
+$expect-&gt;assertFileDialogShown([&#39;multiSelections&#39; =&gt; true]);
+$expect-&gt;assertFileDialogShownAttachedTo(&#39;main&#39;);
+$expect-&gt;assertNoDialogShown();
+$expect-&gt;assertAlerted(&#39;Delete 4 items?&#39;);
+$expect-&gt;assertErrorBoxShown(&#39;Could not start&#39;);
+
+$expect-&gt;assertNotificationSent(&#39;Export finished&#39;);
+$expect-&gt;assertNoNotificationSent();
+
+$expect-&gt;assertProcessStarted(&#39;messenger_async&#39;);
+$expect-&gt;assertProcessStopped(&#39;import&#39;);
+$expect-&gt;assertMessageSentToProcess(&#39;import&#39;, [&#39;pause&#39; =&gt; true]);
+$expect-&gt;assertProcessNotStarted();
+
+$expect-&gt;assertQuitRequested();
+$expect-&gt;assertNoQuitRequested();
+
+// 116 endpoints will always outrun the named helpers:
+$expect-&gt;assertCalled(&#39;settings/theme&#39;, [&#39;value&#39; =&gt; &#39;dark&#39;]);
+$expect-&gt;assertNotCalled(&#39;app/relaunch&#39;);
+$expect-&gt;assertCalledTimes(2, &#39;window/show&#39;);
+$expect-&gt;assertNothingSent();          // the assertion for a guarded path
+</code></pre>
+<p>Passing <code>null</code> as an id asserts that <em>some</em> window was opened, resized, and so on.</p>
+<p><strong>These assert requests, never outcomes.</strong> The runtime ignores unknown window ids silently,
+<code>menu-bar/*</code> and <code>context/*</code> answer <code>200</code> before doing any work, and no endpoint reports
+whether the user saw anything. <code>assertWindowOpened(&#39;main&#39;)</code> means &quot;the app asked for window
+<code>main</code>&quot; — the strongest claim any test without an Electron process can make. The one place a
+real outcome is observable is a dialog&#39;s return value, and that is your own code to assert on.</p>
+<h2 id="pushing-events-into-the-app"><a class="anchor" href="#pushing-events-into-the-app">Pushing events into the app</a></h2>
+<p><code>RuntimeEventSimulator</code> pushes an event exactly as the runtime&#39;s
+<code>POST /_native/api/events</code> would — through the real <code>EventsController</code>, so JSON encoding, the
+dual argument spreading and the double dispatch of caller-named events all apply. A simulator
+that skipped those would prove nothing.</p>
+<pre><code class="language-php">$simulator = $this-&gt;nativeEvents();   // the container&#39;s dispatcher, so real listeners run
+
+$simulator-&gt;windowResized(&#39;main&#39;, 760, 520);
+$simulator-&gt;windowFocused(&#39;main&#39;);
+$simulator-&gt;windowClosed(&#39;main&#39;);
+$simulator-&gt;settingChanged(&#39;theme&#39;, &#39;dark&#39;);
+$simulator-&gt;processExited(&#39;messenger_async&#39;, 137);
+$simulator-&gt;processMessageReceived(&#39;import&#39;, &quot;42 rows\n&quot;);
+$simulator-&gt;menuItemClicked(&#39;save&#39;, label: &#39;Save&#39;);
+$simulator-&gt;notificationClicked($reference);
+$simulator-&gt;notificationReplied($reference, &#39;on my way&#39;);
+$simulator-&gt;openedFromUrl(&#39;myapp://open/42&#39;);
+$simulator-&gt;shortcutPressed(&#39;App\Shortcut\Palette&#39;, &#39;CommandOrControl+Shift+K&#39;);
+$simulator-&gt;powerStateChanged(&#39;on-battery&#39;);
+$simulator-&gt;screenLocked();
+</code></pre>
+<p>Anything not covered by a helper, including your own event names:</p>
+<pre><code class="language-php">$simulator-&gt;dispatch(&#39;Native\Desktop\Events\Windows\WindowMaximized&#39;, [&#39;main&#39;]);
+$simulator-&gt;dispatch(&#39;App\Menu\NewReport&#39;, [&#39;from&#39; =&gt; &#39;toolbar&#39;]);   // → NativeEvent
+</code></pre>
+<p><code>dispatch()</code> returns nothing on purpose: the runtime discards your answer, so there is no
+outcome to hand back. What a test asserts on is what its own listener did.</p>
+<p>To check the mapping itself — that a payload really reaches the constructor argument you think
+it does — use <code>make()</code>:</p>
+<pre><code class="language-php">$event = $simulator-&gt;make(&#39;Native\Desktop\Events\ChildProcess\ProcessExited&#39;, [&#39;alias&#39; =&gt; &#39;x&#39;, &#39;code&#39; =&gt; 1]);
+self::assertSame(1, $event-&gt;code);
+</code></pre>
+<p>If you construct the simulator yourself and test events your app dispatches by class name,
+pass your app&#39;s own <code>EventFactory</code> — the one configured with <code>events.allowed_namespaces</code> — as
+the second constructor argument. <code>nativeEvents()</code> and the container-registered service already
+do that.</p>
+<h2 id="mobile"><a class="anchor" href="#mobile">Mobile</a></h2>
+<pre><code class="language-php">use Native\Symfony\Mobile\Api\SecureStorage;
+use Native\Symfony\Mobile\Bridge\FakeBridge;
+
+$bridge = new FakeBridge();
+$bridge-&gt;willReturn(&#39;SecureStorage.Get&#39;, [&#39;value&#39; =&gt; &#39;tok_123&#39;]);
+
+self::assertSame(&#39;tok_123&#39;, (new SecureStorage($bridge))-&gt;get(&#39;token&#39;));
+self::assertSame(&#39;SecureStorage.Get&#39;, $bridge-&gt;lastCall()[&#39;method&#39;]);
+</code></pre>
+<p><code>new FakeBridge(available: false)</code> models being outside a packaged app. Through the container,
+set <code>native_mobile.fake_bridge: true</code> in <code>config/packages/test/native_mobile.yaml</code>.</p>
+<p>The real <code>Bridge</code> accepts an <code>$invoker</code> callable in place of the extension function, so the
+real class can be tested too:</p>
+<pre><code class="language-php">$bridge = new Bridge(null, fn (string $method, string $json): ?string =&gt; &#39;{&quot;ok&quot;:true}&#39;);
+</code></pre>
+<h3 id="native-ui-screens"><a class="anchor" href="#native-ui-screens">Native-UI screens</a></h3>
+<p>There is no device, so the assertion target is the <strong>published frame</strong>, which
+<code>ElementPublisher</code> captures when the extension is absent:</p>
+<pre><code class="language-php">$screen = $factory-&gt;open(new TodoScreen());
+$frame = $screen-&gt;frame();
+
+self::assertSame(&#39;column&#39;, $frame[&#39;type&#39;]);
+self::assertSame(&#39;Todo&#39;, $frame[&#39;children&#39;][0][&#39;props&#39;][&#39;text&#39;]);
+
+$next = $screen-&gt;handle([
+    &#39;callback_id&#39; =&gt; $screen-&gt;callbackId(&#39;add&#39;),
+    &#39;type&#39; =&gt; InteractionEvent::PRESS,
+]);
+
+// Unchanged nodes come back as {id, type, flags: 1, _hash} — that is subtree reuse,
+// not a missing node. Only what actually changed carries layout, style, props and children.
+self::assertSame(1, $next[&#39;children&#39;][0][&#39;flags&#39;] ?? null);
+</code></pre>
+<p><code>ComponentScreen::callbackId($expression)</code> goes from expression to id, which is the direction
+a test needs (the device learns ids from the frame). <code>frame()</code> also runs
+<code>assertCallbacksDispatchable()</code>, so <strong>rendering a screen in a test is what catches a typo&#39;d
+handler</strong> — otherwise it is a dead button on a device with no error anywhere.</p>
+<h2 id="what-these-tests-cannot-tell-you"><a class="anchor" href="#what-these-tests-cannot-tell-you">What these tests cannot tell you</a></h2>
+<p>Both bundles carry coverage tests that parse upstream&#39;s own sources, so upstream drift becomes
+a failing test rather than a discovery in production: <code>ContractCoverageTest</code> (the 116 express
+routes and the 44 event names), <code>BridgeCoverageTest</code> (the 54 bridge methods) and
+<code>UiElementCoverageTest</code> (the 36 element types, asserted in <strong>both</strong> directions, since a type
+the renderers do not know produces a missing region on the device and no error anywhere).
+Those live in the bundles, not in your app.</p>
+<p>What no test in your app can establish:</p>
+<ul>
+<li>that a window was <em>seen</em>. Every assertion above is about a request.</li>
+<li>that a <code>200</code> meant success. <code>menu-bar/*</code> and <code>context/*</code> acknowledge before acting.</li>
+<li>that the runtime behaves as the contract describes. That is what
+<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/SPIKE-RESULTS.md" target="_blank" rel="noopener"><code>../SPIKE-RESULTS.md</code></a>, <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M2-RESULTS.md" target="_blank" rel="noopener"><code>../M2-RESULTS.md</code></a> and
+<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M3-RESULTS.md" target="_blank" rel="noopener"><code>../M3-RESULTS.md</code></a> are: the record of running it and finding out.</li>
+<li>anything about mobile on a real device. Nothing in this project has run on one.</li>
+</ul>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

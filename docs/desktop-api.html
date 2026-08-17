@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Desktop API · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link" href="index.html">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link" href="getting-started-desktop.html">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link" href="getting-started-mobile.html">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link current" href="desktop-api.html" aria-current="page">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link" href="mobile-api.html">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link" href="recipes.html">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link" href="testing.html">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link" href="troubleshooting.html">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d2"><a href="#three-things-that-apply-everywhere">Three things that apply everywhere</a></li>
+<li class="d2"><a href="#windows">Windows</a></li>
+<li class="d3"><a href="#the-_windowid-convention">The _windowId convention</a></li>
+<li class="d2"><a href="#menus">Menus</a></li>
+<li class="d3"><a href="#menu-bar-tray">Menu bar (tray)</a></li>
+<li class="d3"><a href="#dock-macos-only">Dock (macOS only)</a></li>
+<li class="d2"><a href="#dialogs">Dialogs</a></li>
+<li class="d2"><a href="#notifications">Notifications</a></li>
+<li class="d2"><a href="#clipboard">Clipboard</a></li>
+<li class="d2"><a href="#settings">Settings</a></li>
+<li class="d2"><a href="#child-processes-and-messenger-workers">Child processes and Messenger workers</a></li>
+<li class="d3"><a href="#messenger">Messenger</a></li>
+<li class="d2"><a href="#events">Events</a></li>
+<li class="d3"><a href="#broadcasting-to-the-front-end">Broadcasting to the front end</a></li>
+<li class="d2"><a href="#the-rest-briefly">The rest, briefly</a></li>
+<li class="d2"><a href="#commands">Commands</a></li>
+</ul></nav>
+        <article class="prose">
+<h1 id="desktop-api-reference"><a class="anchor" href="#desktop-api-reference">Desktop API reference</a></h1>
+<p>Every service below is registered <code>public</code> and autowirable by class name. There are no
+facades and no static helpers: inject <code>WindowManager</code>, <code>DialogManager</code>, <code>SettingsManager</code>
+and so on. If you came from the Laravel version, that is the largest day-to-day difference —
+<code>Window::open()</code> becomes an injected <code>$this-&gt;windows-&gt;open()</code>.</p>
+<p>This page shows the shape of each area and flags what behaves surprisingly. For the
+exhaustive list of all 116 endpoints with request and response shapes, read
+<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/CONTRACT.md" target="_blank" rel="noopener"><code>../CONTRACT.md</code></a>; it is the specification, this is the guide.</p>
+<h2 id="three-things-that-apply-everywhere"><a class="anchor" href="#three-things-that-apply-everywhere">Three things that apply everywhere</a></h2>
+<p><strong>A dispatch is not an outcome.</strong> Most endpoints answer <code>200</code> with the body <code>OK</code>, and
+several — every <code>menu-bar/*</code> endpoint and both <code>context</code> ones — send that <code>200</code> <em>before</em>
+doing any work. A successful call means the runtime received your request. Nothing more.</p>
+<p><strong>Unknown ids are silently ignored.</strong> The runtime uses optional chaining on its window map,
+so <code>$windows-&gt;close(&#39;typo&#39;)</code> is a no-op, not an error.</p>
+<p><strong>Outside the runtime, every call throws.</strong> <code>Client::isAvailable()</code> is false when
+<code>NATIVEPHP_API_URL</code> is unset, and any call then throws
+<code>Native\Symfony\Desktop\Client\RuntimeNotAvailable</code>. Code that also runs as an ordinary web request
+must guard:</p>
+<pre><code class="language-php">if ($this-&gt;client-&gt;isAvailable()) {
+    $this-&gt;windows-&gt;title(&#39;Saved&#39;);
+}
+</code></pre>
+<p><code>Native\Symfony\Desktop\Client\RuntimeCallFailed</code> covers the other two failures: a transport error,
+and a <code>403</code> (the shared secret did not match).</p>
+<hr>
+<h2 id="windows"><a class="anchor" href="#windows">Windows</a></h2>
+<p><code>Native\Symfony\Desktop\Window\WindowManager</code> — 21 endpoints.</p>
+<pre><code class="language-php">$windows-&gt;open(&#39;settings&#39;)            // returns PendingWindow; nothing happens until open()
+    -&gt;url(&#39;/settings&#39;)
+    -&gt;size(700, 500)
+    -&gt;minSize(400, 300)
+    -&gt;title(&#39;Settings&#39;)
+    -&gt;rememberState()
+    -&gt;open();
+
+$windows-&gt;title(&#39;Unsaved changes&#39;);   // current window
+$windows-&gt;resize(1200, 800, &#39;main&#39;);
+$windows-&gt;position(x: 40, y: 40, animate: true, id: &#39;main&#39;);
+$windows-&gt;navigate(&#39;/reports&#39;, &#39;main&#39;);
+$windows-&gt;close(&#39;settings&#39;);
+</code></pre>
+<p><code>PendingWindow</code> covers all 39 <code>window/open</code> keys — geometry, <code>frameless()</code>,
+<code>transparent()</code>, <code>vibrancy()</code>, <code>titleBarStyle()</code>, <code>kiosk()</code>, <code>alwaysOnTop()</code>,
+<code>skipTaskbar()</code>, <code>hiddenInMissionControl()</code>, <code>webPreferences()</code>,
+<code>preventLeavingDomain()</code>, <code>preventLeavingPage()</code>, <code>suppressNewWindows()</code>, <code>showDevTools()</code>.
+Read the class; it is a flat list of one-line setters.</p>
+<p>Reads:</p>
+<pre><code class="language-php">$window = $windows-&gt;get(&#39;main&#39;);   // ?Window — null on 404
+$window = $windows-&gt;current();     // ?Window — null when the runtime failed the call
+$all    = $windows-&gt;all();         // list&lt;Window&gt;
+</code></pre>
+<p><code>Window</code> is a readonly value object with 21 typed properties (<code>id</code>, <code>x</code>, <code>y</code>, <code>width</code>,
+<code>height</code>, <code>title</code>, <code>url</code>, <code>focused</code>, <code>resizable</code>, …).</p>
+<p><strong>Surprises worth internalising.</strong></p>
+<ul>
+<li><code>open()</code> <strong>is idempotent by id.</strong> An existing id is shown and focused and nothing is
+created. This is why calling it from <code>AppBootstrapper::boot()</code> is safe even though
+<code>/booted</code> fires again on macOS <code>activate</code>.</li>
+<li><strong><code>current()</code> is fallible by design.</strong> The runtime calls
+<code>BrowserWindow.getFocusedWindow().id</code> with no null guard, so when the app is backgrounded
+it throws on its side and answers 500. You get <code>null</code>, never an exception. Never write
+<code>$windows-&gt;current()-&gt;id</code>.</li>
+<li><strong>A programmatic resize emits no <code>WindowResized</code>.</strong> The runtime listens for Electron&#39;s
+<code>resized</code>, which fires for user drags but not <code>setSize()</code>. <code>window/resize</code> succeeds and
+<code>window/get</code> reflects the new size; no event arrives.</li>
+<li><strong><code>zoomFactor</code> is effectively required, and the bundle sends it for you.</strong> The runtime
+does <code>setZoomFactor(parseFloat(zoomFactor))</code> on <code>dom-ready</code> with no guard, so an absent
+value is <code>NaN</code> and renders the page at an absurd zoom. <code>PendingWindow::open()</code> defaults it
+to <code>1.0</code>.</li>
+<li><strong>The document <code>&lt;title&gt;</code> never reaches the title bar.</strong> The runtime <code>preventDefault()</code>s
+Electron&#39;s <code>page-title-updated</code>. <code>$windows-&gt;title()</code> is the only way.</li>
+<li>Window URLs must be absolute. <code>UrlResolver</code> builds them from the current request, so
+calling <code>open()</code> or <code>navigate()</code> <strong>outside</strong> an HTTP request throws a <code>LogicException</code>
+unless you pass an absolute URL or set <code>native_desktop.base_url</code> — the dev server&#39;s port
+is assigned by the runtime and never published to PHP.</li>
+</ul>
+<h3 id="the-_windowid-convention"><a class="anchor" href="#the-_windowid-convention">The <code>_windowId</code> convention</a></h3>
+<p>The runtime appends <code>?_windowId=&lt;id&gt;</code> to every navigation it performs. Every mutation on
+<code>WindowManager</code> takes an optional <code>$id</code> and falls back to <code>detectId()</code>, which reads
+<code>_windowId</code> from the <strong>Referer first, then the current URL</strong> — in that order, because a form
+POST carries the window in its Referer, not its own URI. If neither has it, the id is
+<code>&#39;main&#39;</code>.</p>
+<pre><code class="language-php">$id = $windows-&gt;detectId();   // ?string
+</code></pre>
+<h2 id="menus"><a class="anchor" href="#menus">Menus</a></h2>
+<p><code>Native\Symfony\Desktop\Menu\Menu</code> is an immutable builder; <code>MenuManager</code> sends it.</p>
+<pre><code class="language-php">use Native\Symfony\Desktop\Enums\MenuRole;
+use Native\Symfony\Desktop\Menu\Menu;
+
+$menu = Menu::new()
+    -&gt;submenu(&#39;App&#39;, Menu::new()
+        -&gt;role(MenuRole::About)
+        -&gt;separator()
+        -&gt;role(MenuRole::Quit))
+    -&gt;submenu(&#39;File&#39;, Menu::new()
+        -&gt;label(&#39;New report&#39;, event: &#39;App\Menu\NewReport&#39;, accelerator: &#39;CommandOrControl+N&#39;)
+        -&gt;link(&#39;Documentation&#39;, &#39;https://example.com/docs&#39;, openInBrowser: true)
+        -&gt;separator()
+        -&gt;checkbox(&#39;Dark mode&#39;, checked: true, event: &#39;App\Menu\ToggleDark&#39;))
+    -&gt;submenu(&#39;Edit&#39;, Menu::new()-&gt;role(MenuRole::EditMenu));
+
+$menus-&gt;set($menu);          // the application menu
+$menus-&gt;context($menu);      // the page context menu
+$menus-&gt;removeContext();
+</code></pre>
+<p>Item types: <code>label()</code>, <code>link()</code>, <code>checkbox()</code>, <code>radio()</code>, <code>role()</code>, <code>separator()</code>,
+<code>submenu()</code>, plus <code>Menu::make(MenuItem ...$items)</code> and <code>add()</code> if you want to construct
+<code>Native\Symfony\Desktop\Menu\Items\*</code> yourself. <code>MenuRole</code> covers 42 Electron roles.</p>
+<p><strong>Every method returns a new <code>Menu</code>.</strong> <code>$menu-&gt;label(&#39;x&#39;);</code> on its own does nothing —
+assign the result.</p>
+<p><strong>Routing clicks.</strong> An item with an <code>event:</code> name arrives as a <code>NativeEvent</code> under
+<code>native.&lt;that name&gt;</code>, which is how you route clicks without inspecting a payload. An item
+<em>without</em> one arrives as <code>Event\Menu\MenuItemClicked</code>, whose <code>$item</code> array carries
+<code>id</code>, <code>label</code> and <code>checked</code> (with <code>id()</code>, <code>label()</code>, <code>checked()</code> accessors). For checkboxes
+and radios, <code>checked</code> is the state the runtime has <em>already</em> flipped to on its side and is
+not queryable afterwards — persist it if you need it.</p>
+<h3 id="menu-bar-tray"><a class="anchor" href="#menu-bar-tray">Menu bar (tray)</a></h3>
+<p><code>MenuBarManager</code> — 9 endpoints, macOS-flavoured but functional elsewhere.</p>
+<pre><code class="language-php">$menuBar-&gt;create()
+    -&gt;label(&#39;7 open&#39;)
+    -&gt;tooltip(&#39;My App&#39;)
+    -&gt;icon(&#39;/abs/path/icon.png&#39;)
+    -&gt;url(&#39;/tray&#39;)
+    -&gt;size(360, 420)
+    -&gt;contextMenu($menu)
+    -&gt;create();
+
+$menuBar-&gt;label(&#39;8 open&#39;);
+$menuBar-&gt;showContextMenu();
+$menuBar-&gt;hide();
+</code></pre>
+<p>Set <code>onlyShowContextMenu()</code> for a tray icon with no popover window. Remember shape 3 of the
+response convention: every <code>menu-bar/*</code> endpoint acknowledges before acting, so a <code>200</code> here
+tells you nothing about success.</p>
+<h3 id="dock-macos-only"><a class="anchor" href="#dock-macos-only">Dock (macOS only)</a></h3>
+<p><code>DockManager</code> — <code>menu()</code>, <code>show()</code>, <code>hide()</code>, <code>icon()</code>, <code>badge()</code>, <code>setBadge()</code>,
+<code>bounce(DockBounce::Informational)</code>, <code>cancelBounce()</code>. Every method checks the platform and
+returns quietly off macOS, where <code>app.dock</code> is <code>undefined</code> and the request would throw. Your
+calling code needs no platform checks.</p>
+<h2 id="dialogs"><a class="anchor" href="#dialogs">Dialogs</a></h2>
+<p><code>Native\Symfony\Desktop\Dialog\DialogManager</code> — 4 endpoints, <strong>all of which block the runtime&#39;s
+event loop until the user answers</strong>. The client&#39;s timeout is 3600s for exactly this reason.</p>
+<pre><code class="language-php">$paths = $dialogs-&gt;open()
+    -&gt;title(&#39;Choose a spreadsheet&#39;)
+    -&gt;filters([[&#39;name&#39; =&gt; &#39;Spreadsheets&#39;, &#39;extensions&#39; =&gt; [&#39;csv&#39;, &#39;xlsx&#39;]]])
+    -&gt;multiple()
+    -&gt;open();                       // list&lt;string&gt;; [] when cancelled
+
+$one = $dialogs-&gt;open()-&gt;directories()-&gt;openOne();   // ?string
+
+$target = $dialogs-&gt;save()
+    -&gt;defaultPath(&#39;/home/me/report.pdf&#39;)
+    -&gt;confirmOverwrite()
+    -&gt;save();                       // ?string; null when cancelled
+
+$index = $dialogs-&gt;alert(&#39;Delete 4 items?&#39;, [&#39;Delete&#39;, &#39;Cancel&#39;], cancelId: 1);
+
+if ($dialogs-&gt;confirm(&#39;Discard unsaved changes?&#39;)) {
+    // …
+}
+
+$dialogs-&gt;error(&#39;Could not start&#39;, &#39;The database file is locked.&#39;);
+</code></pre>
+<p>Notes:</p>
+<ul>
+<li><code>confirm()</code> binds <code>cancelId</code> to the second button, so Escape and the window close button
+both mean &quot;no&quot;. Electron otherwise maps them to index 0 — a dismissed dialog silently
+meaning &quot;yes&quot;. If you call <code>alert()</code> directly, pass <code>cancelId</code> yourself.</li>
+<li>An open dialog with no properties defaults to picking files, since Electron accepts it but
+it is useless.</li>
+<li>Cancellation arrives as a <em>missing</em> <code>result</code> key, not an empty list. The wrappers
+normalise that to <code>[]</code> / <code>null</code>.</li>
+<li><code>error()</code> is the only dialog that works before the app is ready and needs no window, which
+makes it the one usable way to report a boot failure.</li>
+<li><code>attachedTo($windowId)</code> makes a dialog window-modal; <code>properties(DialogProperty ...)</code> sets
+Electron&#39;s raw property list.</li>
+</ul>
+<h2 id="notifications"><a class="anchor" href="#notifications">Notifications</a></h2>
+<pre><code class="language-php">$reference = $notifications-&gt;create()
+    -&gt;title(&#39;Export finished&#39;)
+    -&gt;body(&#39;report.pdf is ready&#39;)
+    -&gt;actions([&#39;Open&#39;, &#39;Reveal&#39;])       // macOS; index reported by NotificationActionClicked
+    -&gt;withReply(&#39;Reply…&#39;)               // macOS
+    -&gt;event(&#39;App\Notification\ExportDone&#39;)
+    -&gt;show();                           // returns the reference
+
+$notifications-&gt;send(&#39;Export finished&#39;, &#39;report.pdf is ready&#39;);
+</code></pre>
+<p>The returned reference correlates the four notification events: <code>NotificationClicked</code>,
+<code>NotificationActionClicked</code>, <code>NotificationReply</code>, <code>NotificationClosed</code>. With <code>event()</code> set,
+clicks arrive as a <code>NativeEvent</code> under that name instead. <code>toastXml()</code> is Windows-only and
+overrides title and body entirely.</p>
+<h2 id="clipboard"><a class="anchor" href="#clipboard">Clipboard</a></h2>
+<pre><code class="language-php">use Native\Symfony\Desktop\Enums\ClipboardType;
+
+$clipboard-&gt;setText(&#39;hello&#39;);
+$text = $clipboard-&gt;text();
+$clipboard-&gt;setHtml(&#39;&lt;b&gt;hello&lt;/b&gt;&#39;);
+$dataUrl = $clipboard-&gt;image();                       // ?string, a data: URL
+$clipboard-&gt;setImage($dataUrl);
+$clipboard-&gt;clear();
+
+$clipboard-&gt;text(ClipboardType::Selection);           // X11 primary selection
+</code></pre>
+<p>The buffer is selected by query string, as the runtime requires. <code>Selection</code> is meaningful
+on Linux only.</p>
+<h2 id="settings"><a class="anchor" href="#settings">Settings</a></h2>
+<p><code>SettingsManager</code> wraps the runtime&#39;s electron-store — a JSON file under <code>userData</code> that
+survives restarts. Unrelated to remembered window geometry, which lives in its own files.</p>
+<pre><code class="language-php">$settings-&gt;set(&#39;theme&#39;, &#39;dark&#39;);
+$theme = $settings-&gt;get(&#39;theme&#39;, &#39;light&#39;);
+$settings-&gt;forget(&#39;theme&#39;);
+$settings-&gt;clear();
+</code></pre>
+<p>Two behaviours that cost real debugging time:</p>
+<p><strong>Every write fires <code>SettingChanged</code>, including writes you make yourself.</strong> The runtime
+watches the store, not the caller. A listener that writes on change will loop.</p>
+<p><strong>Dots are object paths, not part of the key.</strong> electron-store uses dot-prop, so
+<code>set(&#39;a.b&#39;, 1)</code> stores <code>{&quot;a&quot;:{&quot;b&quot;:1}}</code>. <code>get(&#39;a.b&#39;)</code> reads it back correctly — but the
+<code>SettingChanged</code> event reports the <strong>root</strong> key <code>a</code>, because the runtime&#39;s store watcher
+diffs top-level keys only. Use a flat separator such as <code>:</code> if you need the event key to
+match the key you wrote. The same dot-prop behaviour applies to mobile&#39;s <code>SecureStorage</code>.</p>
+<h2 id="child-processes-and-messenger-workers"><a class="anchor" href="#child-processes-and-messenger-workers">Child processes and Messenger workers</a></h2>
+<p><code>ChildProcessManager</code> — 8 endpoints. These run as Electron <code>utilityProcess</code>es, which is the
+point: the runtime supervises them, restarts the persistent ones, and tears them all down on
+quit with a 12-second drain window. A process started here outlives the request that started
+it, unlike anything spawned with <code>symfony/process</code> from a web request.</p>
+<pre><code class="language-php">$handle = $processes-&gt;console(&#39;import&#39;, [&#39;app:import&#39;, &#39;data.csv&#39;]);
+$handle = $processes-&gt;php(&#39;worker&#39;, [&#39;bin/console&#39;, &#39;app:work&#39;], persistent: true);
+$handle = $processes-&gt;node(&#39;vite&#39;, [&#39;node_modules/.bin/vite&#39;, &#39;build&#39;]);
+$handle = $processes-&gt;start(&#39;tail&#39;, [&#39;tail&#39;, &#39;-f&#39;, &#39;/var/log/app.log&#39;]);
+
+$processes-&gt;message(&#39;import&#39;, [&#39;pause&#39; =&gt; true]);
+$processes-&gt;stop(&#39;import&#39;);
+$processes-&gt;restart(&#39;import&#39;);
+
+$processes-&gt;get(&#39;import&#39;);   // ?ProcessHandle — null on 410
+$processes-&gt;all();           // array&lt;string, ProcessHandle&gt;
+</code></pre>
+<p><code>ProcessHandle</code> exposes <code>$alias</code>, <code>$pid</code>, <code>$cmd</code>, <code>$settings</code>, <code>isRunning()</code>,
+<code>isPersistent()</code>. Note <code>$pid</code> is often <code>null</code> on start — the runtime has not observed the
+spawn yet; the <code>ProcessSpawned</code> event carries it.</p>
+<ul>
+<li><strong>Every start is idempotent by alias.</strong> Starting an existing alias returns the existing
+handle and starts nothing.</li>
+<li><code>php()</code> gets the runtime&#39;s own PHP binary, its ini flags, and the full <code>NATIVEPHP_*</code>
+environment including the API URL and secret — so a child can call back into the runtime.</li>
+<li><code>message()</code> answers <code>200</code> even for an unknown alias, so it cannot confirm delivery.</li>
+<li><code>restart()</code> on an unknown alias is meant to 410 but does not: the runtime captures
+settings before stopping, and <code>{...undefined}</code> is <code>{}</code> in JavaScript, so you get a process
+with empty settings. Check the returned handle.</li>
+<li>Output arrives as events: <code>MessageReceived</code> (stdout) and <code>ErrorReceived</code> (stderr), neither
+line-buffered — one event may carry several lines or half of one.</li>
+</ul>
+<h3 id="messenger"><a class="anchor" href="#messenger">Messenger</a></h3>
+<p><code>MessengerWorker</code> runs <code>messenger:consume</code> as a supervised child process. It is the Symfony
+counterpart to Laravel&#39;s <code>QueueWorker</code>, and the argument names are the real difference
+(<code>--memory-limit=128M</code> not <code>--memory=128</code>, <code>--time-limit</code> not <code>--timeout</code>, transports
+positional rather than <code>--queue=a,b</code>).</p>
+<pre><code class="language-php">$worker-&gt;up();                                            // alias messenger_messenger
+$worker-&gt;up(alias: &#39;async&#39;, transports: [&#39;async&#39;], memoryLimit: 256, timeLimit: 3600);
+$worker-&gt;status(&#39;async&#39;);                                 // ?ProcessHandle
+$worker-&gt;down(&#39;async&#39;);
+</code></pre>
+<p>It always starts with <code>persistent: true</code> (the runtime&#39;s watchdog restarts a worker that
+exited on <code>--memory-limit</code>) and <code>handlesOwnShutdown: true</code> (a plain SIGTERM rather than a
+tree-kill, so Messenger can finish the message in flight). The ini <code>memory_limit</code> is set to
+twice <code>--memory-limit</code>, because otherwise PHP fatals before Messenger notices its own limit.
+Aliases are namespaced <code>messenger_*</code> so they cannot collide with your own.</p>
+<h2 id="events"><a class="anchor" href="#events">Events</a></h2>
+<p>The runtime pushes 44 typed events plus any number of caller-named ones. Typed events
+dispatch under their class name, so a listener is ordinary Symfony:</p>
+<pre><code class="language-php">use Native\Symfony\Desktop\Event\Windows\WindowResized;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+
+final class WindowListener
+{
+    #[AsEventListener]
+    public function onResized(WindowResized $event): void
+    {
+        // typed, not an array: $event-&gt;id, $event-&gt;width, $event-&gt;height
+    }
+}
+</code></pre>
+<p>Namespaces under <code>Native\Symfony\Desktop\Event\</code>: <code>Windows\</code> (9), <code>App\</code> (3, including
+<code>ApplicationBooted</code> which the bundle dispatches itself), <code>Menu\</code>, <code>MenuBar\</code> (7),
+<code>Notifications\</code> (4), <code>ChildProcess\</code> (5), <code>PowerMonitor\</code> (8), <code>Settings\</code>,
+<code>AutoUpdater\</code> (7).</p>
+<p><strong>Caller-named events</strong> — from global shortcuts, menu items with an <code>event</code>, and
+notification overrides — have no class to key on, so they arrive as <code>NativeEvent</code> and are
+dispatched <strong>twice</strong>: once under <code>native.&lt;name&gt;</code>, once under <code>NativeEvent::class</code>.</p>
+<pre><code class="language-php">#[AsEventListener(event: &#39;native.App\Menu\NewReport&#39;)]
+public function onNewReport(NativeEvent $event): void {}
+
+#[AsEventListener]                       // every caller-named event — useful while porting
+public function onAny(NativeEvent $event): void
+{
+    $this-&gt;logger-&gt;debug($event-&gt;name, $event-&gt;payload);
+}
+</code></pre>
+<p>Register for one or the other. A listener registered for both runs twice.</p>
+<p><code>NativeEvent</code> carries <code>$name</code>, <code>$payload</code> and a <code>get($key, $default)</code>. If a known event&#39;s
+payload cannot satisfy its class constructor — a runtime upgrade changed a shape —
+<code>EventFactory</code> degrades to a <code>NativeEvent</code> with <code>__error</code> in the payload rather than 500ing
+the endpoint, because the runtime swallows non-2xx answers here.</p>
+<h3 id="broadcasting-to-the-front-end"><a class="anchor" href="#broadcasting-to-the-front-end">Broadcasting to the front end</a></h3>
+<p>Laravel sniffs every dispatched event with a wildcard listener. Symfony has no wildcard
+hook, so intent is declared on the event:</p>
+<pre><code class="language-php">use Native\Symfony\Desktop\Contract\BroadcastsToRuntime;
+
+final class ImportProgressed implements BroadcastsToRuntime
+{
+    public function __construct(public readonly int $percent) {}
+
+    public function broadcastAs(): string
+    {
+        return self::class;
+    }
+
+    public function broadcastPayload(): array
+    {
+        return [&#39;percent&#39; =&gt; $this-&gt;percent];
+    }
+}
+</code></pre>
+<p>Dispatch it normally; <code>BroadcastingDispatcher</code> (which decorates <code>event_dispatcher</code>) forwards
+it to <code>POST /api/broadcast</code>, and the page receives it through <code>window.Native.on()</code>. This
+reaches renderers only — it never comes back to PHP. A failed broadcast is logged, never
+thrown, so it cannot take down whatever dispatched it.</p>
+<p>An app ported from Laravel must add this interface to events that previously only declared a
+<code>nativephp</code> channel.</p>
+<h2 id="the-rest-briefly"><a class="anchor" href="#the-rest-briefly">The rest, briefly</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Service</th><th>What it does</th><th>Worth knowing</th></tr></thead><tbody>
+<tr><td><code>App\AppManager</code></td><td><code>quit()</code>, <code>relaunch()</code>, <code>show()</code>, <code>hide()</code>, <code>isHidden()</code>, <code>locale()</code>, <code>version()</code>, <code>path(AppPath)</code>, <code>badgeCount()</code>, <code>openAtLogin()</code>, recent documents, emoji panel</td><td><code>path()</code> queries live; prefer <code>NativePaths</code> for the ten paths already in the environment</td></tr>
+<tr><td><code>Support\NativePaths</code></td><td><code>home()</code>, <code>userData()</code>, <code>documents()</code>, <code>downloads()</code>, <code>storage()</code>, <code>database()</code>, …</td><td>Read from <code>NATIVEPHP_*_PATH</code>; <strong>no round-trip</strong>, and every getter is nullable</td></tr>
+<tr><td><code>System\SystemManager</code></td><td>TouchID, keychain <code>encrypt()</code>/<code>decrypt()</code>, <code>printers()</code>, <code>print()</code>, <code>printToPdf()</code>, <code>theme()</code>, <code>setTheme()</code></td><td><code>canEncrypt()</code> is false without an OS keyring — including most containers</td></tr>
+<tr><td><code>Screen\ScreenManager</code></td><td><code>displays()</code>, <code>primaryDisplay()</code>, <code>cursorPosition()</code>, <code>activeDisplay()</code></td><td>The last two return <strong>unwrapped</strong> objects; the wrappers hide that</td></tr>
+<tr><td><code>Shell\ShellManager</code></td><td><code>showInFolder()</code>, <code>openPath()</code>, <code>openExternal()</code>, <code>trash()</code></td><td><code>openExternal()</code> can answer 500</td></tr>
+<tr><td><code>PowerMonitor\PowerMonitorManager</code></td><td><code>idleState()</code>, <code>idleTime()</code>, <code>thermalState()</code>, <code>onBatteryPower()</code></td><td>Returns <code>IdleState</code> / <code>ThermalState</code> enums</td></tr>
+<tr><td><code>Shortcut\GlobalShortcutManager</code></td><td><code>register($accelerator, $event)</code>, <code>registerChecked()</code>, <code>unregister()</code>, <code>isRegistered()</code></td><td><code>register()</code> cannot fail visibly — another app may own the accelerator. Use <code>registerChecked()</code>. The event arrives as a <code>NativeEvent</code> under the name you chose</td></tr>
+<tr><td><code>System\ProgressBar</code></td><td><code>update(float $percent)</code>, <code>clear()</code></td><td>Taskbar/dock progress</td></tr>
+<tr><td><code>System\RuntimeInfo</code></td><td><code>get()</code> — pid, platform, arch, uptime</td><td></td></tr>
+<tr><td><code>System\DebugLogger</code></td><td>A PSR-3 logger writing to the devtools console</td><td><code>/api/debug/*</code> exists <strong>only</strong> when <code>NODE_ENV=development</code>. In a packaged app the first record 404s and the logger latches off, so the rest cost nothing. Re-entrant records are dropped, which is what stops the runtime&#39;s own &quot;could not read the reply&quot; error from posting another one</td></tr>
+<tr><td><code>Updater\UpdaterManager</code></td><td><code>checkForUpdates()</code>, <code>downloadUpdate()</code>, <code>quitAndInstall()</code></td><td>Needs <code>native_desktop.updater.enabled: true</code> and a provider; results arrive as the seven <code>AutoUpdater\*</code> events</td></tr>
+<tr><td><code>Contract\ClientInterface</code></td><td><code>isAvailable()</code>, <code>get()</code>, <code>post()</code>, <code>delete()</code></td><td>The escape hatch for an endpoint with no wrapper. <code>Response</code> has <code>$status</code>, <code>$data</code>, <code>successful()</code>, <code>array()</code>, <code>value($key, $default)</code></td></tr>
+</tbody></table></div>
+<h2 id="commands"><a class="anchor" href="#commands">Commands</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>native:install --source=…</code></td><td>Copy, patch and build the Electron runtime into <code>nativephp/electron</code></td></tr>
+<tr><td><code>native:manifest</code></td><td>Write <code>nativephp.json</code>; <code>--dry-run</code> to preview</td></tr>
+<tr><td><code>native:doctor</code></td><td>Check that the runtime can reach the app: routes, firewall, bootstrapper. Exits non-zero when it cannot</td></tr>
+<tr><td><code>native:run</code></td><td>Start the app in development</td></tr>
+<tr><td><code>native:build [os] [arch]</code></td><td>Package for distribution; <code>--dir</code> skips installer generation</td></tr>
+<tr><td><code>native:config</code></td><td>Print the startup config as JSON — <strong>the runtime calls this</strong></td></tr>
+<tr><td><code>native:php-ini</code></td><td>Print PHP ini overrides as JSON — <strong>the runtime calls this</strong></td></tr>
+<tr><td><code>native:schedule-tick</code></td><td>The once-a-minute tick the runtime drives; a no-op by default</td></tr>
+</tbody></table></div>
+<p><code>ScheduleTickCommand</code> is deliberately not <code>final</code>: override the service to hook up
+<code>symfony/scheduler</code>, a Messenger dispatch, or anything else that wants a minute tick. The
+runtime spawns it aligned to the minute boundary and does not check the command exists —
+which is why the patcher retargets it here instead of the bundle shipping a <code>schedule:run</code>
+that would collide with <code>symfony/scheduler</code>&#39;s own.</p>
+<p>The two marked commands are part of the wire contract: JSON on stdout and nothing else, and
+they run before the runtime&#39;s API server exists.</p>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

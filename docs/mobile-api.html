@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mobile API · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link" href="index.html">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link" href="getting-started-desktop.html">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link" href="getting-started-mobile.html">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link" href="desktop-api.html">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link current" href="mobile-api.html" aria-current="page">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link" href="recipes.html">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link" href="testing.html">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link" href="troubleshooting.html">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d2"><a href="#the-bridge">The bridge</a></li>
+<li class="d3"><a href="#where-do-the-results-arrive">Where do the results arrive?</a></li>
+<li class="d2"><a href="#the-groups">The groups</a></li>
+<li class="d3"><a href="#camera--apicamera">Camera — Api\Camera</a></li>
+<li class="d3"><a href="#device--apidevice">Device — Api\Device</a></li>
+<li class="d3"><a href="#secure-storage--apisecurestorage">Secure storage — Api\SecureStorage</a></li>
+<li class="d3"><a href="#geolocation--apigeolocation">Geolocation — Api\Geolocation</a></li>
+<li class="d3"><a href="#microphone--apimicrophone">Microphone — Api\Microphone</a></li>
+<li class="d3"><a href="#biometric--apibiometric">Biometric — Api\Biometric</a></li>
+<li class="d3"><a href="#push-notifications--apipushnotifications">Push notifications — Api\PushNotifications</a></li>
+<li class="d3"><a href="#browser--apibrowser">Browser — Api\Browser</a></li>
+<li class="d3"><a href="#share--apishare">Share — Api\Share</a></li>
+<li class="d3"><a href="#dialog--apidialog">Dialog — Api\Dialog</a></li>
+<li class="d3"><a href="#files--apifiles">Files — Api\Files</a></li>
+<li class="d3"><a href="#network--apinetwork">Network — Api\Network</a></li>
+<li class="d3"><a href="#system--apisystem">System — Api\System</a></li>
+<li class="d3"><a href="#wallet--apimobilewallet">Wallet — Api\MobileWallet</a></li>
+<li class="d3"><a href="#performance--apiperformance">Performance — Api\Performance</a></li>
+<li class="d3"><a href="#native-ui-transitions--apinativeui">Native UI transitions — Api\NativeUi</a></li>
+<li class="d2"><a href="#testing-the-bridge">Testing the bridge</a></li>
+<li class="d2"><a href="#native-ui">Native UI</a></li>
+<li class="d3"><a href="#elements">Elements</a></li>
+<li class="d3"><a href="#publishing-a-frame">Publishing a frame</a></li>
+<li class="d3"><a href="#callbacks">Callbacks</a></li>
+<li class="d3"><a href="#components">Components</a></li>
+<li class="d3"><a href="#twig-authoring">Twig authoring</a></li>
+<li class="d3"><a href="#styling">Styling</a></li>
+<li class="d2"><a href="#commands">Commands</a></li>
+</ul></nav>
+        <article class="prose">
+<h1 id="mobile-api-reference"><a class="anchor" href="#mobile-api-reference">Mobile API reference</a></h1>
+<p>All classes live under <code>Native\Symfony\Mobile\</code>. The sixteen API services are registered
+<code>public</code> and autowirable; they are thin, typed wrappers over
+<code>nativephp_call($method, $jsonPayload)</code>.</p>
+<p>For the native-UI wire format — node shapes, hashes, callback ids, style vocabulary — read
+<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/NATIVE-UI-CONTRACT.md" target="_blank" rel="noopener"><code>../NATIVE-UI-CONTRACT.md</code></a>. This page is the guide to using it.</p>
+<hr>
+<h2 id="the-bridge"><a class="anchor" href="#the-bridge">The bridge</a></h2>
+<p><code>Bridge/BridgeInterface</code> has four methods, and the distinction between two of them is the
+most important thing on this page:</p>
+<div class="table-scroll"><table><thead><tr><th>Method</th><th>Returns</th><th>Use</th></tr></thead><tbody>
+<tr><td><code>call($method, $payload)</code></td><td><code>?array</code> — decoded JSON, <code>null</code> on any failure</td><td>Reads, and writes whose result is known immediately</td></tr>
+<tr><td><code>dispatch($method, $payload)</code></td><td><code>bool</code> — <strong>was the call made</strong>, not what it achieved</td><td>Anything that presents UI</td></tr>
+<tr><td><code>raw($method, $payload)</code></td><td><code>?string</code></td><td>The undecoded reply</td></tr>
+<tr><td><code>isAvailable()</code></td><td><code>bool</code></td><td>False outside a packaged app; every call then no-ops</td></tr>
+</tbody></table></div>
+<p><strong>A dispatch is not an outcome.</strong> Camera, biometrics, media pickers and the payment sheet all
+return as soon as the UI is <em>presented</em>. The result arrives later as an event on the native
+side. Those methods deliberately sit on <code>dispatch()</code> so the distinction is visible in the
+type. <code>$biometric-&gt;prompt()</code> returning <code>true</code> means a prompt appeared — treating it as &quot;the
+user authenticated&quot; is an authentication bypass.</p>
+<p>Non-JSON replies and throws from the extension are logged (channel <code>native_mobile</code>) and
+turned into <code>null</code>, never swallowed silently, on the same principle as the desktop client:
+&quot;the native layer did not answer&quot; must not look like &quot;the native layer said nothing&quot;.</p>
+<h3 id="where-do-the-results-arrive"><a class="anchor" href="#where-do-the-results-arrive">Where do the results arrive?</a></h3>
+<p>On the WebView path, the host&#39;s JS bridge exposes <code>window.Native.dispatch(eventName, payload)</code>
+— the same shape as desktop&#39;s preload — so an asynchronous result reaches <strong>the page</strong>, not
+PHP. <strong>This bundle implements no PHP-side receiver for mobile events</strong>; there is no mobile
+equivalent of the desktop <code>EventsController</code> and no mobile event classes. If PHP needs to know
+about a captured photo, the page has to tell it (a <code>fetch()</code> to one of your routes). Plan for
+that when you design a flow around <code>Camera</code>, <code>Biometric</code>, <code>Microphone</code> or <code>MobileWallet</code>.</p>
+<hr>
+<h2 id="the-groups"><a class="anchor" href="#the-groups">The groups</a></h2>
+<h3 id="camera--apicamera"><a class="anchor" href="#camera--apicamera">Camera — <code>Api\Camera</code></a></h3>
+<pre><code class="language-php">$camera-&gt;photo(quality: 85, front: false);          // quality clamped to 1–100
+$camera-&gt;pickMedia(type: &#39;image&#39;, multiple: true);  // &#39;image&#39; | &#39;video&#39; | &#39;any&#39;
+$camera-&gt;recordVideo(maxSeconds: 30, front: true);
+</code></pre>
+<p>All three are dispatches. Nothing is returned but &quot;the UI was presented&quot;.</p>
+<h3 id="device--apidevice"><a class="anchor" href="#device--apidevice">Device — <code>Api\Device</code></a></h3>
+<pre><code class="language-php">$device-&gt;info();          // array&lt;string,mixed&gt;; [] when the bridge is absent
+$device-&gt;id();            // ?string
+$device-&gt;batteryInfo();   // array
+$device-&gt;vibrate(250);
+$device-&gt;toggleFlashlight(true);   // null argument toggles
+</code></pre>
+<h3 id="secure-storage--apisecurestorage"><a class="anchor" href="#secure-storage--apisecurestorage">Secure storage — <code>Api\SecureStorage</code></a></h3>
+<p>iOS Keychain and Android Keystore. Values survive app updates but not a reinstall or a move
+to another device — suitable for tokens, not for anything a user would be upset to lose.</p>
+<pre><code class="language-php">$storage-&gt;set(&#39;token&#39;, $jwt, accessibility: null);   // bool
+$storage-&gt;get(&#39;token&#39;);                              // ?string
+$storage-&gt;has(&#39;token&#39;);
+$storage-&gt;delete(&#39;token&#39;);
+</code></pre>
+<p><strong>Dots in a key are not part of the key</strong> — the same dot-prop behaviour the desktop settings
+store has. Use a flat separator if you care.</p>
+<h3 id="geolocation--apigeolocation"><a class="anchor" href="#geolocation--apigeolocation">Geolocation — <code>Api\Geolocation</code></a></h3>
+<p>This reads unlike a browser&#39;s geolocation API on purpose. Background positions are buffered
+natively, because a phone can accumulate thousands while the app is asleep and waking PHP for
+each would drain the battery.</p>
+<pre><code class="language-php">$geo-&gt;backgroundWatchStatus();      // array — active? permission state?
+$geo-&gt;drainWatchBuffer(limit: 500); // list&lt;array&gt; — DESTRUCTIVE, the buffer is emptied
+$geo-&gt;trimWatchBuffer(keep: 0);     // drop without reading
+$geo-&gt;stopBackgroundWatch();
+$geo-&gt;clearWatch();
+</code></pre>
+<p><code>drainWatchBuffer()</code> removes what it returns. Persist before doing anything that might fail.</p>
+<p>There is no <code>start</code>/<code>request</code> method here — starting a background watch is not one of the 54
+bridge methods.</p>
+<h3 id="microphone--apimicrophone"><a class="anchor" href="#microphone--apimicrophone">Microphone — <code>Api\Microphone</code></a></h3>
+<p><code>start()</code>, <code>stop()</code>, <code>pause()</code>, <code>resume()</code> (dispatches), <code>status()</code>, <code>isRecording()</code>,
+<code>recording()</code> (reads).</p>
+<h3 id="biometric--apibiometric"><a class="anchor" href="#biometric--apibiometric">Biometric — <code>Api\Biometric</code></a></h3>
+<pre><code class="language-php">$biometric-&gt;prompt(&#39;Unlock your vault&#39;, fallbackTitle: &#39;Use passcode&#39;);
+</code></pre>
+<p>Asynchronous. See the warning above.</p>
+<h3 id="push-notifications--apipushnotifications"><a class="anchor" href="#push-notifications--apipushnotifications">Push notifications — <code>Api\PushNotifications</code></a></h3>
+<p><code>token()</code> (<code>?string</code>), <code>checkPermission()</code> (array), <code>isAuthorised()</code>, <code>clearBadge()</code>.</p>
+<h3 id="browser--apibrowser"><a class="anchor" href="#browser--apibrowser">Browser — <code>Api\Browser</code></a></h3>
+<p><code>open($url)</code> hands off to the system browser; <code>openInApp($url)</code> uses the in-app browser;
+<code>openAuth($url, $callbackScheme)</code> opens an ephemeral OAuth session.</p>
+<h3 id="share--apishare"><a class="anchor" href="#share--apishare">Share — <code>Api\Share</code></a></h3>
+<p><code>url($url, $title, $text)</code>, <code>file($path, $title, $text)</code>.</p>
+<h3 id="dialog--apidialog"><a class="anchor" href="#dialog--apidialog">Dialog — <code>Api\Dialog</code></a></h3>
+<p><code>toast($message, $duration = &#39;long&#39;)</code>. One method; native alerts are not part of the bridge.</p>
+<h3 id="files--apifiles"><a class="anchor" href="#files--apifiles">Files — <code>Api\Files</code></a></h3>
+<p><code>copy($from, $to)</code>, <code>move($from, $to)</code>. Only for places PHP cannot reach — <code>content://</code> URIs
+on Android, security-scoped URLs on iOS. For ordinary paths in the app sandbox use PHP&#39;s own
+filesystem functions.</p>
+<h3 id="network--apinetwork"><a class="anchor" href="#network--apinetwork">Network — <code>Api\Network</code></a></h3>
+<p><code>status()</code> (array), <code>isConnected()</code>, <code>connectionType()</code> (<code>?string</code>).</p>
+<h3 id="system--apisystem"><a class="anchor" href="#system--apisystem">System — <code>Api\System</code></a></h3>
+<p><code>appearance()</code> (string), <code>isDarkMode()</code>, <code>minimize()</code>, <code>openAppSettings()</code>,
+<code>setBackground($color)</code>.</p>
+<h3 id="wallet--apimobilewallet"><a class="anchor" href="#wallet--apimobilewallet">Wallet — <code>Api\MobileWallet</code></a></h3>
+<pre><code class="language-php">if ($wallet-&gt;isAvailable()) {
+    $intent = $wallet-&gt;createPaymentIntent(1999, &#39;EUR&#39;, [&#39;order&#39; =&gt; &#39;123&#39;]);
+    $wallet-&gt;presentPaymentSheet($intent[&#39;id&#39;] ?? &#39;&#39;);
+    // …later, from a route the page calls back:
+    $status = $wallet-&gt;paymentStatus($intentId);
+}
+</code></pre>
+<p><code>presentPaymentSheet()</code> returning <code>true</code> is <strong>not</strong> a completed payment. Always read the
+status back; never infer it from the presentation call.</p>
+<h3 id="performance--apiperformance"><a class="anchor" href="#performance--apiperformance">Performance — <code>Api\Performance</code></a></h3>
+<p><code>enable()</code>, <code>disable()</code>, <code>export()</code>, <code>showFpsOverlay()</code>, <code>startCaptureWindow($label)</code>,
+<code>stopCaptureWindow()</code>, plus three input simulators — <code>simulatePress($target)</code>,
+<code>simulateTextChange($target, $value)</code>, <code>simulateToggle($target, $value)</code> — which drive the
+native UI for instrumentation.</p>
+<h3 id="native-ui-transitions--apinativeui"><a class="anchor" href="#native-ui-transitions--apinativeui">Native UI transitions — <code>Api\NativeUi</code></a></h3>
+<p><code>setTransition($transition)</code>, one of <code>fade</code>, <code>slide_from_right</code>, <code>slide_from_left</code>,
+<code>slide_from_bottom</code>, <code>fade_from_bottom</code>, <code>scale_from_center</code>, <code>parallax_push</code>, <code>none</code>.</p>
+<p>It has <strong>no effect on the WebView path</strong>, and is wrapped only so the 54-method surface is
+complete rather than looking like an oversight.</p>
+<hr>
+<h2 id="testing-the-bridge"><a class="anchor" href="#testing-the-bridge">Testing the bridge</a></h2>
+<pre><code class="language-php">use Native\Symfony\Mobile\Api\SecureStorage;
+use Native\Symfony\Mobile\Bridge\FakeBridge;
+
+$bridge = new FakeBridge();
+$bridge-&gt;willReturn(&#39;SecureStorage.Get&#39;, [&#39;value&#39; =&gt; &#39;tok_123&#39;]);
+
+self::assertSame(&#39;tok_123&#39;, (new SecureStorage($bridge))-&gt;get(&#39;token&#39;));
+self::assertSame(&#39;SecureStorage.Get&#39;, $bridge-&gt;lastCall()[&#39;method&#39;]);
+self::assertContains(&#39;SecureStorage.Get&#39;, $bridge-&gt;methods());
+</code></pre>
+<p><code>new FakeBridge(available: false)</code> models being outside a packaged app. Set
+<code>native_mobile.fake_bridge: true</code> to use it through the container instead.</p>
+<p>The real <code>Bridge</code> also takes an <code>$invoker</code> callable standing in for the extension function,
+which is how the bundle tests the real class rather than only the fake:</p>
+<pre><code class="language-php">$bridge = new Bridge(null, fn (string $method, string $json): string =&gt; &#39;{&quot;value&quot;:1}&#39;);
+</code></pre>
+<hr>
+<h2 id="native-ui"><a class="anchor" href="#native-ui">Native UI</a></h2>
+<p>Only relevant on the native-UI render path. Skip this if your app renders Twig into a
+WebView.</p>
+<h3 id="elements"><a class="anchor" href="#elements">Elements</a></h3>
+<p>37 element classes covering all 36 wire types (<code>Fab</code> shares <code>pressable</code>) under
+<code>Ui\Elements\</code>. Containers take children, leaves take their content:</p>
+<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Elements\Button;
+use Native\Symfony\Mobile\Ui\Elements\Column;
+use Native\Symfony\Mobile\Ui\Elements\Text;
+use Native\Symfony\Mobile\Ui\Elements\TextInput;
+
+$tree = Column::make(
+    Text::make(&#39;Hello&#39;)-&gt;fontSize(24)-&gt;fontWeight(&#39;bold&#39;),
+    TextInput::make()-&gt;placeholder(&#39;Name&#39;)-&gt;onChange(&#39;rename&#39;),
+    Button::make(&#39;Save&#39;)-&gt;onPress(&#39;save&#39;),
+)-&gt;layout([&#39;gap&#39; =&gt; 8, &#39;padding&#39; =&gt; 16]);
+</code></pre>
+<p>Shared on every element: <code>key()</code>, <code>ref()</code>, <code>onPress()</code>, <code>onLongPress()</code>, <code>navigate()</code>,
+<code>child()</code>, <code>layout()</code>, <code>style()</code>, <code>props()</code>.</p>
+<p>Container and canvas setters, each byte-compared against upstream&#39;s equivalent:</p>
+<div class="table-scroll"><table><thead><tr><th>Element</th><th>Setters</th></tr></thead><tbody>
+<tr><td><code>ScrollView</code></td><td><code>horizontal()</code>, <code>both()</code> for 2D panning, <code>showsIndicators()</code>, <code>autoScrollTo()</code></td></tr>
+<tr><td><code>LazyGrid</code></td><td><code>columns()</code> (clamped at 1), <code>gap()</code>, <code>horizontal()</code>, <code>showsIndicators()</code></td></tr>
+<tr><td><code>Line</code></td><td><code>from($x, $y)</code>, <code>to($x, $y)</code></td></tr>
+<tr><td><code>Rect</code>, <code>Circle</code></td><td><code>at($left, $top)</code></td></tr>
+<tr><td><code>Image</code></td><td><code>fit()</code>, <code>tintColor()</code>, <code>alt()</code></td></tr>
+<tr><td><code>Button</code></td><td><code>color()</code>, <code>fontSize()</code>, <code>variant()</code>, <code>disabled()</code></td></tr>
+</tbody></table></div>
+<p><code>ScrollView::horizontal()</code> also sets <code>flex_direction</code>, because the main axis has to move
+with the scroll axis — otherwise <code>overflow: scroll</code> applies to the height while the content
+runs along the width, which is a carousel that does not scroll. <code>both()</code> deliberately does
+not: 2D mode bypasses flex and the renderers honour each child&#39;s declared frame.</p>
+<p><code>Line</code> needs all four coordinates or it draws nothing.</p>
+<p><strong>Give a <code>key()</code> to anything in a list that can reorder.</strong> Node identity is otherwise
+positional, and a reordered list reuses the wrong nodes — losing scroll position and input
+focus. Node ids are FNV-1a over the key path, and both the hash and the 32-bit masking are
+part of the wire format rather than an implementation detail.</p>
+<p>Two element defaults exist because their absence made a tree diverge from upstream&#39;s:
+<code>ScrollView</code>&#39;s <code>overflow=2</code> and <code>Circle</code>&#39;s <code>border_radius=9999</code>. <code>Spacer</code> defaults
+<code>flex_grow=1</code>, so it works dropped in bare.</p>
+<h3 id="publishing-a-frame"><a class="anchor" href="#publishing-a-frame">Publishing a frame</a></h3>
+<pre><code class="language-php">$tree = $publisher-&gt;publish($root, $callbacks);   // array&lt;string,mixed&gt;, the published tree
+$publisher-&gt;resetDiffState();                     // on navigation — see below
+</code></pre>
+<p><code>ElementPublisher</code> keeps the previous frame&#39;s node hashes, which is what makes subtree reuse
+work: an interaction that changes one label republishes one node and marks the rest
+<code>flags: 1</code>. Upstream leaves that to the caller, and without it every frame is a full repaint.</p>
+<p>Off a device there is nothing to publish to, so frames are <strong>captured</strong> —
+<code>capturedFrames()</code>, <code>lastFrame()</code> — which is what makes a native screen testable at all.</p>
+<p><strong>Reset the diff state when the screen changes.</strong> Node ids are only meaningful within one
+screen&#39;s tree; carrying hashes across a navigation lets the renderer splice an unrelated
+subtree it still has cached. <code>ComponentScreen</code> and <code>NativeScreenResponder</code> both do this for
+you.</p>
+<h3 id="callbacks"><a class="anchor" href="#callbacks">Callbacks</a></h3>
+<p><code>Ui\CallbackRegistry</code> maps a handler expression to the integer id that travels to the device
+and back. Ids are content-derived (FNV-1a masked to 31 bits, because a callback id travels as
+a signed Kotlin <code>Int</code>), so a registry can be rebuilt and the ids stay stable. The scope —
+joined to the expression with <code>\x1F</code> — is what keeps two screens&#39; <code>save</code> handlers apart.</p>
+<p><code>0</code> is never a valid id: the native side reads 0 as &quot;no callback&quot;.</p>
+<h3 id="components"><a class="anchor" href="#components">Components</a></h3>
+<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Component\NativeAction;
+use Native\Symfony\Mobile\Ui\Component\NativeComponent;
+use Native\Symfony\Mobile\Ui\Element;
+use Native\Symfony\Mobile\Ui\Elements\Button;
+use Native\Symfony\Mobile\Ui\Elements\Column;
+use Native\Symfony\Mobile\Ui\Elements\Text;
+
+final class Counter extends NativeComponent
+{
+    private int $count = 0;
+
+    #[NativeAction]
+    public function increment(): void
+    {
+        ++$this-&gt;count;
+    }
+
+    protected function render(): Element
+    {
+        return Column::make(
+            Text::make(&quot;Count: {$this-&gt;count}&quot;),
+            Button::make(&#39;+&#39;)-&gt;onPress(&#39;increment&#39;),
+        );
+    }
+}
+</code></pre>
+<ul>
+<li>State is ordinary typed properties. The PHP process is long-lived in persistent mode, so
+there is nothing to serialise and nothing to rehydrate — unlike Livewire, which must,
+because HTTP throws the object away.</li>
+<li><strong>Only <code>#[NativeAction]</code> methods are reachable from the device.</strong> Default-deny, and the
+allowlist is greppable. An id arriving from the native side is only ever a lookup key: it
+never becomes a method name.</li>
+<li><code>render()</code> is <code>protected</code> on the base class. <code>mount(Child::class, [&#39;prop&#39; =&gt; $v], key: $k)</code>
+mounts a child and returns its subtree; identity is the explicit key, else the occurrence
+index of that class in this render. Nesting is capped at 32 levels, because a component that
+mounts itself would otherwise freeze the screen with no error.</li>
+<li>Props are assigned to <strong>public, non-static, non-readonly</strong> properties, and an unknown prop
+name throws. Upstream ignores unmatched props because its props are HTML attributes; here
+you wrote a PHP array, so an unmatched key is a typo — and a typo&#39;d prop is a child
+rendering last frame&#39;s data forever.</li>
+<li><code>onMount()</code>, <code>onUnmount()</code>, <code>onNavigate($key)</code> are the hooks. Navigation itself is not
+implemented: <code>__navigate</code> callbacks are recognised so a navigating element still renders and
+dispatches, and they arrive at <code>onNavigate()</code>. Nothing else happens.</li>
+<li>A component instance can be bound to exactly one screen. Reusing one throws, because the
+reuse would carry state and children across invisibly.</li>
+</ul>
+<p>Driving a screen through routing — what a device does, and what the bundle wires by default:</p>
+<pre><code class="language-php">// ScreenRendererInterface is aliased to ComponentScreenRenderer, so this needs no glue.
+$frame = $responder-&gt;respond(&#39;/counter&#39;);                        // first paint
+$id    = $responder-&gt;callbacks()-&gt;idFor(&#39;increment&#39;);            // expression → id
+$renderer-&gt;dispatch(&#39;/counter&#39;, InteractionEvent::press($id));   // false = nothing mounted
+$frame = $responder-&gt;republish();                                // repaint, as a delta
+$renderer-&gt;forget(&#39;/counter&#39;);                                   // navigating away
+</code></pre>
+<p>The renderer keeps one component instance per route pattern, and binds it to the registry the
+responder handed it. Both matter and both fail silently otherwise: a per-frame instance gives a
+screen whose state resets on every tap, and a self-made registry gives one whose buttons do
+nothing. A screen with constructor dependencies is resolved from the container — every
+<code>NativeComponent</code> is autoconfigured with the <code>native.screen</code> tag — and route parameters reach a
+screen that declares <code>withRouteParameters(array $params)</code>.</p>
+<p>Driving one directly, without routing:</p>
+<pre><code class="language-php">$screen = $factory-&gt;open(new Counter());          // ComponentScreenFactory
+$frame  = $screen-&gt;frame();                       // first paint
+$frame  = $screen-&gt;handle($eventArrayFromDevice); // ?array — null when the id is unknown
+$id     = $screen-&gt;callbackId(&#39;increment&#39;);       // for tests: expression → id
+$screen-&gt;close();                                 // unmounts the graph, drops diff state
+</code></pre>
+<p><code>handle()</code> returning <code>null</code> is routine, not an error: the device may still be showing a
+superseded frame and tap a node that has since gone away. A registered id that cannot be
+dispatched throws <code>CallbackRefused</code>.</p>
+<p><code>frame()</code> calls <code>assertCallbacksDispatchable()</code> <strong>after</strong> publishing — expressions are
+registered while the tree is serialised, not while it is built. That check is what turns
+<code>-&gt;onPress(&#39;incremnt&#39;)</code> from a button that silently does nothing on a device into an
+exception. Argument counts are deliberately not checked there, because how many values a call
+receives depends on the event type, which is not known until the interaction arrives.</p>
+<p>Interaction payloads are narrowed by type in <code>InteractionEvent</code>: <code>PRESS = 0</code>,
+<code>LONG_PRESS = 1</code>, <code>TEXT_CHANGE = 2</code>, <code>TOGGLE_CHANGE = 3</code>, <code>SUBMIT = 4</code>,
+<code>SLIDER_CHANGE = 9</code>, <code>CHECKBOX_CHANGE = 10</code>, <code>RADIO_CHANGE = 11</code>, <code>SELECT_CHANGE = 12</code>,
+<code>TAB_CHANGE = 13</code>, <code>SHEET_DISMISS = 14</code>. A text handler cannot be handed an array, a toggle
+handler cannot receive the string <code>&quot;false&quot;</code>, and an unknown type carries nothing at all.</p>
+<h3 id="twig-authoring"><a class="anchor" href="#twig-authoring">Twig authoring</a></h3>
+<pre><code class="language-twig">{% set tree = native(&#39;column&#39;, {layout: {gap: 8}}, [
+    native(&#39;text&#39;,   {text: &#39;Hello&#39;, fontSize: 24}),
+    native(&#39;button&#39;, {label: &#39;Tap me&#39;, onPress: &#39;save&#39;}),
+    native(&#39;spacer&#39;),
+]) %}
+</code></pre>
+<p><code>native(type, options, children)</code> and <code>native_types()</code> are the two Twig functions;
+<code>children</code> may be one element, a list, or nothing. Passing a string where an element belongs
+throws with the child&#39;s index and the type it was in, rather than failing deep in the tree
+walk.</p>
+<p>Upstream&#39;s Blade equivalent is a tag precompiler that rewrites <code>&lt;native:*&gt;</code> tags into
+collector calls specifically to bypass Blade&#39;s component lifecycle for speed. Twig needs none
+of that: its functions are already calls.</p>
+<p>Note the Twig extension only <em>builds</em> a tree. Publishing is <code>ElementPublisher::publish()</code>,
+which needs a <code>CallbackRegistry</code> — the bundle ships <strong>no</strong> <code>native_publish()</code> Twig function,
+because the join carries two decisions that belong to the app: which registry a frame&#39;s ids
+belong to (an interaction is looked up in the same one), and when to drop the diff state. It is
+about ten lines; <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/src/Twig/NativePublishExtension.php" target="_blank" rel="noopener"><code>demo/src/Twig/NativePublishExtension.php</code></a>
+is a working one.</p>
+<h3 id="styling"><a class="anchor" href="#styling">Styling</a></h3>
+<p><code>Ui\Style\StyleParser</code> parses a Tailwind class string into the canonical camelCase map from
+the contract&#39;s §4d — verified token-for-token against upstream across 684 tokens and 1,336
+class strings, plus a 48,849-parse differential sweep:</p>
+<pre><code class="language-php">$parser-&gt;parse(&#39;flex-1 p-4 gap-2&#39;);
+// [&#39;flexGrow&#39; =&gt; 1, &#39;flexShrink&#39; =&gt; 1, &#39;flexBasis&#39; =&gt; 0, &#39;padding&#39; =&gt; 16, &#39;gap&#39; =&gt; 8]
+
+$parser-&gt;parse(&#39;bg-theme-surface&#39;, $dropped);   // $dropped lists tokens that produced nothing
+</code></pre>
+<p>Two things to be careful about:</p>
+<p><strong>That map is not the wire vocabulary.</strong> Layout keys on the wire are snake_case
+(<code>flex_grow</code>), element props are camelCase (<code>fontSize</code>) — upstream&#39;s inconsistency, which the
+element <em>setters</em> resolve. Upstream has an <code>applyLayout()</code> that dispatches each parsed key
+through the right setter; <strong>this bundle does not implement that dispatcher yet</strong>. So
+<code>-&gt;layout($parser-&gt;parse(&#39;flex-1&#39;))</code> would put <code>flexGrow</code> on the wire, which the renderers do
+not read. Until an applier exists, either set wire keys directly
+(<code>-&gt;layout([&#39;flex_grow&#39; =&gt; 1])</code>) or route the parsed values through the typed setters
+yourself.</p>
+<p><strong>Theme colours need a resolver.</strong> Without a <code>ThemeColorResolverInterface</code> service, every
+<code>bg-/text-/border-theme-*</code> class resolves to nothing rather than to a guessed colour — 31 of
+the 684 corpus tokens. <code>ArrayThemeColorResolver</code> is the simple implementation. Platform
+variants (<code>ios:</code> / <code>android:</code>) drop unless <code>native_mobile.platform</code> is set.</p>
+<p>There is one intentional divergence from upstream, and it is a bug fix: upstream&#39;s
+theme-border branch emits <code>borderWidth: 1</code> unconditionally, so <code>border-2 border-theme-outline</code>
+renders a 1pt border while the reverse order gives 2. Here both orderings give 2. See patch
+<code>0008</code> in <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/upstream-patches/README.md" target="_blank" rel="noopener"><code>../upstream-patches/</code></a>.</p>
+<h2 id="commands"><a class="anchor" href="#commands">Commands</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Command</th><th>Purpose</th></tr></thead><tbody>
+<tr><td><code>native:mobile:install --source=…</code></td><td>Copy <code>androidstudio/</code> and <code>xcode/</code> into the app and retarget their bootstrap paths</td></tr>
+<tr><td><code>native:mobile:doctor</code></td><td>Report what the integration can see; most useful run on a device</td></tr>
+<tr><td><code>native:mobile:manifest</code></td><td>Write <code>bundle_meta.json</code> and the runtime route dump; <code>--dry-run</code> prints both</td></tr>
+<tr><td><code>native:mobile:build &lt;android|ios&gt;</code></td><td>Stage the app and produce an APK/AAB or an iOS archive; <code>--stage-only</code> stops before Gradle/Xcode</td></tr>
+<tr><td><code>native:mobile:run &lt;android|ios&gt;</code></td><td>Debug build, install and launch; <code>--dry-run</code> prints the plan</td></tr>
+</tbody></table></div>
+<p>See <a href="getting-started-mobile.html#building-and-running">getting started</a> for what those commands
+have and have not actually executed in this environment.</p>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

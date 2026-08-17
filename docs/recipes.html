@@ -1,0 +1,492 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipes · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link" href="index.html">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link" href="getting-started-desktop.html">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link" href="getting-started-mobile.html">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link" href="desktop-api.html">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link" href="mobile-api.html">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link current" href="recipes.html" aria-current="page">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link" href="testing.html">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link" href="troubleshooting.html">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d2"><a href="#a-multi-window-app-and-the-_windowid-convention">A multi-window app, and the _windowId convention</a></li>
+<li class="d2"><a href="#running-a-messenger-worker">Running a Messenger worker</a></li>
+<li class="d2"><a href="#reacting-to-a-runtime-event-with-a-typed-listener">Reacting to a runtime event with a typed listener</a></li>
+<li class="d3"><a href="#caller-named-events">Caller-named events</a></li>
+<li class="d2"><a href="#a-native-ui-screen-with-state">A native-UI screen with state</a></li>
+<li class="d2"><a href="#building-for-distribution">Building for distribution</a></li>
+</ul></nav>
+        <article class="prose">
+<h1 id="recipes"><a class="anchor" href="#recipes">Recipes</a></h1>
+<p>Complete, working answers to the things people actually build. Every sample here is written
+against the real classes; check the signatures in
+<a href="desktop-api.html"><code>desktop-api.md</code></a> / <a href="mobile-api.html"><code>mobile-api.md</code></a> if you extend them.</p>
+<ul>
+<li><a href="#a-multi-window-app-and-the-_windowid-convention">A multi-window app, and the <code>_windowId</code> convention</a></li>
+<li><a href="#running-a-messenger-worker">Running a Messenger worker</a></li>
+<li><a href="#reacting-to-a-runtime-event-with-a-typed-listener">Reacting to a runtime event with a typed listener</a></li>
+<li><a href="#a-native-ui-screen-with-state">A native-UI screen with state</a></li>
+<li><a href="#building-for-distribution">Building for distribution</a></li>
+</ul>
+<hr>
+<h2 id="a-multi-window-app-and-the-_windowid-convention"><a class="anchor" href="#a-multi-window-app-and-the-_windowid-convention">A multi-window app, and the <code>_windowId</code> convention</a></h2>
+<p>The runtime appends <code>?_windowId=&lt;id&gt;</code> to every navigation it performs. That parameter is how
+a request knows which window it came from — and it is the whole mechanism, so it is worth
+understanding before you rely on it.</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Native;
+
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Window\WindowManager;
+
+final class Bootstrapper implements AppBootstrapper
+{
+    public function __construct(private readonly WindowManager $windows)
+    {
+    }
+
+    public function boot(): void
+    {
+        $this-&gt;windows-&gt;open(&#39;main&#39;)
+            -&gt;url(&#39;/&#39;)
+            -&gt;size(1100, 760)
+            -&gt;minSize(640, 480)
+            -&gt;title(&#39;Ledger&#39;)
+            -&gt;rememberState()
+            -&gt;open();
+    }
+}
+</code></pre>
+<p>Opening a second window from a controller, and closing it from inside itself:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Controller;
+
+use Native\Symfony\Desktop\Window\WindowManager;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+
+final class InspectorController extends AbstractController
+{
+    public function __construct(private readonly WindowManager $windows)
+    {
+    }
+
+    #[Route(&#39;/inspector/open/{id}&#39;, name: &#39;inspector_open&#39;)]
+    public function open(string $id): Response
+    {
+        // One window per inspected entity. open() is idempotent by id, so clicking
+        // twice focuses the existing window instead of stacking a second one.
+        $this-&gt;windows-&gt;open(&#39;inspector:&#39;.$id)
+            -&gt;url($this-&gt;generateUrl(&#39;inspector_show&#39;, [&#39;id&#39; =&gt; $id]))
+            -&gt;size(520, 640)
+            -&gt;title(&#39;Inspector — &#39;.$id)
+            -&gt;open();
+
+        return $this-&gt;redirectToRoute(&#39;home&#39;);
+    }
+
+    #[Route(&#39;/inspector/{id}&#39;, name: &#39;inspector_show&#39;)]
+    public function show(string $id): Response
+    {
+        return $this-&gt;render(&#39;inspector.html.twig&#39;, [
+            &#39;id&#39; =&gt; $id,
+            // Which window am I? Null outside the runtime, or if the navigation
+            // did not carry the parameter.
+            &#39;windowId&#39; =&gt; $this-&gt;windows-&gt;detectId(),
+        ]);
+    }
+
+    #[Route(&#39;/inspector/{id}/close&#39;, name: &#39;inspector_close&#39;, methods: [&#39;POST&#39;])]
+    public function close(string $id): Response
+    {
+        // No id argument: close() falls back to the window this request came from,
+        // recovered from the Referer. A form POST is exactly the case the
+        // Referer-before-URL order exists for.
+        $this-&gt;windows-&gt;close();
+
+        return new Response(status: Response::HTTP_NO_CONTENT);
+    }
+}
+</code></pre>
+<p>Three rules that follow from the mechanism:</p>
+<ol>
+<li><strong>Keep the fallback order.</strong> <code>detectId()</code> reads the Referer first, then the current URL,
+then gives up (<code>resolveId()</code> then defaults to <code>&#39;main&#39;</code>). A form POST carries the window in
+its Referer, not its own URI. &quot;Improving&quot; this order makes multi-window apps target the
+wrong window.</li>
+<li><strong>Make these responses <code>no-store</code>.</strong> <code>?_windowId=…</code> is part of the URL for HTTP cache
+purposes, and without it two windows can share a cached page.</li>
+<li><strong>Do not open windows outside a request</strong> unless you pass an absolute URL or set
+<code>native_desktop.base_url</code>. <code>UrlResolver</code> builds the base from the current request because
+the dev server&#39;s port is chosen by the runtime and never published to PHP; outside a
+request it throws a <code>LogicException</code> that says exactly this.</li>
+</ol>
+<p>Reading the window back:</p>
+<pre><code class="language-php">$window = $this-&gt;windows-&gt;get(&#39;inspector:&#39;.$id);   // ?Window
+$current = $this-&gt;windows-&gt;current();              // ?Window — may be null; never chain on it
+$open = $this-&gt;windows-&gt;all();                     // list&lt;Window&gt;
+</code></pre>
+<h2 id="running-a-messenger-worker"><a class="anchor" href="#running-a-messenger-worker">Running a Messenger worker</a></h2>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Native;
+
+use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Process\MessengerWorker;
+use Native\Symfony\Desktop\Window\WindowManager;
+
+final class Bootstrapper implements AppBootstrapper
+{
+    public function __construct(
+        private readonly WindowManager $windows,
+        private readonly MessengerWorker $worker,
+    ) {
+    }
+
+    public function boot(): void
+    {
+        $this-&gt;windows-&gt;open(&#39;main&#39;)-&gt;url(&#39;/&#39;)-&gt;size(1000, 700)-&gt;open();
+
+        // Idempotent by alias, which matters: /booted can fire more than once and
+        // this must not start a second consumer.
+        $this-&gt;worker-&gt;up(
+            alias: &#39;async&#39;,
+            transports: [&#39;async&#39;],
+            memoryLimit: 256,   // MB
+            timeLimit: 3600,    // seconds, then it exits and the watchdog restarts it
+            sleep: 1,
+        );
+    }
+}
+</code></pre>
+<p>Watch it, and stop it:</p>
+<pre><code class="language-php">$handle = $worker-&gt;status(&#39;async&#39;);    // ?ProcessHandle
+
+if (null === $handle || !$handle-&gt;isRunning()) {
+    $worker-&gt;up(alias: &#39;async&#39;, transports: [&#39;async&#39;]);
+}
+
+$worker-&gt;down(&#39;async&#39;);
+</code></pre>
+<p>What <code>up()</code> does that you would otherwise have to remember: <code>persistent: true</code> so the
+runtime&#39;s watchdog restarts a worker that exited on <code>--memory-limit</code>;
+<code>handlesOwnShutdown: true</code> so shutdown is a plain SIGTERM to that process rather than a
+tree-kill that could drop the message in flight; and an ini <code>memory_limit</code> of twice
+<code>--memory-limit</code>, because otherwise PHP fatals before Messenger notices its own limit and
+exits cleanly.</p>
+<p>The alias on the wire is <code>messenger_async</code> — namespaced so a worker cannot collide with your
+own process aliases. Use the un-prefixed name in every <code>MessengerWorker</code> call; use the
+prefixed one when reading <code>ChildProcessManager::all()</code> or matching events.</p>
+<p>Worker output arrives as events:</p>
+<pre><code class="language-php">#[AsEventListener]
+public function onWorkerOutput(MessageReceived $event): void
+{
+    if (&#39;messenger_async&#39; === $event-&gt;alias) {
+        // Not line-buffered: one event may carry several lines or part of one.
+        $this-&gt;logger-&gt;info(rtrim($event-&gt;data));
+    }
+}
+</code></pre>
+<p>For a one-off job instead of a consumer, use <code>ChildProcessManager::console()</code> — same
+supervision, no watchdog:</p>
+<pre><code class="language-php">$processes-&gt;console(&#39;import&#39;, [&#39;app:import&#39;, $path]);
+</code></pre>
+<h2 id="reacting-to-a-runtime-event-with-a-typed-listener"><a class="anchor" href="#reacting-to-a-runtime-event-with-a-typed-listener">Reacting to a runtime event with a typed listener</a></h2>
+<p>Typed events dispatch under their class name, so <code>#[AsEventListener]</code> on a typed parameter is
+all a listener needs:</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Native;
+
+use Native\Symfony\Desktop\Event\App\ApplicationBooted;
+use Native\Symfony\Desktop\Event\ChildProcess\ProcessExited;
+use Native\Symfony\Desktop\Event\Settings\SettingChanged;
+use Native\Symfony\Desktop\Event\Windows\WindowResized;
+use Native\Symfony\Desktop\Settings\SettingsManager;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
+
+final class RuntimeListener
+{
+    public function __construct(
+        private readonly SettingsManager $settings,
+        private readonly LoggerInterface $logger,
+    ) {
+    }
+
+    #[AsEventListener]
+    public function onBooted(ApplicationBooted $event): void
+    {
+        $this-&gt;logger-&gt;info(&#39;The runtime finished booting.&#39;);
+    }
+
+    /**
+     * User-driven resizes only. A resize your own code requested through
+     * WindowManager::resize() does NOT arrive here.
+     */
+    #[AsEventListener]
+    public function onResized(WindowResized $event): void
+    {
+        $this-&gt;settings-&gt;set(&quot;geometry:{$event-&gt;id}&quot;, [$event-&gt;width, $event-&gt;height]);
+    }
+
+    #[AsEventListener]
+    public function onSettingChanged(SettingChanged $event): void
+    {
+        // Fires for writes this app makes itself — the runtime watches the store,
+        // not the caller. Writing from here would loop.
+        // And $event-&gt;key is the ROOT key: writing &#39;a.b&#39; reports &#39;a&#39;.
+        $this-&gt;logger-&gt;debug(&#39;setting {key} changed&#39;, [&#39;key&#39; =&gt; $event-&gt;key]);
+    }
+
+    #[AsEventListener]
+    public function onProcessExited(ProcessExited $event): void
+    {
+        $this-&gt;logger-&gt;warning(&#39;{alias} exited with {code}&#39;, [
+            &#39;alias&#39; =&gt; $event-&gt;alias,
+            &#39;code&#39; =&gt; $event-&gt;code,
+        ]);
+    }
+}
+</code></pre>
+<h3 id="caller-named-events"><a class="anchor" href="#caller-named-events">Caller-named events</a></h3>
+<p>A global shortcut, a menu item with an <code>event:</code>, or a notification with <code>event()</code> pushes back
+a name of <em>your</em> choosing. There is no class to key on, so those arrive as <code>NativeEvent</code>
+under two names — <code>native.&lt;name&gt;</code> and <code>NativeEvent::class</code>. Register for one, never both:</p>
+<pre><code class="language-php">use Native\Symfony\Desktop\Event\NativeEvent;
+
+final class ShortcutListener
+{
+    public function __construct(private readonly GlobalShortcutManager $shortcuts) {}
+
+    public function register(): void
+    {
+        // register() cannot report failure — another app may already own the
+        // accelerator. registerChecked() asks the OS afterwards.
+        if (!$this-&gt;shortcuts-&gt;registerChecked(&#39;CommandOrControl+Shift+K&#39;, &#39;App\Shortcut\Palette&#39;)) {
+            // fall back to an in-app binding
+        }
+    }
+
+    #[AsEventListener(event: &#39;native.App\Shortcut\Palette&#39;)]
+    public function onPalette(NativeEvent $event): void
+    {
+        // $event-&gt;name is the name you chose; $event-&gt;payload is whatever came with it
+    }
+}
+</code></pre>
+<p>While porting, a catch-all is the fastest way to see what the runtime is really sending:</p>
+<pre><code class="language-php">#[AsEventListener]
+public function onAnything(NativeEvent $event): void
+{
+    $this-&gt;logger-&gt;debug(&#39;native event {name}&#39;, [
+        &#39;name&#39; =&gt; $event-&gt;name,
+        &#39;payload&#39; =&gt; $event-&gt;payload,
+    ]);
+}
+</code></pre>
+<p>Test any of this without a runtime — see <a href="testing.html#pushing-events-into-the-app">Testing</a>.</p>
+<h2 id="a-native-ui-screen-with-state"><a class="anchor" href="#a-native-ui-screen-with-state">A native-UI screen with state</a></h2>
+<p>Mobile only, and the least device-verified path in the project. Read
+<a href="getting-started-mobile.html#path-b--the-native-ui-render-path">the mobile getting-started page</a>
+first.</p>
+<pre><code class="language-php">&lt;?php
+
+namespace App\Screen;
+
+use Native\Symfony\Mobile\Ui\Component\NativeAction;
+use Native\Symfony\Mobile\Ui\Component\NativeComponent;
+use Native\Symfony\Mobile\Ui\Element;
+use Native\Symfony\Mobile\Ui\Elements\Button;
+use Native\Symfony\Mobile\Ui\Elements\Column;
+use Native\Symfony\Mobile\Ui\Elements\Row;
+use Native\Symfony\Mobile\Ui\Elements\Text;
+use Native\Symfony\Mobile\Ui\Elements\TextInput;
+
+final class TodoScreen extends NativeComponent
+{
+    /** @var list&lt;string&gt; */
+    private array $items = [];
+
+    private string $draft = &#39;&#39;;
+
+    #[NativeAction]
+    public function draftChanged(string $value): void
+    {
+        // The argument comes from InteractionEvent, narrowed by event type:
+        // TEXT_CHANGE always yields exactly one string.
+        $this-&gt;draft = $value;
+    }
+
+    #[NativeAction]
+    public function add(): void
+    {
+        if (&#39;&#39; !== trim($this-&gt;draft)) {
+            $this-&gt;items[] = $this-&gt;draft;
+            $this-&gt;draft = &#39;&#39;;
+        }
+    }
+
+    #[NativeAction]
+    public function remove(int $index): void
+    {
+        // Literal arguments in the expression come first, event values after.
+        unset($this-&gt;items[$index]);
+        $this-&gt;items = array_values($this-&gt;items);
+    }
+
+    protected function render(): Element
+    {
+        $rows = [];
+
+        foreach ($this-&gt;items as $index =&gt; $item) {
+            $rows[] = Row::make(
+                Text::make($item),
+                Button::make(&#39;×&#39;)-&gt;onPress(&quot;remove({$index})&quot;),
+            )
+                // Keyed, so removing row 0 does not hand row 1&#39;s native state to it.
+                -&gt;key(&#39;item-&#39;.$item);
+        }
+
+        return Column::make(
+            Text::make(&#39;Todo&#39;)-&gt;fontSize(24)-&gt;fontWeight(&#39;bold&#39;),
+            TextInput::make($this-&gt;draft)
+                -&gt;placeholder(&#39;What needs doing?&#39;)
+                -&gt;onChange(&#39;draftChanged&#39;),
+            Button::make(&#39;Add&#39;)-&gt;onPress(&#39;add&#39;),
+            ...$rows,
+        )-&gt;layout([&#39;gap&#39; =&gt; 8, &#39;padding&#39; =&gt; 16]);
+    }
+}
+</code></pre>
+<p>Driving it:</p>
+<pre><code class="language-php">use Native\Symfony\Mobile\Ui\Component\ComponentScreenFactory;
+use Native\Symfony\Mobile\Ui\Component\InteractionEvent;
+
+$screen = $factory-&gt;open(new TodoScreen());   // one fresh instance per screen
+$frame = $screen-&gt;frame();                    // first paint
+
+// An interaction as the native layer delivers it:
+$screen-&gt;handle([&#39;callback_id&#39; =&gt; $screen-&gt;callbackId(&#39;add&#39;), &#39;type&#39; =&gt; InteractionEvent::PRESS]);
+$screen-&gt;handle([
+    &#39;callback_id&#39; =&gt; $screen-&gt;callbackId(&#39;draftChanged&#39;),
+    &#39;type&#39; =&gt; InteractionEvent::TEXT_CHANGE,
+    &#39;text&#39; =&gt; &#39;Buy milk&#39;,
+]);
+
+$screen-&gt;close();   // unmounts the graph, drops the diff state
+</code></pre>
+<p>Things this recipe is quietly getting right:</p>
+<ul>
+<li><strong>Only <code>#[NativeAction]</code> methods are reachable.</strong> Drop the attribute and the button becomes
+a <code>CallbackRefused</code> at dispatch — which <code>frame()</code> surfaces eagerly through
+<code>assertCallbacksDispatchable()</code> rather than leaving you with a dead button on a device.</li>
+<li><strong><code>key()</code> on anything reorderable.</strong> Identity is otherwise positional.</li>
+<li><strong>A fresh component per screen.</strong> Binding an instance twice throws, deliberately: reuse
+would carry state and children across invisibly.</li>
+<li><strong><code>handle()</code> may return <code>null</code>.</strong> That means the id belongs to no live component — routine
+when the device is still showing a superseded frame.</li>
+<li>Children are mounted with <code>$this-&gt;mount(Child::class, [&#39;prop&#39; =&gt; $value], key: $k)</code>, and
+props are assigned to public non-readonly properties. An unknown prop name throws.</li>
+</ul>
+<h2 id="building-for-distribution"><a class="anchor" href="#building-for-distribution">Building for distribution</a></h2>
+<pre><code class="language-bash">composer require nativephp/php-bin          # static PHP binaries + cacert.pem, no PHP deps
+bin/console native:build linux x64 --dir    # unpacked directory — the fast smoke test
+bin/console native:build linux x64          # installer
+bin/console native:build mac arm64
+bin/console native:build win x64 --publish  # publish to the configured updater provider
+</code></pre>
+<p>The pipeline: pre-build hooks → stage the app into <code>nativephp/build/app</code> → <code>composer install --no-dev</code> there → clean the staged <code>.env</code> → install <code>cacert.pem</code> and icons → patch the
+Electron project&#39;s <code>package.json</code> with your app identity → electron-builder → post-build
+hooks. <code>--skip-composer</code> reuses the staged vendor dir; <code>-v</code> shows subprocess output.</p>
+<p>Five things to know before you ship.</p>
+<p><strong>Builds contain readable PHP source.</strong> Upstream&#39;s protected build needs a bundle from
+Bifrost, NativePHP&#39;s hosted service, which currently targets Laravel&#39;s entry points.
+<code>native:build</code> prints a warning on every run rather than letting that pass unnoticed.</p>
+<p><strong><code>APP_SECRET</code> is protected from your own configuration.</strong> <code>build.env_keep</code> wins over
+<code>build.env_remove</code> and defaults to <code>[&#39;APP_SECRET&#39;]</code>. Laravel&#39;s upstream cleanup list globs
+<code>*_SECRET</code>, which is safe there (its key is <code>APP_KEY</code>) and fatal here: <code>framework.yaml</code> reads
+<code>%env(APP_SECRET)%</code>, so a stripped one means the packaged app throws
+<code>EnvNotFoundException</code> at container build and never renders anything. Adding a broad glob must
+not let you break your own build. Only the staged copy is ever touched; your own <code>.env</code> is
+not modified.</p>
+<p><strong>Without <code>cacert.pem</code> the packaged app has no outbound TLS.</strong> It comes from
+<code>vendor/nativephp/php-bin</code>. The build warns rather than failing, because a build that fails
+for a missing optional file is worse than one that tells you what will not work.</p>
+<p><strong>Packaged apps have no opcache.</strong> The static musl PHP binary cannot dynamically load
+extensions, so every request pays full compile cost — Laravel&#39;s builds too. Warm <code>var/cache</code>
+at build time rather than relying on runtime caching. The manifest&#39;s default <code>optimize</code> step
+(<code>cache:warmup</code>) covers this on a manifest-aware runtime; on a patched one, add it to
+<code>prebuild</code> or let the runtime&#39;s optimize step do it.</p>
+<p><strong><code>var/cache</code> and <code>var/log</code> must exist in the package.</strong> They are in <code>build.exclude</code> (a dev
+machine&#39;s cache must not ship) and in <code>build.keep</code>, which plants a placeholder because
+electron-builder prunes empty directories and dotfiles do not stop it. Symfony will not boot
+without them.</p>
+<p>Signing and notarisation: the environment plumbing is in <code>BuildCommand</code>, untested because it
+needs real credentials. Installer targets beyond <code>--dir</code> are invoked already but need <code>fpm</code>,
+<code>dpkg</code> or an AppImage runtime present.</p>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

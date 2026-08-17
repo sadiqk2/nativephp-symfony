@@ -4,7 +4,7 @@ Complete, working answers to the things people actually build. Every sample here
 against the real classes; check the signatures in
 [`desktop-api.md`](desktop-api.md) / [`mobile-api.md`](mobile-api.md) if you extend them.
 
-- [A multi-window app, and the `_windowId` convention](#a-multi-window-app-and-the-windowid-convention)
+- [A multi-window app, and the `_windowId` convention](#a-multi-window-app-and-the-_windowid-convention)
 - [Running a Messenger worker](#running-a-messenger-worker)
 - [Reacting to a runtime event with a typed listener](#reacting-to-a-runtime-event-with-a-typed-listener)
 - [A native-UI screen with state](#a-native-ui-screen-with-state)

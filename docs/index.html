@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Overview · NativePHP for Symfony</title>
+<meta name="description" content="Build desktop, iOS and Android applications with Symfony and PHP, on NativePHP's runtimes.">
+<link rel="stylesheet" href="assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%228%22%20fill%3D%22%236366f1%22%2F%3E%3Cpath%20d%3D%22M9%2022V10h3l8%208V10h3v12h-3l-8-8v8z%22%20fill%3D%22%23fff%22%2F%3E%3C%2Fsvg%3E">
+</head>
+<body class="is-index">
+<a class="skip" href="#content">Skip to content</a>
+
+<div class="layout">
+    <aside class="sidebar">
+        <a class="brand" href="index.html">
+            <span class="brand-mark" aria-hidden="true">NS</span>
+            <span class="brand-text">NativePHP<span class="brand-dim"> for Symfony</span></span>
+        </a>
+        <nav class="nav" aria-label="Documentation">
+<a class="nav-link current" href="index.html" aria-current="page">
+            <span class="nav-title">Overview</span>
+            <span class="nav-blurb">What is here, and what is authoritative</span>
+        </a>
+<p class="nav-section">Using it</p>
+<a class="nav-link" href="getting-started-desktop.html">
+            <span class="nav-title">Desktop</span>
+            <span class="nav-blurb">From composer require to a window</span>
+        </a>
+<a class="nav-link" href="getting-started-mobile.html">
+            <span class="nav-title">Mobile</span>
+            <span class="nav-blurb">Both render paths, and what is verified</span>
+        </a>
+<p class="nav-section">Reference</p>
+<a class="nav-link" href="desktop-api.html">
+            <span class="nav-title">Desktop API</span>
+            <span class="nav-blurb">Windows, menus, dialogs, processes, events</span>
+        </a>
+<a class="nav-link" href="mobile-api.html">
+            <span class="nav-title">Mobile API</span>
+            <span class="nav-blurb">16 bridge groups and the native-UI layers</span>
+        </a>
+<p class="nav-section">Working with it</p>
+<a class="nav-link" href="recipes.html">
+            <span class="nav-title">Recipes</span>
+            <span class="nav-blurb">Multi-window, workers, native screens, packaging</span>
+        </a>
+<a class="nav-link" href="testing.html">
+            <span class="nav-title">Testing</span>
+            <span class="nav-blurb">FakeRuntime, expectations, event simulation</span>
+        </a>
+<a class="nav-link" href="troubleshooting.html">
+            <span class="nav-title">Troubleshooting</span>
+            <span class="nav-blurb">Symptom → cause → fix</span>
+        </a>
+        </nav>
+        <div class="sidebar-foot">
+            <a href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener">Source on GitHub ↗</a>
+            <p class="sidebar-note">Desktop is verified by a running packaged app. Mobile is verified by tests, not yet by a device.</p>
+        </div>
+    </aside>
+
+    <main id="content">
+        <nav class="toc" aria-label="On this page"><p class="toc-title">On this page</p><ul>
+<li class="d2"><a href="#using-it">Using it</a></li>
+<li class="d2"><a href="#a-worked-example">A worked example</a></li>
+<li class="d2"><a href="#reference--the-protocol-not-the-guide">Reference — the protocol, not the guide</a></li>
+<li class="d2"><a href="#understanding-it">Understanding it</a></li>
+<li class="d2"><a href="#working-on-the-port">Working *on* the port</a></li>
+<li class="d2"><a href="#historical-record">Historical record</a></li>
+<li class="d2"><a href="#known-drift-in-older-documents">Known drift in older documents</a></li>
+</ul></nav>
+        <article class="prose">
+<div class="hero">
+    <p class="eyebrow">Documentation</p>
+    <h1>Symfony, in a native window</h1>
+    <p class="lede">Two bundles on NativePHP's runtimes: an Electron desktop app around the Symfony
+    application you already have, and iOS/Android with 54 device methods and a native-UI path.
+    Your controllers, templates and console do not change.</p>
+    <div class="hero-links">
+        <a class="cta" href="getting-started-desktop.html">Start with desktop →</a>
+        <a class="cta ghost" href="getting-started-mobile.html">Or mobile</a>
+    </div>
+</div><h1 id="documentation"><a class="anchor" href="#documentation">Documentation</a></h1>
+<p>Start here. This directory is the documentation for <strong>using</strong> NativePHP for Symfony; the
+Markdown files at the repository root are mostly analysis, specification, or a record of how
+the port was built.</p>
+<h2 id="using-it"><a class="anchor" href="#using-it">Using it</a></h2>
+<div class="table-scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><strong><a href="getting-started-desktop.html">Getting started — desktop</a></strong></td><td><code>composer require</code> to a window on screen, including the two things that are not automatic</td></tr>
+<tr><td><strong><a href="getting-started-mobile.html">Getting started — mobile</a></strong></td><td>Both render paths, and what &quot;verified by tests, not by a device&quot; means</td></tr>
+<tr><td><strong><a href="desktop-api.html">Desktop API reference</a></strong></td><td>Windows, menus, dialogs, notifications, clipboard, settings, child processes, Messenger, events</td></tr>
+<tr><td><strong><a href="mobile-api.html">Mobile API reference</a></strong></td><td>The 16 bridge groups, and the native-UI element/component/style layers</td></tr>
+<tr><td><strong><a href="recipes.html">Recipes</a></strong></td><td>Multi-window apps, a Messenger worker, typed listeners, a stateful native screen, packaging</td></tr>
+<tr><td><strong><a href="testing.html">Testing</a></strong></td><td><code>FakeRuntime</code>, <code>RuntimeExpectations</code>, <code>RuntimeEventSimulator</code>, <code>FakeBridge</code></td></tr>
+<tr><td><strong><a href="troubleshooting.html">Troubleshooting</a></strong></td><td>Symptom → cause → fix. Read this first when something is <em>silently</em> wrong, which is this runtime&#39;s usual failure mode</td></tr>
+</tbody></table></div>
+<h2 id="a-worked-example"><a class="anchor" href="#a-worked-example">A worked example</a></h2>
+<p><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/" target="_blank" rel="noopener"><code>../demo/</code></a> is a Symfony 8 application using both bundles: a bootstrapper, a
+multi-window inspector, a notes CRUD over the settings store, a Messenger-style job page, a
+menu with routed events, a native-UI counter screen, and a <code>native_publish()</code> Twig function the
+app owns rather than the bundle. Read it after the getting-started page for this project&#39;s
+idea of idiomatic use. It is newer than these docs; where it disagrees, it is probably right.</p>
+<h2 id="reference--the-protocol-not-the-guide"><a class="anchor" href="#reference--the-protocol-not-the-guide">Reference — the protocol, not the guide</a></h2>
+<p>Current and authoritative. Consult these when a wrapper does not cover what you need, or when
+you are checking a payload shape.</p>
+<div class="table-scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/CONTRACT.md" target="_blank" rel="noopener"><code>../CONTRACT.md</code></a></td><td>The desktop wire protocol: all 116 endpoints with request and response shapes, all 44 events, the environment contract, and the seven things the runtime requires of any PHP app</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/NATIVE-UI-CONTRACT.md" target="_blank" rel="noopener"><code>../NATIVE-UI-CONTRACT.md</code></a></td><td>The mobile native-UI wire format: node shapes, content hashes, id derivation, the callback protocol, the style vocabulary</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/bundle/README.md" target="_blank" rel="noopener"><code>../bundle/README.md</code></a></td><td>Desktop package overview</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/mobile-bundle/README.md" target="_blank" rel="noopener"><code>../mobile-bundle/README.md</code></a></td><td>Mobile package overview</td></tr>
+</tbody></table></div>
+<p>The two package READMEs are summaries and lag the code slightly — see
+<a href="#known-drift-in-older-documents">known drift</a> below. Where they disagree with these docs,
+these docs were written against the source.</p>
+<h2 id="understanding-it"><a class="anchor" href="#understanding-it">Understanding it</a></h2>
+<div class="table-scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener"><code>../ARCHITECTURE.md</code></a></td><td>How desktop and mobile differ, what the two bundles share and deliberately do not, the three verification techniques, and a collected list of the traps. The best single document if you read only one</td></tr>
+</tbody></table></div>
+<h2 id="working-on-the-port"><a class="anchor" href="#working-on-the-port">Working <em>on</em> the port</a></h2>
+<p>Not needed to build an application with it.</p>
+<div class="table-scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/PLAN.md" target="_blank" rel="noopener"><code>../PLAN.md</code></a></td><td>What NativePHP is, where Laravel leaks, and the milestone roadmap</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/ANALYSIS.md" target="_blank" rel="noopener"><code>../ANALYSIS.md</code></a></td><td>The deep dive: boot sequence, per-directory port map with LOC, the eight Laravel-isms with line numbers, the Symfony-specific design decisions, upstream bugs found</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/MOBILE-ANALYSIS.md" target="_blank" rel="noopener"><code>../MOBILE-ANALYSIS.md</code></a></td><td>Why mobile splits in two, and a correction to an earlier conclusion that was wrong</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/upstream-patches/README.md" target="_blank" rel="noopener"><code>../upstream-patches/README.md</code></a></td><td>Eleven patches. <code>0002</code>–<code>0007</code> are open as NativePHP/desktop #136–#141; <code>0008</code>–<code>0011</code> target <code>mobile-air</code> and are unsubmitted. Patch <code>0001</code> is the manifest change that would make the runtime framework-agnostic and retire the patcher. Five of them the bundle no longer waits on — <code>RuntimePatcher</code> carries them into your copy</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/spike/README.md" target="_blank" rel="noopener"><code>../spike/README.md</code></a></td><td>The reproduction harness — a container with PHP, Node, Electron and Xvfb that boots the runtime headlessly and screenshots it</td></tr>
+</tbody></table></div>
+<h2 id="historical-record"><a class="anchor" href="#historical-record">Historical record</a></h2>
+<p>These are milestone write-ups. They are accurate about what was true when they were written,
+and they are where the <em>evidence</em> for the current behaviour lives — but they are not the place
+to learn how to use anything.</p>
+<div class="table-scroll"><table><thead><tr><th></th><th></th></tr></thead><tbody>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/SPIKE-RESULTS.md" target="_blank" rel="noopener"><code>../SPIKE-RESULTS.md</code></a></td><td>M1: proving a Symfony app can run under the runtime at all. Five findings, including <code>APP_ENV=local</code> and the resize that emits no event</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M2-RESULTS.md" target="_blank" rel="noopener"><code>../M2-RESULTS.md</code></a></td><td>M2: the bundle. Seven findings, including <code>sendStatus</code> sending <code>&quot;OK&quot;</code>, the <code>NaN</code> zoom factor, and the dot-path settings key</td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/M3-RESULTS.md" target="_blank" rel="noopener"><code>../M3-RESULTS.md</code></a></td><td>M3: the build pipeline, and a packaged app that was built <em>and run</em>. Four findings, including the <code>APP_SECRET</code> collision and no opcache</td></tr>
+</tbody></table></div>
+<p>Every &quot;worth knowing&quot; in the pages above traces back to one of these three.</p>
+<h2 id="known-drift-in-older-documents"><a class="anchor" href="#known-drift-in-older-documents">Known drift in older documents</a></h2>
+<p>Everything the first pass of these docs found wrong has since been fixed in code, not
+papered over — the list is kept because <em>how</em> each was found is the useful part.</p>
+<div class="table-scroll"><table><thead><tr><th>Was wrong</th><th>Now</th></tr></thead><tbody>
+<tr><td><code>native_publish()</code> was documented and never registered</td><td>Registered; returns void, so <code>{% do native_publish(...) %}</code> is the spelling</td></tr>
+<tr><td>Parsed styles never reached the wire — the documented <code>-&gt;layout($parser-&gt;parse(...))</code> put camelCase keys where the renderers read snake_case</td><td><code>StyleApplier</code> dispatches them, or use the <code>class</code> option</td></tr>
+<tr><td>Element props were camelCase (<code>fontSize</code>), <code>text_align</code> was a string, <code>font_size</code> an int</td><td>All match the wire; a test now compares an element <em>with</em> props, which is how these surfaced</td></tr>
+<tr><td><code>NativeScreenResponder</code> typed its renderer non-nullable while DI wired it <code>nullOnInvalid</code> — a <code>TypeError</code> for any app enabling the bundle</td><td>Nullable, with a guard naming the interface to implement</td></tr>
+<tr><td>The install flow predated <code>native:manifest</code></td><td>Documented, and patching is skipped when the runtime is manifest-aware</td></tr>
+<tr><td>Test counts contradicted each other across three READMEs</td><td>Read from the suites</td></tr>
+<tr><td>Nothing implemented <code>ScreenRendererInterface</code>, so a <code>#[NativeScreen]</code> component needed application glue — the two halves of the native-UI path did not join up</td><td><code>ComponentScreenRenderer</code> ships, aliased to the interface; override the alias for a different renderer</td></tr>
+<tr><td>The routes import was a manual step, and forgetting it gave an app that boots and shows nothing</td><td><code>native:install</code> writes it, and warns rather than guessing when there is no <code>config/routes/</code></td></tr>
+<tr><td>Five runtime defects — four filed as NativePHP/desktop #137–#140 and unreviewed, one found here — were left to upstream&#39;s release schedule, which on discussion #504 has meant eighteen months of silence</td><td><code>RuntimePatcher</code> carries all five into the copy <code>native:install</code> writes. Non-strict hunks, so a target that moves (most likely because the fix landed) is reported, not fatal</td></tr>
+<tr><td>An application firewall silently denied the runtime&#39;s own callbacks — <code>access_control: ^/</code> makes <code>POST /_native/api/booted</code> a 401, which the runtime discards, giving a window that opens and does nothing. Laravel is not exposed to this: there the two routes sit outside the app&#39;s middleware groups</td><td><code>RuntimeRoutesAccessMap</code> decorates <code>security.access_map</code> so the paths carry no attributes <em>inside the runtime only</em> — a bundle cannot fix it as config, since both <code>security.firewalls</code> and <code>security.access_control</code> are single-source. Found by diffing our route registration against upstream&#39;s <code>routes/api.php</code></td></tr>
+<tr><td><code>native:build</code> crashed part-way through on any app containing a self-referential symlink (<code>public/storage -&gt; ..</code>), with a <code>FileNotFoundException</code> naming a path forty levels deep</td><td>The staging walk remembers real directories and refuses to enter one twice</td></tr>
+<tr><td>The demo itself did <code>layout: $parser-&gt;parse(...)</code> on two pages — the very mistake row three above records</td><td>Both go through <code>StyleApplier</code> now; found by reading a published frame, not by a test</td></tr>
+</tbody></table></div>
+<p>Two caveats that are <em>not</em> drift and will not be fixed:</p>
+<ul>
+<li><strong>Mobile is verified by tests, not on a device.</strong> There is no Xcode or Android SDK in
+the environment this was built in. Desktop&#39;s claims are backed by a running packaged
+app; mobile&#39;s are not, and no amount of test coverage changes that.</li>
+<li><strong><code>SPIKE-RESULTS.md</code>, <code>M2-RESULTS.md</code> and <code>M3-RESULTS.md</code> are a journal.</strong> They record
+what was true at a milestone, including conclusions later corrected. Read them for the
+reasoning, not the API.</li>
+</ul>
+
+        </article>
+        <footer class="foot">
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> is someone else's brand.</p>
+        </footer>
+    </main>
+</div>
+</body>
+</html>

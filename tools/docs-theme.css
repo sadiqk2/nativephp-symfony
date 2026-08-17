@@ -1,0 +1,621 @@
+/*
+ * The documentation site's whole stylesheet.
+ *
+ * No external requests: system fonts, an inline SVG favicon, no CDN. A docs site that
+ * cannot render offline is a docs site that renders differently for whoever is behind a
+ * corporate proxy, and this one is read while something is broken.
+ *
+ * Light and dark are both first-class. Tokens are defined on :root for light and
+ * redefined under prefers-color-scheme: dark — never the other way around, so a page
+ * always has a complete palette whatever the viewer's setting.
+ */
+
+:root {
+    color-scheme: light dark;
+
+    --bg: #fbfbfd;
+    --bg-raised: #ffffff;
+    --bg-sunken: #f2f2f7;
+    --border: #e3e3ea;
+    --border-strong: #d0d0dc;
+    --text: #17171c;
+    --text-dim: #5c5c6b;
+    --text-faint: #8a8a99;
+    --accent: #4f46e5;
+    --accent-soft: #eef0ff;
+    --accent-text: #4338ca;
+    --code-bg: #f6f6fa;
+    --code-text: #2a2a35;
+    --shadow: 0 1px 2px rgb(20 20 40 / 6%), 0 8px 24px -12px rgb(20 20 40 / 12%);
+
+    --sidebar: 17.5rem;
+    --measure: 46rem;
+    --radius: 10px;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0e0f13;
+        --bg-raised: #15161c;
+        --bg-sunken: #101117;
+        --border: #24262f;
+        --border-strong: #333644;
+        --text: #e9e9ef;
+        --text-dim: #a3a4b3;
+        --text-faint: #74757f;
+        --accent: #8b8cf7;
+        --accent-soft: #1b1c2b;
+        --accent-text: #a5a6fb;
+        --code-bg: #12131a;
+        --code-text: #d7d8e2;
+        --shadow: 0 1px 2px rgb(0 0 0 / 40%), 0 12px 32px -16px rgb(0 0 0 / 60%);
+    }
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    /* Anchored headings land below the sticky offset rather than under it. */
+    scroll-padding-top: 1.5rem;
+}
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 16.5px;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+.skip {
+    position: absolute;
+    left: -9999px;
+}
+
+.skip:focus {
+    left: 1rem;
+    top: 1rem;
+    z-index: 10;
+    padding: 0.5rem 0.75rem;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 6px;
+}
+
+/* ── Layout ─────────────────────────────────────── */
+
+.layout {
+    display: grid;
+    grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    gap: 0;
+    min-height: 100vh;
+}
+
+.sidebar {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 1.75rem 1.25rem 1.5rem;
+    border-right: 1px solid var(--border);
+    background: var(--bg-sunken);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+main {
+    min-width: 0;
+    padding: 3.5rem clamp(1.25rem, 4vw, 4rem) 4rem;
+    display: grid;
+    grid-template-columns: minmax(0, var(--measure)) minmax(0, 15rem);
+    grid-template-areas: "article toc" "foot foot";
+    gap: 0 3rem;
+    align-content: start;
+    justify-content: center;
+}
+
+.prose {
+    grid-area: article;
+    min-width: 0;
+}
+
+.foot {
+    grid-area: foot;
+    margin-top: 4rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--border);
+    color: var(--text-faint);
+    font-size: 0.85rem;
+}
+
+@media (max-width: 1180px) {
+    main {
+        grid-template-columns: minmax(0, var(--measure));
+        grid-template-areas: "toc" "article" "foot";
+    }
+}
+
+@media (max-width: 860px) {
+    .layout {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    main {
+        padding-top: 2rem;
+    }
+}
+
+/* ── Sidebar ────────────────────────────────────── */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 620;
+    letter-spacing: -0.01em;
+}
+
+.brand-mark {
+    display: grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    border-radius: 8px;
+    background: linear-gradient(140deg, var(--accent), #7c3aed);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.brand-dim {
+    color: var(--text-dim);
+    font-weight: 500;
+}
+
+.nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.nav-section {
+    margin: 1.1rem 0 0.35rem;
+    padding-left: 0.7rem;
+    color: var(--text-faint);
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.nav-link {
+    display: block;
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-dim);
+    border: 1px solid transparent;
+    transition: background 0.12s ease, color 0.12s ease;
+}
+
+.nav-link:hover {
+    background: var(--bg-raised);
+    color: var(--text);
+}
+
+.nav-link.current {
+    background: var(--accent-soft);
+    border-color: color-mix(in oklab, var(--accent) 25%, transparent);
+    color: var(--accent-text);
+}
+
+.nav-title {
+    display: block;
+    font-size: 0.94rem;
+    font-weight: 560;
+    color: inherit;
+}
+
+.nav-blurb {
+    display: block;
+    font-size: 0.76rem;
+    line-height: 1.45;
+    color: var(--text-faint);
+}
+
+.nav-link.current .nav-blurb {
+    color: color-mix(in oklab, var(--accent-text) 70%, var(--text-faint));
+}
+
+.sidebar-foot {
+    margin-top: auto;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.8rem;
+}
+
+.sidebar-foot a {
+    color: var(--text-dim);
+    text-decoration: none;
+}
+
+.sidebar-foot a:hover {
+    color: var(--accent-text);
+}
+
+.sidebar-note {
+    margin: 0.6rem 0 0;
+    color: var(--text-faint);
+    font-size: 0.75rem;
+    line-height: 1.5;
+}
+
+/* ── On this page ───────────────────────────────── */
+
+.toc {
+    grid-area: toc;
+    align-self: start;
+    position: sticky;
+    top: 3.5rem;
+    max-height: calc(100vh - 6rem);
+    overflow-y: auto;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border);
+    font-size: 0.82rem;
+}
+
+.toc-title {
+    margin: 0 0 0.5rem;
+    color: var(--text-faint);
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.toc ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.toc li {
+    margin: 0.15rem 0;
+}
+
+.toc li.d3 {
+    padding-left: 0.85rem;
+}
+
+.toc a {
+    color: var(--text-dim);
+    text-decoration: none;
+    display: block;
+    line-height: 1.45;
+}
+
+.toc a:hover {
+    color: var(--accent-text);
+}
+
+@media (max-width: 1180px) {
+    .toc {
+        position: static;
+        max-height: none;
+        margin-bottom: 2.5rem;
+        padding: 1rem 1.1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--bg-raised);
+    }
+
+    .toc ul {
+        columns: 2;
+        column-gap: 2rem;
+    }
+}
+
+/* ── Hero, on the index only ────────────────────── */
+
+.hero {
+    margin-bottom: 3rem;
+    padding-bottom: 2.25rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.eyebrow {
+    margin: 0 0 0.5rem;
+    color: var(--accent-text);
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.hero h1 {
+    margin: 0 0 0.75rem;
+    font-size: clamp(2rem, 5vw, 2.9rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    border: 0;
+    padding: 0;
+}
+
+.lede {
+    margin: 0;
+    max-width: 40rem;
+    color: var(--text-dim);
+    font-size: 1.08rem;
+    line-height: 1.65;
+}
+
+.hero-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.6rem;
+}
+
+.cta {
+    display: inline-block;
+    padding: 0.6rem 1.05rem;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.92rem;
+    font-weight: 560;
+    text-decoration: none;
+    box-shadow: var(--shadow);
+}
+
+.cta:hover {
+    filter: brightness(1.08);
+}
+
+.cta.ghost {
+    background: transparent;
+    color: var(--accent-text);
+    border: 1px solid var(--border-strong);
+    box-shadow: none;
+}
+
+.cta.ghost:hover {
+    background: var(--accent-soft);
+    filter: none;
+}
+
+/* ── Prose ──────────────────────────────────────── */
+
+.prose > :first-child {
+    margin-top: 0;
+}
+
+.prose h1,
+.prose h2,
+.prose h3,
+.prose h4 {
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    scroll-margin-top: 1.5rem;
+}
+
+.prose h1 {
+    margin: 0 0 1.5rem;
+    font-size: clamp(1.9rem, 4vw, 2.35rem);
+}
+
+.prose h2 {
+    margin: 3.25rem 0 1rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 1.5rem;
+}
+
+.prose h3 {
+    margin: 2.25rem 0 0.75rem;
+    font-size: 1.15rem;
+}
+
+.prose h4 {
+    margin: 1.75rem 0 0.5rem;
+    font-size: 1rem;
+    color: var(--text-dim);
+}
+
+.anchor {
+    color: inherit;
+    text-decoration: none;
+}
+
+.anchor:hover::after {
+    content: " #";
+    color: var(--text-faint);
+    font-weight: 400;
+}
+
+.prose p,
+.prose li {
+    color: var(--text);
+}
+
+.prose p {
+    margin: 0 0 1.1rem;
+}
+
+.prose a {
+    color: var(--accent-text);
+    text-decoration-color: color-mix(in oklab, var(--accent) 40%, transparent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+.prose a:hover {
+    text-decoration-color: var(--accent);
+}
+
+.prose strong {
+    font-weight: 640;
+}
+
+.prose ul,
+.prose ol {
+    margin: 0 0 1.2rem;
+    padding-left: 1.35rem;
+}
+
+.prose li {
+    margin: 0.35rem 0;
+}
+
+.prose li > ul,
+.prose li > ol {
+    margin: 0.35rem 0 0.5rem;
+}
+
+.prose hr {
+    margin: 2.75rem 0;
+    border: 0;
+    border-top: 1px solid var(--border);
+}
+
+.prose blockquote {
+    margin: 1.5rem 0;
+    padding: 0.15rem 0 0.15rem 1.1rem;
+    border-left: 3px solid var(--accent);
+    color: var(--text-dim);
+}
+
+.prose blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+.prose img {
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+/* ── Code ───────────────────────────────────────── */
+
+code,
+kbd,
+samp {
+    font-family: var(--mono);
+    font-size: 0.88em;
+}
+
+.prose :not(pre) > code {
+    padding: 0.12em 0.36em;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--code-bg);
+    color: var(--code-text);
+    white-space: nowrap;
+}
+
+.prose pre {
+    margin: 0 0 1.4rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--code-bg);
+    overflow-x: auto;
+    line-height: 1.6;
+    font-size: 0.86rem;
+    tab-size: 4;
+}
+
+.prose pre code {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--code-text);
+    white-space: pre;
+    font-size: inherit;
+}
+
+/* ── Tables ─────────────────────────────────────── */
+
+.table-scroll {
+    margin: 0 0 1.5rem;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-raised);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+
+th {
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border-strong);
+    background: var(--bg-sunken);
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 650;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    white-space: nowrap;
+}
+
+td {
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+}
+
+tr:last-child td {
+    border-bottom: 0;
+}
+
+td code {
+    white-space: normal;
+}
+
+/* The API references have a two-column table whose first column is all class names;
+   keeping those on one line is what makes them scannable. */
+td:first-child code {
+    white-space: nowrap;
+}
+
+@media print {
+    .sidebar,
+    .toc,
+    .skip {
+        display: none;
+    }
+
+    .layout,
+    main {
+        display: block;
+        padding: 0;
+    }
+}
