@@ -8,6 +8,8 @@ use Native\Symfony\Manifest\Manifest;
 use Native\Symfony\Manifest\ManifestSupport;
 use Native\Symfony\Manifest\ManifestSupportDetector;
 use Native\Symfony\Manifest\ManifestWriter;
+use Native\Symfony\Support\Platform;
+use Native\Symfony\Support\ProjectPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,13 +33,18 @@ use Symfony\Component\Filesystem\Path;
 #[AsCommand(name: 'native:manifest', description: 'Write nativephp.json describing this app to the Electron runtime')]
 final class ManifestCommand extends Command
 {
+    private readonly ProjectPath $paths;
+
     public function __construct(
         private readonly ManifestWriter $writer,
         private readonly Manifest $manifest,
         private readonly ManifestSupportDetector $detector,
         private readonly string $projectDir,
+        ?Platform $platform = null,
     ) {
         parent::__construct();
+
+        $this->paths = new ProjectPath($projectDir, $platform);
     }
 
     protected function configure(): void
@@ -97,14 +104,11 @@ final class ManifestCommand extends Command
      */
     private function reportRuntime(string $electronPath, SymfonyStyle $io): void
     {
-        // Path::isAbsolute rather than a leading slash — the same reason native:run and
-        // native:build use it. Here the consequence is only advisory, but it is advice
+        // Here the consequence of getting this wrong is only advisory, but it is advice
         // pointing the wrong way: a Windows --electron-path was joined onto the project
         // directory, so an installed runtime was reported missing and the fix suggested
         // was to install it again.
-        $electron = Path::isAbsolute($electronPath)
-            ? $electronPath
-            : Path::join($this->projectDir, $electronPath);
+        $electron = $this->paths->absolute($electronPath);
 
         if (!is_dir($electron)) {
             $io->comment(sprintf('No runtime at %s yet; run native:install when you need one.', $electron));

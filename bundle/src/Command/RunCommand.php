@@ -9,8 +9,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Native\Symfony\Support\Platform;
+use Native\Symfony\Support\ProjectPath;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Path;
 use Symfony\Component\Process\Process;
 
 /**
@@ -30,9 +31,15 @@ use Symfony\Component\Process\Process;
 #[AsCommand(name: 'native:run', description: 'Start the desktop app in development')]
 final class RunCommand extends Command
 {
-    public function __construct(private readonly string $projectDir)
-    {
+    private readonly ProjectPath $paths;
+
+    public function __construct(
+        private readonly string $projectDir,
+        ?Platform $platform = null,
+    ) {
         parent::__construct();
+
+        $this->paths = new ProjectPath($projectDir, $platform);
     }
 
     protected function configure(): void
@@ -195,14 +202,8 @@ final class RunCommand extends Command
         return Command::SUCCESS;
     }
 
-    /**
-     * `str_starts_with($path, '/')` is not "is this absolute" anywhere but POSIX:
-     * C:\\dev\\electron and \\\\server\\share are both absolute and both failed it,
-     * turning an --electron-path into C:\\proj\\C:\\dev\\electron and reporting a
-     * project that exists as missing.
-     */
     private function absolute(string $path): string
     {
-        return Path::isAbsolute($path) ? $path : Path::join($this->projectDir, $path);
+        return $this->paths->absolute($path);
     }
 }

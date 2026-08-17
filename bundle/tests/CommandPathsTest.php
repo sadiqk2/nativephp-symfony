@@ -10,22 +10,29 @@ use Native\Symfony\Command\RunCommand;
 use Native\Symfony\Manifest\Manifest;
 use Native\Symfony\Manifest\ManifestSupportDetector;
 use Native\Symfony\Manifest\ManifestWriter;
+use Native\Symfony\Support\Platform;
+use Native\Symfony\Support\ProjectPath;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Filesystem\Path;
 
 /**
- * How `native:run`, `native:build` and `native:manifest` turn `--electron-path`
- * into a path.
+ * How `native:run`, `native:build` and `native:manifest` turn `--electron-path` into a path.
  *
  * None of the three had a test of its own, which is how a `Path::` call shipped in
- * `RunCommand` with no import for it — every invocation of the command would have
- * died on `Native\Symfony\Command\Path` before printing anything, and 349 green
- * tests said nothing about it. `native:manifest` then turned out to still carry the
- * POSIX-only check the other two had just had removed. These run the commands far
- * enough to hit the resolution and read the path back out of the output.
+ * `RunCommand` with no import for it — every invocation would have died before printing
+ * anything, and 349 green tests said nothing. `native:manifest` then turned out to still
+ * carry the POSIX-only check the other two had just had removed.
+ *
+ * The Windows rows used to be skipped off Windows, because `Path::isAbsolute()` decides from
+ * `DIRECTORY_SEPARATOR`. That hid a second mistake: they expected `C:/dev/electron` from code
+ * that returned the path verbatim, so they would have *failed* on the only platform that ran
+ * them. The commands now resolve through {@see ProjectPath}, which takes the platform as an
+ * argument, so every row runs on every host — and the expectations have been checked rather
+ * than assumed.
  */
 final class CommandPathsTest extends TestCase
 {
@@ -41,6 +48,8 @@ final class CommandPathsTest extends TestCase
     {
         (new Filesystem())->remove($this->project);
     }
+
+    // ── Each command resolves a relative option against the project ──
 
     public function testRunResolvesARelativeElectronPathAgainstTheProject(): void
     {
@@ -60,74 +69,109 @@ final class CommandPathsTest extends TestCase
 
     public function testManifestResolvesARelativeElectronPathAgainstTheProject(): void
     {
-        // native:manifest resolves --electron-path too, and had the same POSIX-only test
-        // as the other two — found only by grepping for the pattern after fixing them,
-        // which is the lesson: when a fix ships, sweep the tree for what it replaced.
+        // Found only by grepping for the pattern after fixing the other two, which is the
+        // lesson: when a fix ships, sweep the tree for what it replaced.
         $tester = $this->execute($this->manifestCommand(), []);
 
         self::assertStringContainsString($this->project.'/nativephp/electron', $this->flatten($tester));
     }
 
-    #[DataProvider('absolutePaths')]
-    public function testManifestLeavesAnAbsoluteElectronPathAlone(string $path, string $expected, bool $windowsOnly): void
+    // ── The same table, on every platform, through every command ──
+
+    #[DataProvider('paths')]
+    public function testEveryCommandResolvesAPathTheSameWay(string $osFamily, string $path, string $expected): void
     {
-        if ($windowsOnly && '\\' !== \DIRECTORY_SEPARATOR) {
-            self::markTestSkipped('Drive letters and UNC paths are only absolute on Windows.');
+        $platform = new Platform($osFamily);
+        $expected = str_replace('{project}', $this->project, $expected);
+
+        foreach ([
+            'native:run' => $this->execute(new RunCommand($this->project, $platform), ['--electron-path' => $path]),
+            'native:build' => $this->execute(new BuildCommand($this->project, [], $platform), ['os' => 'linux', '--electron-path' => $path]),
+            'native:manifest' => $this->execute($this->manifestCommand($platform), ['--electron-path' => $path]),
+        ] as $command => $tester) {
+            self::assertStringContainsString(
+                $this->squeeze($expected),
+                $this->flatten($tester),
+                sprintf('%s should report %s for "%s" on %s', $command, $expected, $path, $osFamily),
+            );
         }
-
-        $output = $this->flatten($this->execute($this->manifestCommand(), ['--electron-path' => $path]));
-
-        self::assertStringContainsString($expected, $output);
-        self::assertStringNotContainsString($this->project.'/'.$path, $output);
     }
 
     /**
-     * `str_starts_with($path, '/')` is not "is this absolute" anywhere but POSIX.
-     * A Windows path failed it and was appended to the project directory, so
-     * `--electron-path=C:\dev\electron` looked for C:\proj\C:\dev\electron and
-     * reported a project that exists as missing.
+     * Every row is asserted on whatever host runs the suite: the platform is an argument, not
+     * `DIRECTORY_SEPARATOR`.
+     *
+     * @return iterable<string, array{string, string, string}>
      */
-    #[DataProvider('absolutePaths')]
-    public function testAnAbsolutePathIsLeftAlone(string $path, string $expected, bool $windowsOnly): void
+    public static function paths(): iterable
     {
-        if ($windowsOnly && '\\' !== \DIRECTORY_SEPARATOR) {
-            // `Path::isAbsolute` gates the drive-letter and UNC forms on
-            // DIRECTORY_SEPARATOR, which is right: on Linux "C:\dev" really is a
-            // relative path, one weirdly-named directory deep. So these two rows
-            // only mean anything on the platform the bug was about — they are kept
-            // here to run there rather than deleted for being inconvenient.
-            self::markTestSkipped('Drive letters and UNC paths are only absolute on Windows.');
-        }
+        // Absolute on both platforms.
+        yield 'posix, on linux' => ['Linux', '/opt/electron', '/opt/electron'];
+        yield 'posix, on windows' => ['Windows', '/opt/electron', '/opt/electron'];
 
-        foreach ([$this->execute(new RunCommand($this->project), ['--electron-path' => $path]),
-            $this->execute(new BuildCommand($this->project, []), ['os' => 'linux', '--electron-path' => $path])] as $tester) {
-            $output = $this->flatten($tester);
+        // A stream wrapper is absolute everywhere — and it is the only input where this rule
+        // and the old leading-slash test disagree on a non-Windows host, so it is what keeps
+        // this suite able to fail here at all.
+        yield 'stream wrapper, on linux' => ['Linux', 'file:///opt/electron', 'file:///opt/electron'];
+        yield 'stream wrapper, on windows' => ['Windows', 'file:///opt/electron', 'file:///opt/electron'];
 
-            self::assertStringContainsString($expected, $output);
-            self::assertStringNotContainsString($this->project.'/'.$path, $output);
-        }
+        // Absolute on Windows, and genuinely relative anywhere else: on Linux `C:\dev` is one
+        // directory whose name contains a colon and backslashes, so resolving it against the
+        // project is the correct answer rather than a compromise.
+        yield 'drive letter, on windows' => ['Windows', 'C:\\dev\\electron', 'C:/dev/electron'];
+        yield 'drive letter, on linux' => ['Linux', 'C:\\dev\\electron', '{project}/C:\\dev\\electron'];
+        yield 'unc, on windows' => ['Windows', '\\\\server\\share\\electron', '//server/share/electron'];
+
+        // A bare drive letter is absolute on Windows; `Path::isAbsolute()` special-cases it.
+        yield 'bare drive letter, on windows' => ['Windows', 'C:', 'C:'];
+
+        yield 'relative, on windows' => ['Windows', 'nativephp\\electron', '{project}/nativephp\\electron'];
+        yield 'relative, on linux' => ['Linux', 'nativephp/electron', '{project}/nativephp/electron'];
     }
 
-    /** @return iterable<string, array{string, string, bool}> */
-    public static function absolutePaths(): iterable
-    {
-        // Path normalises separators, so the expectation is the forward-slash form.
-        yield 'posix' => ['/opt/electron', '/opt/electron', false];
-        // Runs everywhere, and is the only row that does: the drive-letter and UNC
-        // forms are only absolute on Windows, so on any other platform a stream
-        // wrapper is the one input where Path::isAbsolute and the old leading-slash
-        // test disagree — which is what keeps this suite able to fail here at all.
-        yield 'stream wrapper' => ['file:///opt/electron', 'file:///opt/electron', false];
-        yield 'windows drive' => ['C:\\dev\\electron', 'C:/dev/electron', true];
-        yield 'windows unc' => ['\\\\server\\share\\electron', '//server/share/electron', true];
-    }
+    // ── The rule itself, pinned to Symfony's ──
 
     /**
-     * `native:manifest` with the real collaborators — only the report is under test, and
-     * it is reached through the write, so the command is run with --dry-run nowhere: the
-     * write goes to the throwaway project directory.
+     * `ProjectPath::isAbsolute()` is a port of `Path::isAbsolute()` with the platform passed
+     * in, so the port has to agree with the original — for the *host* platform, which is the
+     * only one `Path` can answer for. On Linux this pins the POSIX and stream-wrapper
+     * branches; on a Windows runner it pins the drive-letter and UNC ones. Between the two the
+     * whole rule is covered by something other than my own reading of it.
      */
-    private function manifestCommand(): ManifestCommand
+    #[DataProvider('everyPathShape')]
+    public function testTheRuleAgreesWithSymfonyForThisHost(string $path): void
+    {
+        $mine = new ProjectPath($this->project, new Platform(\PHP_OS_FAMILY));
+
+        self::assertSame(
+            Path::isAbsolute($path),
+            $mine->isAbsolute($path),
+            sprintf('Disagreed with Path::isAbsolute() about "%s" on %s', $path, \PHP_OS_FAMILY),
+        );
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function everyPathShape(): iterable
+    {
+        foreach ([
+            '/opt/electron', 'opt/electron', 'nativephp/electron', '',
+            'C:\\dev\\electron', 'C:/dev/electron', 'C:', 'C:x', 'CC:/x', '1:/x',
+            '\\\\server\\share', '\\single', 'file:///opt/electron', 'phar:///app.phar/x',
+            'https://example.com/x', './relative', '../up', 'a://b',
+        ] as $path) {
+            yield ('' === $path ? '(empty)' : $path) => [$path];
+        }
+    }
+
+    public function testAnEmptyOptionIsTheProjectDirectory(): void
+    {
+        // Not a crash and not the filesystem root: `Path::join()` treats it as nothing.
+        $paths = new ProjectPath($this->project, new Platform('Linux'));
+
+        self::assertSame($this->project, $paths->absolute(''));
+    }
+
+    private function manifestCommand(?Platform $platform = null): ManifestCommand
     {
         $manifest = new Manifest();
 
@@ -136,6 +180,7 @@ final class CommandPathsTest extends TestCase
             $manifest,
             new ManifestSupportDetector(),
             $this->project,
+            $platform,
         );
     }
 
@@ -150,8 +195,13 @@ final class CommandPathsTest extends TestCase
 
     private function flatten(CommandTester $tester): string
     {
-        // SymfonyStyle wraps error blocks at the terminal width, so a long path
-        // arrives split across lines.
-        return preg_replace('/\s+/', '', $tester->getDisplay()) ?? '';
+        // SymfonyStyle wraps error blocks at the terminal width, so a long path arrives split
+        // across lines.
+        return $this->squeeze($tester->getDisplay());
+    }
+
+    private function squeeze(string $value): string
+    {
+        return preg_replace('/\s+/', '', $value) ?? '';
     }
 }

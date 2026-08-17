@@ -12,6 +12,7 @@ use Native\Symfony\Mobile\Build\PlannedCommand;
 use Native\Symfony\Mobile\Build\ProcessRunner;
 use Native\Symfony\Mobile\Build\Toolchain;
 use Native\Symfony\Mobile\Build\ToolchainReport;
+use Native\Symfony\Mobile\Support\ProjectPath;
 use Native\Symfony\Mobile\Ui\Routing\NativeRouteManifest;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Filesystem\Path;
 
 /**
  * Release build: stage the application, bake it into the native project, and produce an
@@ -50,14 +50,19 @@ use Symfony\Component\Filesystem\Path;
 #[AsCommand(name: 'native:mobile:build', description: 'Stage the app and produce a release APK/AAB or iOS archive')]
 final class MobileBuildCommand extends Command
 {
+    private readonly ProjectPath $paths;
+
     public function __construct(
         private readonly string $projectDir,
         private readonly string $version,
         private readonly NativeRouteManifest $manifest,
         private readonly Toolchain $toolchain,
         private readonly CommandRunnerInterface $runner = new ProcessRunner(),
+        ?string $osFamily = null,
     ) {
         parent::__construct();
+
+        $this->paths = new ProjectPath($projectDir, $osFamily ?? \PHP_OS_FAMILY);
     }
 
     protected function configure(): void
@@ -397,13 +402,11 @@ final class MobileBuildCommand extends Command
         // platform-independent values today, but a shared directory would make any future
         // divergence a silent cross-contamination between builds.
         //
-        // Path::isAbsolute, not a leading slash: `--stage-dir=D:\builds` is absolute on the
-        // platform iOS development cannot happen on but Android's can, and treating it as
-        // relative would assemble several hundred megabytes inside the project directory
-        // instead — silently, since staging creates whatever directory it is given.
-        $base = Path::isAbsolute($dir) ? $dir : Path::join($this->projectDir, $dir);
-
-        return Path::join($base, $platform->value);
+        // Resolved through ProjectPath, not a leading-slash test: `--stage-dir=D:\builds` is
+        // absolute on Windows, and treating it as relative would assemble several hundred
+        // megabytes inside the project directory instead — silently, since staging creates
+        // whatever directory it is given.
+        return $this->paths->join($dir, $platform->value);
     }
 
     private function humanSize(string $path): string

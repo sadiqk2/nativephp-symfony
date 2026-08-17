@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Native\Symfony\Command;
 
 use Native\Symfony\Builder\Builder;
+use Native\Symfony\Support\Platform;
+use Native\Symfony\Support\ProjectPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -37,14 +39,19 @@ final class BuildCommand extends Command
     private const OPERATING_SYSTEMS = ['linux', 'mac', 'win'];
     private const ARCHITECTURES = ['x64', 'arm64'];
 
+    private readonly ProjectPath $paths;
+
     /**
      * @param array<string, mixed> $config
      */
     public function __construct(
         private readonly string $projectDir,
         private readonly array $config,
+        ?Platform $platform = null,
     ) {
         parent::__construct();
+
+        $this->paths = new ProjectPath($projectDir, $platform);
     }
 
     protected function configure(): void
@@ -307,15 +314,9 @@ final class BuildCommand extends Command
         );
     }
 
-    /**
-     * `str_starts_with($path, '/')` is not "is this absolute" anywhere but POSIX:
-     * C:\\dev\\electron and \\\\server\\share are both absolute and both failed it,
-     * turning an --electron-path into C:\\proj\\C:\\dev\\electron and reporting a
-     * project that exists as missing.
-     */
     private function absolute(string $path): string
     {
-        return Path::isAbsolute($path) ? $path : Path::join($this->projectDir, $path);
+        return $this->paths->absolute($path);
     }
 
     private function slug(string $value): string
