@@ -1,8 +1,8 @@
 diff --git a/src/Edge/CallbackRegistry.php b/src/Edge/CallbackRegistry.php
-index a27c9b3..39f3228 100644
+index a27c9b3..933ab4d 100644
 --- a/src/Edge/CallbackRegistry.php
 +++ b/src/Edge/CallbackRegistry.php
-@@ -200,10 +200,90 @@ class CallbackRegistry
+@@ -200,10 +200,86 @@ class CallbackRegistry
              return ['method' => $method, 'args' => []];
          }
  
@@ -76,14 +76,10 @@ index a27c9b3..39f3228 100644
 +                continue;
 +            }
 +
-+            // An apostrophe inside a double-quoted string, or a double quote inside a
-+            // single-quoted one, is data: escape rather than rewrite.
-+            if ($quote === '"' && $char === '"') {
-+                $out .= '\\"';
-+
-+                continue;
-+            }
-+
++            // A double quote inside a single-quoted literal is data, not a delimiter, so
++            // it has to be escaped rather than rewritten. (The mirror case needs no
++            // branch: a double quote inside a double-quoted string closes it above,
++            // which is what PHP's own tokenizer does with an unescaped one.)
 +            if ($quote === "'" && $char === '"') {
 +                $out .= '\\"';
 +
@@ -96,3 +92,53 @@ index a27c9b3..39f3228 100644
 +        return $out;
      }
  }
+diff --git a/tests/Unit/Edge/CallbackRegistryTest.php b/tests/Unit/Edge/CallbackRegistryTest.php
+index d969d51..eb3f881 100644
+--- a/tests/Unit/Edge/CallbackRegistryTest.php
++++ b/tests/Unit/Edge/CallbackRegistryTest.php
+@@ -70,3 +70,45 @@ it('exposes stored navigation configs keyed by stable content-addressed keys', f
+         // Same config re-registered anywhere reproduces the identical key.
+         ->and((new CallbackRegistry)->registerNavigation(['uri' => '/detail/7']))->toBe($key);
+ });
++
++// ── Argument literals ───────────────────────────────
++
++// The conversion to JSON used to be `str_replace("'", '"')`, which rewrote every
++// apostrophe whatever its role. Three silent failures came out of that, and the
++// third is the one worth the guard: the handler runs, with data nobody wrote.
++
++it('keeps an apostrophe inside a double-quoted argument', function () {
++    expect(CallbackRegistry::parse('save("don\'t")'))
++        ->toBe(['method' => 'save', 'args' => ["don't"]]);
++});
++
++it('keeps an escaped apostrophe inside a single-quoted argument', function () {
++    // Previously became `it"s fine` — no error, wrong value, handler invoked anyway.
++    expect(CallbackRegistry::parse("rename('it\\'s fine')"))
++        ->toBe(['method' => 'rename', 'args' => ["it's fine"]]);
++});
++
++it('keeps a double quote inside a single-quoted argument', function () {
++    expect(CallbackRegistry::parse("say('he said \"hi\"')"))
++        ->toBe(['method' => 'say', 'args' => ['he said "hi"']]);
++});
++
++it('still parses the ordinary literals', function () {
++    expect(CallbackRegistry::parse('add(5)'))->toBe(['method' => 'add', 'args' => [5]])
++        ->and(CallbackRegistry::parse("setName('Ada')"))->toBe(['method' => 'setName', 'args' => ['Ada']])
++        ->and(CallbackRegistry::parse('flag(true, null)'))->toBe(['method' => 'flag', 'args' => [true, null]])
++        ->and(CallbackRegistry::parse("pair('a', 'b')"))->toBe(['method' => 'pair', 'args' => ['a', 'b']])
++        ->and(CallbackRegistry::parse('increment'))->toBe(['method' => 'increment', 'args' => []])
++        ->and(CallbackRegistry::parse('reset()'))->toBe(['method' => 'reset', 'args' => []]);
++});
++
++it('keeps a comma inside a quoted argument out of the argument split', function () {
++    expect(CallbackRegistry::parse("greet('Hello, world')"))
++        ->toBe(['method' => 'greet', 'args' => ['Hello, world']]);
++});
++
++it('falls back to no arguments for an expression it cannot parse', function () {
++    // The contract callers rely on (they spread the result), but no longer silent.
++    expect(CallbackRegistry::parse('save(this is not a literal)'))
++        ->toBe(['method' => 'save', 'args' => []]);
++});

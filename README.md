@@ -15,7 +15,7 @@ full API, packaged into a distributable app that has been built *and run*.
 | **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 116 runtime endpoints, all 44 events, 357 tests. Verified by a running packaged app. |
 | **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 340 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
-| [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. Six are **open PRs ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2))**; the manifest patch is held until they land, and the mobile four are not submitted. All apply cleanly; the big one typechecks. |
+| [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. Ten are **open PRs** ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2) and [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)); only the manifest patch is held, until the small ones land. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
 
 ## Using it
@@ -93,11 +93,14 @@ What is left is not code:
    has been rendered on a phone. Everything up to that boundary is tested; `--stage-only`
    stops exactly there. This is the single most valuable thing anyone with a Mac or an
    Android SDK can contribute.
-2. **The rest of the upstream work.** Six of the eleven patches in
-   [`upstream-patches/`](upstream-patches/README.md) are open PRs
-   ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2))
-   awaiting review. The manifest patch — the one that makes the runtime framework-agnostic —
-   is held until those land, and the four `mobile-air` fixes are not submitted. Prior art is
+2. **Upstream review.** Ten of the eleven patches in
+   [`upstream-patches/`](upstream-patches/README.md) are open PRs awaiting review — six on
+   `NativePHP/desktop` ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2))
+   and four on `NativePHP/mobile-air`
+   ([#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)),
+   each with a regression test in that repo's own idiom. The manifest patch — the one that
+   makes the runtime framework-agnostic — is held until the small ones land, so it reaches a
+   maintainer who has already merged code from the same author. Prior art is
    [NativePHP discussion #504](https://github.com/NativePHP/laravel/discussions/504).
 3. **One open question for upstream** (ANALYSIS.md §9): whether Bifrost's server-side bundler
    can target `bin/console` instead of `artisan`. If it cannot, Symfony applications can only

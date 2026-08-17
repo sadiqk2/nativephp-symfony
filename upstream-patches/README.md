@@ -1,26 +1,47 @@
-# Upstream patches — six submitted, five held
+# Upstream patches — ten submitted, one held
 
-Eleven patches. The six independent desktop bug fixes are **open pull requests**; the rest
-are prepared so that opening them is a decision rather than a project.
+Eleven patches. Ten are **open pull requests**; the eleventh is held deliberately.
 
 | | repo | base | status |
 |---|---|---|---|
 | `0002`–`0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` | **open PRs [#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
+| `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` @ `bf4fd2a` | **open PRs [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
 | `0001` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` | held until the small ones land — it is the one that needs a maintainer conversation |
-| `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` | not submitted |
 
-The order is deliberate: six small, individually reviewable fixes first, so that the
+The order is deliberate: ten small, individually reviewable fixes first, so that the
 manifest patch — the only one that asks upstream to change a design — arrives to someone
 who has already merged code from the same author.
 
-Every patch applies cleanly to a clean tree, individually and as a series — verified with
-`git apply --check`. `0001` typechecks clean under the project's own `tsc`. `0008` is
-demonstrated with a before/after run of upstream's own parser.
+The `mobile-air` four each carry a regression test in the repo's own Pest idiom, written
+against its real `TailwindParser`, `NativeRouter` and `CallbackRegistry` rather than a
+stub. Every test was checked against unpatched `main` first: 3 of 3, 4 of 6, 3 of 6 and 1
+of 3 fail there, which is the only evidence that they test the fix rather than the code.
+The full upstream suite passes at 887 with the same 13 pre-existing failures `main` has on
+its own (Android splash-screen and release-build cases, unrelated), and `pint` is clean.
 
-Note `0008` targets the **mobile** repo, which is a commercial product rather than the
-MIT-licensed desktop runtime. It is a self-contained bug fix to public code, so submitting
-it raises nothing that `0001`–`0007` do not — but it is worth knowing they are different
-repositories with different licences.
+Writing those tests also found a dead branch in `0010` — a double quote inside a
+double-quoted literal is caught by the delimiter check above it, so the escape branch for
+that case was unreachable. Removed before submitting.
+
+| Patch | PR |
+|---|---|
+| `0008` theme border must not clobber an explicit width | [#349](https://github.com/NativePHP/mobile-air/pull/349) |
+| `0011` `dark:` variant buries a theme token's dark value | [#350](https://github.com/NativePHP/mobile-air/pull/350) |
+| `0009` optional route segments never resolved | [#351](https://github.com/NativePHP/mobile-air/pull/351) |
+| `0010` expression parser corrupts and drops arguments | [#352](https://github.com/NativePHP/mobile-air/pull/352) |
+
+Each patch file here is a `git diff` of the branch that was pushed, so it includes the
+tests and matches the pull request exactly.
+
+Every patch applies cleanly to a clean tree, individually and as a series — verified with
+`git apply --check`, and re-verified against `mobile-air`'s current `main` before the four
+were submitted. `0001` typechecks clean under the project's own `tsc`.
+
+`0008`–`0011` target the **mobile** repo. An earlier note here called it commercial rather
+than MIT: that was wrong about the repository, which carries an MIT `LICENSE.md`
+(Bifrost Technology, LLC) and declares `"license": "MIT"` in its `composer.json`. What is
+commercial is NativePHP Mobile as a *product* — the licence you buy to ship apps — not the
+source these patches touch. Submitting them raises nothing that `0002`–`0007` do not.
 
 ```bash
 git clone https://github.com/NativePHP/desktop && cd desktop
