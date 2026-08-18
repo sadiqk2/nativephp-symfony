@@ -244,6 +244,7 @@ final class Builder
 
         $kept = [];
         $continuation = null;
+        $appending = false;
 
         foreach (file($envPath, \FILE_IGNORE_NEW_LINES) ?: [] as $line) {
             // A quoted value may span lines — a PEM key, a JWT passphrase, a service
@@ -251,11 +252,21 @@ final class Builder
             // `=` truncated those at the first line and left the quote open, so the
             // staged .env no longer parsed and the packaged app died in bootEnv()
             // before the kernel existed, with the build reporting success.
+            //
+            // The continuation is tracked for *every* entry, not only the ones being
+            // kept: a dropped entry's remaining lines are still its value, and left to
+            // be read as fresh lines any of them containing an `=` — which base64
+            // padding and JSON both produce — looked like a key/value pair and was
+            // written into the staged file. The secret the remove list existed to strip
+            // then shipped inside the package anyway, in pieces.
             if (null !== $continuation) {
-                $kept[array_key_last($kept)] .= "\n".$line;
+                if ($appending) {
+                    $kept[array_key_last($kept)] .= "\n".$line;
+                }
 
                 if ($this->closesQuote($line, $continuation)) {
                     $continuation = null;
+                    $appending = false;
                 }
 
                 continue;
@@ -288,24 +299,21 @@ final class Builder
             // %env(APP_SECRET)%, so stripping it makes the packaged app fail to
             // boot at all. That must not be something a user can do to themselves
             // by accident.
-            if ($this->matchesAny($key, $this->envKeep)) {
+            $keep = $this->matchesAny($key, $this->envKeep)
+                || !($this->matchesAny($key, $this->envRemove) || \array_key_exists($key, $this->envDefaults));
+
+            if ($keep) {
                 $kept[] = $trimmed;
-
-                continue;
             }
 
-            if ($this->matchesAny($key, $this->envRemove) || \array_key_exists($key, $this->envDefaults)) {
-                continue;
-            }
-
-            $kept[] = $trimmed;
-
-            // Whatever quote this value opened has to be tracked to the line that
-            // closes it, so the rest of the value survives with it.
+            // Whatever quote this value opened has to be tracked to the line that closes
+            // it — to carry the rest of a kept value, and to swallow the rest of a
+            // dropped one.
             $quote = $this->opensQuote(substr($trimmed, \strlen((string) strstr($trimmed, '=', true)) + 1));
 
             if (null !== $quote) {
                 $continuation = $quote;
+                $appending = $keep;
             }
         }
 
@@ -342,9 +350,20 @@ final class Builder
         return $this->closesQuote(substr($value, 1), $quote) ? null : $quote;
     }
 
-    /** Whether this text contains the unescaped closing quote. */
+    /**
+     * Whether this text leaves an open quote closed — parity, not first occurrence.
+     *
+     * "Contains a quote" is the obvious rule and it is wrong for exactly the values that
+     * need multi-line handling in the first place. A service-account JSON continues with
+     * lines like `  "key": "sk_live_…",` whose *first* quote is an opening one; treating it
+     * as the close ended the value early, and every line after it was read as a fresh
+     * entry. Counting instead means a line closes the value only if it has an odd number of
+     * unescaped quotes, so `}"` ends it and `"key": "value",` does not.
+     */
     private function closesQuote(string $text, string $quote): bool
     {
+        $seen = 0;
+
         for ($i = 0, $length = \strlen($text); $i < $length; ++$i) {
             if ('\\' === $text[$i]) {
                 ++$i;
@@ -353,11 +372,11 @@ final class Builder
             }
 
             if ($text[$i] === $quote) {
-                return true;
+                ++$seen;
             }
         }
 
-        return false;
+        return 1 === $seen % 2;
     }
 
     /**

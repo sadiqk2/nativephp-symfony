@@ -149,6 +149,37 @@ final class BuilderTest extends TestCase
         self::assertStringNotContainsString('STRIPE_SECRET', $env);
     }
 
+    public function testARemovedMultiLineValueTakesItsContinuationLinesWithIt(): void
+    {
+        // Continuation was only tracked for lines that were *kept*, so dropping the first
+        // line of a removed secret left its remaining lines to be read as fresh entries —
+        // and a line that happens to contain `=`, which base64 padding and JSON both
+        // produce, then looked like a key/value pair and was written into the staged .env.
+        // The value the remove list existed to strip shipped inside the package anyway.
+        $this->write('.env', implode("\n", [
+            'APP_SECRET=keepme',
+            'STRIPE_SECRET="{',
+            '  "key": "sk_live_deadbeef",',
+            '  "pad": "AAAA=="',
+            '}"',
+            'DATABASE_URL=sqlite:///db.sqlite',
+            '',
+        ]));
+
+        $builder = $this->builder([]);   // its default remove list already has *_SECRET
+        $builder->stageApplication();
+        $builder->cleanEnvironmentFile();
+
+        $env = (string) file_get_contents($builder->appPath('.env'));
+
+        self::assertStringNotContainsString('sk_live_deadbeef', $env, 'A removed value must not survive in its own continuation lines.');
+        self::assertStringNotContainsString('AAAA==', $env);
+        self::assertStringNotContainsString('STRIPE_SECRET', $env);
+        self::assertStringContainsString('APP_SECRET=keepme', $env);
+        self::assertStringContainsString('DATABASE_URL=sqlite:///db.sqlite', $env);
+        self::assertSame(0, substr_count($env, '"') % 2, 'Unbalanced quotes mean the staged file no longer parses.');
+    }
+
     public function testAMultiLineQuotedValueSurvivesTheClean(): void
     {
         // Splitting on newlines and dropping every line without an `=` truncated a

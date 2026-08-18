@@ -137,6 +137,89 @@ final class MobileBuildTest extends TestCase
         self::assertStringNotContainsString('# a comment', $env);
     }
 
+    public function testAMultiLineQuotedValueSurvivesTheClean(): void
+    {
+        // Desktop's builder learned this and this one had not: splitting on newlines and
+        // dropping every line without an `=` truncates the value and leaves the quote open,
+        // so the staged .env stops parsing. On a device that is a launch to a 500, with the
+        // build having reported success.
+        $this->givenAnApplication();
+        $this->fs->dumpFile($this->projectDir.'/.env', implode("\n", [
+            'APP_SECRET=s3cret',
+            'JWT_PASSPHRASE="line one',
+            'line two"',
+            'DATABASE_URL="mysql://u:p@h/db?opt=1"',
+            '',
+        ]));
+
+        $builder = $this->builder();
+        $builder->stageApplication();
+        $builder->cleanEnvironmentFile('1.2.3', 4);
+
+        $env = (string) file_get_contents($builder->stagePath('.env'));
+
+        self::assertStringContainsString("JWT_PASSPHRASE=\"line one\nline two\"", $env);
+        self::assertStringContainsString('DATABASE_URL="mysql://u:p@h/db?opt=1"', $env);
+        self::assertSame(0, substr_count($env, '"') % 2, 'Unbalanced quotes mean the staged file no longer parses.');
+    }
+
+    public function testARemovedMultiLineValueTakesItsContinuationLinesWithIt(): void
+    {
+        // The lines after the first are still the removed value. Read as fresh entries, any
+        // of them containing an `=` — base64 padding, JSON — looked like a key/value pair
+        // and shipped inside the app: the secret the remove list existed to strip, in pieces.
+        $this->givenAnApplication();
+        $this->fs->dumpFile($this->projectDir.'/.env', implode("\n", [
+            'APP_SECRET=keepme',
+            'AWS_SESSION_TOKEN="{',
+            '  "key": "sk_live_deadbeef",',
+            '  "pad": "AAAA=="',
+            '}"',
+            'DATABASE_URL=sqlite:///db.sqlite',
+            '',
+        ]));
+
+        $builder = new MobileBuilder(
+            sourcePath: $this->projectDir,
+            stagePath: $this->projectDir.'/stage',
+            envRemove: ['AWS_*'],
+        );
+
+        $builder->stageApplication();
+        $builder->cleanEnvironmentFile('1.2.3', 4);
+
+        $env = (string) file_get_contents($builder->stagePath('.env'));
+
+        self::assertStringNotContainsString('sk_live_deadbeef', $env);
+        self::assertStringNotContainsString('AAAA==', $env);
+        self::assertStringContainsString('APP_SECRET=keepme', $env);
+        self::assertStringContainsString('DATABASE_URL=sqlite:///db.sqlite', $env);
+    }
+
+    public function testAnExportedSecretIsStillProtectedByTheKeepList(): void
+    {
+        // `export FOO=bar` is valid in Symfony's Dotenv. Taking everything before the `=`
+        // gives "export APP_SECRET", which fnmatch anchors at both ends — so the keep list
+        // missed it while a *_SECRET remove glob still matched, and the one variable the
+        // packaged app cannot boot without was stripped.
+        $this->givenAnApplication();
+        $this->fs->dumpFile($this->projectDir.'/.env', "export APP_SECRET=s3cret\nexport STRIPE_SECRET=sk_live\n");
+
+        $builder = new MobileBuilder(
+            sourcePath: $this->projectDir,
+            stagePath: $this->projectDir.'/stage',
+            envRemove: ['*_SECRET'],
+        );
+
+        $builder->stageApplication();
+        $builder->cleanEnvironmentFile('1.2.3', 4);
+
+        $env = (string) file_get_contents($builder->stagePath('.env'));
+
+        self::assertStringContainsString('APP_SECRET=s3cret', $env);
+        self::assertStringNotContainsString('sk_live', $env);
+    }
+
     public function testStagedEnvCarriesBothVersionKeysTheHostsCompare(): void
     {
         $this->givenAnApplication();

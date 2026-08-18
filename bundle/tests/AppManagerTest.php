@@ -6,6 +6,7 @@ namespace Native\Symfony\Desktop\Tests;
 
 use Native\Symfony\Desktop\App\AppManager;
 use Native\Symfony\Desktop\App\AppPath;
+use Native\Symfony\Desktop\Testing\FakeRuntime;
 use PHPUnit\Framework\TestCase;
 
 final class AppManagerTest extends TestCase
@@ -18,6 +19,22 @@ final class AppManagerTest extends TestCase
 
         self::assertSame('/home/u/Downloads', $manager->path(AppPath::Downloads));
         self::assertSame('/home/u/Downloads', $manager->path('downloads'));
+    }
+
+    public function testAPathNameThatWouldChangeTheRequestPathIsRefused(): void
+    {
+        // The name is interpolated into the URL. `../` resolves against the API root, so a
+        // value arriving from configuration or a route parameter would address a different
+        // endpoint rather than failing inside the runtime as the docblock promises.
+        $runtime = FakeRuntime::available();
+
+        try {
+            (new AppManager($runtime))->path('../app/quit');
+            self::fail('A path name with segments in it must be refused.');
+        } catch (\InvalidArgumentException $e) {
+            self::assertStringContainsString('../app/quit', $e->getMessage());
+            self::assertSame([], $runtime->calls(), 'It must be refused before anything is sent.');
+        }
     }
 
     public function testReadersUnwrapTheRuntimesKeys(): void

@@ -213,8 +213,33 @@ final class MobileBuilder
         ];
 
         $kept = [];
+        $continuation = null;
+        $appending = false;
 
         foreach (is_file($envPath) ? file($envPath, \FILE_IGNORE_NEW_LINES) ?: [] : [] as $line) {
+            // A quoted value may span lines — a PEM key, a service-account JSON, a JWT
+            // passphrase. This used to split on newlines and drop every line without an
+            // `=`, which truncated such a value at its first line and left the quote open:
+            // the staged .env then failed to parse, and on a device that is a launch to a
+            // 500 with the build having reported success. Desktop's builder learned this
+            // (M3-RESULTS.md); this one had not.
+            //
+            // The continuation is tracked for dropped entries too, or the rest of a removed
+            // secret is read as fresh lines — and any of them containing an `=`, which
+            // base64 padding and JSON both produce, ships inside the app anyway.
+            if (null !== $continuation) {
+                if ($appending) {
+                    $kept[array_key_last($kept)] .= "\n".$line;
+                }
+
+                if ($this->closesQuote($line, $continuation)) {
+                    $continuation = null;
+                    $appending = false;
+                }
+
+                continue;
+            }
+
             $trimmed = trim($line);
 
             if ('' === $trimmed || str_starts_with($trimmed, '#')) {
@@ -227,19 +252,28 @@ final class MobileBuilder
                 continue;
             }
 
+            // `export FOO=bar` is valid in Symfony's Dotenv, and taking the key as
+            // everything before the `=` yields "export FOO" — which is anchored at both
+            // ends by fnmatch, so it breaks the match in both directions: a prefix glob
+            // stops matching and the secret ships, while a leading-star glob still matches
+            // and strips an APP_SECRET the keep list was supposed to protect.
+            $key = trim(preg_replace('/^export\s+/', '', $key) ?? $key);
+
             // The keep list is checked first and wins. See the class docblock: this is the
             // difference between a packaged app that boots and one that does not.
-            if ($this->matchesAny($key, $this->envKeep)) {
+            $keep = $this->matchesAny($key, $this->envKeep)
+                || !($this->matchesAny($key, $this->envRemove) || \array_key_exists($key, $defaults));
+
+            if ($keep) {
                 $kept[] = $trimmed;
-
-                continue;
             }
 
-            if ($this->matchesAny($key, $this->envRemove) || \array_key_exists($key, $defaults)) {
-                continue;
-            }
+            $quote = $this->opensQuote(substr($trimmed, \strlen((string) strstr($trimmed, '=', true)) + 1));
 
-            $kept[] = $trimmed;
+            if (null !== $quote) {
+                $continuation = $quote;
+                $appending = $keep;
+            }
         }
 
         foreach ($defaults as $key => $value) {
@@ -247,6 +281,46 @@ final class MobileBuilder
         }
 
         $this->fs->dumpFile($envPath, implode("\n", $kept)."\n");
+    }
+
+    /** The quote character a value opens and does not close on its own line, if any. */
+    private function opensQuote(string $value): ?string
+    {
+        $value = ltrim($value);
+        $quote = substr($value, 0, 1);
+
+        if ('"' !== $quote && "'" !== $quote) {
+            return null;
+        }
+
+        return $this->closesQuote(substr($value, 1), $quote) ? null : $quote;
+    }
+
+    /**
+     * Whether this text leaves an open quote closed — parity, not first occurrence.
+     *
+     * "Contains a quote" is the obvious rule and it is wrong for exactly the values that
+     * need multi-line handling: a service-account JSON continues with lines like
+     * `  "key": "sk_live_…",` whose first quote is an opening one. Counting means a line
+     * closes the value only when it has an odd number of unescaped quotes.
+     */
+    private function closesQuote(string $text, string $quote): bool
+    {
+        $seen = 0;
+
+        for ($i = 0, $length = \strlen($text); $i < $length; ++$i) {
+            if ('\\' === $text[$i]) {
+                ++$i;
+
+                continue;
+            }
+
+            if ($text[$i] === $quote) {
+                ++$seen;
+            }
+        }
+
+        return 1 === $seen % 2;
     }
 
     /**

@@ -77,10 +77,28 @@ final class AppManager
     /**
      * @param AppPath|string $name One of Electron's app.getPath() names. An
      *                             unrecognised name throws inside the runtime.
+     *
+     * @throws \InvalidArgumentException for a name that is not one, before it is
+     *                                   interpolated into the request path
      */
     public function path(AppPath|string $name): string
     {
         $name = $name instanceof AppPath ? $name->value : $name;
+
+        // The name goes into the URL, and every name Electron accepts is alphabetic
+        // (`userData`, `sessionData`, `crashDumps`). Interpolating anything else builds
+        // a path with segments in it — `../` resolves against the API root, so a value
+        // that reached here from configuration or a route parameter would address a
+        // different endpoint entirely rather than failing as the docblock promises. The
+        // AppPath enum is the intended way in; this is what makes the string overload
+        // safe to keep.
+        if (1 !== preg_match('/^[A-Za-z]+$/', $name)) {
+            throw new \InvalidArgumentException(sprintf(
+                'Unknown application path "%s". Use the %s enum, or one of Electron\'s alphabetic path names.',
+                $name,
+                AppPath::class,
+            ));
+        }
 
         return (string) $this->client->get('app/path/'.$name)->value('path', '');
     }
