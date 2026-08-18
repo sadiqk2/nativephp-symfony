@@ -1,6 +1,12 @@
 /*
  * The documentation site's whole stylesheet.
  *
+ * The accent is NativePHP's own: the two colours in upstream's application icon are a slate
+ * blue (#54608D) and a teal (#4CABAD), taken straight from resources/build/icon.png rather
+ * than guessed at. The teal is darkened to #0f7378 in light mode, where the brand value only
+ * reaches 2.71:1 against white — below the 4.5:1 that body-sized link text needs — and used
+ * as-is in dark mode, where it clears 7:1. The logo carries both colours unaltered.
+ *
  * No external requests: system fonts, an inline SVG favicon, no CDN. A documentation site
  * that cannot render offline renders differently for whoever is behind a corporate proxy,
  * and this one gets read while something is broken.
@@ -20,9 +26,9 @@
     --ink: #16161d;
     --ink-soft: #55555f;
     --ink-faint: #8b8b96;
-    --accent: #4f46e5;
-    --accent-ink: #4338ca;
-    --accent-wash: #f1f0fe;
+    --accent: #0f7378;
+    --accent-ink: #0e6a6f;
+    --accent-wash: #eaf5f5;
     --code-bg: #f7f7fb;
     --mark: #fde68a;
     --shadow-sm: 0 1px 2px rgb(16 16 32 / 5%);
@@ -30,12 +36,12 @@
 
     /* Syntax: one hue family, differing in weight and saturation, so code reads as text
        with structure rather than as a colour chart. */
-    --syn-key: #8250df;
+    --syn-key: #6b4bc4;
     --syn-str: #0a7c5a;
     --syn-num: #b3541e;
-    --syn-fn: #2c5fd8;
+    --syn-fn: #3b4f8f;
     --syn-cmt: #8b8b96;
-    --syn-var: #b3325c;
+    --syn-var: #a63a5f;
 
     --sidebar-w: 16.5rem;
     --toc-w: 14rem;
@@ -55,18 +61,18 @@
         --ink: #e8e8ef;
         --ink-soft: #a2a3b0;
         --ink-faint: #71727d;
-        --accent: #7c78f0;
-        --accent-ink: #a5a2fb;
-        --accent-wash: #191a26;
+        --accent: #4CABAD;
+        --accent-ink: #6fd0d1;
+        --accent-wash: #101f22;
         --code-bg: #11121a;
         --mark: #6b5a1f;
         --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
         --shadow: 0 4px 8px -2px rgb(0 0 0 / 45%), 0 16px 40px -20px rgb(0 0 0 / 70%);
 
-        --syn-key: #c4a7fb;
+        --syn-key: #b9a6f0;
         --syn-str: #7ee2b8;
         --syn-num: #f0a875;
-        --syn-fn: #8ab4f8;
+        --syn-fn: #93a8e4;
         --syn-cmt: #6f707b;
         --syn-var: #f2879b;
     }
@@ -81,18 +87,18 @@
     --ink: #e8e8ef;
     --ink-soft: #a2a3b0;
     --ink-faint: #71727d;
-    --accent: #7c78f0;
-    --accent-ink: #a5a2fb;
-    --accent-wash: #191a26;
+    --accent: #4CABAD;
+    --accent-ink: #6fd0d1;
+    --accent-wash: #101f22;
     --code-bg: #11121a;
     --mark: #6b5a1f;
     --shadow-sm: 0 1px 2px rgb(0 0 0 / 40%);
     --shadow: 0 4px 8px -2px rgb(0 0 0 / 45%), 0 16px 40px -20px rgb(0 0 0 / 70%);
 
-    --syn-key: #c4a7fb;
+    --syn-key: #b9a6f0;
     --syn-str: #7ee2b8;
     --syn-num: #f0a875;
-    --syn-fn: #8ab4f8;
+    --syn-fn: #93a8e4;
     --syn-cmt: #6f707b;
     --syn-var: #f2879b;
 }
@@ -181,7 +187,7 @@ a {
     width: 1.55rem;
     height: 1.55rem;
     border-radius: 7px;
-    background: linear-gradient(145deg, #6f68f2, #4a3fd8 60%, #7c3aed);
+    background: linear-gradient(145deg, #54608D, #3B475E 55%, #4CABAD);
     box-shadow: var(--shadow-sm);
 }
 

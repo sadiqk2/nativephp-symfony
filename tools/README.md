@@ -51,6 +51,12 @@ trying to process the directory as a Jekyll project.
 - **Headerless Markdown tables** (`| | |`, used as two-column layout throughout these
   documents) render without an empty header band, and their first column is treated as the
   label.
+- **The accent is NativePHP's own, measured rather than guessed.** Upstream's application icon
+  (`resources/build/icon.png`) is a slate blue `#54608D` and a teal `#4CABAD`; the logo here uses
+  both unaltered. The teal only reaches 2.71:1 against white, below the 4.5:1 body-sized link
+  text needs, so light mode darkens it to `#0f7378` (5.61:1) and dark mode uses the brand value
+  as-is (7.11:1). Changing the palette means changing four tokens — and checking those ratios
+  again.
 - Light and dark are both first-class: tokens for light on `:root`, redefined under
   `prefers-color-scheme: dark` (guarded so an explicit light choice wins), and again under
   `[data-theme="dark"]` so the toggle wins in both directions. No colour is declared only

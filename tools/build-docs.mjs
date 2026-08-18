@@ -220,7 +220,7 @@ const tocMarkup = (items) => {
 };
 
 const FAVICON = `data:image/svg+xml,${encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#5b53f0"/><path d="M8.5 23V9h3.2l8.6 8.8V9h3.2v14h-3.2l-8.6-8.8V23z" fill="#fff"/></svg>',
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="7" fill="#3B475E"/><path d="M8.5 23V9h3.2l8.6 8.8V9h3.2v14h-3.2l-8.6-8.8V23z" fill="#4CABAD"/></svg>',
 )}`;
 
 function shell({ page, body, toc, prev, next }) {
@@ -313,7 +313,7 @@ const everythingGrid = () => {
 
 const HERO = `<section class="hero">
     <p class="eyebrow">Documentation</p>
-    <h1 class="hero-title">Ship your Symfony app as a desktop, iOS and Android application</h1>
+    <h1 class="hero-title">Take the Symfony app you already have to the desktop, iOS and Android</h1>
     <p class="hero-lede">Two bundles on NativePHP's runtimes. Your controllers, templates, console
     commands and tests do not change — they gain a native window, a menu bar, and 54 device methods.</p>
     <div class="hero-actions">
