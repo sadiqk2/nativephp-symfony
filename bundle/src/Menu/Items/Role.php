@@ -12,6 +12,12 @@ use Native\Symfony\Desktop\Enums\MenuRole;
  * compileMenu reduces a role item to `{role, label?}` and discards every other
  * key — including `id` and `event` — so a role item can never report a click back
  * to PHP. The OS owns the behaviour; that is the point of using one.
+ *
+ * Prefer the {@see MenuRole} enum over a string. Electron drops a menu item whose role
+ * it does not recognise, without an error anywhere — so a typo is an item that simply
+ * is not in the menu. The string overload exists because Electron adds roles faster
+ * than an enum here can follow, and validating against a fixed list would reject a role
+ * that has become valid; it is an escape hatch, not the front door.
  */
 final class Role implements MenuItem
 {
