@@ -11,6 +11,7 @@ use Native\Symfony\Mobile\Ui\Component\ComponentScreenFactory;
 use Native\Symfony\Mobile\Ui\Component\InteractionEvent;
 use Native\Symfony\Mobile\Ui\Component\NativeAction;
 use Native\Symfony\Mobile\Ui\Component\NativeComponent;
+use Native\Symfony\Mobile\Ui\CallbackRegistry;
 use Native\Symfony\Mobile\Ui\Element;
 use Native\Symfony\Mobile\Ui\ElementPublisher;
 use Native\Symfony\Mobile\Ui\Elements\Button;
@@ -574,6 +575,26 @@ final class UiComponentTest extends TestCase
         self::assertNotNull($root->navigatedTo);
         self::assertSame(['screen' => 'detail'], $root->callbacks()->navigation($root->navigatedTo));
     }
+
+    public function testASequentialNodeIdNeverReusesOneAKeyedNodeAlreadyTook(): void
+    {
+        // Derived ids are 32-bit hashes and probe on collision; the sequential counter
+        // did not consult the map at all, so an id a keyed node had already taken could
+        // be handed out again. Two nodes sharing an id means the renderers collapse them
+        // into one piece of native state — silent, and undebuggable from PHP. Seeding the
+        // map is how that is reproduced deterministically rather than waiting for a hash
+        // to land on a small number.
+        $nextId = 1;
+        $emitted = [1 => true, 2 => true];
+
+        $tree = Column::make(Text::make('a'), Text::make('b'))
+            ->toArray(new CallbackRegistry(), $nextId, '', 0, $emitted);
+
+        $ids = [$tree['id'], $tree['children'][0]['id'], $tree['children'][1]['id']];
+
+        self::assertSame([3, 4, 5], $ids);
+        self::assertSame(\count($ids), \count(array_unique($ids)));
+    }
 }
 
 // ── Fixtures ─────────────────────────────────────────
@@ -879,6 +900,7 @@ final class InputFixture extends NativeComponent
             TextInput::make($this->text)->onChange('setText'),
         );
     }
+
 }
 
 final class VariadicFixture extends NativeComponent

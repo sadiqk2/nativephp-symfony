@@ -73,7 +73,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p>Status: <strong>the WebView render path is implemented, and the native-UI wire format is
 implemented and verified.</strong> All <strong>54 native bridge methods</strong> are wrapped, the SAPI
 shim and persistent runtime are in place, element trees are byte-identical to
-upstream&#39;s, and 376 tests cover it.</p>
+upstream&#39;s, and 377 tests cover it.</p>
 <blockquote>
 <p><strong>Verified by tests, not by a device.</strong> Unlike the desktop bundle — whose claim is
 backed by a screenshot of a running packaged app — nothing here has run on a phone
@@ -249,7 +249,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.</
 <figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer install &amp;&amp; vendor/bin/phpunit</code></pre>
 </figure>
-<p>376 tests. <code>UiWireFormatTest</code> byte-compares element trees against upstream&#39;s own
+<p>377 tests. <code>UiWireFormatTest</code> byte-compares element trees against upstream&#39;s own
 collector, and <code>UiElementCoverageTest</code> does it per type — which is how two missing
 defaults were found (<code>ScrollView</code>&#39;s <code>overflow=2</code> and <code>Circle</code>&#39;s <code>border_radius=9999</code>). <code>BridgeCoverageTest</code> parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. <code>MobileRuntimeTest</code> drives

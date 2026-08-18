@@ -31,16 +31,44 @@ final class Builder
      * @param list<string>          $envKeep         .env keys never stripped, whatever
      *                                               $envRemove says (fnmatch)
      */
+    /** @var list<string> */
+    private readonly array $excludePatterns;
+
     public function __construct(
         private readonly string $sourcePath,
         private readonly string $buildPath,
-        private readonly array $excludePatterns = [],
+        array $excludePatterns = [],
         private readonly array $keepDirectories = [],
         private readonly array $envDefaults = [],
         private readonly array $envRemove = [],
         private readonly array $envKeep = [],
     ) {
         $this->fs = new Filesystem();
+
+        // The build directory conventionally lives at nativephp/build, inside the source
+        // tree, and the shipped config excludes `nativephp` — but that is a *default*, and
+        // `native_desktop.build.exclude` replaces the list rather than adding to it. An
+        // application that sets its own exclude list therefore staged the previous build
+        // into the new one: unbounded on the second run, and invisible on the first, when
+        // the directory is still empty. The mobile builder guards this in the class; this
+        // one trusted the configuration. Excluded by path now, whatever the list says.
+        $nested = $this->relativeToSource($buildPath);
+        $this->excludePatterns = null === $nested ? $excludePatterns : [...$excludePatterns, $nested, $nested.'/*'];
+    }
+
+    /** @return list<string> */
+    public function excludePatterns(): array
+    {
+        return $this->excludePatterns;
+    }
+
+    /** The build path expressed relative to the source, or null when it is outside it. */
+    private function relativeToSource(string $path): ?string
+    {
+        $source = rtrim(str_replace('\\', '/', $this->sourcePath), '/').'/';
+        $candidate = str_replace('\\', '/', $path);
+
+        return str_starts_with($candidate, $source) ? trim(substr($candidate, \strlen($source)), '/') : null;
     }
 
     public function sourcePath(string $path = ''): string

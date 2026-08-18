@@ -149,6 +149,30 @@ final class BuilderTest extends TestCase
         self::assertStringNotContainsString('STRIPE_SECRET', $env);
     }
 
+    public function testTheBuildDirectoryIsNeverStagedIntoItself(): void
+    {
+        // `nativephp` is in the shipped exclude default, but `native_desktop.build.exclude`
+        // replaces that list rather than adding to it — so an application with its own
+        // exclude list staged the previous build into the new one. Unbounded on the second
+        // run, and invisible on the first, when the directory is still empty.
+        $build = $this->source.'/nativephp/build';
+        $builder = new Builder(
+            sourcePath: $this->source,
+            buildPath: $build,
+            excludePatterns: ['var/cache'],   // a plausible custom list, without `nativephp`
+        );
+
+        $builder->stageApplication();
+        $this->fs->dumpFile($builder->appPath('marker.txt'), 'from the first build');
+        $builder->stageApplication();
+
+        // The behavioural assertion first, so this test fails on the recursion itself
+        // rather than on a missing accessor when the guard is taken away.
+        self::assertFileDoesNotExist($builder->appPath('nativephp/build/app/marker.txt'), 'The previous build must not be staged inside the new one.');
+        self::assertFileDoesNotExist($builder->appPath('marker.txt'), 'The second staging clears the directory.');
+        self::assertContains('nativephp/build', $builder->excludePatterns());
+    }
+
     public function testARemovedMultiLineValueTakesItsContinuationLinesWithIt(): void
     {
         // Continuation was only tracked for lines that were *kept*, so dropping the first

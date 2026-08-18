@@ -323,6 +323,16 @@ abstract class Element
             return [self::deriveNodeIdFromKeyPath($keyPath, $emittedIds), $keyPath];
         }
 
+        // Skip anything a keyed node already derived. Derived ids are 32-bit hashes and
+        // probe on collision, but the sequential counter did not look at the map at all —
+        // so a hash that happened to land on a small number was handed out a second time
+        // here, and two nodes sharing an id means the renderer collapses them into one
+        // piece of native state. Vanishingly unlikely per tree, silent and undebuggable
+        // when it happens, and two lines to make impossible.
+        while (isset($emittedIds[$nextId])) {
+            ++$nextId;
+        }
+
         $id = $nextId++;
         $emittedIds[$id] = true;
 
