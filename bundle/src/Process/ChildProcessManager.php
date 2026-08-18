@@ -160,7 +160,10 @@ final class ChildProcessManager
 
     public function get(string $alias): ?ProcessHandle
     {
-        $response = $this->client->get("child-process/get/{$alias}");
+        // One path segment, whatever the alias contains — the same reasoning as
+        // WindowManager::get(). An alias is application-chosen, but "application-chosen"
+        // includes "read from configuration" and "built from a job name".
+        $response = $this->client->get('child-process/get/'.rawurlencode($alias));
 
         if (410 === $response->status || null === $response->data) {
             return null;

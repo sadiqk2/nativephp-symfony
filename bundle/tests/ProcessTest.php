@@ -6,10 +6,21 @@ namespace Native\Symfony\Desktop\Tests;
 
 use Native\Symfony\Desktop\Process\ChildProcessManager;
 use Native\Symfony\Desktop\Process\MessengerWorker;
+use Native\Symfony\Desktop\Testing\FakeRuntime;
 use PHPUnit\Framework\TestCase;
 
 final class ProcessTest extends TestCase
 {
+    public function testAnAliasCannotAddressADifferentEndpoint(): void
+    {
+        // Same reasoning as WindowManager::get(): the alias reaches the URL rather than a
+        // payload, and "application-chosen" includes "read from configuration".
+        $runtime = FakeRuntime::available();
+
+        self::assertNull((new ChildProcessManager($runtime))->get('../app/quit'));
+        self::assertSame('child-process/get/..%2Fapp%2Fquit', $runtime->calls()[0]->endpoint);
+    }
+
     public function testPidIsNullOnTheSynchronousStartResponse(): void
     {
         // The runtime returns before Electron's `spawn` fires, so the pid on this

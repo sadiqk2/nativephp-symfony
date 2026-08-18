@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Desktop\Tests;
 
+use Native\Symfony\Desktop\Testing\FakeRuntime;
 use Native\Symfony\Desktop\Window\UrlResolver;
 use Native\Symfony\Desktop\Window\WindowManager;
 use PHPUnit\Framework\TestCase;
@@ -166,6 +167,28 @@ final class WindowManagerTest extends TestCase
     }
 
     /** @return array{0: WindowManager, 1: FakeClient} */
+    public function testAWindowIdCannotAddressADifferentEndpoint(): void
+    {
+        // detectId() reads `_windowId` out of the Referer or the current URI, so this id can
+        // arrive from outside the application. Interpolated raw, `../app/quit` resolved
+        // against the API root and asked a different endpoint entirely; encoded, it stays
+        // one path segment and the answer is "no such window".
+        $runtime = FakeRuntime::available();
+        $windows = new WindowManager($runtime, new UrlResolver(new RequestStack(), null), new RequestStack());
+
+        self::assertNull($windows->get('../app/quit'));
+        self::assertSame('window/get/..%2Fapp%2Fquit', $runtime->calls()[0]->endpoint);
+    }
+
+    public function testAnOrdinaryWindowIdIsUnchanged(): void
+    {
+        $runtime = FakeRuntime::available()->windowIs('main');
+        $windows = new WindowManager($runtime, new UrlResolver(new RequestStack(), null), new RequestStack());
+
+        self::assertSame('main', $windows->get('main')?->id);
+        self::assertSame('window/get/main', $runtime->calls()[0]->endpoint);
+    }
+
     private function manager(?Request $request = null): array
     {
         $stack = new RequestStack();

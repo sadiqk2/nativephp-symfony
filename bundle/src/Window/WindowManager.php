@@ -153,7 +153,13 @@ final class WindowManager
 
     public function get(string $id = 'main'): ?Window
     {
-        $response = $this->client->get("window/get/{$id}");
+        // Encoded, because this id reaches the URL rather than a payload — and unlike most
+        // of them it can arrive from outside the application: detectId() reads `_windowId`
+        // out of the Referer or the current URI, so `../app/quit` would have addressed a
+        // different endpoint instead of asking about a window that does not exist. Encoding
+        // rather than validating keeps every id an application might legitimately choose
+        // working, while confining it to one path segment.
+        $response = $this->client->get('window/get/'.rawurlencode($id));
 
         // Any unusable answer means null, not just a 404. getWindowData() throws a
         // bare string for some unknown ids, which arrives as a 500 with an HTML
