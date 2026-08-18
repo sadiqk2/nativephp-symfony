@@ -156,12 +156,33 @@ final class ApiTest extends TestCase
         }
     }
 
-    public function testDeviceVibrateSendsADuration(): void
+    public function testDeviceVibrateSendsNoDurationBecauseNeitherHostHasOne(): void
     {
+        // Android hardcodes createOneShot(200, DEFAULT_AMPLITUDE); iOS plays
+        // kSystemSoundID_Vibrate, which has no length. The old signature took milliseconds
+        // and sent them as `duration`, so the argument was accepted and dropped.
         $bridge = new FakeBridge();
-        (new Api\Device($bridge))->vibrate(400);
+        (new Api\Device($bridge))->vibrate();
 
-        self::assertSame(['duration' => 400], $bridge->lastCall()['payload']);
+        self::assertSame([], $bridge->lastCall()['payload']);
+    }
+
+    public function testTheInputSimulatorsSendWhatBothHostsActuallyRead(): void
+    {
+        // Both hosts require callback_id as a number and answer success: false without it,
+        // so the previous `target` string meant every simulated interaction did nothing on
+        // a device while returning true in PHP.
+        $bridge = new FakeBridge();
+        $perf = new Api\Performance($bridge);
+
+        $perf->simulatePress(42);
+        self::assertSame(['callback_id' => 42, 'node_id' => 0], $bridge->lastCall()['payload']);
+
+        $perf->simulateTextChange(42, 'typed', 7);
+        self::assertSame(['callback_id' => 42, 'node_id' => 7, 'text' => 'typed'], $bridge->lastCall()['payload']);
+
+        $perf->simulateToggle(42, true);
+        self::assertSame(['callback_id' => 42, 'node_id' => 0, 'value' => true], $bridge->lastCall()['payload']);
     }
 
     public function testFlashlightOmitsStateWhenToggling(): void

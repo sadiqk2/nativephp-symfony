@@ -38,9 +38,18 @@ final class Device
     }
 
     /** @param int $milliseconds Duration; iOS ignores it and uses a system haptic */
-    public function vibrate(int $milliseconds = 250): bool
+    /**
+     * A single haptic buzz.
+     *
+     * No duration, because neither host has one: Android hardcodes
+     * `VibrationEffect.createOneShot(200, DEFAULT_AMPLITUDE)` and iOS plays
+     * `kSystemSoundID_Vibrate`, which has no length at all. This used to take
+     * milliseconds and send them as `duration` — a parameter both hosts ignore, so the
+     * argument was documented, accepted, and silently dropped on the way out.
+     */
+    public function vibrate(): bool
     {
-        return $this->bridge->dispatch('Device.Vibrate', ['duration' => $milliseconds]);
+        return $this->bridge->dispatch('Device.Vibrate');
     }
 
     public function toggleFlashlight(?bool $on = null): bool

@@ -115,7 +115,7 @@ that when you design a flow around <code>Camera</code>, <code>Biometric</code>, 
 <pre><code class="language-php"><span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">info</span>();          <span class="hljs-comment">// array&lt;string,mixed&gt;; [] when the bridge is absent</span>
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">id</span>();            <span class="hljs-comment">// ?string</span>
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">batteryInfo</span>();   <span class="hljs-comment">// array</span>
-<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">vibrate</span>(<span class="hljs-number">250</span>);
+<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">vibrate</span>();       <span class="hljs-comment">// no duration: Android hardcodes 200ms, iOS has none</span>
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">toggleFlashlight</span>(<span class="hljs-literal">true</span>);   <span class="hljs-comment">// null argument toggles</span></code></pre>
 </figure>
 <h3 id="secure-storage--apisecurestorage"><a class="anchor" href="#secure-storage--apisecurestorage">Secure storage — <code>Api\SecureStorage</code></a></h3>
@@ -186,9 +186,14 @@ filesystem functions.</p>
 status back; never infer it from the presentation call.</p>
 <h3 id="performance--apiperformance"><a class="anchor" href="#performance--apiperformance">Performance — <code>Api\Performance</code></a></h3>
 <p><code>enable()</code>, <code>disable()</code>, <code>export()</code>, <code>showFpsOverlay()</code>, <code>startCaptureWindow($label)</code>,
-<code>stopCaptureWindow()</code>, plus three input simulators — <code>simulatePress($target)</code>,
-<code>simulateTextChange($target, $value)</code>, <code>simulateToggle($target, $value)</code> — which drive the
-native UI for instrumentation.</p>
+<code>stopCaptureWindow()</code>, plus three input simulators — <code>simulatePress($callbackId, $nodeId = 0)</code>,
+<code>simulateTextChange($callbackId, $text, $nodeId = 0)</code>,
+<code>simulateToggle($callbackId, $value, $nodeId = 0)</code> — which drive the native UI for
+instrumentation.</p>
+<p>The callback id is the one the published frame carries, not a selector:
+<code>ComponentScreen::callbackId(&#39;increment&#39;)</code> is how PHP gets it. Both hosts answer
+<code>success: false</code> without it, which is what the previous <code>$target</code> string produced — a call
+that succeeded in PHP and did nothing on the device.</p>
 <h3 id="native-ui-transitions--apinativeui"><a class="anchor" href="#native-ui-transitions--apinativeui">Native UI transitions — <code>Api\NativeUi</code></a></h3>
 <p><code>setTransition($transition)</code>, one of <code>fade</code>, <code>slide_from_right</code>, <code>slide_from_left</code>,
 <code>slide_from_bottom</code>, <code>fade_from_bottom</code>, <code>scale_from_center</code>, <code>parallax_push</code>, <code>none</code>.</p>

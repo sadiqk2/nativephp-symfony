@@ -60,7 +60,7 @@ All three are dispatches. Nothing is returned but "the UI was presented".
 $device->info();          // array<string,mixed>; [] when the bridge is absent
 $device->id();            // ?string
 $device->batteryInfo();   // array
-$device->vibrate(250);
+$device->vibrate();       // no duration: Android hardcodes 200ms, iOS has none
 $device->toggleFlashlight(true);   // null argument toggles
 ```
 
@@ -160,9 +160,15 @@ status back; never infer it from the presentation call.
 ### Performance — `Api\Performance`
 
 `enable()`, `disable()`, `export()`, `showFpsOverlay()`, `startCaptureWindow($label)`,
-`stopCaptureWindow()`, plus three input simulators — `simulatePress($target)`,
-`simulateTextChange($target, $value)`, `simulateToggle($target, $value)` — which drive the
-native UI for instrumentation.
+`stopCaptureWindow()`, plus three input simulators — `simulatePress($callbackId, $nodeId = 0)`,
+`simulateTextChange($callbackId, $text, $nodeId = 0)`,
+`simulateToggle($callbackId, $value, $nodeId = 0)` — which drive the native UI for
+instrumentation.
+
+The callback id is the one the published frame carries, not a selector:
+`ComponentScreen::callbackId('increment')` is how PHP gets it. Both hosts answer
+`success: false` without it, which is what the previous `$target` string produced — a call
+that succeeded in PHP and did nothing on the device.
 
 ### Native UI transitions — `Api\NativeUi`
 

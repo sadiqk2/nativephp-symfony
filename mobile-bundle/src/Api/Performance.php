@@ -50,18 +50,40 @@ final class Performance
         return $this->bridge->dispatch('Perf.StopCaptureWindow');
     }
 
-    public function simulatePress(string $target): bool
+    /**
+     * Simulate a press on a published node.
+     *
+     * These three took a string `$target` and sent it as `target`, which neither host
+     * reads: both require `callback_id` as a number and return `success: false` without
+     * it, so every call did nothing on a device while succeeding in PHP. The callback id
+     * is the one the frame published — `ComponentScreen::callbackId()` is how a test gets
+     * it — and `$nodeId` is optional on both sides, defaulting to 0.
+     */
+    public function simulatePress(int $callbackId, int $nodeId = 0): bool
     {
-        return $this->bridge->dispatch('Perf.SimulatePress', ['target' => $target]);
+        return $this->bridge->dispatch('Perf.SimulatePress', [
+            'callback_id' => $callbackId,
+            'node_id' => $nodeId,
+        ]);
     }
 
-    public function simulateTextChange(string $target, string $value): bool
+    /** @see simulatePress() for why this takes a callback id */
+    public function simulateTextChange(int $callbackId, string $text, int $nodeId = 0): bool
     {
-        return $this->bridge->dispatch('Perf.SimulateTextChange', ['target' => $target, 'value' => $value]);
+        return $this->bridge->dispatch('Perf.SimulateTextChange', [
+            'callback_id' => $callbackId,
+            'node_id' => $nodeId,
+            'text' => $text,
+        ]);
     }
 
-    public function simulateToggle(string $target, bool $value): bool
+    /** @see simulatePress() for why this takes a callback id */
+    public function simulateToggle(int $callbackId, bool $value, int $nodeId = 0): bool
     {
-        return $this->bridge->dispatch('Perf.SimulateToggle', ['target' => $target, 'value' => $value]);
+        return $this->bridge->dispatch('Perf.SimulateToggle', [
+            'callback_id' => $callbackId,
+            'node_id' => $nodeId,
+            'value' => $value,
+        ]);
     }
 }
