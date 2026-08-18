@@ -44,6 +44,79 @@ final class NativeUiAuthoringTest extends TestCase
         (new ElementFactory())->create('text', ['text' => 'x', 'fontSizes' => 12]);
     }
 
+    public function testAConstructorOptionOnTheWrongElementIsRejectedToo(): void
+    {
+        // `text`, `source` and `value` are consumed by the constructor — but only for the
+        // element whose constructor consumes them. Skipping them for every type meant a
+        // template could pass `text` to a text input, or `source` to a column, and get a
+        // silently empty element while every other typo threw. That is the exact failure
+        // this layer exists to prevent, at its own front door.
+        $factory = new ElementFactory();
+
+        foreach ([
+            ['text_input', 'text'],
+            ['column', 'source'],
+            ['text', 'value'],
+        ] as [$type, $option]) {
+            try {
+                $factory->create($type, [$option => 'x']);
+                self::fail(sprintf('native(\'%s\', {%s: …}) must be refused.', $type, $option));
+            } catch (\InvalidArgumentException $e) {
+                self::assertStringContainsString(sprintf('has no property "%s"', $option), $e->getMessage());
+            }
+        }
+    }
+
+    public function testTheOptionEachConstructorDoesConsumeStillWorks(): void
+    {
+        $factory = new ElementFactory();
+        $registry = new CallbackRegistry();
+        $nextId = 1;
+
+        $text = $factory->create('text', ['text' => 'hello'])->toArray($registry, $nextId);
+        $image = $factory->create('image', ['source' => 'https://example.test/a.png'])->toArray($registry, $nextId);
+        $input = $factory->create('text_input', ['value' => 'typed'])->toArray($registry, $nextId);
+        $toggle = $factory->create('toggle', ['value' => true])->toArray($registry, $nextId);
+
+        self::assertSame('hello', $text['props']['text']);
+        // `src` on the wire, not `source`: the renderers intern it at PropKey 14.
+        self::assertSame('https://example.test/a.png', $image['props']['src']);
+        self::assertSame('typed', $input['props']['value']);
+        self::assertTrue($toggle['props']['value']);
+    }
+
+    public function testAParserVocabularyKeyInAnExplicitLayoutIsRefused(): void
+    {
+        // The wire wants snake_case; the parser speaks camelCase and StyleApplier
+        // translates. Writing the parser's name in an explicit `layout` — or passing a
+        // parsed result straight through, which this project's own demo did — put a key on
+        // the wire that every renderer ignores without a word.
+        $factory = new ElementFactory();
+
+        try {
+            $factory->create('column', ['layout' => ['flexGrow' => 1]]);
+            self::fail('A camelCase layout key must be refused.');
+        } catch (\InvalidArgumentException $e) {
+            self::assertStringContainsString('flex_grow', $e->getMessage());
+        }
+
+        try {
+            $factory->create('column', ['style' => ['bg' => '#fff']]);
+            self::fail('The parser calls it bg; the wire calls it bg_color.');
+        } catch (\InvalidArgumentException $e) {
+            self::assertStringContainsString('bg_color', $e->getMessage());
+        }
+
+        // The wire names themselves pass, and so does anything the maps do not know —
+        // this refuses a known-wrong name, it is not an allowlist of every valid key.
+        $registry = new CallbackRegistry();
+        $nextId = 1;
+        $node = $factory->create('column', ['layout' => ['flex_grow' => 1, 'gap' => 8]])->toArray($registry, $nextId);
+
+        self::assertSame(1, $node['layout']['flex_grow']);
+        self::assertSame(8, $node['layout']['gap']);
+    }
+
     public function testSharedOptionsAreApplied(): void
     {
         $registry = new CallbackRegistry();

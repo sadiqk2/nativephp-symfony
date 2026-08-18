@@ -161,10 +161,13 @@ final class ElementFactory
                 continue;
             }
 
-            // Consumed by the constructor above. `label` is the exception: it is a
-            // constructor argument for a button and an ordinary prop on nav items,
-            // so it is only skipped where make() already took it.
-            if (\in_array($name, ['text', 'source', 'value'], true)
+            // Consumed by the constructor above — and only for the type whose constructor
+            // consumed it. Skipping these for every type meant `native('text_input',
+            // {text: …})` or `native('column', {source: …})` was accepted and silently did
+            // nothing, while every other unknown option threw with the property named. A
+            // template typo that quietly renders an empty element is the failure mode this
+            // whole layer is built to avoid, and it had one at its own front door.
+            if ($this->consumedByConstructor($name, $type)
                 || ('label' === $name && 'button' === $type)
                 || ('name' === $name && 'icon' === $type)
             ) {
@@ -183,6 +186,53 @@ final class ElementFactory
         }
 
         return $element;
+    }
+
+    /**
+     * Refuse a parser-vocabulary key in an explicit `layout` or `style` option.
+     *
+     * The wire wants snake_case; the style parser speaks camelCase internally and
+     * StyleApplier is what translates between them. A template that writes
+     * `layout: {flexGrow: 1}` — or passes a parsed result straight through, which this
+     * project's own demo did — puts a key on the wire that every renderer ignores without
+     * a word. It is the failure this layer exists to prevent, and it was reachable through
+     * the one option that bypassed the applier.
+     *
+     * @param array<string, mixed> $values
+     */
+    private function assertWireKeys(array $values, string $bucket): void
+    {
+        foreach (array_keys($values) as $key) {
+            $wire = \is_string($key) ? StyleApplier::wireNameFor($key) : null;
+
+            if (null !== $wire && $wire !== $key) {
+                throw new \InvalidArgumentException(sprintf(
+                    'The %s key "%s" is the style parser\'s name for it; the wire wants "%s", '.
+                    'and the renderers ignore anything else without an error. Write "%s", or '.
+                    'use the `class` option and let StyleApplier translate.',
+                    $bucket,
+                    $key,
+                    $wire,
+                    $wire,
+                ));
+            }
+        }
+    }
+
+    /**
+     * Whether the constructor above already took this option for this type.
+     *
+     * Mirrors the match in instantiate() exactly; the two are the same decision written
+     * twice, so a new constructor-argument element has to be added to both.
+     */
+    private function consumedByConstructor(string $name, string $type): bool
+    {
+        return match ($name) {
+            'text' => 'text' === $type,
+            'source' => 'image' === $type,
+            'value' => 'text_input' === $type || 'toggle' === $type,
+            default => false,
+        };
     }
 
     /** @param array<string, mixed> $options */
@@ -222,10 +272,12 @@ final class ElementFactory
         }
 
         if (isset($options['layout']) && \is_array($options['layout'])) {
+            $this->assertWireKeys($options['layout'], 'layout');
             $element->layout($options['layout']);
         }
 
         if (isset($options['style']) && \is_array($options['style'])) {
+            $this->assertWireKeys($options['style'], 'style');
             $element->style($options['style']);
         }
 

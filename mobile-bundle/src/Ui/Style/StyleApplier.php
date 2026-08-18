@@ -61,6 +61,20 @@ final class StyleApplier
      *
      * @var array<string, string>
      */
+    /**
+     * The wire name for a parser-vocabulary key, when the two differ.
+     *
+     * Public because the authoring layer needs the same knowledge: a template writing
+     * `layout: {flexGrow: 1}` — the vocabulary the parser uses internally, and the obvious
+     * guess for anyone who has read it — puts a key on the wire that every renderer
+     * silently ignores. Knowing the wire name is what lets that be refused with the
+     * correction in hand rather than discovered on a device.
+     */
+    public static function wireNameFor(string $key): ?string
+    {
+        return self::LAYOUT[$key] ?? self::STYLE[$key] ?? null;
+    }
+
     private const CASTS = [
         'aspect_ratio' => 'float',
         'flex_basis' => 'float',
