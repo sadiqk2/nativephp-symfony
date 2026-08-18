@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -78,7 +79,7 @@ runtime this bundle installs</strong>. <code>RuntimePatcher</code> carries that 
 So under <code>native:run -v</code> a failed callback now says so.</p>
 <p>Two things to do before reading further:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:run -v      <span class="hljs-comment"># sets SHELL_VERBOSITY=1 — the runtime then logs every</span>
                                <span class="hljs-comment"># PHP command it spawns, with its full argv and env</span></code></pre>
 </figure>
@@ -97,13 +98,13 @@ would swallow: a missing bootstrapper, a non-JSON response, a failed broadcast.<
 <p>Five distinct causes. <code>native:doctor</code> checks for the first — and the second is handled for
 you by default:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:doctor</code></pre>
 </figure>
 <p><strong>The routes are not imported.</strong> Symfony bundles cannot register routes, so the runtime&#39;s
 <code>POST /_native/api/booted</code> 404s and nothing ever asks for a window.</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console debug:router | grep _native
 <span class="hljs-comment"># native_desktop_booted   POST   /_native/api/booted</span>
 <span class="hljs-comment"># native_desktop_events   POST   /_native/api/events</span></code></pre>
@@ -133,7 +134,7 @@ stanza is <strong>unconditional</strong>, where the bundle&#39;s decorator appli
 Put it in a runtime-only config environment, or you have opened on the web exactly the hole
 the option is careful not to:</p>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/packages/security.yaml</span>
 <span class="hljs-attr">security:</span>
     <span class="hljs-attr">firewalls:</span>
@@ -171,7 +172,7 @@ console and network tabs. This is now an ordinary Symfony debugging problem.</p>
 the kernel boots, so <code>RuntimeAccessSubscriber</code> never sees the request and the shared secret
 does not apply:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>GET /app.css    (no secret) -&gt; 200
 GET /index.php  (no secret) -&gt; 403   # goes through the kernel, so the gate applies</code></pre>
 </figure>
@@ -186,7 +187,7 @@ patch did not apply, or you installed a <em>manifest-aware</em> runtime without 
 <code>nativephp.json</code>, the runtime resolves Laravel&#39;s paths and 404s everything with nothing in
 the log.</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:manifest              <span class="hljs-comment"># writes nativephp.json and reports what the runtime supports</span>
 bin/console native:install --<span class="hljs-built_in">source</span>=… -f <span class="hljs-comment"># or reinstall and re-patch</span>
 <span class="hljs-built_in">ls</span> public/nativephp-router.php           <span class="hljs-comment"># must exist</span></code></pre>
@@ -219,7 +220,7 @@ unpatched runtime, either patch it or create an empty <code>storage/</code>.</p>
 completion: no app id, no deep-link registration, no updater, and a window that looks
 perfectly normal. A totally broken config command and a correct one are visually identical.</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:config    <span class="hljs-comment"># must print exactly one line of JSON, nothing else</span>
 bin/console native:php-ini</code></pre>
 </figure>
@@ -242,7 +243,7 @@ still running after a restart, most often.</p>
 <p>The code is running in a process the runtime did not start: a plain CLI invocation, an
 ordinary web request, or a test. Guard it:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">if</span> (<span class="hljs-variable language_">$this</span>-&gt;client-&gt;<span class="hljs-title function_ invoke__">isAvailable</span>()) { … }</code></pre>
 </figure>
 <p>Or, in tests, use <code>FakeRuntime::available()</code> — see <a href="testing.html">Testing</a>.</p>
@@ -342,7 +343,7 @@ phrase for the status code (express&#39;s <code>res.sendStatus(200)</code> sends
 <p>No CA bundle. The runtime passes <code>$NATIVEPHP_BUILD_PATH/cacert.pem</code> to every PHP process as
 <code>curl.cainfo</code> and <code>openssl.cafile</code>; without it every outbound TLS handshake fails.</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require nativephp/php-bin    <span class="hljs-comment"># ships cacert.pem; zero PHP dependencies</span>
 bin/console native:build linux x64</code></pre>
 </figure>
@@ -358,7 +359,7 @@ and defaults to <code>[&#39;APP_SECRET&#39;]</code>. If you see this, you have r
 <code>env_keep</code>. Put it back.</p>
 <h3 id="the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request"><a class="anchor" href="#the-packaged-app-is-slow-and-logs-an-opcache-warning-on-every-request">The packaged app is slow, and logs an opcache warning on every request</a></h3>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>Warning: Failed loading Zend extension 'opcache' (… Dynamic loading not supported)</code></pre>
 </figure>
 <p>The static musl PHP binary cannot dynamically load extensions and its baked-in ini asks for
@@ -389,7 +390,7 @@ router path and 404s everything. Either pin an older <code>NativePHP/desktop</co
 <h3 id="i-edited-the-runtimes-typescript-and-nothing-changed"><a class="anchor" href="#i-edited-the-runtimes-typescript-and-nothing-changed">I edited the runtime&#39;s TypeScript and nothing changed</a></h3>
 <p>The runtime loads <code>electron-plugin/dist/</code>, which ships pre-compiled. Rebuild:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash"><span class="hljs-built_in">cd</span> nativephp/electron &amp;&amp; npm run plugin:build</code></pre>
 </figure>
 <p><code>native:install</code> does this for you after patching, which is why <code>--skip-npm</code> leaves the
@@ -414,7 +415,7 @@ not have. Patch the runtime, or write the manifest (<code>lifecycle.schedule</co
 outside one <code>Bridge::isAvailable()</code> is false and every call no-ops. That includes your dev
 machine, your test suite and CI.</p>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/packages/test/native_mobile.yaml (or dev)</span>
 <span class="hljs-attr">native_mobile:</span>
     <span class="hljs-attr">fake_bridge:</span> <span class="hljs-literal">true</span></code></pre>
@@ -501,7 +502,7 @@ naming the interface at the point a native screen is actually requested.</p>
 default off a device and the wrong one on it.</p>
 <p>Pass the out-param to see exactly what was dropped:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$style</span> = <span class="hljs-variable">$parser</span>-&gt;<span class="hljs-title function_ invoke__">parse</span>(<span class="hljs-variable">$classes</span>, <span class="hljs-variable">$dropped</span>);   <span class="hljs-comment">// $dropped: list&lt;string&gt;</span></code></pre>
 </figure>
 <p>Note that intentional no-ops (a variant aimed at the <em>other</em> platform) are excluded from

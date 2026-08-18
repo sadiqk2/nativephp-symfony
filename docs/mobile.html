@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item active" href="mobile.html" aria-current="page"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -108,7 +109,7 @@ always unavailable and every call returns <code>null</code> or <code>false</code
 <code>native_mobile.fake_bridge: true</code>, plus tests.</p>
 <h2 id="1-install"><a class="anchor" href="#1-install">1. Install</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require native-symfony/mobile-bundle:^0.1</code></pre>
 </figure>
 <p><strong>Not on Packagist yet</strong> — clone this repository and add a path repository pointing at
@@ -116,7 +117,7 @@ always unavailable and every call returns <code>null</code> or <code>false</code
 <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/README.md#0-install-the-packages" target="_blank" rel="noopener">root README</a>; <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/composer.json" target="_blank" rel="noopener"><code>demo/composer.json</code></a>
 is a working example.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-comment">// config/bundles.php</span>
 <span class="hljs-keyword">return</span> [
     <span class="hljs-comment">// …</span>
@@ -125,7 +126,7 @@ is a working example.</p>
 </figure>
 <p>Then copy the two native projects into your application and retarget them:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/mobile-air /tmp/np-mobile
 bin/console native:mobile:install --<span class="hljs-built_in">source</span>=/tmp/np-mobile/resources
 bin/console native:mobile:doctor</code></pre>
@@ -176,7 +177,7 @@ and <code>NATIVEPHP_BOOT_MODE=web</code> at build time forces it.</p>
 Twig. Your controllers and templates are ordinary Symfony. The only new thing is the device
 API:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Controller</span>;
@@ -223,7 +224,7 @@ API:</p>
 <a href="mobile-api.html">mobile API reference</a>.</p>
 <h3 id="developing-without-a-device"><a class="anchor" href="#developing-without-a-device">Developing without a device</a></h3>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/packages/test/native_mobile.yaml</span>
 <span class="hljs-attr">native_mobile:</span>
     <span class="hljs-attr">fake_bridge:</span> <span class="hljs-literal">true</span></code></pre>
@@ -238,7 +239,7 @@ component lifecycle — and byte-verified against upstream wherever a comparison
 also the least device-verified part of the project.</p>
 <p>Declare a screen:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Screen</span>;
@@ -258,7 +259,7 @@ paths boot natively — a WebView flash on a device and nothing at all in a test
 <p>Discovery is explicit, never a scan of everything autoloadable, because the manifest is only
 correct if the build-time walk and the runtime walk produce the same list:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Routing</span>\<span class="hljs-title">NativeScreenAttributeLoader</span>;
 
 <span class="hljs-comment">// One class at a time…</span>
@@ -277,7 +278,7 @@ and the dump&#39;s directory must exist (<code>writeRuntimeDump()</code> creates
 in a browser — a shared link, a smoke test — register <code>NativeScreenRouteLoader</code> yourself as a
 service tagged <code>routing.loader</code> and import it:</p>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/routes.yaml</span>
 <span class="hljs-attr">native_screens:</span>
     <span class="hljs-attr">resource:</span> <span class="hljs-string">.</span>
@@ -291,7 +292,7 @@ job ends at &quot;this path is screen X with these parameters&quot;, and turning
 is the component lifecycle&#39;s job. <code>ComponentScreenRenderer</code> is that implementation, aliased to
 the interface, so a <code>#[NativeScreen]</code> component works with no glue:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$frame</span> = <span class="hljs-variable">$responder</span>-&gt;<span class="hljs-title function_ invoke__">respond</span>(<span class="hljs-string">&#x27;/counter&#x27;</span>);                                  <span class="hljs-comment">// first paint</span>
 <span class="hljs-variable">$id</span>    = <span class="hljs-variable">$responder</span>-&gt;<span class="hljs-title function_ invoke__">callbacks</span>()-&gt;<span class="hljs-title function_ invoke__">idFor</span>(<span class="hljs-string">&#x27;increment&#x27;</span>);                      <span class="hljs-comment">// what the device sends back</span>
 <span class="hljs-variable">$renderer</span>-&gt;<span class="hljs-title function_ invoke__">dispatch</span>(<span class="hljs-string">&#x27;/counter&#x27;</span>, <span class="hljs-title class_">InteractionEvent</span>::<span class="hljs-title function_ invoke__">press</span>(<span class="hljs-variable">$id</span>));             <span class="hljs-comment">// tap</span>
@@ -324,7 +325,7 @@ blank ever after.</p>
 loaded after the bundle&#39;s. <code>ComponentScreenFactory</code> remains available for driving a screen
 directly, without routing:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ComponentScreenFactory</span>;
 
 <span class="hljs-variable">$screen</span> = <span class="hljs-variable">$factory</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Counter</span>());   <span class="hljs-comment">// a fresh component instance, once per screen</span>
@@ -335,7 +336,7 @@ directly, without routing:</p>
 <a href="mobile-api.html#native-ui">the mobile API reference</a> for elements, callbacks and styling.</p>
 <h2 id="building-and-running"><a class="anchor" href="#building-and-running">Building and running</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:mobile:manifest --dry-run        <span class="hljs-comment"># what would the device boot?</span>
 bin/console native:mobile:build android --stage-only  <span class="hljs-comment"># everything up to Gradle</span>
 bin/console native:mobile:build android --dry-run     <span class="hljs-comment"># print the whole plan, touch nothing</span>
@@ -370,7 +371,7 @@ because Android can boot native from the runtime dump alone and iOS cannot — a
 bake is a silent fallback to the WebView.</p>
 <h2 id="configuration"><a class="anchor" href="#configuration">Configuration</a></h2>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/packages/native_mobile.yaml</span>
 <span class="hljs-attr">native_mobile:</span>
     <span class="hljs-attr">app_id:</span> <span class="hljs-string">com.example.app</span>     <span class="hljs-comment"># bundle identifier / Android application id</span>

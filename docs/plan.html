@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -90,7 +91,7 @@ design resolutions, eight upstream bugs worth reporting, and the M1 recipe.</p>
 <code>nativephp/laravel</code> or <code>nativephp/electron</code> is historical — do not build against it.</p>
 <p>Architecture — <strong>two OS processes</strong>:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>┌─────────────────────────────── Electron main process ───────────────────────────────┐
 │  resources/electron/electron-plugin/  (TypeScript)                                  │
 │    • express server on 127.0.0.1:&lt;apiPort&gt;, mounted at /api/*   ← PHP calls IN       │
@@ -328,7 +329,7 @@ something neutral until then.</li>
 <hr>
 <h2 id="6-reference--local-checkouts-used-for-this-study"><a class="anchor" href="#6-reference--local-checkouts-used-for-this-study">6. Reference — local checkouts used for this study</a></h2>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>np-desktop/   github.com/NativePHP/desktop      (depth 1)  — 178 PHP files, 4.2M
 np-mobile/    github.com/NativePHP/mobile-air   (depth 1)  — embedded PHP, 25M</code></pre>
 </figure>

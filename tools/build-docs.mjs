@@ -38,7 +38,8 @@ const BLOB = `${REPO}/blob/main`;
  */
 const NAV = [
     { group: 'Start here' },
-    { src: 'docs/README.md', slug: 'index', title: 'Introduction', blurb: 'What this is, and what is verified' },
+    { home: true, slug: 'index', title: 'Home', blurb: 'Symfony as a desktop, iOS and Android application' },
+    { src: 'docs/README.md', slug: 'introduction', title: 'Introduction', blurb: 'What is here, what is authoritative, and what has drifted' },
     { src: 'docs/getting-started-desktop.md', slug: 'desktop', title: 'Desktop', blurb: 'composer require to a window on screen' },
     { src: 'docs/getting-started-mobile.md', slug: 'mobile', title: 'Mobile', blurb: 'iOS and Android, and what a build needs' },
 
@@ -72,6 +73,7 @@ const NAV = [
 ];
 
 const pages = NAV.filter((n) => n.src && existsSync(join(root, n.src)));
+const home = NAV.find((n) => n.home);
 const bySource = new Map(pages.map((p) => [p.src, p]));
 const fileOf = (page) => `${page.slug}.html`;
 
@@ -148,7 +150,7 @@ function renderer(page) {
         // The copy button is in the markup rather than injected by script, so a page with
         // JavaScript off shows no half-built control.
         return `<figure class="code">
-${language ? `<span class="code-lang">${escapeHtml(language)}</span>` : ''}<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">${escapeHtml(language || 'text')}</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code${language ? ` class="language-${escapeHtml(language)}"` : ''}>${highlight(text, language)}</code></pre>
 </figure>\n`;
     };
@@ -198,10 +200,10 @@ const searchText = (markdown) =>
         .slice(0, 2000);
 
 const sidebar = (current) =>
-    NAV.filter((n) => n.group || bySource.has(n.src))
+    NAV.filter((n) => n.group || n.home || bySource.has(n.src))
         .map((n) => {
             if (n.group) return `<p class="nav-group">${n.group}</p>`;
-            const page = bySource.get(n.src);
+            const page = n.home ? home : bySource.get(n.src);
             const active = page.slug === current.slug;
             return `<a class="nav-item${active ? ' active' : ''}" href="${fileOf(page)}"${active ? ' aria-current="page"' : ''}><span class="nav-name">${page.title}</span><span class="nav-hint">${page.blurb}</span></a>`;
         })
@@ -288,6 +290,27 @@ ${body}
 `;
 }
 
+const everythingGrid = () => {
+    let markup = '';
+    let group = null;
+
+    for (const entry of NAV) {
+        if (entry.group) {
+            if (group) markup += '</div></section>';
+            group = entry.group;
+            markup += `<section class="group"><h2>${group}</h2><div class="group-grid">`;
+            continue;
+        }
+
+        if (entry.home || !bySource.has(entry.src)) continue;
+
+        const page = bySource.get(entry.src);
+        markup += `<a class="tile" href="${fileOf(page)}"><strong>${page.title}</strong><span>${page.blurb}</span></a>`;
+    }
+
+    return `${markup}</div></section>`;
+};
+
 const HERO = `<section class="hero">
     <p class="eyebrow">Documentation</p>
     <h1 class="hero-title">Ship your Symfony app as a desktop, iOS and Android application</h1>
@@ -324,7 +347,7 @@ const HERO = `<section class="hero">
 
 <div class="quickstart">
     <p class="quickstart-head">Desktop, from nothing</p>
-    <figure class="code"><span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+    <figure class="code"><figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">${highlight(
     `composer require native-symfony/desktop-bundle:^0.1
 
@@ -338,10 +361,15 @@ bin/console native:run      # a window, with your application in it`,
 )}</code></pre></figure>
 </div>
 
-<p class="callout"><strong>What is verified, plainly.</strong> Desktop is proven end to end: a packaged
+<p class="callout" id="what-is-verified"><strong>What is verified, plainly.</strong> Desktop is proven end to end: a packaged
 application that has been built and run, with screenshots. Mobile is covered by tests — including byte
 comparisons against upstream's own renderers — but no build produced here has been opened by Xcode or
 Gradle, and no screen has been rendered on a device. That distinction is kept on every page.</p>
+
+<div class="everything">
+    <h2 class="everything-head">Everything here</h2>
+    ${everythingGrid()}
+</div>
 `;
 
 // ── build ────────────────────────────────────────────────────────────────────
@@ -363,9 +391,9 @@ pages.forEach((page, i) => {
         join(out, fileOf(page)),
         shell({
             page,
-            body: (page.slug === 'index' ? HERO : '') + marked.parse(markdown),
+            body: marked.parse(markdown),
             toc: tocMarkup(items),
-            prev: pages[i - 1],
+            prev: i === 0 ? home : pages[i - 1],
             next: pages[i + 1],
         }),
     );
@@ -378,6 +406,13 @@ pages.forEach((page, i) => {
         x: searchText(markdown),
     });
 });
+
+writeFileSync(
+    join(out, fileOf(home)),
+    shell({ page: { ...home, src: 'docs/README.md' }, body: HERO, toc: '<div class="toc-space"></div>', next: pages[0] }),
+);
+
+index.unshift({ t: 'Home', u: fileOf(home), b: home.blurb, h: [], x: 'NativePHP for Symfony desktop iOS Android documentation getting started' });
 
 writeFileSync(join(out, 'assets', 'search.json'), JSON.stringify(index));
 

@@ -117,8 +117,8 @@ body {
     background: var(--bg);
     color: var(--ink);
     font-family: var(--sans);
-    font-size: 15.5px;
-    line-height: 1.68;
+    font-size: 16px;
+    line-height: 1.7;
     -webkit-font-smoothing: antialiased;
 }
 
@@ -378,7 +378,9 @@ main {
 /* ── Sidebar navigation ─────────────────────────── */
 
 .nav-group {
-    margin: 1.4rem 0 0.4rem 0.6rem;
+    margin: 1.4rem 0 0.4rem;
+    padding: 0.75rem 0.6rem 0;
+    border-top: 1px solid var(--line);
     color: var(--ink-faint);
     font-size: 0.68rem;
     font-weight: 650;
@@ -388,6 +390,8 @@ main {
 
 .nav-group:first-child {
     margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
 }
 
 .nav-item {
@@ -651,47 +655,54 @@ samp {
     overflow: hidden;
 }
 
+.code figcaption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.3rem 0.45rem 0.3rem 0.85rem;
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg-alt) 70%, transparent);
+}
+
 .code-lang {
-    position: absolute;
-    top: 0.45rem;
-    left: 0.85rem;
     color: var(--ink-faint);
     font-family: var(--mono);
     font-size: 0.68rem;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
 }
 
 .code .copy {
-    position: absolute;
-    top: 0.35rem;
-    right: 0.4rem;
-    padding: 0.2rem 0.5rem;
-    border: 1px solid var(--line-strong);
+    padding: 0.15rem 0.5rem;
+    border: 1px solid transparent;
     border-radius: 6px;
-    background: var(--bg-raised);
-    color: var(--ink-soft);
+    background: transparent;
+    color: var(--ink-faint);
     font: inherit;
     font-size: 0.72rem;
-    opacity: 0;
     cursor: pointer;
-    transition: opacity 0.12s ease;
+    transition: color 0.12s ease, border-color 0.12s ease;
 }
 
 .code:hover .copy,
 .code .copy:focus-visible {
-    opacity: 1;
+    border-color: var(--line-strong);
+    color: var(--ink-soft);
+}
+
+.code .copy:hover {
+    border-color: var(--accent);
+    color: var(--accent-ink);
 }
 
 .code .copy.done {
     border-color: var(--accent);
     color: var(--accent-ink);
-    opacity: 1;
 }
 
 .code pre {
     margin: 0;
-    padding: 1.6rem 1rem 0.95rem;
+    padding: 0.85rem 1rem;
     overflow-x: auto;
     font-size: 0.83rem;
     line-height: 1.62;
@@ -817,7 +828,20 @@ th code {
 /* ── Landing page ───────────────────────────────── */
 
 .hero {
-    padding: 1rem 0 0;
+    position: relative;
+    padding: 1.5rem 0 0;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    top: -7rem;
+    left: -12rem;
+    z-index: -1;
+    width: 44rem;
+    height: 26rem;
+    background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 16%, transparent), transparent);
+    pointer-events: none;
 }
 
 .eyebrow {
@@ -1089,4 +1113,66 @@ th code {
     .shell {
         display: block;
     }
+}
+
+/* ── Everything here (the landing page's index) ─── */
+
+.everything {
+    max-width: var(--measure);
+    margin: 3.5rem 0 0;
+}
+
+.everything-head {
+    margin: 0 0 0.25rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--line);
+    font-size: 1.3rem;
+    letter-spacing: -0.02em;
+}
+
+.group {
+    margin: 1.75rem 0 0;
+}
+
+.group h2 {
+    margin: 0 0 0.6rem;
+    color: var(--ink-faint);
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+}
+
+.group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+    gap: 0.5rem;
+}
+
+.tile {
+    display: block;
+    padding: 0.6rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--bg-raised);
+    text-decoration: none;
+}
+
+.tile:hover {
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
+    background: var(--accent-wash);
+}
+
+.tile strong {
+    display: block;
+    color: var(--ink);
+    font-size: 0.9rem;
+    font-weight: 580;
+}
+
+.tile span {
+    display: block;
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+    line-height: 1.45;
 }

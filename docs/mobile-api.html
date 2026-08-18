@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -102,7 +103,7 @@ that when you design a flow around <code>Camera</code>, <code>Biometric</code>, 
 <h2 id="the-groups"><a class="anchor" href="#the-groups">The groups</a></h2>
 <h3 id="camera--apicamera"><a class="anchor" href="#camera--apicamera">Camera — <code>Api\Camera</code></a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">photo</span>(<span class="hljs-attr">quality</span>: <span class="hljs-number">85</span>, <span class="hljs-attr">front</span>: <span class="hljs-literal">false</span>);          <span class="hljs-comment">// quality clamped to 1–100</span>
 <span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">pickMedia</span>(<span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;image&#x27;</span>, <span class="hljs-attr">multiple</span>: <span class="hljs-literal">true</span>);  <span class="hljs-comment">// &#x27;image&#x27; | &#x27;video&#x27; | &#x27;any&#x27;</span>
 <span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">recordVideo</span>(<span class="hljs-attr">maxSeconds</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">front</span>: <span class="hljs-literal">true</span>);</code></pre>
@@ -110,7 +111,7 @@ that when you design a flow around <code>Camera</code>, <code>Biometric</code>, 
 <p>All three are dispatches. Nothing is returned but &quot;the UI was presented&quot;.</p>
 <h3 id="device--apidevice"><a class="anchor" href="#device--apidevice">Device — <code>Api\Device</code></a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">info</span>();          <span class="hljs-comment">// array&lt;string,mixed&gt;; [] when the bridge is absent</span>
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">id</span>();            <span class="hljs-comment">// ?string</span>
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">batteryInfo</span>();   <span class="hljs-comment">// array</span>
@@ -121,7 +122,7 @@ that when you design a flow around <code>Camera</code>, <code>Biometric</code>, 
 <p>iOS Keychain and Android Keystore. Values survive app updates but not a reinstall or a move
 to another device — suitable for tokens, not for anything a user would be upset to lose.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$storage</span>-&gt;<span class="hljs-title function_ invoke__">set</span>(<span class="hljs-string">&#x27;token&#x27;</span>, <span class="hljs-variable">$jwt</span>, <span class="hljs-attr">accessibility</span>: <span class="hljs-literal">null</span>);   <span class="hljs-comment">// bool</span>
 <span class="hljs-variable">$storage</span>-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;token&#x27;</span>);                              <span class="hljs-comment">// ?string</span>
 <span class="hljs-variable">$storage</span>-&gt;<span class="hljs-title function_ invoke__">has</span>(<span class="hljs-string">&#x27;token&#x27;</span>);
@@ -134,7 +135,7 @@ store has. Use a flat separator if you care.</p>
 natively, because a phone can accumulate thousands while the app is asleep and waking PHP for
 each would drain the battery.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">backgroundWatchStatus</span>();      <span class="hljs-comment">// array — active? permission state?</span>
 <span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">drainWatchBuffer</span>(<span class="hljs-attr">limit</span>: <span class="hljs-number">500</span>); <span class="hljs-comment">// list&lt;array&gt; — DESTRUCTIVE, the buffer is emptied</span>
 <span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">trimWatchBuffer</span>(<span class="hljs-attr">keep</span>: <span class="hljs-number">0</span>);     <span class="hljs-comment">// drop without reading</span>
@@ -149,7 +150,7 @@ bridge methods.</p>
 <code>recording()</code> (reads).</p>
 <h3 id="biometric--apibiometric"><a class="anchor" href="#biometric--apibiometric">Biometric — <code>Api\Biometric</code></a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$biometric</span>-&gt;<span class="hljs-title function_ invoke__">prompt</span>(<span class="hljs-string">&#x27;Unlock your vault&#x27;</span>, <span class="hljs-attr">fallbackTitle</span>: <span class="hljs-string">&#x27;Use passcode&#x27;</span>);</code></pre>
 </figure>
 <p>Asynchronous. See the warning above.</p>
@@ -173,7 +174,7 @@ filesystem functions.</p>
 <code>setBackground($color)</code>.</p>
 <h3 id="wallet--apimobilewallet"><a class="anchor" href="#wallet--apimobilewallet">Wallet — <code>Api\MobileWallet</code></a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">if</span> (<span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">isAvailable</span>()) {
     <span class="hljs-variable">$intent</span> = <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">createPaymentIntent</span>(<span class="hljs-number">1999</span>, <span class="hljs-string">&#x27;EUR&#x27;</span>, [<span class="hljs-string">&#x27;order&#x27;</span> =&gt; <span class="hljs-string">&#x27;123&#x27;</span>]);
     <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">presentPaymentSheet</span>(<span class="hljs-variable">$intent</span>[<span class="hljs-string">&#x27;id&#x27;</span>] ?? <span class="hljs-string">&#x27;&#x27;</span>);
@@ -196,7 +197,7 @@ complete rather than looking like an oversight.</p>
 <hr>
 <h2 id="testing-the-bridge"><a class="anchor" href="#testing-the-bridge">Testing the bridge</a></h2>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Api</span>\<span class="hljs-title">SecureStorage</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">FakeBridge</span>;
 
@@ -212,7 +213,7 @@ complete rather than looking like an oversight.</p>
 <p>The real <code>Bridge</code> also takes an <code>$invoker</code> callable standing in for the extension function,
 which is how the bundle tests the real class rather than only the fake:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Bridge</span>(<span class="hljs-literal">null</span>, <span class="hljs-function"><span class="hljs-keyword">fn</span> (<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$method</span>, <span class="hljs-keyword">string</span> <span class="hljs-variable">$json</span></span>): <span class="hljs-title">string</span> =&gt;</span> <span class="hljs-string">&#x27;{&quot;value&quot;:1}&#x27;</span>);</code></pre>
 </figure>
 <hr>
@@ -223,7 +224,7 @@ WebView.</p>
 <p>37 element classes covering all 36 wire types (<code>Fab</code> shares <code>pressable</code>) under
 <code>Ui\Elements\</code>. Containers take children, leaves take their content:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Button</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Column</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Elements</span>\<span class="hljs-title">Text</span>;
@@ -260,7 +261,7 @@ part of the wire format rather than an implementation detail.</p>
 <code>flex_grow=1</code>, so it works dropped in bare.</p>
 <h3 id="publishing-a-frame"><a class="anchor" href="#publishing-a-frame">Publishing a frame</a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$tree</span> = <span class="hljs-variable">$publisher</span>-&gt;<span class="hljs-title function_ invoke__">publish</span>(<span class="hljs-variable">$root</span>, <span class="hljs-variable">$callbacks</span>);   <span class="hljs-comment">// array&lt;string,mixed&gt;, the published tree</span>
 <span class="hljs-variable">$publisher</span>-&gt;<span class="hljs-title function_ invoke__">resetDiffState</span>();                     <span class="hljs-comment">// on navigation — see below</span></code></pre>
 </figure>
@@ -281,7 +282,7 @@ joined to the expression with <code>\x1F</code> — is what keeps two screens&#3
 <p><code>0</code> is never a valid id: the native side reads 0 as &quot;no callback&quot;.</p>
 <h3 id="components"><a class="anchor" href="#components">Components</a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">NativeAction</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">NativeComponent</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Element</span>;
@@ -331,7 +332,7 @@ reuse would carry state and children across invisibly.</li>
 </ul>
 <p>Driving a screen through routing — what a device does, and what the bundle wires by default:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-comment">// ScreenRendererInterface is aliased to ComponentScreenRenderer, so this needs no glue.</span>
 <span class="hljs-variable">$frame</span> = <span class="hljs-variable">$responder</span>-&gt;<span class="hljs-title function_ invoke__">respond</span>(<span class="hljs-string">&#x27;/counter&#x27;</span>);                        <span class="hljs-comment">// first paint</span>
 <span class="hljs-variable">$id</span>    = <span class="hljs-variable">$responder</span>-&gt;<span class="hljs-title function_ invoke__">callbacks</span>()-&gt;<span class="hljs-title function_ invoke__">idFor</span>(<span class="hljs-string">&#x27;increment&#x27;</span>);            <span class="hljs-comment">// expression → id</span>
@@ -347,7 +348,7 @@ nothing. A screen with constructor dependencies is resolved from the container �
 screen that declares <code>withRouteParameters(array $params)</code>.</p>
 <p>Driving one directly, without routing:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$screen</span> = <span class="hljs-variable">$factory</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">Counter</span>());          <span class="hljs-comment">// ComponentScreenFactory</span>
 <span class="hljs-variable">$frame</span>  = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">frame</span>();                       <span class="hljs-comment">// first paint</span>
 <span class="hljs-variable">$frame</span>  = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">handle</span>(<span class="hljs-variable">$eventArrayFromDevice</span>); <span class="hljs-comment">// ?array — null when the id is unknown</span>
@@ -369,7 +370,7 @@ receives depends on the event type, which is not known until the interaction arr
 handler cannot receive the string <code>&quot;false&quot;</code>, and an unknown type carries nothing at all.</p>
 <h3 id="twig-authoring"><a class="anchor" href="#twig-authoring">Twig authoring</a></h3>
 <figure class="code">
-<span class="code-lang">twig</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">twig</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-twig"><span class="hljs-template-tag">{%</span> <span class="hljs-name">set</span> tree = native(<span class="hljs-string">&#x27;column&#x27;</span>, {layout: {gap: <span class="hljs-number">8</span>}}, [
     native(<span class="hljs-string">&#x27;text&#x27;</span>,   {text: <span class="hljs-string">&#x27;Hello&#x27;</span>, fontSize: <span class="hljs-number">24</span>}),
     native(<span class="hljs-string">&#x27;button&#x27;</span>, {label: <span class="hljs-string">&#x27;Tap me&#x27;</span>, onPress: <span class="hljs-string">&#x27;save&#x27;</span>}),
@@ -394,7 +395,7 @@ is a working one.</p>
 the contract&#39;s §4d — verified token-for-token against upstream across 684 tokens and 1,336
 class strings, plus a 48,849-parse differential sweep:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$parser</span>-&gt;<span class="hljs-title function_ invoke__">parse</span>(<span class="hljs-string">&#x27;flex-1 p-4 gap-2&#x27;</span>);
 <span class="hljs-comment">// [&#x27;flexGrow&#x27; =&gt; 1, &#x27;flexShrink&#x27; =&gt; 1, &#x27;flexBasis&#x27; =&gt; 0, &#x27;padding&#x27; =&gt; 16, &#x27;gap&#x27; =&gt; 8]</span>
 

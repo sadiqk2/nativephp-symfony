@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item active" href="desktop.html" aria-current="page"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -76,7 +77,7 @@ at it.</p>
 <hr>
 <h2 id="1-install-the-bundle"><a class="anchor" href="#1-install-the-bundle">1. Install the bundle</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require native-symfony/desktop-bundle:^0.1</code></pre>
 </figure>
 <p><strong>Not on Packagist yet</strong>, so that resolves only once Composer knows where to find it: clone
@@ -91,7 +92,7 @@ candidates are <code>SymfonyBundle</code> and <code>NativeSymfonyBundle</code> a
 so every application had to register it by hand.</p>
 <p>Without Flex, add it yourself:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-comment">// config/bundles.php</span>
 <span class="hljs-keyword">return</span> [
     <span class="hljs-comment">// …</span>
@@ -106,7 +107,7 @@ Flex-shaped has to write it by hand.</p>
 <code>/_native/api/booted</code> and <code>/_native/api/events</code>, and until they are imported the app boots
 into a window that never opens and receives no events:</p>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/routes/native_desktop.yaml</span>
 <span class="hljs-attr">native_desktop:</span>
     <span class="hljs-attr">resource:</span> <span class="hljs-string">&#x27;@NativeDesktopBundle/src/Resources/config/routes.php&#x27;</span>
@@ -122,7 +123,7 @@ somewhere nothing loads.</p>
 handler does <em>is</em> your application&#39;s startup. Nothing appears on screen unless you ask
 for it:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Native</span>;
@@ -159,7 +160,7 @@ contract and answers 500. The runtime swallows that response, so the log line is
 symptom you will get.</p>
 <h2 id="4-install-the-electron-runtime-into-your-project"><a class="anchor" href="#4-install-the-electron-runtime-into-your-project">4. Install the Electron runtime into your project</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop
 bin/console native:install --<span class="hljs-built_in">source</span>=/tmp/np-desktop/resources/electron</code></pre>
 </figure>
@@ -205,7 +206,7 @@ non-strict: if a target has moved — most likely because the fix landed upstrea
 says so and carries on.</p>
 <h3 id="check-it-before-you-run-it"><a class="anchor" href="#check-it-before-you-run-it">Check it before you run it</a></h3>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:doctor</code></pre>
 </figure>
 <p>The runtime talks to your app over HTTP, so a call that never lands is logged by Electron and
@@ -217,7 +218,7 @@ bootstrapper and the inputs <code>native:build</code> needs.</p>
 see <code>exempt_runtime_firewall</code> in <a href="troubleshooting.html#desktop--boot">troubleshooting</a>.</p>
 <h2 id="5-run-it"><a class="anchor" href="#5-run-it">5. Run it</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:run</code></pre>
 </figure>
 <p><code>native:run</code> prepares <code>nativephp/build</code> with the three things the runtime insists on — an
@@ -247,14 +248,14 @@ console-boot path will throw <code>RuntimeNotAvailable</code> here.</li>
 No app id, no deep links, no updater, no visible symptom. Check them by hand whenever
 something configured seems to be ignored:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:config   <span class="hljs-comment"># {&quot;app_id&quot;:&quot;com.example.app&quot;,&quot;version&quot;:&quot;1.0.0&quot;,…}</span>
 bin/console native:php-ini  <span class="hljs-comment"># {&quot;memory_limit&quot;:&quot;512M&quot;}</span></code></pre>
 </figure>
 <p>Both should print one line of JSON and nothing else.</p>
 <h2 id="7-optional-write-a-manifest"><a class="anchor" href="#7-optional-write-a-manifest">7. Optional: write a manifest</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">bin/console native:manifest            <span class="hljs-comment"># writes nativephp.json</span>
 bin/console native:manifest --dry-run  <span class="hljs-comment"># print it instead</span></code></pre>
 </figure>
@@ -275,7 +276,7 @@ that 404s every route with nothing in the log.</li>
 <h2 id="8-configuration"><a class="anchor" href="#8-configuration">8. Configuration</a></h2>
 <p>Every key, with its default:</p>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/packages/native_desktop.yaml</span>
 <span class="hljs-attr">native_desktop:</span>
     <span class="hljs-attr">app_id:</span> <span class="hljs-string">com.example.app</span>     <span class="hljs-comment"># passed to setAppUserModelId()</span>
@@ -347,7 +348,7 @@ wrong, which with this runtime is the usual failure mode.</li>
         </article>
 
         <nav class="pager" aria-label="Pagination">
-            <a class="pager-link" href="index.html"><span>← Previous</span><strong>Introduction</strong></a>
+            <a class="pager-link" href="introduction.html"><span>← Previous</span><strong>Introduction</strong></a>
             <a class="pager-link next" href="mobile.html"><span>Next →</span><strong>Mobile</strong></a>
         </nav>
 

@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -78,7 +79,7 @@ PHP (272 files).</p>
 <p>This is the single most important thing to understand. From
 <code>electron-plugin/src/index.ts::bootstrapApp()</code>:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code> 1. app.whenReady()                                    Electron
  2. loadConfig()
       └─ execFile(php, ['artisan','native:config'])    ← spawns PHP, reads stdout as JSON
@@ -181,7 +182,7 @@ is not decoration.</p>
 <h3 id="config-keys-the-runtime-actually-reads"><a class="anchor" href="#config-keys-the-runtime-actually-reads">Config keys the runtime actually reads</a></h3>
 <p>Out of the ~90-line <code>config/nativephp.php</code>, <code>index.ts</code> consumes exactly <strong>five</strong>:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>app_id                                    → electronApp.setAppUserModelId()
 deeplink_scheme                           → app.setAsDefaultProtocolClient()
 updater.enabled                           → autoUpdater.checkForUpdatesAndNotify()
@@ -217,7 +218,7 @@ latter for M2</strong> and Flysystem later; don&#39;t make <code>league/flysyste
 <h2 id="4-reverse-channel--the-44-events"><a class="anchor" href="#4-reverse-channel--the-44-events">4. Reverse channel — the 44 events</a></h2>
 <p><code>DispatchEventFromAppController</code> is the whole mechanism:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$event</span> = <span class="hljs-variable">$request</span>-&gt;<span class="hljs-title function_ invoke__">input</span>(<span class="hljs-string">&#x27;event&#x27;</span>);           <span class="hljs-comment">// e.g. &quot;\Native\Desktop\Events\Windows\WindowResized&quot;</span>
 <span class="hljs-variable">$payload</span> = <span class="hljs-variable">$request</span>-&gt;<span class="hljs-title function_ invoke__">input</span>(<span class="hljs-string">&#x27;payload&#x27;</span>, []);
 <span class="hljs-keyword">if</span> (<span class="hljs-title function_ invoke__">class_exists</span>(<span class="hljs-variable">$event</span>)) { <span class="hljs-title function_ invoke__">event</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable">$event</span>(...<span class="hljs-variable">$payload</span>)); }

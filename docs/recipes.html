@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -84,7 +85,7 @@ against the real classes; check the signatures in
 a request knows which window it came from — and it is the whole mechanism, so it is worth
 understanding before you rely on it.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Native</span>;
@@ -112,7 +113,7 @@ understanding before you rely on it.</p>
 </figure>
 <p>Opening a second window from a controller, and closing it from inside itself:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Controller</span>;
@@ -180,14 +181,14 @@ request it throws a <code>LogicException</code> that says exactly this.</li>
 </ol>
 <p>Reading the window back:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$window</span> = <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;inspector:&#x27;</span>.<span class="hljs-variable">$id</span>);   <span class="hljs-comment">// ?Window</span>
 <span class="hljs-variable">$current</span> = <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">current</span>();              <span class="hljs-comment">// ?Window — may be null; never chain on it</span>
 <span class="hljs-variable">$open</span> = <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">all</span>();                     <span class="hljs-comment">// list&lt;Window&gt;</span></code></pre>
 </figure>
 <h2 id="running-a-messenger-worker"><a class="anchor" href="#running-a-messenger-worker">Running a Messenger worker</a></h2>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Native</span>;
@@ -222,7 +223,7 @@ request it throws a <code>LogicException</code> that says exactly this.</li>
 </figure>
 <p>Watch it, and stop it:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$handle</span> = <span class="hljs-variable">$worker</span>-&gt;<span class="hljs-title function_ invoke__">status</span>(<span class="hljs-string">&#x27;async&#x27;</span>);    <span class="hljs-comment">// ?ProcessHandle</span>
 
 <span class="hljs-keyword">if</span> (<span class="hljs-literal">null</span> === <span class="hljs-variable">$handle</span> || !<span class="hljs-variable">$handle</span>-&gt;<span class="hljs-title function_ invoke__">isRunning</span>()) {
@@ -242,7 +243,7 @@ own process aliases. Use the un-prefixed name in every <code>MessengerWorker</co
 prefixed one when reading <code>ChildProcessManager::all()</code> or matching events.</p>
 <p>Worker output arrives as events:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
 <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onWorkerOutput</span>(<span class="hljs-params">MessageReceived <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
 </span>{
@@ -255,14 +256,14 @@ prefixed one when reading <code>ChildProcessManager::all()</code> or matching ev
 <p>For a one-off job instead of a consumer, use <code>ChildProcessManager::console()</code> — same
 supervision, no watchdog:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$processes</span>-&gt;<span class="hljs-title function_ invoke__">console</span>(<span class="hljs-string">&#x27;import&#x27;</span>, [<span class="hljs-string">&#x27;app:import&#x27;</span>, <span class="hljs-variable">$path</span>]);</code></pre>
 </figure>
 <h2 id="reacting-to-a-runtime-event-with-a-typed-listener"><a class="anchor" href="#reacting-to-a-runtime-event-with-a-typed-listener">Reacting to a runtime event with a typed listener</a></h2>
 <p>Typed events dispatch under their class name, so <code>#[AsEventListener]</code> on a typed parameter is
 all a listener needs:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Native</span>;
@@ -323,7 +324,7 @@ all a listener needs:</p>
 a name of <em>your</em> choosing. There is no class to key on, so those arrive as <code>NativeEvent</code>
 under two names — <code>native.&lt;name&gt;</code> and <code>NativeEvent::class</code>. Register for one, never both:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">NativeEvent</span>;
 
 <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ShortcutListener</span>
@@ -348,7 +349,7 @@ under two names — <code>native.&lt;name&gt;</code> and <code>NativeEvent::clas
 </figure>
 <p>While porting, a catch-all is the fastest way to see what the runtime is really sending:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
 <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onAnything</span>(<span class="hljs-params">NativeEvent <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
 </span>{
@@ -364,7 +365,7 @@ under two names — <code>native.&lt;name&gt;</code> and <code>NativeEvent::clas
 <a href="mobile.html#path-b--the-native-ui-render-path">the mobile getting-started page</a>
 first.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">&lt;?php</span>
 
 <span class="hljs-keyword">namespace</span> <span class="hljs-title class_">App</span>\<span class="hljs-title class_">Screen</span>;
@@ -436,7 +437,7 @@ first.</p>
 </figure>
 <p>Driving it:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">ComponentScreenFactory</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Ui</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">InteractionEvent</span>;
 
@@ -468,7 +469,7 @@ props are assigned to public non-readonly properties. An unknown prop name throw
 </ul>
 <h2 id="building-for-distribution"><a class="anchor" href="#building-for-distribution">Building for distribution</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require nativephp/php-bin          <span class="hljs-comment"># static PHP binaries + cacert.pem, no PHP deps</span>
 bin/console native:build linux x64 --<span class="hljs-built_in">dir</span>    <span class="hljs-comment"># unpacked directory — the fast smoke test</span>
 bin/console native:build linux x64          <span class="hljs-comment"># installer</span>

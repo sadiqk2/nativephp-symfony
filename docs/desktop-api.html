@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -86,7 +87,7 @@ so <code>$windows-&gt;close(&#39;typo&#39;)</code> is a no-op, not an error.</p>
 <code>Native\Symfony\Desktop\Client\RuntimeNotAvailable</code>. Code that also runs as an ordinary web request
 must guard:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">if</span> (<span class="hljs-variable language_">$this</span>-&gt;client-&gt;<span class="hljs-title function_ invoke__">isAvailable</span>()) {
     <span class="hljs-variable language_">$this</span>-&gt;windows-&gt;<span class="hljs-title function_ invoke__">title</span>(<span class="hljs-string">&#x27;Saved&#x27;</span>);
 }</code></pre>
@@ -97,7 +98,7 @@ and a <code>403</code> (the shared secret did not match).</p>
 <h2 id="windows"><a class="anchor" href="#windows">Windows</a></h2>
 <p><code>Native\Symfony\Desktop\Window\WindowManager</code> — 21 endpoints.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-string">&#x27;settings&#x27;</span>)            <span class="hljs-comment">// returns PendingWindow; nothing happens until open()</span>
     -&gt;<span class="hljs-title function_ invoke__">url</span>(<span class="hljs-string">&#x27;/settings&#x27;</span>)
     -&gt;<span class="hljs-title function_ invoke__">size</span>(<span class="hljs-number">700</span>, <span class="hljs-number">500</span>)
@@ -119,7 +120,7 @@ and a <code>403</code> (the shared secret did not match).</p>
 Read the class; it is a flat list of one-line setters.</p>
 <p>Reads:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$window</span> = <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;main&#x27;</span>);   <span class="hljs-comment">// ?Window — null on 404</span>
 <span class="hljs-variable">$window</span> = <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">current</span>();     <span class="hljs-comment">// ?Window — null when the runtime failed the call</span>
 <span class="hljs-variable">$all</span>    = <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">all</span>();         <span class="hljs-comment">// list&lt;Window&gt;</span></code></pre>
@@ -156,13 +157,13 @@ is assigned by the runtime and never published to PHP.</li>
 POST carries the window in its Referer, not its own URI. If neither has it, the id is
 <code>&#39;main&#39;</code>.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$id</span> = <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">detectId</span>();   <span class="hljs-comment">// ?string</span></code></pre>
 </figure>
 <h2 id="menus"><a class="anchor" href="#menus">Menus</a></h2>
 <p><code>Native\Symfony\Desktop\Menu\Menu</code> is an immutable builder; <code>MenuManager</code> sends it.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Enums</span>\<span class="hljs-title">MenuRole</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Menu</span>\<span class="hljs-title">Menu</span>;
 
@@ -196,7 +197,7 @@ not queryable afterwards — persist it if you need it.</p>
 <h3 id="menu-bar-tray"><a class="anchor" href="#menu-bar-tray">Menu bar (tray)</a></h3>
 <p><code>MenuBarManager</code> — 9 endpoints, macOS-flavoured but functional elsewhere.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$menuBar</span>-&gt;<span class="hljs-title function_ invoke__">create</span>()
     -&gt;<span class="hljs-title function_ invoke__">label</span>(<span class="hljs-string">&#x27;7 open&#x27;</span>)
     -&gt;<span class="hljs-title function_ invoke__">tooltip</span>(<span class="hljs-string">&#x27;My App&#x27;</span>)
@@ -222,7 +223,7 @@ calling code needs no platform checks.</p>
 <p><code>Native\Symfony\Desktop\Dialog\DialogManager</code> — 4 endpoints, <strong>all of which block the runtime&#39;s
 event loop until the user answers</strong>. The client&#39;s timeout is 3600s for exactly this reason.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$paths</span> = <span class="hljs-variable">$dialogs</span>-&gt;<span class="hljs-title function_ invoke__">open</span>()
     -&gt;<span class="hljs-title function_ invoke__">title</span>(<span class="hljs-string">&#x27;Choose a spreadsheet&#x27;</span>)
     -&gt;<span class="hljs-title function_ invoke__">filters</span>([[<span class="hljs-string">&#x27;name&#x27;</span> =&gt; <span class="hljs-string">&#x27;Spreadsheets&#x27;</span>, <span class="hljs-string">&#x27;extensions&#x27;</span> =&gt; [<span class="hljs-string">&#x27;csv&#x27;</span>, <span class="hljs-string">&#x27;xlsx&#x27;</span>]]])
@@ -260,7 +261,7 @@ Electron&#39;s raw property list.</li>
 </ul>
 <h2 id="notifications"><a class="anchor" href="#notifications">Notifications</a></h2>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$reference</span> = <span class="hljs-variable">$notifications</span>-&gt;<span class="hljs-title function_ invoke__">create</span>()
     -&gt;<span class="hljs-title function_ invoke__">title</span>(<span class="hljs-string">&#x27;Export finished&#x27;</span>)
     -&gt;<span class="hljs-title function_ invoke__">body</span>(<span class="hljs-string">&#x27;report.pdf is ready&#x27;</span>)
@@ -277,7 +278,7 @@ clicks arrive as a <code>NativeEvent</code> under that name instead. <code>toast
 overrides title and body entirely.</p>
 <h2 id="clipboard"><a class="anchor" href="#clipboard">Clipboard</a></h2>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Enums</span>\<span class="hljs-title">ClipboardType</span>;
 
 <span class="hljs-variable">$clipboard</span>-&gt;<span class="hljs-title function_ invoke__">setText</span>(<span class="hljs-string">&#x27;hello&#x27;</span>);
@@ -295,7 +296,7 @@ on Linux only.</p>
 <p><code>SettingsManager</code> wraps the runtime&#39;s electron-store — a JSON file under <code>userData</code> that
 survives restarts. Unrelated to remembered window geometry, which lives in its own files.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$settings</span>-&gt;<span class="hljs-title function_ invoke__">set</span>(<span class="hljs-string">&#x27;theme&#x27;</span>, <span class="hljs-string">&#x27;dark&#x27;</span>);
 <span class="hljs-variable">$theme</span> = <span class="hljs-variable">$settings</span>-&gt;<span class="hljs-title function_ invoke__">get</span>(<span class="hljs-string">&#x27;theme&#x27;</span>, <span class="hljs-string">&#x27;light&#x27;</span>);
 <span class="hljs-variable">$settings</span>-&gt;<span class="hljs-title function_ invoke__">forget</span>(<span class="hljs-string">&#x27;theme&#x27;</span>);
@@ -315,7 +316,7 @@ point: the runtime supervises them, restarts the persistent ones, and tears them
 quit with a 12-second drain window. A process started here outlives the request that started
 it, unlike anything spawned with <code>symfony/process</code> from a web request.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$handle</span> = <span class="hljs-variable">$processes</span>-&gt;<span class="hljs-title function_ invoke__">console</span>(<span class="hljs-string">&#x27;import&#x27;</span>, [<span class="hljs-string">&#x27;app:import&#x27;</span>, <span class="hljs-string">&#x27;data.csv&#x27;</span>]);
 <span class="hljs-variable">$handle</span> = <span class="hljs-variable">$processes</span>-&gt;<span class="hljs-title function_ invoke__">php</span>(<span class="hljs-string">&#x27;worker&#x27;</span>, [<span class="hljs-string">&#x27;bin/console&#x27;</span>, <span class="hljs-string">&#x27;app:work&#x27;</span>], <span class="hljs-attr">persistent</span>: <span class="hljs-literal">true</span>);
 <span class="hljs-variable">$handle</span> = <span class="hljs-variable">$processes</span>-&gt;<span class="hljs-title function_ invoke__">node</span>(<span class="hljs-string">&#x27;vite&#x27;</span>, [<span class="hljs-string">&#x27;node_modules/.bin/vite&#x27;</span>, <span class="hljs-string">&#x27;build&#x27;</span>]);
@@ -349,7 +350,7 @@ counterpart to Laravel&#39;s <code>QueueWorker</code>, and the argument names ar
 (<code>--memory-limit=128M</code> not <code>--memory=128</code>, <code>--time-limit</code> not <code>--timeout</code>, transports
 positional rather than <code>--queue=a,b</code>).</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$worker</span>-&gt;<span class="hljs-title function_ invoke__">up</span>();                                            <span class="hljs-comment">// alias messenger_messenger</span>
 <span class="hljs-variable">$worker</span>-&gt;<span class="hljs-title function_ invoke__">up</span>(<span class="hljs-attr">alias</span>: <span class="hljs-string">&#x27;async&#x27;</span>, <span class="hljs-attr">transports</span>: [<span class="hljs-string">&#x27;async&#x27;</span>], <span class="hljs-attr">memoryLimit</span>: <span class="hljs-number">256</span>, <span class="hljs-attr">timeLimit</span>: <span class="hljs-number">3600</span>);
 <span class="hljs-variable">$worker</span>-&gt;<span class="hljs-title function_ invoke__">status</span>(<span class="hljs-string">&#x27;async&#x27;</span>);                                 <span class="hljs-comment">// ?ProcessHandle</span>
@@ -364,7 +365,7 @@ Aliases are namespaced <code>messenger_*</code> so they cannot collide with your
 <p>The runtime pushes 44 typed events plus any number of caller-named ones. Typed events
 dispatch under their class name, so a listener is ordinary Symfony:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Event</span>\<span class="hljs-title">Windows</span>\<span class="hljs-title">WindowResized</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Component</span>\<span class="hljs-title">EventDispatcher</span>\<span class="hljs-title">Attribute</span>\<span class="hljs-title">AsEventListener</span>;
 
@@ -385,7 +386,7 @@ dispatch under their class name, so a listener is ordinary Symfony:</p>
 notification overrides — have no class to key on, so they arrive as <code>NativeEvent</code> and are
 dispatched <strong>twice</strong>: once under <code>native.&lt;name&gt;</code>, once under <code>NativeEvent::class</code>.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">#[AsEventListener</span>(<span class="hljs-attr">event</span>: <span class="hljs-string">&#x27;native.App\Menu\NewReport&#x27;</span>)<span class="hljs-meta">]</span>
 <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onNewReport</span>(<span class="hljs-params">NativeEvent <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span> </span>{}
 
@@ -404,7 +405,7 @@ the endpoint, because the runtime swallows non-2xx answers here.</p>
 <p>Laravel sniffs every dispatched event with a wildcard listener. Symfony has no wildcard
 hook, so intent is declared on the event:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Contract</span>\<span class="hljs-title">BroadcastsToRuntime</span>;
 
 <span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ImportProgressed</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">BroadcastsToRuntime</span>

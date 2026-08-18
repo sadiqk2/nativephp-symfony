@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -96,7 +97,7 @@ WebView path by construction — and Twig in a WebView is just Twig.</p>
 <p>Full reasoning: <a href="mobile-analysis.html"><code>../MOBILE-ANALYSIS.md</code></a>.</p>
 <h2 id="what-it-gives-you"><a class="anchor" href="#what-it-gives-you">What it gives you</a></h2>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">ProfileController</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">AbstractController</span>
 </span>{
     <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params">
@@ -121,7 +122,7 @@ WebView path by construction — and Twig in a WebView is just Twig.</p>
 <code>Performance</code>, <code>PushNotifications</code>, <code>SecureStorage</code>, <code>Share</code>, <code>System</code>.</p>
 <h2 id="install"><a class="anchor" href="#install">Install</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require native-symfony/mobile-bundle
 
 git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/mobile-air /tmp/np-mobile
@@ -133,7 +134,7 @@ bin/console native:mobile:doctor    <span class="hljs-comment"># what the integr
 are required.</p>
 <h2 id="configuration"><a class="anchor" href="#configuration">Configuration</a></h2>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-attr">native_mobile:</span>
     <span class="hljs-attr">app_id:</span> <span class="hljs-string">com.example.app</span>
     <span class="hljs-attr">name:</span> <span class="hljs-string">&#x27;My App&#x27;</span>
@@ -146,13 +147,13 @@ are required.</p>
 outside one the bridge is always unavailable and every call returns null. Two ways
 around that, both shipped rather than kept in this package&#39;s own tests:</p>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/packages/test/native_mobile.yaml</span>
 <span class="hljs-attr">native_mobile:</span>
     <span class="hljs-attr">fake_bridge:</span> <span class="hljs-literal">true</span></code></pre>
 </figure>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">FakeBridge</span>();
 <span class="hljs-variable">$bridge</span>-&gt;<span class="hljs-title function_ invoke__">willReturn</span>(<span class="hljs-string">&#x27;SecureStorage.Get&#x27;</span>, [<span class="hljs-string">&#x27;value&#x27;</span> =&gt; <span class="hljs-string">&#x27;tok_123&#x27;</span>]);
 
@@ -172,7 +173,7 @@ behaviour the desktop bundle documents for settings.</p>
 <p>The second render path. <code>Ui/</code> produces the element tree the SwiftUI and Jetpack
 Compose renderers consume — the <code>super-native</code> equivalent, authored from Twig:</p>
 <figure class="code">
-<span class="code-lang">twig</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">twig</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-twig"><span class="hljs-template-tag">{%</span> <span class="hljs-name">do</span> native_publish(native(<span class="hljs-string">&#x27;column&#x27;</span>, {layout: {gap: <span class="hljs-number">8</span>}}, [
     native(<span class="hljs-string">&#x27;text&#x27;</span>,   {text: <span class="hljs-string">&#x27;Hello&#x27;</span>, fontSize: <span class="hljs-number">24</span>}),
     native(<span class="hljs-string">&#x27;button&#x27;</span>, {label: <span class="hljs-string">&#x27;Tap me&#x27;</span>, onPress: <span class="hljs-string">&#x27;save&#x27;</span>}),
@@ -189,7 +190,7 @@ navigation keys. That comparison caught three things a careful reading had got w
 they are written up in <a href="native-ui-contract.html"><code>../NATIVE-UI-CONTRACT.md</code></a>.</p>
 <p>Screens are declared with <code>#[NativeScreen(&#39;/items/{id}&#39;)]</code> and rendered by components:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Counter</span> <span class="hljs-keyword">extends</span> <span class="hljs-title">NativeComponent</span>
 </span>{
     <span class="hljs-keyword">private</span> <span class="hljs-keyword">int</span> <span class="hljs-variable">$count</span> = <span class="hljs-number">0</span>;
@@ -206,7 +207,7 @@ an id arriving from the native side is only ever a lookup key: it never becomes 
 name.</p>
 <p>Styling uses the same Tailwind-subset classes:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-comment">// StyleApplier, not -&gt;layout($parser-&gt;parse(...)): the parser emits a camelCase</span>
 <span class="hljs-comment">// intermediate vocabulary, and camelCase keys on the wire are silently ignored.</span>
 <span class="hljs-variable">$styles</span>-&gt;<span class="hljs-title function_ invoke__">applyClasses</span>(<span class="hljs-variable">$column</span>, <span class="hljs-string">&#x27;flex-1 p-4 gap-2&#x27;</span>);
@@ -245,7 +246,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.</
 <code>dispatch.php</code> pay once. Prefer the persistent pair wherever the host supports it.</p>
 <h2 id="tests"><a class="anchor" href="#tests">Tests</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer install &amp;&amp; vendor/bin/phpunit</code></pre>
 </figure>
 <p>340 tests. <code>UiWireFormatTest</code> byte-compares element trees against upstream&#39;s own

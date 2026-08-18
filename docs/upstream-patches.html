@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -103,7 +104,7 @@ than MIT: that was wrong about the repository, which carries an MIT <code>LICENS
 commercial is NativePHP Mobile as a <em>product</em> — the licence you buy to ship apps — not the
 source these patches touch. Submitting them raises nothing that <code>0002</code>–<code>0007</code> do not.</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">git <span class="hljs-built_in">clone</span> https://github.com/NativePHP/desktop &amp;&amp; <span class="hljs-built_in">cd</span> desktop
 git apply /path/to/upstream-patches/0001-manifest-declared-app-paths.patch</code></pre>
 </figure>
@@ -174,7 +175,7 @@ regardless; the manifest is what makes them expressible rather than special-case
 <p><code>parseThemeBorder()</code> emits <code>borderWidth: 1</code> unconditionally, and since classes merge in
 order it overwrites an explicit width that came before it:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>BEFORE (upstream)                              AFTER (patched)
 border-2 border-theme-outline → width 1  ✗     → width 2  ✓
 border-theme-outline border-2 → width 2  ✓     → width 2  ✓
@@ -196,7 +197,7 @@ distinct tokens) and running upstream&#39;s parser over all of them.</p>
 the string <code>&quot;{slug?}&quot;</code>.</p>
 <p>Verified against upstream&#39;s own code:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>                    BEFORE                        AFTER
 /items/42           params {id: 42}   ✓           params {id: 42}      ✓
 /posts/hello        NULL              ✗           params {slug: hello} ✓
@@ -214,7 +215,7 @@ empty captures so an omitted segment reads as absent rather than blank.</p>
 decode failure to <code>$args ?? []</code>. Three distinct silent failures, all verified against
 upstream&#39;s own code:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>                       BEFORE                        AFTER
 save('hello')          [&quot;hello&quot;]        ✓            [&quot;hello&quot;]     ✓
 save(&quot;don't&quot;)          []               ✗ dropped    [&quot;don't&quot;]     ✓
@@ -235,7 +236,7 @@ tightening that contract deserves its own change. But the failure is no longer s
 variant nested that companion a level deeper — where <code>parse()</code>&#39;s merge never lifts it —
 and left the <strong>light</strong> hex in the dark slot:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>                        BEFORE                                  AFTER
 bg-theme-surface        {bg:#FFF, dark:{bg:#000}}      ✓        unchanged            ✓
 dark:bg-theme-surface   {dark:{bg:#FFF, dark:{bg:#000}}} ✗      {dark:{bg:#000}}     ✓</code></pre>

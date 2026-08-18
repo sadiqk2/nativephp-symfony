@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -83,7 +84,7 @@ difference between testing your payloads and testing a stub.</p>
 <hr>
 <h2 id="wiring-one-flag-and-one-trait"><a class="anchor" href="#wiring-one-flag-and-one-trait">Wiring: one flag and one trait</a></h2>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/packages/test/native_desktop.yaml</span>
 <span class="hljs-attr">native_desktop:</span>
     <span class="hljs-attr">testing:</span> <span class="hljs-literal">true</span></code></pre>
@@ -96,7 +97,7 @@ one that has to be running. It also registers <code>RuntimeEventSimulator</code>
 <p>Set it in <code>config/packages/test/</code> only. With it on, nothing reaches a real runtime.</p>
 <p>The trait wires the three pieces in one <code>use</code>, and works both ways round:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Desktop</span>\<span class="hljs-title">Testing</span>\<span class="hljs-title">InteractsWithNativeRuntime</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Symfony</span>\<span class="hljs-title">Bundle</span>\<span class="hljs-title">FrameworkBundle</span>\<span class="hljs-title">Test</span>\<span class="hljs-title">KernelTestCase</span>;
 
@@ -145,14 +146,14 @@ wire, not a stub. All 116 endpoints are covered the day they are added, includin
 with no manager.</p>
 <p>Overriding the alias by hand still works if you prefer it:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">getContainer</span>()-&gt;<span class="hljs-title function_ invoke__">set</span>(<span class="hljs-title class_">ClientInterface</span>::<span class="hljs-variable language_">class</span>, <span class="hljs-title class_">FakeRuntime</span>::<span class="hljs-title function_ invoke__">available</span>());</code></pre>
 </figure>
 <p><code>FakeRuntime::unavailable()</code> models a process the runtime did not start: every call throws
 <code>RuntimeNotAvailable</code>, exactly as the real client does, so <code>isAvailable()</code> guards are testable.</p>
 <h3 id="scripting-replies"><a class="anchor" href="#scripting-replies">Scripting replies</a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$fake</span> = <span class="hljs-title class_">FakeRuntime</span>::<span class="hljs-title function_ invoke__">available</span>()
     -&gt;<span class="hljs-title function_ invoke__">willReturn</span>(<span class="hljs-string">&#x27;app/version&#x27;</span>, [<span class="hljs-string">&#x27;version&#x27;</span> =&gt; <span class="hljs-string">&#x27;1.2.3&#x27;</span>])
     -&gt;<span class="hljs-title function_ invoke__">willReturnStatus</span>(<span class="hljs-string">&#x27;window/get/ghost&#x27;</span>, <span class="hljs-number">404</span>)
@@ -175,7 +176,7 @@ test pass against a runtime that would fail.</li>
 value <em>is</em> a human decision. These are <code>willReturn()</code> with the runtime&#39;s exact response shape
 filled in:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userPicksFiles</span>(<span class="hljs-string">&#x27;/tmp/a.csv&#x27;</span>, <span class="hljs-string">&#x27;/tmp/b.csv&#x27;</span>);
 <span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userCancelsFileSelection</span>();     <span class="hljs-comment">// {result: undefined} — a MISSING key, not []</span>
 <span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">userSavesFileAs</span>(<span class="hljs-string">&#x27;/tmp/out.pdf&#x27;</span>);
@@ -193,7 +194,7 @@ most valuable test anyone writes against this kit — pass against code missing 
 altogether.</p>
 <h3 id="scripting-windows"><a class="anchor" href="#scripting-windows">Scripting windows</a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">windowIs</span>(<span class="hljs-string">&#x27;main&#x27;</span>, [<span class="hljs-string">&#x27;width&#x27;</span> =&gt; <span class="hljs-number">800</span>, <span class="hljs-string">&#x27;height&#x27;</span> =&gt; <span class="hljs-number">600</span>]);   <span class="hljs-comment">// window/get/main + window/all</span>
 <span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">currentWindowIs</span>(<span class="hljs-string">&#x27;main&#x27;</span>);                               <span class="hljs-comment">// …and window/current</span>
 <span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">windowDoesNotExist</span>(<span class="hljs-string">&#x27;ghost&#x27;</span>);                           <span class="hljs-comment">// 404 — and drops it from window/all</span>
@@ -204,7 +205,7 @@ the app is backgrounded, since the runtime dereferences <code>getFocusedWindow()
 guard. Any code that reads the current window should have a test for it.</p>
 <h3 id="inspecting-the-log"><a class="anchor" href="#inspecting-the-log">Inspecting the log</a></h3>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">calls</span>();                    <span class="hljs-comment">// list&lt;RecordedCall&gt;, in order</span>
 <span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">callsTo</span>(<span class="hljs-string">&#x27;child-process/*&#x27;</span>); <span class="hljs-comment">// filtered</span>
 <span class="hljs-variable">$fake</span>-&gt;<span class="hljs-title function_ invoke__">forgetCalls</span>();              <span class="hljs-comment">// keep the script, clear the log — for multi-phase tests</span></code></pre>
@@ -216,7 +217,7 @@ guard. Any code that reads the current window should have a test for it.</p>
 it prints the whole call log, because the question a red test has to answer is &quot;then what did
 it do instead?&quot;.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$expect</span> = <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">nativeExpects</span>();   <span class="hljs-comment">// or new RuntimeExpectations($fake)</span>
 
 <span class="hljs-comment">// …exercise the app…</span>
@@ -262,7 +263,7 @@ real outcome is observable is a dialog&#39;s return value, and that is your own 
 dual argument spreading and the double dispatch of caller-named events all apply. A simulator
 that skipped those would prove nothing.</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$simulator</span> = <span class="hljs-variable language_">$this</span>-&gt;<span class="hljs-title function_ invoke__">nativeEvents</span>();   <span class="hljs-comment">// the container&#x27;s dispatcher, so real listeners run</span>
 
 <span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">windowResized</span>(<span class="hljs-string">&#x27;main&#x27;</span>, <span class="hljs-number">760</span>, <span class="hljs-number">520</span>);
@@ -281,7 +282,7 @@ that skipped those would prove nothing.</p>
 </figure>
 <p>Anything not covered by a helper, including your own event names:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">dispatch</span>(<span class="hljs-string">&#x27;Native\Desktop\Events\Windows\WindowMaximized&#x27;</span>, [<span class="hljs-string">&#x27;main&#x27;</span>]);
 <span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">dispatch</span>(<span class="hljs-string">&#x27;App\Menu\NewReport&#x27;</span>, [<span class="hljs-string">&#x27;from&#x27;</span> =&gt; <span class="hljs-string">&#x27;toolbar&#x27;</span>]);   <span class="hljs-comment">// → NativeEvent</span></code></pre>
 </figure>
@@ -290,7 +291,7 @@ outcome to hand back. What a test asserts on is what its own listener did.</p>
 <p>To check the mapping itself — that a payload really reaches the constructor argument you think
 it does — use <code>make()</code>:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$event</span> = <span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Native\Desktop\Events\ChildProcess\ProcessExited&#x27;</span>, [<span class="hljs-string">&#x27;alias&#x27;</span> =&gt; <span class="hljs-string">&#x27;x&#x27;</span>, <span class="hljs-string">&#x27;code&#x27;</span> =&gt; <span class="hljs-number">1</span>]);
 <span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-number">1</span>, <span class="hljs-variable">$event</span>-&gt;code);</code></pre>
 </figure>
@@ -300,7 +301,7 @@ the second constructor argument. <code>nativeEvents()</code> and the container-r
 do that.</p>
 <h2 id="mobile"><a class="anchor" href="#mobile">Mobile</a></h2>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Api</span>\<span class="hljs-title">SecureStorage</span>;
 <span class="hljs-keyword">use</span> <span class="hljs-title">Native</span>\<span class="hljs-title">Symfony</span>\<span class="hljs-title">Mobile</span>\<span class="hljs-title">Bridge</span>\<span class="hljs-title">FakeBridge</span>;
 
@@ -315,14 +316,14 @@ set <code>native_mobile.fake_bridge: true</code> in <code>config/packages/test/n
 <p>The real <code>Bridge</code> accepts an <code>$invoker</code> callable in place of the extension function, so the
 real class can be tested too:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$bridge</span> = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Bridge</span>(<span class="hljs-literal">null</span>, <span class="hljs-function"><span class="hljs-keyword">fn</span> (<span class="hljs-params"><span class="hljs-keyword">string</span> <span class="hljs-variable">$method</span>, <span class="hljs-keyword">string</span> <span class="hljs-variable">$json</span></span>): ?<span class="hljs-title">string</span> =&gt;</span> <span class="hljs-string">&#x27;{&quot;ok&quot;:true}&#x27;</span>);</code></pre>
 </figure>
 <h3 id="native-ui-screens"><a class="anchor" href="#native-ui-screens">Native-UI screens</a></h3>
 <p>There is no device, so the assertion target is the <strong>published frame</strong>, which
 <code>ElementPublisher</code> captures when the extension is absent:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$screen</span> = <span class="hljs-variable">$factory</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-keyword">new</span> <span class="hljs-title class_">TodoScreen</span>());
 <span class="hljs-variable">$frame</span> = <span class="hljs-variable">$screen</span>-&gt;<span class="hljs-title function_ invoke__">frame</span>();
 

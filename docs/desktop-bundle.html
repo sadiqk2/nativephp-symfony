@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -78,7 +79,7 @@ there, untested without real credentials).</p>
 comes before claiming it.</p>
 <h2 id="what-it-gives-you"><a class="anchor" href="#what-it-gives-you">What it gives you</a></h2>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">final</span> <span class="hljs-class"><span class="hljs-keyword">class</span> <span class="hljs-title">Bootstrapper</span> <span class="hljs-keyword">implements</span> <span class="hljs-title">AppBootstrapper</span>
 </span>{
     <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">__construct</span>(<span class="hljs-params"><span class="hljs-keyword">private</span> <span class="hljs-keyword">readonly</span> WindowManager <span class="hljs-variable">$windows</span></span>) </span>{}
@@ -97,7 +98,7 @@ comes before claiming it.</p>
 }</code></pre>
 </figure>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-meta">#[AsEventListener</span><span class="hljs-meta">]</span>
 <span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">onResized</span>(<span class="hljs-params">WindowResized <span class="hljs-variable">$event</span></span>): <span class="hljs-title">void</span>
 </span>{
@@ -108,7 +109,7 @@ comes before claiming it.</p>
 <code>ClientInterface</code>, <code>RuntimeBroadcaster</code>.</p>
 <h2 id="install"><a class="anchor" href="#install">Install</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require native-symfony/desktop-bundle
 
 <span class="hljs-comment"># The runtime lives in your project, not in vendor/ — see &quot;Why patch?&quot; below.</span>
@@ -126,7 +127,7 @@ autoconfigures and aliases it — no wiring needed.</p>
 <p>Routes cannot be auto-registered (Symfony bundles cannot register their own), so
 <code>native:install</code> writes the import for you:</p>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-comment"># config/routes/native_desktop.yaml — written by native:install</span>
 <span class="hljs-attr">native_desktop:</span>
     <span class="hljs-attr">resource:</span> <span class="hljs-string">&#x27;@NativeDesktopBundle/src/Resources/config/routes.php&#x27;</span>
@@ -137,7 +138,7 @@ instead of guessing if there is no <code>config/routes/</code>. Without this imp
 a window that shows nothing, because <code>/booted</code> 404s and <code>boot()</code> is never called.</p>
 <h2 id="configuration"><a class="anchor" href="#configuration">Configuration</a></h2>
 <figure class="code">
-<span class="code-lang">yaml</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-yaml"><span class="hljs-attr">native_desktop:</span>
     <span class="hljs-attr">app_id:</span> <span class="hljs-string">com.example.app</span>        <span class="hljs-comment"># the runtime passes this to setAppUserModelId()</span>
     <span class="hljs-attr">version:</span> <span class="hljs-string">&#x27;1.0.0&#x27;</span>
@@ -177,7 +178,7 @@ idempotent and <strong>fails loudly</strong> if a hunk&#39;s target has moved, b
 one produces an app that boots into a Laravel router path and 404s everything.</p>
 <h2 id="building"><a class="anchor" href="#building">Building</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require nativephp/php-bin       <span class="hljs-comment"># static PHP binaries + cacert.pem, no PHP deps</span>
 bin/console native:build linux x64       <span class="hljs-comment"># or mac / win, x64 / arm64</span>
 bin/console native:build linux x64 --<span class="hljs-built_in">dir</span> <span class="hljs-comment"># unpacked directory, much faster to check</span></code></pre>
@@ -216,7 +217,7 @@ is created, which is why calling it from <code>boot()</code> is safe even though
 <code>/booted</code> again on macOS <code>activate</code>.</p>
 <h2 id="tests"><a class="anchor" href="#tests">Tests</a></h2>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer install &amp;&amp; vendor/bin/phpunit</code></pre>
 </figure>
 <p>357 tests, 780 assertions. <code>ContractCoverageTest</code> parses the runtime&#39;s own express

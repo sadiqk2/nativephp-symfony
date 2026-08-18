@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -106,13 +107,13 @@ manifest PR as hygiene rather than a blocker — as predicted in <code>ANALYSIS.
 <h3 id="1-app_envlocal-is-a-hard-boot-failure-on-symfony-8-an-8th-laravel-ism"><a class="anchor" href="#1-app_envlocal-is-a-hard-boot-failure-on-symfony-8-an-8th-laravel-ism">1. <code>APP_ENV=local</code> is a hard boot failure on Symfony 8 (an 8th Laravel-ism)</a></h3>
 <p><code>php.ts::getDefaultEnvironmentVariables()</code> hardcodes Laravel&#39;s environment names:</p>
 <figure class="code">
-<span class="code-lang">ts</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">ts</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-ts"><span class="hljs-attr">APP_ENV</span>: process.<span class="hljs-property">env</span>.<span class="hljs-property">NODE_ENV</span> === <span class="hljs-string">&#x27;development&#x27;</span> ? <span class="hljs-string">&#x27;local&#x27;</span> : <span class="hljs-string">&#x27;production&#x27;</span>,</code></pre>
 </figure>
 <p>Symfony 8 whitelists <code>APP_ENV</code> in <code>App\Kernel::getAllowedEnvs()</code> (<code>[&#39;prod&#39;,&#39;dev&#39;,&#39;test&#39;]</code>)
 and throws on anything else:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>In KernelTrait.php line 587:
   [InvalidArgumentException]
   The environment &quot;local&quot; is not registered as allowed by &quot;App\Kernel::getAllowedEnvs()&quot;.</code></pre>

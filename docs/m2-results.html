@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -95,7 +96,7 @@ idempotent, seven hunks, and it throws rather than skip when a target has moved 
 <h2 id="proven-end-to-end"><a class="anchor" href="#proven-end-to-end">Proven end-to-end</a></h2>
 <p>Same harness as M1, now against the bundle. Zero errors and zero criticals in the app log:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>resize -&gt; HTTP 200
 no-secret -&gt; HTTP 403 (expect 403)
 size now: 760 × 520          # window/get read back through the bundle
@@ -121,7 +122,7 @@ and anything else is logged. Contract corrected.</p>
 <h3 id="2-windowopen-without-zoomfactor-renders-the-page-at-an-absurd-zoom"><a class="anchor" href="#2-windowopen-without-zoomfactor-renders-the-page-at-an-absurd-zoom">2. <code>window/open</code> without <code>zoomFactor</code> renders the page at an absurd zoom</a></h3>
 <p>The runtime does, on <code>dom-ready</code>, with no guard:</p>
 <figure class="code">
-<span class="code-lang">ts</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">ts</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-ts"><span class="hljs-variable language_">window</span>.<span class="hljs-property">webContents</span>.<span class="hljs-title function_">setZoomFactor</span>(<span class="hljs-built_in">parseFloat</span>(zoomFactor));</code></pre>
 </figure>
 <p>Omit <code>zoomFactor</code> and that is <code>parseFloat(undefined)</code> → <code>NaN</code>. The first bundle run
@@ -193,7 +194,7 @@ Messenger can notice its own limit and exit cleanly.</p>
 the result. Dialogs are excluded on purpose — all four block the runtime&#39;s event loop
 until a human answers, so driving them would hang the run.</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>clipboard      wrote symfony-39c98aed, read back symfony-39c98aed
 settings       set -&gt; &quot;yes&quot;, forget -&gt; &quot;gone&quot;
 notification   reference 1786719963732.9h984lv
@@ -206,7 +207,7 @@ runtime        pid 61, linux, x64, uptime 7.29s</code></pre>
 </figure>
 <p>Events that arrived, all through typed listeners, zero errors in the log:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>native: application booted
 native: window main shown / focused
 native: process diag spawned pid 179        (positional [alias, pid])

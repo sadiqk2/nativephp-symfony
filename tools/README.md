@@ -8,7 +8,7 @@ patches — into a static site in `docs/`, which GitHub Pages serves as-is.
 
 ```bash
 npm install marked highlight.js
-DOCS_ROOT="$PWD" node tools/build-docs.mjs      # 21 pages + a 404
+DOCS_ROOT="$PWD" node tools/build-docs.mjs      # a home page, 21 documents, a 404
 php -S 127.0.0.1:8000 -t docs                   # look at it before publishing
 ```
 
@@ -24,6 +24,7 @@ trying to process the directory as a Jekyll project.
 
 | | |
 |---|---|
+| Home | A landing page built from `NAV`, not rendered from a document: hero, four entry points, a copyable quick start, the verified-so-far note, and an index of every page grouped as the sidebar groups it. Nothing on it duplicates a Markdown file, so nothing on it can drift out of step with one |
 | Navigation | Grouped in reading order — *Start here*, *Reference*, *Working with it*, *How it works*, *The packages*, *Record* — not alphabetically, and not derived from the filesystem |
 | Search | Client-side over a prebuilt 54 KB index; `/` focuses it, arrows and Enter work, hits show the matching heading and a highlighted excerpt |
 | Themes | Light, dark, or follow the system — three states, cycled by the toggle, applied before first paint so nothing flashes |

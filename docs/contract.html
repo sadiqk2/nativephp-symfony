@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -170,7 +171,7 @@ endpoint as fallible — see <code>ANALYSIS.md</code> §8.3.</p>
 yields <code>NaN</code> and renders the page at an absurd zoom. Always send it (<code>1.0</code> is the
 upstream default). See <code>M2-RESULTS.md</code> finding 2.</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>id  url  x  y  width  height  minWidth  minHeight  maxWidth  maxHeight
 frame  title  backgroundColor  transparency  vibrancy  hasShadow
 alwaysOnTop  resizable  movable  minimizable  maximizable  closable
@@ -476,7 +477,7 @@ secure-bundle path. A framework-neutral runtime keys this off the manifest&#39;s
 <p><code>POST /_native/api/events</code> with <code>{event: string, payload?: array|object}</code>.</p>
 <p>Reference dispatch (<code>DispatchEventFromAppController</code>):</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-title function_ invoke__">class_exists</span>(<span class="hljs-variable">$event</span>) ? <span class="hljs-title function_ invoke__">event</span>(<span class="hljs-keyword">new</span> <span class="hljs-variable">$event</span>(...<span class="hljs-variable">$payload</span>)) : <span class="hljs-title function_ invoke__">event</span>(<span class="hljs-variable">$event</span>, <span class="hljs-variable">$payload</span>);</code></pre>
 </figure>
 <p>Two behaviours any port <strong>must</strong> reproduce:</p>
@@ -600,7 +601,7 @@ only), <code>migrate --force</code> (pre-serve, prod only, version-gated), <code
 <h3 id="config-keys-the-runtime-consumes"><a class="anchor" href="#config-keys-the-runtime-consumes">Config keys the runtime consumes</a></h3>
 <p>Of the whole <code>nativephp</code> config, <code>index.ts</code> reads exactly <strong>five</strong>:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>app_id                                   → setAppUserModelId()
 deeplink_scheme                          → setAsDefaultProtocolClient()
 updater.enabled                          → checkForUpdatesAndNotify()

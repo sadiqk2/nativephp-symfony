@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -105,7 +106,7 @@ transition — the one bridge method that belongs to this path rather than the W
 <p>From <code>Element::toArray()</code>. Every key except <code>id</code>, <code>type</code> and <code>_hash</code> is omitted when
 empty, which keeps frames small:</p>
 <figure class="code">
-<span class="code-lang">jsonc</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">jsonc</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-jsonc"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span>                    <span class="hljs-comment">// stable node identity — see §3</span>
   <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;column&quot;</span><span class="hljs-punctuation">,</span>           <span class="hljs-comment">// element type — see §6</span>
@@ -144,7 +145,7 @@ root hash.</p>
 <p>When the caller maintains a <code>lastNodeHashes</code> map across frames and a node&#39;s hash is
 unchanged, the node is emitted as a marker instead of in full:</p>
 <figure class="code">
-<span class="code-lang">json</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">json</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-json"><span class="hljs-punctuation">{</span> <span class="hljs-attr">&quot;id&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">7</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;type&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;column&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;flags&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">1</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;_hash&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;9f2c…&quot;</span> <span class="hljs-punctuation">}</span></code></pre>
 </figure>
 <p><code>flags: 1</code> is <code>NPHP_NODE_FLAG_REUSE</code>: the renderer splices its previous subtree for that
@@ -163,7 +164,7 @@ detail.</li>
 <p>The first draft of this document said &quot;a hash&quot;, and a reimplementation using md5 produced
 ids that diverged silently. Both id spaces use <strong>FNV-1a 32-bit</strong>:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$hash</span> = <span class="hljs-number">0x811C9DC5</span>;                              <span class="hljs-comment">// offset basis</span>
 <span class="hljs-keyword">foreach</span> (bytes) { <span class="hljs-variable">$hash</span> ^= <span class="hljs-variable">$byte</span>; <span class="hljs-variable">$hash</span> = (<span class="hljs-variable">$hash</span> * <span class="hljs-number">0x01000193</span>) &amp; <span class="hljs-number">0xFFFFFFFF</span>; }
 <span class="hljs-keyword">return</span> <span class="hljs-number">0</span> === <span class="hljs-variable">$hash</span> ? <span class="hljs-number">1</span> : <span class="hljs-variable">$hash</span>;                  <span class="hljs-comment">// 0 means &quot;unset&quot; natively</span></code></pre>
@@ -181,7 +182,7 @@ cannot occur in an expression, so two scopes cannot collide by concatenation.</p
 <p>The base element exposes <code>layoutDefaults()</code> and <code>styleDefaults()</code>, merged <strong>under</strong>
 whatever the author set:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">public</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getLayout</span>(<span class="hljs-params"></span>): <span class="hljs-title">array</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-title function_ invoke__">array_merge</span>(<span class="hljs-variable">$this</span>-&gt;<span class="hljs-title function_ invoke__">layoutDefaults</span>(), <span class="hljs-variable">$this</span>-&gt;layout); }</code></pre>
 </figure>
 <p>A default has to appear in the emitted layout for the renderer to apply it, but must lose
@@ -202,7 +203,7 @@ reproduce it.</p>
 <p>A class string does not reach the wire directly. It goes through a canonical
 intermediate vocabulary, which is what resolves the naming inconsistency in §4c:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>&quot;flex-1 px-3 bg-slate-900 text-2xl&quot;
         │
         ▼  TailwindParser::parse()  →  a flat camelCase map
@@ -267,7 +268,7 @@ callable and resolve it again on the next request.</p>
 <p>37 element classes plus 17 native components in <code>mobile-air</code>, and 60+ more renderers in
 the separate <code>nativephp/mobile-ui</code> package. The types in <code>mobile-air</code>:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>Layout      column  row  stack  spacer  scroll_view  lazy_grid  divider
 Content     text  image  icon  canvas  rect  circle  line
 Input       button  text_input  toggle  pressable  gesture_area
@@ -330,7 +331,7 @@ build pipeline that produces the manifest.</p>
 <p><strong>1. <code>{param?}</code> makes the entire remaining tail optional, not just itself.</strong> <code>matches()</code>
 short-circuits on the <em>first</em> missing segment:</p>
 <figure class="code">
-<span class="code-lang">kotlin</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">kotlin</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-kotlin"><span class="hljs-keyword">else</span> -&gt; <span class="hljs-keyword">return</span> isOptional || (i until p.size).all { … }</code></pre>
 </figure>
 <p>So <code>/items/{a?}/edit</code> matches <code>/items</code>, and <code>/items/{a?}/{b}</code> matches <code>/items</code> — a

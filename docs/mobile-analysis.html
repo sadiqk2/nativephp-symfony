@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -86,7 +87,7 @@ WEB_LEGACY — always safe, byte-identical to the pre-native-first behavior.</p>
 <p>The decision is data-driven from a native-route manifest that the CLI bakes into
 <code>bundle_meta.json</code>, listing the <code>Route::native</code> URI patterns. The logic:</p>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>entry_mode == &quot;web&quot;            → WEB_LEGACY      (explicit build-time escape hatch)
 no native-route manifest       → WEB_LEGACY
 requested path matches none    → WEB_LEGACY
@@ -97,7 +98,7 @@ otherwise                      → NATIVE_DIRECT</code></pre>
 <p>And the escape hatch is a documented, first-class env var. From
 <code>src/Concerns/PreparesBuild.php</code> and <code>src/Commands/BuildIosAppCommand.php</code>:</p>
 <figure class="code">
-<span class="code-lang">php</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-comment">// NATIVEPHP_BOOT_MODE=web forces the legacy path.</span>
 <span class="hljs-variable">$entryMode</span> = <span class="hljs-title function_ invoke__">env</span>(<span class="hljs-string">&#x27;NATIVEPHP_BOOT_MODE&#x27;</span>) === <span class="hljs-string">&#x27;web&#x27;</span> ? <span class="hljs-string">&#x27;web&#x27;</span> : <span class="hljs-string">&#x27;auto&#x27;</span>;</code></pre>
 </figure>
@@ -119,13 +120,13 @@ secret, no express server. Two mechanisms instead:</p>
 <p>The native layer executes a bootstrap script by absolute path and reads its stdout as a raw
 HTTP response. From <code>bridge/PHPBridge.kt</code>:</p>
 <figure class="code">
-<span class="code-lang">kotlin</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">kotlin</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-kotlin"><span class="hljs-keyword">get</span>() = <span class="hljs-string">&quot;<span class="hljs-subst">${getLaravelPath()}</span>/vendor/nativephp/mobile/bootstrap/android/native.php&quot;</span>
 <span class="hljs-keyword">get</span>() = <span class="hljs-string">&quot;<span class="hljs-subst">${getLaravelPath()}</span>/vendor/nativephp/mobile/bootstrap/android/persistent.php&quot;</span></code></pre>
 </figure>
 <p>and <code>NativePHPApp.swift</code>:</p>
 <figure class="code">
-<span class="code-lang">swift</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">swift</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-swift"><span class="hljs-keyword">let</span> phpFilePath <span class="hljs-operator">=</span> appPath <span class="hljs-operator">+</span> <span class="hljs-string">&quot;/vendor/nativephp/mobile/bootstrap/ios/native.php&quot;</span>
 <span class="hljs-keyword">let</span> phpFilePath <span class="hljs-operator">=</span> appPath <span class="hljs-operator">+</span> <span class="hljs-string">&quot;/vendor/nativephp/mobile/bootstrap/ios/artisan.php&quot;</span></code></pre>
 </figure>

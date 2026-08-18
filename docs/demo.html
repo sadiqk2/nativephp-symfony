@@ -35,7 +35,8 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <aside class="sidebar" id="sidebar">
         <nav aria-label="Documentation">
 <p class="nav-group">Start here</p>
-<a class="nav-item" href="index.html"><span class="nav-name">Introduction</span><span class="nav-hint">What this is, and what is verified</span></a>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
 <a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
 <a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
 <p class="nav-group">Reference</p>
@@ -116,14 +117,14 @@ stateful component. Read the honesty section below before believing any of it.</
 ImageMagick). Build it once from <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/spike/README.md" target="_blank" rel="noopener"><code>../spike/Dockerfile</code></a> if it does
 not exist:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">docker build -t np-symfony-spike ../spike</code></pre>
 </figure>
 <p><code>D</code> is the invocation used throughout — note that the two bundles are installed
 through composer <em>path</em> repositories, so <code>/bundle</code> and <code>/mobile-bundle</code> must be
 mounted at runtime as well as at install time, or <code>vendor/</code> points at nothing:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash"><span class="hljs-function"><span class="hljs-title">D</span></span>() { docker run --<span class="hljs-built_in">rm</span> -u $(<span class="hljs-built_in">id</span> -u):$(<span class="hljs-built_in">id</span> -g) \
   -e HOME=/tmp -e COMPOSER_HOME=/tmp/composer -e npm_config_cache=/tmp/npmcache \
   -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/..&quot;</span>:/np -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/../bundle&quot;</span>:/bundle -v <span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>/../mobile-bundle&quot;</span>:/mobile-bundle \
@@ -131,7 +132,7 @@ mounted at runtime as well as at install time, or <code>vendor/</code> points at
 </figure>
 <h3 id="1-dependencies"><a class="anchor" href="#1-dependencies">1. Dependencies</a></h3>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">D <span class="hljs-string">&#x27;composer install&#x27;</span></code></pre>
 </figure>
 <h3 id="2-the-electron-runtime"><a class="anchor" href="#2-the-electron-runtime">2. The Electron runtime</a></h3>
@@ -141,7 +142,7 @@ because upstream hardcodes eight Laravel-specific strings in its TypeScript and
 This step copies it, patches it, runs <code>npm install</code> (~115MB, several minutes) and
 rebuilds the plugin from the patched sources:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">D <span class="hljs-string">&#x27;php bin/console native:install --source=/np/upstream/np-desktop/resources/electron&#x27;</span></code></pre>
 </figure>
 <p>If <code>../upstream/np-desktop</code> is not there:
@@ -149,12 +150,12 @@ rebuilds the plugin from the patched sources:</p>
 <h3 id="3-start-it"><a class="anchor" href="#3-start-it">3. Start it</a></h3>
 <p>On a machine with a display, that is all <code>native:run</code> needs:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">D <span class="hljs-string">&#x27;php bin/console native:run&#x27;</span></code></pre>
 </figure>
 <p>Headless — which is how every screenshot in this README was made:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">docker run --<span class="hljs-built_in">rm</span> -u $(<span class="hljs-built_in">id</span> -u):$(<span class="hljs-built_in">id</span> -g) -e HOME=/tmp -e npm_config_cache=/tmp/npmcache \
   -e SHOT2=/np/demo/shot-notes.png \
   -e SHOT3=/np/demo/shot-dialog.png \
@@ -179,7 +180,7 @@ is how a menu, a global shortcut and a context menu are verified without a mouse
 <code>runtime connected</code> — a native app you cannot open in a browser is a native app you
 cannot develop:</p>
 <figure class="code">
-<span class="code-lang">bash</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">D <span class="hljs-string">&#x27;php -S 0.0.0.0:8080 -t public public/index.php&#x27;</span></code></pre>
 </figure>
 <h2 id="what-was-actually-verified"><a class="anchor" href="#what-was-actually-verified">What was actually verified</a></h2>
@@ -202,7 +203,7 @@ of that run is what the screenshots are.</p>
 </tbody></table></div>
 <p>The full <code>_smoke</code> output from that run:</p>
 <figure class="code">
-<span class="code-lang">json</span><button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">json</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-json"><span class="hljs-punctuation">{</span>
   <span class="hljs-attr">&quot;runtime&quot;</span><span class="hljs-punctuation">:</span>  <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;pid&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">67</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;platform&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;linux&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;arch&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;x64&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;uptime&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">12.36</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
   <span class="hljs-attr">&quot;windows&quot;</span><span class="hljs-punctuation">:</span>  <span class="hljs-punctuation">{</span><span class="hljs-attr">&quot;ids&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">[</span><span class="hljs-string">&quot;main&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-string">&quot;inspector&quot;</span><span class="hljs-punctuation">]</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;main_size&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;1180x827&quot;</span><span class="hljs-punctuation">,</span> <span class="hljs-attr">&quot;main_title&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;Deskpad&quot;</span><span class="hljs-punctuation">}</span><span class="hljs-punctuation">,</span>
@@ -284,7 +285,7 @@ who wrote the applier.</p>
 </ol>
 <h2 id="layout"><a class="anchor" href="#layout">Layout</a></h2>
 <figure class="code">
-<button class="copy" type="button">Copy</button>
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code>src/Bootstrapper.php              the app-startup contract
 src/Controller/                   four screens, plus /_smoke
 src/Event/                        MenuAction (the names), NoteSaved (the broadcast)
