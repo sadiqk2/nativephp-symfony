@@ -171,6 +171,47 @@ final class RuntimePatcherTest extends TestCase
         self::assertStringContainsString('assuming it is fixed upstream', $applied);
     }
 
+    public function testEveryHunkStillMatchesTheRealUpstreamRuntime(): void
+    {
+        // The fixtures in ScaffoldsRuntime are quoted from upstream by hand, so they can
+        // drift from it without anything failing — the patcher would keep passing against
+        // a copy of code that no longer exists. This runs it against the actual checkout,
+        // which is the only thing that can catch upstream moving a target. Skips when the
+        // clone is absent, exactly as ContractCoverageTest does.
+        $upstream = __DIR__.'/../../upstream/np-desktop/resources/electron';
+
+        if (!is_dir($upstream.'/electron-plugin/src/server')) {
+            self::markTestSkipped('upstream/np-desktop is not checked out.');
+        }
+
+        $copy = sys_get_temp_dir().'/np-upstream-'.bin2hex(random_bytes(5));
+        $fs = new Filesystem();
+        $fs->mirror($upstream.'/electron-plugin/src', $copy.'/electron-plugin/src');
+
+        try {
+            $applied = implode("\n", (new RuntimePatcher())->patch($copy));
+
+            // The Laravel-isms are the strict hunks: a build whose runtime still spawns
+            // `artisan` does not start at all, so a missed one must fail here rather than
+            // on someone's machine. The bug fixes are deliberately non-strict — they report
+            // "assuming it is fixed upstream" when their target is gone, which is what
+            // should happen once the open PRs land.
+            foreach ([
+                'CLI entrypoint',
+                'router script',
+                'APP_ENV',
+                'scheduler tick',
+                'guard the storage/ copy',
+                'skip Laravel\'s optimize',
+                'skip Laravel\'s migrate',
+            ] as $hunk) {
+                self::assertStringContainsString($hunk, $applied, sprintf('The "%s" hunk no longer matches upstream.', $hunk));
+            }
+        } finally {
+            $fs->remove($copy);
+        }
+    }
+
     public function testAPatchThatCannotBeWrittenIsAnError(): void
     {
         // The one outcome this class exists to prevent is a patch that is reported as

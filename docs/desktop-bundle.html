@@ -72,7 +72,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p>Build desktop applications with Symfony, on NativePHP&#39;s Electron runtime.</p>
 <p>Status: <strong>M3 complete.</strong> All <strong>116 runtime endpoints</strong> and all <strong>44 events</strong> are
 implemented, and <code>native:build</code> produces a distributable app that has been <strong>built and
-run</strong> — see <code>../M3-RESULTS.md</code>. 392 tests.</p>
+run</strong> — see <code>../M3-RESULTS.md</code>. 394 tests.</p>
 <p>Not done yet: installer targets beyond <code>--dir</code>, and code signing (the env plumbing is
 there, untested without real credentials).</p>
 <p>The vendor name is provisional — <code>nativephp/*</code> is someone else&#39;s brand, and asking
@@ -220,7 +220,7 @@ is created, which is why calling it from <code>boot()</code> is safe even though
 <figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer install &amp;&amp; vendor/bin/phpunit</code></pre>
 </figure>
-<p>392 tests, 846 assertions. <code>ContractCoverageTest</code> parses the runtime&#39;s own express
+<p>394 tests, 855 assertions. <code>ContractCoverageTest</code> parses the runtime&#39;s own express
 routers and fails if an endpoint goes uncovered or an event name goes unmapped, so
 upstream drift breaks the suite rather than surfacing a release later.</p>
 <p>The ones that matter most cover the dual argument spreading (list payloads
