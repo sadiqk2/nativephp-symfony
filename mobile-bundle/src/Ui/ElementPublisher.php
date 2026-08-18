@@ -22,8 +22,22 @@ class ElementPublisher
 
     private bool $initialised = false;
 
-    /** @var list<array<string, mixed>> Frames captured when the extension is absent */
+    /**
+     * Frames captured when the extension is absent, newest last.
+     *
+     * Bounded, because off a device this is the only place a frame goes and nothing ever
+     * consumes it: with `fake_bridge: true` under the persistent runtime — the documented
+     * way to develop against a simulator or a browser — every frame of every screen was
+     * retained for the life of the process. A tree is a few KB, a busy screen republishes
+     * on every interaction, and none of it is ever read back except by a test looking at
+     * the last few.
+     *
+     * @var list<array<string, mixed>>
+     */
     private array $captured = [];
+
+    /** Enough for any test that inspects a sequence; small enough to never matter. */
+    private const KEEP_FRAMES = 64;
 
     public function isAvailable(): bool
     {
@@ -68,6 +82,10 @@ class ElementPublisher
             // Off a device there is nothing to publish to. Capturing rather than
             // discarding is what makes a native-UI screen testable at all.
             $this->captured[] = $tree;
+
+            if (\count($this->captured) > self::KEEP_FRAMES) {
+                array_shift($this->captured);
+            }
         }
 
         return $tree;

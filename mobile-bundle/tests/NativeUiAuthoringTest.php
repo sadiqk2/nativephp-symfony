@@ -289,6 +289,27 @@ final class NativeUiAuthoringTest extends TestCase
         self::assertSame('column', $publisher->lastFrame()['type']);
     }
 
+    public function testCapturedFramesAreBoundedSoADevLoopDoesNotGrowForever(): void
+    {
+        // `fake_bridge: true` under the persistent runtime is the documented way to
+        // develop off a device, and there the capture buffer is the only place a frame
+        // goes — nothing consumes it. Unbounded, a busy screen republishing on every
+        // interaction retained every tree for the life of the process.
+        $publisher = new ElementPublisher();
+        $registry = new CallbackRegistry();
+
+        for ($i = 0; $i < 200; ++$i) {
+            $publisher->publish(Elements\Text::make('frame '.$i), $registry);
+        }
+
+        $frames = $publisher->capturedFrames();
+
+        self::assertLessThanOrEqual(64, \count($frames));
+        // The newest survive, because that is what anything reading this wants.
+        self::assertSame('frame 199', $publisher->lastFrame()['props']['text'] ?? null);
+        self::assertSame('frame 199', end($frames)['props']['text'] ?? null);
+    }
+
     public function testThePublisherReusesUnchangedSubtreesAcrossFrames(): void
     {
         $publisher = new ElementPublisher();
