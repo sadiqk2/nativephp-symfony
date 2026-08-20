@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Mobile\Tests;
 
+use Native\Symfony\Mobile\Bridge\Bridge;
+use Native\Symfony\Mobile\Bridge\BridgeInterface;
 use Native\Symfony\Mobile\Bridge\FakeBridge;
 use Native\Symfony\Mobile\Command\DoctorCommand;
 use PHPUnit\Framework\TestCase;
@@ -66,6 +68,67 @@ final class MobileDoctorCommandTest extends TestCase
         self::assertStringContainsString('no host sources found', $this->doctor());
     }
 
+    // ── which bridge is actually installed ──────────────────────────────────
+
+    public function testTheFakeBridgeIsNotReportedAsADevice(): void
+    {
+        // FakeBridge answers isAvailable() with true by construction, so a doctor that
+        // asks only that question tells anyone with fake_bridge on that they are running
+        // inside a NativePHP app. That is the single fact this command exists to
+        // establish, and it was the one it got wrong.
+        $display = $this->doctor(new FakeBridge());
+
+        self::assertStringContainsString('fake', $display);
+        self::assertStringNotContainsString('running inside a NativePHP app', $display);
+        // And it has to say so somewhere a person will read it: the old note only fired
+        // on the unavailable branch, so in this case nothing was printed at all.
+        // Collapsed, because SymfonyStyle wraps a warning block at the terminal width and
+        // the sentence being asserted is longer than that.
+        self::assertStringContainsString('never in a device build', $this->flatten($display));
+    }
+
+    public function testTheRealBridgeOutsideAnAppIsReportedAsUnavailable(): void
+    {
+        $display = $this->doctor(new Bridge());
+
+        self::assertStringContainsString('unavailable', $display);
+        self::assertStringContainsString('nativephp_call', $display);
+        self::assertStringNotContainsString('fake bridge is installed', $display);
+    }
+
+    public function testARealAvailableBridgeIsReportedAsADevice(): void
+    {
+        // The third branch, and the only one that should ever say this.
+        $display = $this->doctor(new class implements BridgeInterface {
+            public function isAvailable(): bool
+            {
+                return true;
+            }
+
+            public function call(string $method, array $payload = []): ?array
+            {
+                return null;
+            }
+
+            public function dispatch(string $method, array $payload = []): bool
+            {
+                return true;
+            }
+
+            public function raw(string $method, array $payload = []): ?string
+            {
+                return null;
+            }
+        });
+
+        self::assertStringContainsString('running inside a NativePHP app', $display);
+    }
+
+    private function flatten(string $display): string
+    {
+        return (string) preg_replace('/\s+/', ' ', $display);
+    }
+
     private function writeHostSource(string $platform, string $line): void
     {
         (new Filesystem())->dumpFile(
@@ -74,9 +137,9 @@ final class MobileDoctorCommandTest extends TestCase
         );
     }
 
-    private function doctor(): string
+    private function doctor(?BridgeInterface $bridge = null): string
     {
-        $tester = new CommandTester(new DoctorCommand($this->project, new FakeBridge()));
+        $tester = new CommandTester(new DoctorCommand($this->project, $bridge ?? new FakeBridge()));
 
         self::assertSame(Command::SUCCESS, $tester->execute([]));
 
