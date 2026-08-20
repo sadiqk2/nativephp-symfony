@@ -998,14 +998,27 @@ final class MobileBuildTest extends TestCase
         return new MobileBuilder($this->projectDir, $this->projectDir.'/stage');
     }
 
-    private function buildCommand(CommandRunnerInterface $runner, string $version, string ...$patterns): MobileBuildCommand
-    {
+    private function buildCommand(
+        CommandRunnerInterface $runner,
+        string $version,
+        string ...$patterns,
+    ): MobileBuildCommand {
+        return $this->buildCommandWith($runner, $version, new Toolchain(['PATH' => '/nonexistent'], 'Linux'), ...$patterns);
+    }
+
+    private function buildCommandWith(
+        CommandRunnerInterface $runner,
+        string $version,
+        Toolchain $toolchain,
+        string ...$patterns,
+    ): MobileBuildCommand {
         return new MobileBuildCommand(
             $this->projectDir,
             $version,
             new NativeRouteManifest($this->registryWith(...$patterns), $version),
-            new Toolchain(['PATH' => '/nonexistent'], 'Linux'),
+            $toolchain,
             $runner,
+            'Linux',
         );
     }
 
@@ -1035,6 +1048,123 @@ final class MobileBuildTest extends TestCase
             'AWS_ACCESS_KEY_ID=AKIA',
             'DATABASE_URL=sqlite:///app.db',
         ])."\n");
+    }
+
+    // ── the compile step itself ─────────────────────────────────────────────
+
+    public function testAFullAndroidBuildRunsGradleAndReportsTheArtifact(): void
+    {
+        // Past --stage-only, which is where the existing build tests stop. Gradle is a
+        // recorder here, so what is proven is the invocation and the bookkeeping around
+        // it — not that Gradle succeeds, which nothing in this environment can show.
+        $toolchain = $this->givenASatisfiedAndroidToolchain();
+        $runner = new RecordingRunner();
+
+        // The build only reports success if the artifact is where it expects, so put one
+        // where Gradle would have.
+        $this->fs->dumpFile(BuildPlan::androidArtifact($this->projectDir, 'release'), str_repeat('x', 2048));
+
+        $tester = new CommandTester($this->buildCommandWith($runner, '3.1.0', $toolchain, '/'));
+
+        self::assertSame(Command::SUCCESS, $tester->execute(['platform' => 'android']), $tester->getDisplay());
+
+        // The recorder sees the staging commands first — composer, then the cache warmup —
+        // so the compile step is the last one.
+        $compile = $runner->executed[array_key_last($runner->executed)];
+
+        // Resolved to the project's own wrapper rather than the literal './gradlew': a
+        // relative program is resolved against *this* process's directory, not the child's.
+        self::assertSame($this->projectDir.'/nativephp/android/gradlew', $compile->program());
+        self::assertStringContainsString('assembleRelease', $compile->display());
+        self::assertStringContainsString('Build complete', $tester->getDisplay());
+    }
+
+    public function testAnAabBuildAsksGradleForABundleAndLooksForOne(): void
+    {
+        $toolchain = $this->givenASatisfiedAndroidToolchain();
+        $runner = new RecordingRunner();
+
+        $this->fs->dumpFile(BuildPlan::androidArtifact($this->projectDir, 'bundle'), 'aab');
+
+        $tester = new CommandTester($this->buildCommandWith($runner, '3.1.0', $toolchain, '/'));
+
+        self::assertSame(Command::SUCCESS, $tester->execute(['platform' => 'android', '--aab' => true]), $tester->getDisplay());
+
+        $compile = $runner->executed[array_key_last($runner->executed)];
+
+        self::assertStringContainsString('bundleRelease', $compile->display());
+    }
+
+    public function testAGradleWrapperWithoutTheExecutableBitIsMadeExecutable(): void
+    {
+        // A gradlew checked out without its permission bit is ordinary — git preserves it,
+        // zip archives and some Windows checkouts do not — and exec() would simply fail.
+        $toolchain = $this->givenASatisfiedAndroidToolchain();
+        $wrapper = $this->projectDir.'/nativephp/android/gradlew';
+        chmod($wrapper, 0o644);
+
+        $this->fs->dumpFile(BuildPlan::androidArtifact($this->projectDir, 'release'), 'apk');
+
+        $tester = new CommandTester($this->buildCommandWith(new RecordingRunner(), '1.0.0', $toolchain, '/'));
+        $tester->execute(['platform' => 'android']);
+
+        clearstatcache(true, $wrapper);
+
+        self::assertTrue(is_executable($wrapper));
+    }
+
+    public function testAFailingGradleStepStopsTheBuildAndSaysWhichCommand(): void
+    {
+        $toolchain = $this->givenASatisfiedAndroidToolchain();
+
+        // Exit codes are consumed in order and the staging commands run first, so a bare
+        // [1] would have failed composer and never reached Gradle at all — the test would
+        // have passed while proving nothing about the compile step.
+        $runner = new RecordingRunner([0, 0, 1]);
+
+        $tester = new CommandTester($this->buildCommandWith($runner, '1.0.0', $toolchain, '/'));
+
+        self::assertSame(Command::FAILURE, $tester->execute(['platform' => 'android']));
+
+        $display = $this->flattened($tester);
+
+        self::assertStringContainsString('failed with exit code 1', $display);
+        self::assertStringContainsString('gradlew', $display);
+        self::assertCount(3, $runner->executed);
+    }
+
+    public function testASilentlyMissingArtifactIsAFailureRatherThanAPathNobodyChecked(): void
+    {
+        // Every command reported success and there is no APK. Printing the path as though
+        // it existed is how a developer ends up uploading a file that is not there.
+        $toolchain = $this->givenASatisfiedAndroidToolchain();
+
+        $tester = new CommandTester($this->buildCommandWith(new RecordingRunner(), '1.0.0', $toolchain, '/'));
+
+        self::assertSame(Command::FAILURE, $tester->execute(['platform' => 'android']));
+
+        $display = $this->flattened($tester);
+
+        self::assertStringContainsString('the expected artifact is missing', $display);
+        self::assertStringContainsString('app-release.apk', $display);
+    }
+
+    public function testTheCompileStepSaysItHasNeverBeenRunHere(): void
+    {
+        // Stated in the output, not only in a comment: the person reading it is the one
+        // who has to decide how much to trust the result.
+        $toolchain = $this->givenASatisfiedAndroidToolchain();
+        $this->fs->dumpFile(BuildPlan::androidArtifact($this->projectDir, 'release'), 'apk');
+
+        $tester = new CommandTester($this->buildCommandWith(new RecordingRunner(), '1.0.0', $toolchain, '/'));
+        $tester->execute(['platform' => 'android']);
+
+        self::assertStringContainsString('never been invoked by this command', $this->flattened($tester));
+    }
+
+    private function flattened(CommandTester $tester): string
+    {
+        return (string) preg_replace('/\s+/', ' ', $tester->getDisplay());
     }
 
     private function givenNativeProject(MobilePlatform $platform): void
