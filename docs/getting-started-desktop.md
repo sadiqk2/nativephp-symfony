@@ -311,6 +311,45 @@ dispatch your own event classes by class name. Upstream's Laravel controller doe
 the 44 known runtime events and namespaces you list are constructed, and anything else
 becomes a `NativeEvent` carrying the payload as data.
 
+### Configuring the updater
+
+`providers` is a map of names to provider configurations, and `default` names the one a
+build publishes to. Each provider needs a `driver` — `github`, `s3` or `spaces`, the three
+the Electron runtime ships with — and the keys that driver requires:
+
+```yaml
+native_desktop:
+    updater:
+        enabled: true
+        default: github
+        providers:
+            github:
+                driver: github
+                owner: your-org
+                repo: your-app
+                token: '%env(GITHUB_TOKEN)%'    # uploads the release
+                # optional: private, autoupdate_token, channel, releaseType, vPrefixedTagName
+            releases:
+                driver: s3
+                bucket: your-bucket
+                region: eu-west-1
+                key: '%env(AWS_ACCESS_KEY_ID)%'
+                secret: '%env(AWS_SECRET_ACCESS_KEY)%'
+```
+
+Two consumers read this tree and they want different things from it, which is worth knowing
+if you are debugging an update that never arrives. The **runtime** reads
+`updater.providers[default].public_url` out of `native:config` to check for updates at
+launch. **electron-builder** is handed a publish target derived from the provider above,
+plus its upload credentials in the environment — `GH_TOKEN` for GitHub, `AWS_*` for S3,
+`DO_*` for Spaces — so a `token` or `key`/`secret` in your configuration is what makes
+`native:build --publish` able to upload at all.
+
+`enabled: false` (the default) sends electron-builder no publish target, and `--publish`
+then produces the same package a plain build does. With it enabled, a provider that is
+missing or missing a required key fails the build rather than producing a package that
+quietly cannot update.
+
 ## 9. Where to go next
 
 [`../demo/`](../demo/) is a working application using both bundles — bootstrapper,

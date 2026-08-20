@@ -268,14 +268,14 @@ abstract class NativeComponent
             ));
         }
 
+        // Identity carries the class, so this can only ever be an instance of $class. A
+        // keyed slot rendering a different class is a different identity: the new one is
+        // mounted here and the old one is unmounted by the reconciliation sweep at the end
+        // of renderTree(). There used to be a guard here for "same slot, different class",
+        // which read as the thing preventing props from landing on the wrong instance —
+        // but it could not run, and the comment on it sent a reader looking in the wrong
+        // place for behaviour that lives one function up.
         $child = $this->nativeChildren[$identity] ?? null;
-
-        // A keyed slot now rendering a different class is a fresh mount, not a prop
-        // update — otherwise props would be assigned to the wrong instance.
-        if (null !== $child && $child::class !== $class) {
-            $child->unmountTree();
-            $child = null;
-        }
 
         $isNew = null === $child;
 
