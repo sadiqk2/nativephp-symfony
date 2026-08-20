@@ -37,14 +37,17 @@ $projectDir = \dirname(\dirname($autoloader));
 // Console commands run in the app's environment, but debug is forced off: a
 // device has nowhere useful to render a debug dump, and the profiler would write
 // into a cache dir that may be read-only.
+if (class_exists(\Symfony\Component\Dotenv\Dotenv::class) && is_file($projectDir.'/.env')) {
+    // First, so that .env decides the environment when the host did not — the same
+    // ordering the request shims need, and for the same reason: a default in
+    // $_SERVER looks exactly like a host-supplied value to bootEnv().
+    (new \Symfony\Component\Dotenv\Dotenv())->usePutenv(false)->bootEnv($projectDir.'/.env', 'prod');
+}
+
 $_SERVER['APP_ENV'] ??= $_ENV['APP_ENV'] ?? 'prod';
 $_SERVER['APP_DEBUG'] = '0';
 $_ENV['APP_ENV'] = $_SERVER['APP_ENV'];
 $_ENV['APP_DEBUG'] = '0';
-
-if (class_exists(\Symfony\Component\Dotenv\Dotenv::class) && is_file($projectDir.'/.env')) {
-    (new \Symfony\Component\Dotenv\Dotenv())->usePutenv(false)->bootEnv($projectDir.'/.env');
-}
 
 $kernelClass = $_SERVER['NATIVEPHP_KERNEL_CLASS'] ?? 'App\Kernel';
 

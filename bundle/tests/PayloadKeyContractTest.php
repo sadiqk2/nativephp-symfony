@@ -17,7 +17,9 @@ use PHPUnit\Framework\TestCase;
  * key that works.
  *
  * Both halves are parsed rather than listed. Ours: literal payload arrays passed to
- * `->post()`, `->get()` and `->delete()`. Upstream's: `req.body`, `req.query` and
+ * `->post()`, `->get()` and `->delete()`, plus the payloads the fluent builders assemble
+ * key by key — `PendingWindow` alone carries 38 of them, which used to be the largest
+ * payload in the bundle that nothing compared against upstream. Upstream's: `req.body`, `req.query` and
  * `req.params` reads inside each express handler, including destructuring. A handler that
  * forwards the whole body — `notifyLaravel('events', req.body)` — is exempt, since every
  * key reaches PHP by definition.
@@ -72,15 +74,27 @@ final class PayloadKeyContractTest extends TestCase
         }
 
         self::assertGreaterThan(40, $checked, 'The parser found almost nothing to compare, which means it has stopped working.');
+
+        // Stated, not implied: the builders are the payloads most worth comparing and the
+        // ones most easily left out, so name them rather than trusting the total.
+        foreach (['window/open', 'notification', 'menu-bar/create', 'dialog/open'] as $endpoint) {
+            self::assertArrayHasKey(
+                $endpoint,
+                $this->payloadsWeSend(),
+                sprintf('%s is built by a fluent builder and has to be part of this comparison.', $endpoint),
+            );
+        }
         self::assertSame([], $problems, "A payload key the runtime never reads is a silent no-op:\n".implode("\n", $problems));
     }
 
     /**
-     * Literal payload arrays we pass to the transport, keyed by endpoint.
+     * The payload keys we send, keyed by endpoint.
      *
-     * Only top-level string keys of a literal array — a payload built up dynamically
-     * (PendingWindow, PendingNotification) is not visible here, and is covered by the
-     * fixtures those classes have instead.
+     * Two shapes: the top-level keys of a literal array handed to the transport, and the
+     * keys a builder assembles into `$this->payload` before posting them. The second was
+     * previously waved through with a comment saying those classes had fixtures of their
+     * own — true, but a fixture asserts what we send against ourselves, which is exactly
+     * the comparison that cannot catch a key nobody reads.
      *
      * @return array<string, list<string>>
      */
@@ -105,7 +119,67 @@ final class PayloadKeyContractTest extends TestCase
             }
         }
 
+        foreach ($this->builderPayloads() as $endpoint => $keys) {
+            foreach ($keys as $key) {
+                $found[$endpoint][$key] = true;
+            }
+        }
+
         return array_map(static fn (array $keys): array => array_keys($keys), $found);
+    }
+
+    /**
+     * A fluent builder's payload, keyed by the endpoint it posts to.
+     *
+     * A builder writes into one array and sends it in one place, so the file itself is
+     * the association. Inheritance has to be followed, though: `PendingDialog` holds
+     * every key and posts nothing, while `PendingOpenDialog` and `PendingSaveDialog`
+     * each post to a different endpoint — so the parent's keys count towards both.
+     *
+     * @return array<string, list<string>>
+     */
+    private function builderPayloads(): array
+    {
+        $classes = [];
+
+        foreach ($this->sourceFiles(__DIR__.'/../src') as $file) {
+            $source = (string) file_get_contents($file);
+
+            if (!preg_match('/(?:final |abstract )?class (\w+)(?: extends (\w+))?/', $source, $class)) {
+                continue;
+            }
+
+            preg_match_all('/(?:\$this->payload|\$payload)\[\'([^\']+)\'\]\s*\??=[^=]/', $source, $keys);
+            preg_match_all('/->post\(\s*\'([^\']+)\'\s*,\s*\$(?:this->)?payload/', $source, $posts);
+
+            $endpoints = array_values(array_unique($posts[1]));
+
+            $classes[$class[1]] = [
+                'parent' => $class[2] ?? null,
+                'keys' => array_values(array_unique($keys[1])),
+                // More than one endpoint from one payload would make the association
+                // ambiguous, and guessing is how a check like this compares the wrong pair.
+                'endpoint' => 1 === \count($endpoints) ? rtrim($endpoints[0], '/') : null,
+            ];
+        }
+
+        $found = [];
+
+        foreach ($classes as $class) {
+            if (null === $class['endpoint']) {
+                continue;
+            }
+
+            $keys = $class['keys'];
+
+            for ($parent = $class['parent']; null !== $parent && isset($classes[$parent]); $parent = $classes[$parent]['parent']) {
+                $keys = [...$keys, ...$classes[$parent]['keys']];
+            }
+
+            $found[$class['endpoint']] = array_values(array_unique([...($found[$class['endpoint']] ?? []), ...$keys]));
+        }
+
+        return $found;
     }
 
     /** The keys each express handler reads, keyed by endpoint; `*` means it forwards the lot. */

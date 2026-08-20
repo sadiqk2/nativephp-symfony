@@ -6,6 +6,7 @@ namespace Native\Symfony\Mobile\Command;
 
 use Native\Symfony\Mobile\Bridge\BridgeInterface;
 use Native\Symfony\Mobile\Runtime\MobileRuntime;
+use Native\Symfony\Mobile\Runtime\MobileRuntimePatcher;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -48,14 +49,30 @@ final class DoctorCommand extends Command
 
         $io->section('Native projects');
 
+        $patcher = new MobileRuntimePatcher();
+
         foreach (['android' => 'nativephp/android', 'ios' => 'nativephp/ios'] as $name => $path) {
             $full = $this->projectDir.'/'.$path;
             $io->text(sprintf(' %s %s — %s', is_dir($full) ? '✓' : '✗', $name, is_dir($full) ? $full : 'not installed'));
+
+            if (!is_dir($full)) {
+                continue;
+            }
+
+            // The one that looks like nothing when it is wrong. In persistent mode the
+            // hosts do not execute a bootstrap file per request: they evaluate PHP
+            // compiled into themselves, and unpatched it calls Laravel's runtime, so the
+            // boot check fails and the interpreter is torn down before any screen loads.
+            $io->text(match ($patcher->hostEvaluationsRetargeted($full, $name)) {
+                true => '   ✓ host dispatch retargeted onto MobileRuntime',
+                false => '   ✗ host dispatch still calls Laravel — re-run native:mobile:install',
+                null => '   ? no host sources found to check',
+            });
         }
 
         $io->section('Bootstrap shims');
 
-        $shimDir = $this->projectDir.'/'.\Native\Symfony\Mobile\Runtime\MobileRuntimePatcher::SHIM_DIR;
+        $shimDir = $this->projectDir.'/'.MobileRuntimePatcher::SHIM_DIR;
 
         foreach (['native.php', 'persistent.php', 'dispatch.php', 'console.php'] as $shim) {
             $io->text(sprintf(' %s %s', is_file($shimDir.'/'.$shim) ? '✓' : '✗', $shim));

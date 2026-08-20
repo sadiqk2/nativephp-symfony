@@ -98,7 +98,7 @@ final class BuildCommand extends Command
         $io->warning([
             'This build will contain readable PHP source.',
             'Upstream\'s protected build needs a bundle from Bifrost (NativePHP\'s hosted service),',
-            'which currently targets Laravel entry points. See ANALYSIS.md §9.',
+            'which currently targets Laravel entry points.',
         ]);
 
         // -- hooks ---------------------------------------------------------------
@@ -230,9 +230,37 @@ final class BuildCommand extends Command
             return $this->runProcess($command, $electron, $env, $io);
         }
 
-        $script = ($input->getOption('publish') ? 'publish' : 'build').":{$os}-{$arch}";
+        $publish = (bool) $input->getOption('publish');
+        $script = ($publish ? 'publish' : 'build').":{$os}-{$arch}";
 
-        return $this->runProcess(['npm', 'run', $script], $electron, $env, $io);
+        if ($this->electronDefines($electron, $script)) {
+            return $this->runProcess(['npm', 'run', $script], $electron, $env, $io);
+        }
+
+        // Upstream's package.json has a script per platform pair, and Windows on ARM is
+        // not one of them — so `native:build win arm64`, which this command accepts
+        // without complaint, used to end at npm's "Missing script" after staging the
+        // application and reinstalling its dependencies. electron-builder itself targets
+        // that pair happily, and the scripts are only ever `electron-vite build` followed
+        // by `electron-builder --<os> --<arch>`, so run the two directly instead.
+        $io->note(sprintf('The Electron project defines no "%s" script; running electron-builder directly.', $script));
+
+        if (Command::SUCCESS !== $this->runProcess(['npx', 'electron-vite', 'build'], $electron, $env, $io)) {
+            return Command::FAILURE;
+        }
+
+        return $this->runProcess([
+            'npx', 'electron-builder', '--config', 'electron-builder.mjs',
+            '--'.$os, '--'.$arch, '-p', $publish ? 'always' : 'never',
+        ], $electron, $env, $io);
+    }
+
+    /** Whether the installed Electron project has an npm script by that name. */
+    private function electronDefines(string $electron, string $script): bool
+    {
+        $json = json_decode((string) @file_get_contents(Path::join($electron, 'package.json')), true);
+
+        return \is_array($json) && \is_array($json['scripts'] ?? null) && isset($json['scripts'][$script]);
     }
 
     /**

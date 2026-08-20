@@ -19,12 +19,18 @@ final class ServerRequestFactory
 {
     /**
      * @param array<string, mixed> $server Normally $_SERVER
+     * @param array<string, mixed>|null $post   Normally $_POST, which the host fills in
+     *                                          for form bodies before running the shim
+     * @param array<string, mixed>|null $files  Normally $_FILES
      *
      * @return array{0: Request, 1: array<string, string>} The request, and the cookies
      *                                                     that had to be reconstructed
      */
-    public static function fromServer(array $server, ?string $rawBody = null): array
+    public static function fromServer(array $server, ?string $rawBody = null, ?array $post = null, ?array $files = null): array
     {
+        $post ??= $_POST;
+        $files ??= $_FILES;
+
         $cookies = self::parseCookies($server);
         $query = self::parseQuery($server);
 
@@ -48,12 +54,22 @@ final class ServerRequestFactory
             parse_str($rawBody, $parameters);
         }
 
+        // $_POST is the other half of the same story, and skipping it lost real data.
+        // Both hosts parse a urlencoded body into $_POST in the preamble they run before
+        // this shim, so php://input may already have been consumed by the time we look;
+        // and a multipart body — every file upload — is parsed by PHP itself into $_POST
+        // and $_FILES and is not reconstructible from the raw bytes here at all. Falling
+        // back rather than overriding keeps the raw body authoritative when it parsed.
+        if ([] === $parameters && [] !== $post && \in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
+            $parameters = $post;
+        }
+
         $request = Request::create(
             uri: self::absoluteUri($uri, $server),
             method: $method,
             parameters: $parameters,
             cookies: $cookies,
-            files: [],
+            files: $files,
             server: self::normaliseServer($server),
             content: $rawBody,
         );

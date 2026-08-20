@@ -20,7 +20,7 @@ try {
 
     [$request] = ServerRequestFactory::fromServer($_SERVER);
 
-    $runtime->dispatch($request, [
+    $runtime->emit($request, [
         'X-PHP-Timing' => sprintf(
             'total=%.1fms,mode=persistent,dispatch=%d',
             (microtime(true) - $started) * 1000,

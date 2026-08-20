@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Mobile\Runtime;
 
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\StringInput;
+use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
@@ -109,9 +112,86 @@ final class MobileRuntime
     }
 
     /** Handle a request and write it to stdout in the form the native layer parses. */
-    public function dispatch(Request $request, array $extraHeaders = []): void
+    public function emit(Request $request, array $extraHeaders = []): void
     {
         $this->emitter->emit($this->handle($request), $extraHeaders);
+    }
+
+    /**
+     * The entry point both hosts compile into their own per-request preamble.
+     *
+     * Android's php_bridge.c and iOS's PHP.c build the dispatch as a C string literal
+     * and hand it to zend_eval_string: `$__response = \Native\Mobile\Runtime::dispatch(
+     * \Illuminate\Http\Request::capture());`, then echo the status line, the headers
+     * and the body themselves. That is compiled into the app, not read from a file, so
+     * retargeting the bootstrap scripts — which is all the patcher used to do — left
+     * every request in persistent mode calling a Laravel class that a Symfony app does
+     * not have. {@see MobileRuntimePatcher} rewrites those literals onto this method,
+     * which is why it is static, takes a Request and returns a Response rather than
+     * writing one: the host writes the message itself.
+     */
+    public static function dispatch(Request $request): Response
+    {
+        return self::instance()->handle($request);
+    }
+
+    /**
+     * Run a console command inside the booted kernel and return its output.
+     *
+     * The hosts call this for migrations on first launch and for anything an app
+     * schedules; upstream's equivalent is `Runtime::artisan()`. Reusing the booted
+     * kernel is the point — a device cannot afford a second bootstrap — so the
+     * application is built here rather than by the console shim, which is a separate
+     * process with a separate kernel.
+     */
+    public static function artisan(string $command): string
+    {
+        $kernel = self::instance()->kernel;
+
+        if (!class_exists(Application::class)) {
+            throw new \LogicException(
+                'Running a console command through the persistent runtime needs '.
+                'symfony/framework-bundle, which this application does not have installed.',
+            );
+        }
+
+        $application = new Application($kernel);
+        $application->setAutoExit(false);
+        $application->setCatchExceptions(false);
+
+        $output = new BufferedOutput();
+
+        try {
+            $application->run(new StringInput($command), $output);
+        } catch (\Throwable $e) {
+            error_log('[NATIVE_EXCEPTION]: console command "'.$command.'" failed — '.$e->getMessage());
+
+            return $output->fetch().'Console error: '.$e->getMessage()."\n";
+        }
+
+        return $output->fetch();
+    }
+
+    /**
+     * Shut the kernel down, because the host is about to tear the interpreter down.
+     *
+     * Called from the hosts' `persistent_shutdown`, again as a compiled-in eval.
+     * Skipping it would leave whatever a bundle registered on shutdown unrun —
+     * Doctrine connections, buffered logs — on every app exit.
+     */
+    public static function shutdown(): void
+    {
+        if (null === self::$instance) {
+            return;
+        }
+
+        try {
+            self::$instance->kernel->shutdown();
+        } catch (\Throwable $e) {
+            error_log('[NATIVE_EXCEPTION]: kernel shutdown failed — '.$e->getMessage());
+        } finally {
+            self::$instance = null;
+        }
     }
 
     public function dispatchCount(): int

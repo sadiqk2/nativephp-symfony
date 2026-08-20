@@ -50,15 +50,22 @@ $autoloadedAt = microtime(true);
 // them. APP_ENV/APP_DEBUG come from the app's own .env via Dotenv below.
 $projectDir = nativephp_symfony_project_dir($autoloader);
 
+if (class_exists(\Symfony\Component\Dotenv\Dotenv::class) && is_file($projectDir.'/.env')) {
+    // Deliberately before the defaults below, and that ordering is the whole point:
+    // bootEnv() never overwrites a value already in $_SERVER, so defaulting APP_ENV
+    // to prod first meant the app's own .env could never decide it — and the
+    // environment it names is also what picks .env.dev, .env.prod and their .local
+    // overlays, so every one of those went unread. The host still wins when it sets
+    // APP_ENV itself, because that value is in $_SERVER before this line.
+    //
+    // usePutenv(false): putenv() is process-global and this process outlives the
+    // request in persistent mode.
+    (new \Symfony\Component\Dotenv\Dotenv())->usePutenv(false)->bootEnv($projectDir.'/.env', 'prod');
+}
+
 foreach (['APP_ENV' => 'prod', 'APP_DEBUG' => '0'] as $key => $default) {
     $_SERVER[$key] ??= $_ENV[$key] ?? $default;
     $_ENV[$key] = $_SERVER[$key];
-}
-
-if (class_exists(\Symfony\Component\Dotenv\Dotenv::class) && is_file($projectDir.'/.env')) {
-    // usePutenv(false): putenv() is process-global and this process outlives the
-    // request in persistent mode.
-    (new \Symfony\Component\Dotenv\Dotenv())->usePutenv(false)->bootEnv($projectDir.'/.env');
 }
 
 // ---------------------------------------------------------------------------

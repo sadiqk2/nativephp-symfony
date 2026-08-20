@@ -182,7 +182,7 @@ final class MobileRuntimeTest extends TestCase
         [$request] = ServerRequestFactory::fromServer(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/ping']);
 
         ob_start();
-        $runtime->dispatch($request, ['X-PHP-Timing' => 'total=1ms,mode=persistent']);
+        $runtime->emit($request, ['X-PHP-Timing' => 'total=1ms,mode=persistent']);
         $written = (string) ob_get_clean();
 
         self::assertStringStartsWith("HTTP/1.1 200 OK\r\n", $written);
@@ -207,7 +207,7 @@ final class MobileRuntimeTest extends TestCase
         [$request] = ServerRequestFactory::fromServer(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/set-cookie']);
 
         ob_start();
-        $runtime->dispatch($request);
+        $runtime->emit($request);
         $written = (string) ob_get_clean();
 
         self::assertStringContainsString('Set-Cookie: visited=yes', $written);

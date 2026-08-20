@@ -44,6 +44,23 @@ final class MobilePatchFailed extends \RuntimeException
         ));
     }
 
+    /**
+     * The host's compiled-in PHP still names a Laravel class after the rewrite.
+     *
+     * Reported rather than written, because a partially rewritten eval is worse than an
+     * untouched one: the boot check would pass and the dispatch would fatal, which reads
+     * on a device as an app that starts and then shows nothing.
+     */
+    public static function laravelEvalSurvived(string $path): self
+    {
+        return new self(sprintf(
+            'Rewrote the host evaluations in %s but a reference to the Laravel runtime survived, '.
+            'so the shape of those literals has changed upstream. Re-read the file and update '.
+            'MobileRuntimePatcher::HOST_EVAL_REPLACEMENTS.',
+            $path,
+        ));
+    }
+
     public static function hunkDidNotMatch(string $label, string $path): self
     {
         return new self(sprintf(

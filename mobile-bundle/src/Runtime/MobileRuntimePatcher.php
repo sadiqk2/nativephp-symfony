@@ -18,6 +18,20 @@ namespace Native\Symfony\Mobile\Runtime;
  * both projects into the application's own nativephp/android and nativephp/ios, so
  * this patches a local copy and upstream is untouched.
  *
+ * Retargeting those paths is necessary and not sufficient. In persistent mode the
+ * hosts never execute a file per request at all: `php_bridge.c` and `PHP.c` build the
+ * per-request PHP as a C string literal and hand it to `zend_eval_string`, and that
+ * literal names Laravel's classes —
+ *
+ *   $__response = \Native\Mobile\Runtime::dispatch(\Illuminate\Http\Request::capture());
+ *
+ * — as do the boot check (`class_exists('Native\Mobile\Runtime') && ::isBooted()`),
+ * the console entry point (`::artisan()`) and the teardown (`::shutdown()`). None of
+ * those classes exist in a Symfony application, so the boot check fails, the host tears
+ * the interpreter down, and any request that got past it 500s. The C sources are copied
+ * into the application and compiled there, so they are patched here too — onto
+ * {@see MobileRuntime}, whose static entry points exist for exactly this.
+ *
  * Idempotent, and it throws rather than silently skipping — a missed path means the
  * app launches to a blank screen with no diagnostic, which is far worse than a
  * failed install.
@@ -26,6 +40,29 @@ final class MobileRuntimePatcher
 {
     /** Where our shim lives, relative to the app root. */
     public const SHIM_DIR = 'vendor/native-symfony/mobile-bundle/src/Resources/bootstrap';
+
+    /**
+     * The PHP the hosts evaluate, and what it has to become.
+     *
+     * Written as it appears in the C sources, where a PHP namespace separator is an
+     * escaped backslash. The quoted form on its own line is the one inside
+     * `class_exists('...')`, which escapes twice over.
+     *
+     * @var array<string, string>
+     */
+    private const HOST_EVAL_REPLACEMENTS = [
+        // Request::capture() reads the superglobals the host's own preamble filled in;
+        // this reads the same ones, through the factory the shims use.
+        '\\\\Illuminate\\\\Http\\\\Request::capture()' => '\\\\Native\\\\Symfony\\\\Mobile\\\\Runtime\\\\ServerRequestFactory::fromServer($_SERVER)[0]',
+        "'Native\\\\\\\\Mobile\\\\\\\\Runtime'" => "'Native\\\\\\\\Symfony\\\\\\\\Mobile\\\\\\\\Runtime\\\\\\\\MobileRuntime'",
+        '\\\\Native\\\\Mobile\\\\Runtime' => '\\\\Native\\\\Symfony\\\\Mobile\\\\Runtime\\\\MobileRuntime',
+    ];
+
+    /** The C sources carrying those literals, relative to each copied project. */
+    public const HOST_EVAL_SOURCES = [
+        'android' => ['app/src/main/cpp/php_bridge.c', 'app/src/main/cpp/PHP.c'],
+        'ios' => ['Include/Bridge/PHP.c'],
+    ];
 
     public function __construct(private readonly string $shimDir = self::SHIM_DIR)
     {
@@ -40,7 +77,10 @@ final class MobileRuntimePatcher
     {
         $bridge = rtrim($projectPath, '/').'/app/src/main/java/com/nativephp/mobile/bridge/PHPBridge.kt';
 
-        return $this->patchFile($bridge, 'android', 'Android PHPBridge.kt');
+        return [
+            ...$this->patchFile($bridge, 'android', 'Android PHPBridge.kt'),
+            ...$this->patchHostEvaluations($projectPath, 'android'),
+        ];
     }
 
     /** @return list<string> */
@@ -65,7 +105,7 @@ final class MobileRuntimePatcher
             throw MobilePatchFailed::noIosSources($projectPath);
         }
 
-        return $applied;
+        return [...$applied, ...$this->patchHostEvaluations($projectPath, 'ios')];
     }
 
     /**
@@ -112,6 +152,108 @@ final class MobileRuntimePatcher
         }
 
         return true;
+    }
+
+    /**
+     * Whether an installed project's compiled-in PHP has been retargeted.
+     *
+     * Reported by `native:mobile:doctor`, because this is the failure that looks like
+     * nothing: the bootstrap paths can be perfectly patched and the app still dies on
+     * every request, since in persistent mode the hosts evaluate their own literal
+     * instead of running a file.
+     *
+     * @return bool|null null when the project has none of these sources to check
+     */
+    public function hostEvaluationsRetargeted(string $projectPath, string $platform): ?bool
+    {
+        $seen = false;
+
+        foreach (self::HOST_EVAL_SOURCES[$platform] ?? [] as $relative) {
+            $path = rtrim($projectPath, '/').'/'.$relative;
+
+            if (!is_file($path)) {
+                continue;
+            }
+
+            $seen = true;
+            $source = (string) file_get_contents($path);
+
+            if (str_contains($source, '\\\\Native\\\\Mobile\\\\Runtime')
+                || str_contains($source, "'Native\\\\\\\\Mobile\\\\\\\\Runtime'")
+                || str_contains($source, '\\\\Illuminate\\\\')
+            ) {
+                return false;
+            }
+        }
+
+        return $seen ? true : null;
+    }
+
+    /**
+     * Rewrite the PHP the host compiles into itself.
+     *
+     * A plain substitution, deliberately: the literals are split across C string
+     * fragments and reflowed differently in each host, so anchoring on a block would
+     * break on the next upstream reindent, while the class names are stable and appear
+     * nowhere else in these files. What is checked afterwards is the outcome rather
+     * than the edit — no reference to the Laravel runtime may survive in a file that
+     * had one, because a single missed site is a screen that 500s on a device.
+     *
+     * Not strict about the files themselves: `PHP.c` on Android carries none of these
+     * literals today, and an upstream version that drops one of the call sites is not
+     * a reason to fail an install.
+     *
+     * @return list<string>
+     */
+    private function patchHostEvaluations(string $projectPath, string $platform): array
+    {
+        $applied = [];
+
+        foreach (self::HOST_EVAL_SOURCES[$platform] as $relative) {
+            $path = rtrim($projectPath, '/').'/'.$relative;
+
+            if (!is_file($path)) {
+                continue;
+            }
+
+            $original = (string) file_get_contents($path);
+            $text = $original;
+            $sites = 0;
+
+            foreach (self::HOST_EVAL_REPLACEMENTS as $from => $to) {
+                $count = substr_count($text, $from);
+
+                if ($count > 0) {
+                    $text = str_replace($from, $to, $text);
+                    $sites += $count;
+                }
+            }
+
+            if (0 === $sites) {
+                if (str_contains($original, 'MobileRuntime::dispatch')) {
+                    $applied[] = sprintf('%s %s: host dispatch — already applied', $platform, basename($path));
+                }
+
+                continue;
+            }
+
+            // The escaped forms only: an ordinary C comment mentioning the class — and
+            // there is one, explaining what a failed boot looks like — is not a call site.
+            if (str_contains($text, '\\\\Native\\\\Mobile\\\\Runtime')
+                || str_contains($text, "'Native\\\\\\\\Mobile\\\\\\\\Runtime'")
+                || str_contains($text, '\\\\Illuminate\\\\')
+            ) {
+                throw MobilePatchFailed::laravelEvalSurvived($path);
+            }
+
+            if (false === @file_put_contents($path, $text)) {
+                throw MobilePatchFailed::writeFailed($path);
+            }
+
+            $applied[] = sprintf('%s %s: host eval → MobileRuntime (%d sites)', $platform, basename($path), $sites);
+        }
+
+        return $applied;
     }
 
     /** @return list<string> */

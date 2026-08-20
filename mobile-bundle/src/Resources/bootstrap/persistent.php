@@ -36,13 +36,16 @@ require $autoloader;
 
 $projectDir = \dirname(\dirname($autoloader));
 
+// Before the defaults, so the app's own .env can name the environment — and with
+// it the .env.<env> overlays. A default written into $_SERVER first would be
+// indistinguishable from one the host set, and bootEnv() would defer to it.
+if (class_exists(\Symfony\Component\Dotenv\Dotenv::class) && is_file($projectDir.'/.env')) {
+    (new \Symfony\Component\Dotenv\Dotenv())->usePutenv(false)->bootEnv($projectDir.'/.env', 'prod');
+}
+
 foreach (['APP_ENV' => 'prod', 'APP_DEBUG' => '0'] as $key => $default) {
     $_SERVER[$key] ??= $_ENV[$key] ?? $default;
     $_ENV[$key] = $_SERVER[$key];
-}
-
-if (class_exists(\Symfony\Component\Dotenv\Dotenv::class) && is_file($projectDir.'/.env')) {
-    (new \Symfony\Component\Dotenv\Dotenv())->usePutenv(false)->bootEnv($projectDir.'/.env');
 }
 
 $kernelClass = $_SERVER['NATIVEPHP_KERNEL_CLASS'] ?? 'App\Kernel';
