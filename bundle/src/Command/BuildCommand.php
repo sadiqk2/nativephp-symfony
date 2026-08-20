@@ -6,6 +6,7 @@ namespace Native\Symfony\Desktop\Command;
 
 use Native\Symfony\Desktop\Builder\Builder;
 use Native\Symfony\Desktop\Support\Platform;
+use Native\Symfony\Desktop\Updater\PublishTarget;
 use Native\Symfony\Desktop\Support\ProjectPath;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -190,6 +191,10 @@ final class BuildCommand extends Command
         InputInterface $input,
         SymfonyStyle $io,
     ): int {
+        /** @var array<string, mixed> $updater */
+        $updater = $this->config['updater'] ?? [];
+        $publishTarget = PublishTarget::fromConfig($updater);
+
         $env = [
             // php.js reads these in beforeBuild to unzip the *target* platform's
             // static binary over whatever the dev machine put there.
@@ -206,9 +211,16 @@ final class BuildCommand extends Command
             'NATIVEPHP_APP_COPYRIGHT' => (string) ($this->config['copyright'] ?? ''),
             'NATIVEPHP_APP_FILENAME' => $this->slug((string) ($this->config['name'] ?? 'app')),
             'NATIVEPHP_DEEPLINK_SCHEME' => (string) ($this->config['deeplink_scheme'] ?? ''),
-            'NATIVEPHP_UPDATER_CONFIG' => json_encode($this->config['updater'] ?? [], \JSON_THROW_ON_ERROR),
+            // electron-builder assigns this straight to its own `publish` option, so it
+            // has to be a publish provider — not the config tree the *runtime* reads from
+            // native:config. And without the ENABLED flag the mjs drops `publish`
+            // altogether, which is why --publish used to upload nothing at all.
+            'NATIVEPHP_UPDATER_ENABLED' => null === $publishTarget ? 'false' : 'true',
+            'NATIVEPHP_UPDATER_CONFIG' => json_encode($publishTarget?->builderOptions() ?? [], \JSON_THROW_ON_ERROR),
             'NATIVEPHP_NSIS_DELETE_APP_DATA' => ($this->config['nsis']['delete_app_data_on_uninstall'] ?? false) ? 'true' : 'false',
             'APP_URL' => (string) ($this->config['base_url'] ?? ''),
+            // GH_TOKEN, AWS_* or DO_* — whatever the chosen provider uploads with.
+            ...$publishTarget?->environmentVariables() ?? [],
         ];
 
         $this->patchPackageJson($electron, $io);

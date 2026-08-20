@@ -161,8 +161,15 @@ final class MobileRuntime
 
         $output = new BufferedOutput();
 
+        // Non-interactive, and that is the whole difference between an error and a hang:
+        // an unrecognised command otherwise reaches Symfony's "Did you mean …?" prompt and
+        // blocks on a stdin that a device does not have. Off, it throws, and the catch
+        // below turns it into text the host can print.
+        $input = new StringInput($command);
+        $input->setInteractive(false);
+
         try {
-            $application->run(new StringInput($command), $output);
+            $application->run($input, $output);
         } catch (\Throwable $e) {
             error_log('[NATIVE_EXCEPTION]: console command "'.$command.'" failed — '.$e->getMessage());
 

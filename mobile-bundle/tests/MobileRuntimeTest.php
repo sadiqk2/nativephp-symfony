@@ -213,6 +213,70 @@ final class MobileRuntimeTest extends TestCase
         self::assertStringContainsString('Set-Cookie: visited=yes', $written);
     }
 
+    // ── the static entry points the hosts evaluate ──────────────────────────
+
+    public function testTheHostsDispatchEntryPointReturnsAResponse(): void
+    {
+        // Android's php_bridge.c and iOS's PHP.c compile
+        // `$__response = …::dispatch(…);` into themselves and then echo the status line,
+        // the headers and the body from what they get back — so this has to return the
+        // response rather than write one, and it has to be reachable statically.
+        MobileRuntime::boot(new RuntimeTestKernel());
+
+        [$request] = ServerRequestFactory::fromServer(['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/ping']);
+
+        $response = MobileRuntime::dispatch($request);
+
+        self::assertSame(200, $response->getStatusCode());
+        self::assertSame('pong', $response->getContent());
+        self::assertSame(1, MobileRuntime::instance()->dispatchCount());
+    }
+
+    public function testTheHostsConsoleEntryPointRunsInsideTheBootedKernel(): void
+    {
+        // The host calls this for migrations on first launch. Reusing the booted kernel
+        // is the point: a device cannot afford a second bootstrap per command.
+        MobileRuntime::boot(new RuntimeTestKernel());
+
+        $boots = RuntimeTestKernel::$boots;
+
+        $output = MobileRuntime::artisan('runtime:probe --loud');
+
+        self::assertStringContainsString('probe ran LOUD', $output);
+        self::assertSame($boots, RuntimeTestKernel::$boots, 'The command must not have booted a second kernel.');
+    }
+
+    public function testAFailingConsoleCommandComesBackAsTextRatherThanAnException(): void
+    {
+        // Whatever this returns is echoed straight into the host's output. An exception
+        // crossing back into C is an app that disappears rather than a command that failed.
+        MobileRuntime::boot(new RuntimeTestKernel());
+
+        $output = MobileRuntime::artisan('runtime:nope');
+
+        self::assertStringContainsString('Console error:', $output);
+        self::assertStringContainsString('runtime:nope', $output);
+        // Not the "Did you mean …?" question: that waits on a stdin no device has.
+        self::assertStringNotContainsString('(yes/no)', $output);
+    }
+
+    public function testShutdownClosesTheKernelAndForgetsIt(): void
+    {
+        // Called from the hosts' persistent_shutdown, as another compiled-in eval. It has
+        // to be safe to call when nothing was booted, because a failed boot takes that path.
+        MobileRuntime::boot(new RuntimeTestKernel());
+
+        self::assertTrue(MobileRuntime::isBooted());
+
+        MobileRuntime::shutdown();
+
+        self::assertFalse(MobileRuntime::isBooted());
+
+        MobileRuntime::shutdown();
+
+        self::assertFalse(MobileRuntime::isBooted());
+    }
+
     private function clearCache(): void
     {
         $dir = sys_get_temp_dir().'/native-mobile-test-kernel';
@@ -248,6 +312,25 @@ class RequestCounter implements \Symfony\Contracts\Service\ResetInterface
     public function reset(): void
     {
         $this->count = 0;
+    }
+}
+
+/** Stands in for whatever an application schedules through the host's console entry point. */
+#[\Symfony\Component\Console\Attribute\AsCommand(name: 'runtime:probe')]
+final class ProbeCommand extends \Symfony\Component\Console\Command\Command
+{
+    protected function configure(): void
+    {
+        $this->addOption('loud', null, \Symfony\Component\Console\Input\InputOption::VALUE_NONE);
+    }
+
+    protected function execute(
+        \Symfony\Component\Console\Input\InputInterface $input,
+        \Symfony\Component\Console\Output\OutputInterface $output,
+    ): int {
+        $output->writeln('probe ran '.($input->getOption('loud') ? 'LOUD' : 'quiet'));
+
+        return self::SUCCESS;
     }
 }
 
@@ -300,6 +383,7 @@ final class RuntimeTestKernel extends Kernel
 
         $services = $container->services();
         $services->set(RequestCounter::class)->public()->tag('kernel.reset', ['method' => 'reset']);
+        $services->set(ProbeCommand::class)->tag('console.command');
     }
 
     protected function configureRoutes(RoutingConfigurator $routes): void

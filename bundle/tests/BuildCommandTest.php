@@ -185,6 +185,39 @@ final class BuildCommandTest extends TestCase
         self::assertArrayHasKey('scripts', $json);
     }
 
+    public function testWithTheUpdaterOffElectronBuilderIsToldNotToPublish(): void
+    {
+        $this->execute(['os' => 'linux', '--skip-composer' => true]);
+
+        $env = $this->environment();
+
+        // The mjs drops its whole `publish` block unless this reads exactly 'true'.
+        self::assertSame('false', $env['NATIVEPHP_UPDATER_ENABLED']);
+        self::assertSame('[]', $env['NATIVEPHP_UPDATER_CONFIG']);
+    }
+
+    public function testAnEnabledUpdaterReachesElectronBuilderAsAPublishTarget(): void
+    {
+        $this->execute(['os' => 'linux', '--skip-composer' => true], ['updater' => [
+            'enabled' => true,
+            'default' => 'github',
+            'providers' => ['github' => ['driver' => 'github', 'owner' => 'sadiqk2', 'repo' => 'deskpad', 'token' => 'ghp_x']],
+        ]]);
+
+        $env = $this->environment();
+
+        self::assertSame('true', $env['NATIVEPHP_UPDATER_ENABLED']);
+
+        /** @var array<string, mixed> $publish */
+        $publish = json_decode($env['NATIVEPHP_UPDATER_CONFIG'], true, 512, \JSON_THROW_ON_ERROR);
+
+        // electron-builder assigns this to `publish` as it stands, so it has to be a
+        // provider — not the {enabled, default, providers} tree the runtime reads.
+        self::assertSame('github', $publish['provider']);
+        self::assertSame('deskpad', $publish['repo']);
+        self::assertArrayNotHasKey('providers', $publish);
+    }
+
     // ── the staged application ──────────────────────────────────────────────
 
     public function testTheApplicationIsStagedAndItsEnvironmentCleaned(): void
