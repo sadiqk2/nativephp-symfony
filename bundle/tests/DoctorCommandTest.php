@@ -160,6 +160,28 @@ final class DoctorCommandTest extends TestCase
         self::assertStringContainsString('neutralised', $tester->getDisplay());
     }
 
+    public function testTheExemptionIsNotClaimedWhenTheSecretGateIsOff(): void
+    {
+        // `block_browser_access: false` is one documented line, and it also switches
+        // off the exemption: RuntimeRoutesAccessMap hands the app's rules away only
+        // while the shared secret is enforcing in their place. So the app's `^/` rule
+        // does still cover the runtime endpoints, the runtime's POST is denied, and
+        // boot() never runs — the exact failure this command exists to name.
+        $tester = $this->doctor(
+            router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']),
+            accessMap: $this->accessMap(['IS_AUTHENTICATED_FULLY']),
+            firewallMap: $this->firewallMap(securityEnabled: true),
+            exemptRuntimeFirewall: true,
+            blockBrowserAccess: false,
+        );
+
+        self::assertSame(Command::FAILURE, $tester->getStatusCode());
+        self::assertStringContainsString('behind access_control', $tester->getDisplay());
+        // And the advice must not be "set exempt_runtime_firewall: true", which is
+        // already true and is not what is stopping the exemption.
+        self::assertStringContainsString('block_browser_access', $tester->getDisplay());
+    }
+
     public function testWithoutTheSecurityBundleTheFirewallCheckIsSkippedRatherThanAssumed(): void
     {
         $tester = $this->doctor(router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']));
@@ -297,6 +319,7 @@ final class DoctorCommandTest extends TestCase
         ?string $secret = 'abcdefghijklmnopqrstuvwxyz012345',
         ?object $firewallMap = null,
         bool $exemptRuntimeFirewall = false,
+        bool $blockBrowserAccess = true,
     ): CommandTester {
         $tester = new CommandTester(new DoctorCommand(
             projectDir: sys_get_temp_dir(),
@@ -307,6 +330,7 @@ final class DoctorCommandTest extends TestCase
             accessMap: $accessMap,
             firewallMap: $firewallMap,
             exemptRuntimeFirewall: $exemptRuntimeFirewall,
+            blockBrowserAccess: $blockBrowserAccess,
         ));
 
         $tester->execute([]);

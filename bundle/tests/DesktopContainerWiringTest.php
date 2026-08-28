@@ -15,6 +15,10 @@ use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\RequestMatcher\PathRequestMatcher;
+use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
+use Symfony\Component\Security\Http\AccessMap;
 
 /**
  * The desktop container: every service built, and the two contracts aliased.
@@ -179,6 +183,30 @@ final class DesktopContainerWiringTest extends TestCase
         self::assertFalse($container->has(AppBootstrapper::class));
     }
 
+    public function testTheDoctorIsToldWhetherTheSecretGateIsOn(): void
+    {
+        // End to end from configuration to output, because the value's whole job is to
+        // change one answer: with the gate off the runtime exemption does not happen,
+        // so an app's `^/` rule really does deny the runtime's POST. A DoctorCommand
+        // that never received the key would print a ✓ and exit 0 over a dead app.
+        $container = $this->compiled(
+            ['testing' => true, 'block_browser_access' => false],
+            static function (ContainerBuilder $container): void {
+                $container->setDefinition('router', new Definition(DoctorProbeRouter::class));
+
+                $container->setDefinition('security.access_map', (new Definition(AccessMap::class))
+                    ->addMethodCall('add', [new Definition(PathRequestMatcher::class, ['^/']), ['ROLE_USER'], null]));
+            },
+        );
+
+        $tester = new \Symfony\Component\Console\Tester\CommandTester(
+            $container->get(\Native\Symfony\Desktop\Command\DoctorCommand::class),
+        );
+
+        self::assertSame(1, $tester->execute([]));
+        self::assertStringContainsString('behind access_control', $tester->getDisplay());
+    }
+
     // ── helpers ─────────────────────────────────────────────────────────────
 
     /**
@@ -268,5 +296,13 @@ final class ProbePhpIni implements ProvidesPhpIni
     public function phpIni(): array
     {
         return ['memory_limit' => '2G'];
+    }
+}
+
+final class DoctorProbeRouter implements RequestMatcherInterface
+{
+    public function matchRequest(Request $request): array
+    {
+        return ['_route' => 'native_desktop'];
     }
 }
