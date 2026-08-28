@@ -1,0 +1,55 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    name: ${{ matrix.suite }} on PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [bundle, mobile-bundle]
+        php: ['8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v5
+
+      # Runs unprivileged, unlike a container job: the tests that assert an unwritable
+      # file is an error can only be provoked as a normal user, and root skips them.
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: zip
+          coverage: none
+
+      # The contract tests read the real runtime sources: without these clones their
+      # data providers yield nothing and the suite silently shrinks by ~115 tests.
+      - name: Clone the upstream runtimes the contract tests read
+        run: |
+          git clone --depth 1 https://github.com/NativePHP/desktop upstream/np-desktop
+          git clone --depth 1 https://github.com/NativePHP/mobile-air upstream/np-mobile
+
+      # The lock resolves Symfony 8, which needs PHP 8.4.1, so the declared floor of
+      # ^8.3 can only be checked against a fresh resolve.
+      - name: Install dependencies
+        working-directory: ${{ matrix.suite }}
+        env:
+          LOCKED: ${{ matrix.php == '8.4' }}
+        run: |
+          if [ "$LOCKED" = "true" ]; then
+            composer install --no-interaction --no-progress
+          else
+            composer update --no-interaction --no-progress
+          fi
+
+      # --fail-on-skipped: a skip here means the environment lost coverage, not that a
+      # test was irrelevant. Both suites run with zero skips on an unprivileged runner.
+      - name: Tests
+        working-directory: ${{ matrix.suite }}
+        run: php vendor/bin/phpunit --no-coverage --fail-on-skipped

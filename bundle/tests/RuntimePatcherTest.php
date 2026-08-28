@@ -218,6 +218,10 @@ final class RuntimePatcherTest extends TestCase
         // applied but is not on disk: the app then launches with Laravel's hardcoded
         // paths and shows a window that never does anything. An unwritable file used to
         // produce exactly that, because the write's return value was discarded.
+        if (0 === posix_geteuid()) {
+            self::markTestSkipped('root ignores file permissions, so the failure cannot be provoked.');
+        }
+
         chmod($this->serverDir().'/php.ts', 0o444);
 
         try {

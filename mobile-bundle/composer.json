@@ -25,6 +25,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^11.0|^12.0",
+        "symfony/dotenv": "^7.0|^8.0",
         "symfony/framework-bundle": "^7.0|^8.0",
         "twig/twig": "^3.0"
     },
@@ -43,7 +44,9 @@
     },
     "minimum-stability": "stable",
     "suggest": {
-        "twig/twig": "To author native element trees from Twig templates (the native-UI path)",
-        "symfony/twig-bundle": "To render the application UI in the WebView path"
+        "ext-zip": "To package the application archive that native:mobile:build writes; the hosts extract a zip at boot",
+        "symfony/dotenv": "To resolve the packaged application's .env at boot; without it the shims fall back to the host environment",
+        "symfony/twig-bundle": "To render the application UI in the WebView path",
+        "twig/twig": "To author native element trees from Twig templates (the native-UI path)"
     }
 }

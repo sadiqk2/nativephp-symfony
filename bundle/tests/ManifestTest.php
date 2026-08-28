@@ -212,7 +212,7 @@ final class ManifestTest extends TestCase
     {
         (new Filesystem())->dumpFile($this->root.'/nativephp.json', '{"cli":"artisan"}');
 
-        self::assertTrue(new ManifestWriter($this->root, new Manifest())->write());
+        self::assertTrue((new ManifestWriter($this->root, new Manifest()))->write());
         self::assertStringContainsString('bin/console', (string) file_get_contents($this->root.'/nativephp.json'));
     }
 
