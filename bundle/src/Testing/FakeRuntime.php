@@ -206,7 +206,12 @@ final class FakeRuntime implements ClientInterface
     {
         $this->windows[$id] = ['id' => $id, ...$attributes];
 
-        $this->willReturn("window/get/{$id}", $this->windows[$id]);
+        // Encoded, because WindowManager::get() encodes: it is the one window endpoint
+        // that carries the id in the URL. Scripting the raw id answered an endpoint the
+        // app can never request, so `windowIs('report 2024')` then `get('report 2024')`
+        // came back null while all() still listed the window — a state the real runtime
+        // cannot be in, since both endpoints read one state.windows map.
+        $this->willReturn('window/get/'.rawurlencode($id), $this->windows[$id]);
         $this->willReturn('window/all', array_values($this->windows));
 
         return $this;
@@ -267,7 +272,7 @@ final class FakeRuntime implements ClientInterface
             $this->willReturnStatus('window/current', 500);
         }
 
-        return $this->willReturnStatus("window/get/{$id}", 404);
+        return $this->willReturnStatus('window/get/'.rawurlencode($id), 404);
     }
 
     // --- inspection -----------------------------------------------------------

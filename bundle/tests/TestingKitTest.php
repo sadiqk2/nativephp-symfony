@@ -723,6 +723,53 @@ final class TestingKitTest extends TestCase
         self::assertSame(0, (new DialogManager($runtime))->alert('Heads up'));
     }
 
+    /**
+     * `window/get/:id` is the one window endpoint that carries the id in the URL, so
+     * WindowManager::get() rawurlencodes it. A fake that scripted the raw id answered
+     * an endpoint the app can never request: get() came back null while all() still
+     * listed the window, which is a state the real runtime cannot be in — both are
+     * served from one state.windows map.
+     */
+    #[DataProvider('windowIds')]
+    public function testAScriptedWindowIsFoundByTheIdTheAppActuallyAsksAbout(string $id): void
+    {
+        $runtime = FakeRuntime::available()->windowIs($id, ['title' => 'Report']);
+        $windows = new WindowManager($runtime, new UrlResolver(new RequestStack(), null), new RequestStack());
+
+        self::assertNotNull($windows->get($id), 'get() did not find a window all() lists.');
+        self::assertSame($id, $windows->get($id)->id);
+        self::assertSame([$id], array_map(static fn (object $w): string => $w->id, $windows->all()));
+
+        $runtime->windowDoesNotExist($id);
+
+        self::assertNull($windows->get($id), 'get() still found a window all() no longer lists.');
+        self::assertSame([], $windows->all());
+    }
+
+    /** @return iterable<string, array{string}> */
+    public static function windowIds(): iterable
+    {
+        // An id an application might legitimately choose, or one detectId() read out
+        // of a Referer. Encoding rather than validating is what WindowManager does.
+        yield 'a plain one' => ['main'];
+
+        yield 'with a space' => ['report 2024'];
+
+        yield 'with a slash' => ['reports/2024'];
+
+        yield 'not ASCII' => ['café'];
+
+        yield 'with a plus' => ['a+b'];
+
+        yield 'with an ampersand' => ['a&b'];
+
+        yield 'with a hash' => ['win#1'];
+
+        yield 'with a percent' => ['100%'];
+
+        yield 'with a question mark' => ['why?'];
+    }
+
     public function testClosingAWindowRemovesItFromAllAsWellAsGet(): void
     {
         // Upstream serves both from one state.windows map, so they cannot disagree.

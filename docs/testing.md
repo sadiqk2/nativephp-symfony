@@ -155,6 +155,10 @@ $fake->noCurrentWindow();                                     // window/current 
 the app is backgrounded, since the runtime dereferences `getFocusedWindow().id` with no null
 guard. Any code that reads the current window should have a test for it.
 
+Any id works, including one with a space or a slash: `WindowManager::get()` rawurlencodes the
+id because it reaches the URL, and both scripting helpers encode it the same way, so `get()`
+and `all()` cannot disagree about a window.
+
 ### Inspecting the log
 
 ```php
@@ -278,6 +282,13 @@ self::assertSame('SecureStorage.Get', $bridge->lastCall()['method']);
 
 `new FakeBridge(available: false)` models being outside a packaged app. Through the container,
 set `native_mobile.fake_bridge: true` in `config/packages/test/native_mobile.yaml`.
+
+Two things the fake copies from the real bridge rather than smoothing over. A payload that
+cannot be JSON-encoded throws `InvalidArgumentException` instead of being recorded, because
+the wire is JSON and `Bridge::raw()` refuses one too — an app reaches this with a filename, a
+scanned barcode or a database column that is not UTF-8. And a scripted reply that is empty,
+whitespace or not JSON reads as `null` from `call()`, which is what the real bridge does with
+whatever the native side actually answered.
 
 The real `Bridge` accepts an `$invoker` callable in place of the extension function, so the
 real class can be tested too:
