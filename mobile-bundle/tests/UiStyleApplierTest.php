@@ -73,6 +73,31 @@ final class UiStyleApplierTest extends TestCase
         self::assertSame(48.0, $layout['height']);
     }
 
+    public function testAnExplicitHeightBeatsFullHeightWhicheverWayRoundTheyAreWritten(): void
+    {
+        // `fillHeight` and `height` are two parser keys writing one wire key, and upstream
+        // resolves that collision in a fixed order — the fills are seeded first and an
+        // explicit width/height overwrites them (NativeElementCollector::buildLayoutArray).
+        // Reading the collision off the order the author happened to type the classes makes
+        // the same class string lay out differently here than in the Laravel package.
+        self::assertSame(48.0, $this->applied('h-full h-12')['layout']['height']);
+        self::assertSame(48.0, $this->applied('h-12 h-full')['layout']['height']);
+
+        self::assertSame(24.0, $this->applied('w-full w-6')['layout']['width']);
+        self::assertSame(24.0, $this->applied('w-6 w-full')['layout']['width']);
+    }
+
+    public function testTheSafeAreaMaskIsResolvedInUpstreamsOrderNotTheAuthors(): void
+    {
+        // The three safe-area flags share the one `safe_area` byte, and upstream tests them
+        // in the order both/top/bottom, so the bottom-only mask wins any combination. Both
+        // edges is what `safe-area` alone already means.
+        self::assertSame(3, $this->applied('safe-area-top safe-area-bottom')['layout']['safe_area']);
+        self::assertSame(3, $this->applied('safe-area-bottom safe-area-top')['layout']['safe_area']);
+        self::assertSame(2, $this->applied('safe-area-top safe-area')['layout']['safe_area']);
+        self::assertSame(2, $this->applied('safe-area safe-area-top')['layout']['safe_area']);
+    }
+
     public function testElementPropsReachTheElementUnderTheirWireNames(): void
     {
         $node = $this->applied('text-2xl font-bold', Elements\Text::make('x'));
