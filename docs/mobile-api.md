@@ -85,10 +85,17 @@ This reads unlike a browser's geolocation API on purpose. Background fixes are b
 natively, because a phone can accumulate thousands while the app is asleep and waking PHP for
 each would drain the battery.
 
-Every method takes the id of the watch it acts on. Several watches can run at once, and the
-ids come from whatever started them.
+Every method that acts on a watch takes its id, because several can run at once. The two
+that start one return the id they minted — hold on to it, because it is the only way to stop,
+drain or trim that watch later.
 
 ```php
+$geo->requestPermissions();               // bool — the answer arrives as an event
+$geo->currentPosition(fineAccuracy: true);// bool — a single fix, also as an event
+
+$id = $geo->watchPosition(interval: 2000, minDistance: 5.0);   // ?string — foreground stream
+$id = $geo->startBackgroundWatch();       // ?string — survives backgrounding, death, reboot
+
 $watch = $geo->backgroundWatchStatus();   // array|null — the watch that outlived this process
 $id = $watch['id'];
 
@@ -110,12 +117,18 @@ watch is stopped with `clearBuffer`.
 `backgroundWatchStatus()` returns null when nothing is watching, rather than an array with an
 `active` flag in it — an array is truthy either way.
 
-There is no `start`/`request` method here. Upstream's bridge does have
-`Geolocation.WatchPosition`, `Geolocation.StartBackgroundWatch`,
-`Geolocation.GetCurrentPosition`, `Geolocation.CheckPermissions` and
-`Geolocation.RequestPermissions` — this bundle wraps none of them, and
-`BridgeCoverageTest::UNWRAPPED` names all five so the gap is stated rather than counted
-over. Something outside this bundle has to start the watch whose id you pass in here.
+`watchPosition()` and `startBackgroundWatch()` return null when nothing was started, which
+off a device is the only outcome — no watch, so no id for one. The difference between them is
+the native method: a foreground stream stops being delivered once the app is backgrounded,
+and nothing here notices.
+
+Results never come back as a return value. `currentPosition()`, `checkPermissions()` and
+`requestPermissions()` are asynchronous — a true means the request reached the native layer,
+and the fix or the permission status arrives as the event named by `$event`, defaulting to
+the class upstream sends for that result. This bundle has no PHP-side receiver for mobile
+events, so that event reaches the page through the host's JS bridge; the `id` sent with each
+request is what a listener matches on, which is why one is always generated when you do not
+supply one.
 
 ### Microphone — `Api\Microphone`
 

@@ -111,12 +111,13 @@ in the current PHP surface:
 
 **The bridge itself is entirely framework-agnostic** — a function name and a JSON string. The
 PHP wrappers around it are the same mechanical work as desktop's endpoint wrappers, and there
-are fewer of them (62 vs 116). Five of the 62 have no wrapper here yet, all Geolocation and
-all of them starting or locating a position rather than addressing a watch already running:
-`GetCurrentPosition`, `CheckPermissions`, `RequestPermissions`, `WatchPosition` and
-`StartBackgroundWatch`. `BridgeCoverageTest` names them so the gap is stated rather than
-counted over — the count read 57 until that test learned to read a method name computed
-above its call site, which is where all five were hiding.
+are fewer of them (62 vs 116). All 62 have a wrapper. The last five to get one were the
+Geolocation methods that start or locate a position — `GetCurrentPosition`,
+`CheckPermissions`, `RequestPermissions`, `WatchPosition` and `StartBackgroundWatch` —
+which left `Api\Geolocation` able to stop and drain a watch it had no way to begin. The
+count read 57 until `BridgeCoverageTest` learned to read a method name computed above its
+call site, which is where all five were hiding; its `UNWRAPPED` list is empty and asserted
+to stay that way.
 
 ---
 

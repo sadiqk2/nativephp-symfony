@@ -100,6 +100,114 @@ final class ApiTest extends TestCase
         self::assertTrue((new Api\System($bridge))->isDarkMode());
     }
 
+    public function testGeolocationWatchPositionHandsBackTheIdEverythingElseAddresses(): void
+    {
+        // The half of the lifecycle this class did not have: every other method here
+        // names the watch it acts on, so a start that does not report the id it minted
+        // leaves the caller with a running GPS stream and no way to name it again.
+        $bridge = new FakeBridge();
+        $geolocation = new Api\Geolocation($bridge);
+
+        $id = $geolocation->watchPosition(fineAccuracy: true, interval: 2000, minDistance: 5.0);
+
+        self::assertIsString($id);
+        self::assertSame([
+            'method' => 'Geolocation.WatchPosition',
+            'payload' => [
+                'id' => $id,
+                'event' => Api\Geolocation::LOCATION_UPDATED,
+                'fineAccuracy' => true,
+                'interval' => 2000,
+                'minDistance' => 5.0,
+            ],
+        ], $bridge->lastCall());
+
+        $geolocation->clearWatch($id);
+        self::assertSame(['id' => $id], $bridge->lastCall()['payload']);
+    }
+
+    public function testGeolocationBackgroundWatchIsTheSamePayloadUnderItsOwnMethod(): void
+    {
+        // Same five keys, different native method — that method name is the only thing
+        // that decides whether the stream survives the app being backgrounded.
+        $bridge = new FakeBridge();
+
+        $id = (new Api\Geolocation($bridge))->startBackgroundWatch();
+
+        self::assertSame([
+            'method' => 'Geolocation.StartBackgroundWatch',
+            'payload' => [
+                'id' => $id,
+                'event' => Api\Geolocation::LOCATION_UPDATED,
+                'fineAccuracy' => false,
+                'interval' => 5000,
+                'minDistance' => 0.0,
+            ],
+        ], $bridge->lastCall());
+    }
+
+    public function testGeolocationUsesTheWatchIdItWasGivenAndReportsNoneWhenNothingStarted(): void
+    {
+        $bridge = new FakeBridge();
+
+        self::assertSame('watch-2', (new Api\Geolocation($bridge))->watchPosition(id: 'watch-2'));
+        self::assertSame('watch-2', $bridge->lastCall()['payload']['id']);
+
+        // Off a device there is no watch, so there is no id to address one by either.
+        self::assertNull((new Api\Geolocation(new FakeBridge(available: false)))->watchPosition());
+        self::assertNull((new Api\Geolocation(new FakeBridge(available: false)))->startBackgroundWatch());
+    }
+
+    public function testGeolocationWatchPacingCannotGoNegative(): void
+    {
+        // Upstream's interval() and minDistance() clamp at zero, and a negative pace is
+        // not something either host has a meaning for.
+        $bridge = new FakeBridge();
+
+        (new Api\Geolocation($bridge))->watchPosition(interval: -1, minDistance: -5.0);
+
+        self::assertSame(0, $bridge->lastCall()['payload']['interval']);
+        self::assertSame(0.0, $bridge->lastCall()['payload']['minDistance']);
+    }
+
+    public function testGeolocationAsksForAccuracyOnlyWhereUpstreamDoes(): void
+    {
+        // A one-shot fix chooses GPS or network accuracy; a permission check has no
+        // accuracy to choose, and upstream's payload for those two carries id and event
+        // alone. Each defaults to the event class its own result arrives as.
+        $bridge = new FakeBridge();
+        $geolocation = new Api\Geolocation($bridge);
+
+        self::assertTrue($geolocation->currentPosition(fineAccuracy: true, id: 'fix-1'));
+        self::assertSame([
+            'method' => 'Geolocation.GetCurrentPosition',
+            'payload' => ['id' => 'fix-1', 'event' => Api\Geolocation::LOCATION_RECEIVED, 'fineAccuracy' => true],
+        ], $bridge->lastCall());
+
+        self::assertTrue($geolocation->checkPermissions(id: 'perm-1'));
+        self::assertSame([
+            'method' => 'Geolocation.CheckPermissions',
+            'payload' => ['id' => 'perm-1', 'event' => Api\Geolocation::PERMISSION_STATUS_RECEIVED],
+        ], $bridge->lastCall());
+
+        self::assertTrue($geolocation->requestPermissions(id: 'perm-2'));
+        self::assertSame([
+            'method' => 'Geolocation.RequestPermissions',
+            'payload' => ['id' => 'perm-2', 'event' => Api\Geolocation::PERMISSION_REQUEST_RESULT],
+        ], $bridge->lastCall());
+    }
+
+    public function testGeolocationGeneratesAnIdForAOneShotRatherThanLeavingItOffTheWire(): void
+    {
+        // Both hosts put an id in the result event only when the payload carried one, so
+        // a listener has nothing to match against unless we always send one.
+        $bridge = new FakeBridge();
+
+        (new Api\Geolocation($bridge))->currentPosition();
+
+        self::assertNotSame('', $bridge->lastCall()['payload']['id']);
+    }
+
     public function testGeolocationClearWatchNamesTheWatchItStops(): void
     {
         // Naming the watch is the whole point of the id: several can run at once, so a

@@ -32,19 +32,13 @@ final class BridgeCoverageTest extends TestCase
      * upstream bridge method is wrapped" passed while three were not. Those three now
      * have wrappers.
      *
-     * The five below were invisible one step further on: upstream computes their names
-     * above the call site rather than writing them at it, so the count read 57. Every one
-     * of them starts or locates a position, which `Api\Geolocation` does not do at all —
-     * it addresses a watch that something else started — so they are stated as gaps
-     * rather than wrapped to keep this list short.
+     * It then held the five Geolocation methods that start or locate a position, invisible
+     * one step further on: upstream computes their names above the call site rather than
+     * writing them at it, so the count read 57. Those are wrapped too now, which is why
+     * this is empty — `Api\Geolocation` could stop and drain a watch it had no way to
+     * begin, half a lifecycle.
      */
-    private const array UNWRAPPED = [
-        'Geolocation.CheckPermissions',
-        'Geolocation.GetCurrentPosition',
-        'Geolocation.RequestPermissions',
-        'Geolocation.StartBackgroundWatch',
-        'Geolocation.WatchPosition',
-    ];
+    private const array UNWRAPPED = [];
 
     public function testTheOnlyUnwrappedBridgeMethodsAreTheOnesNamedHere(): void
     {
