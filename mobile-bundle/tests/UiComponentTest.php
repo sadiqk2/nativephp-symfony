@@ -76,6 +76,18 @@ final class UiComponentTest extends TestCase
     }
 
     /** @param array<string, mixed> $node */
+    private function idOfText(array $node, string $text): ?int
+    {
+        $found = $this->findNode(
+            $node,
+            static fn (array $candidate): bool => 'text' === $candidate['type']
+                && $text === ($candidate['props']['text'] ?? null),
+        );
+
+        return $found['id'] ?? null;
+    }
+
+    /** @param array<string, mixed> $node */
     private function texts(array $node): array
     {
         $texts = [];
@@ -275,17 +287,47 @@ final class UiComponentTest extends TestCase
         self::assertContains('deep taps:1', $this->texts($frame));
     }
 
-    public function testAComponentBoundaryEmitsNoNodeOfItsOwn(): void
+    public function testMountingAChildAddsNoNodeOfItsOwn(): void
     {
-        // If the boundary emitted a node, every sibling's positional index and every
-        // unkeyed sequential id would shift — a device symptom (a list losing its
-        // scroll position), never an error.
-        $withChild = $this->screen(new BoundaryShapeFixture(true))->frame();
-        $withoutChild = $this->screen(new BoundaryShapeFixture(false))->frame();
+        // If mounting added a node, every sibling's positional index and every unkeyed
+        // sequential id would shift — a device symptom (a list losing its scroll
+        // position), never an error.
+        $withChild = $this->screen(new MountShapeFixture(true))->frame();
+        $withoutChild = $this->screen(new MountShapeFixture(false))->frame();
 
         self::assertCount(2, $withChild['children']);
         self::assertCount(1, $withoutChild['children']);
         self::assertSame('text', $withChild['children'][1]['type'], 'the child\'s own root, not a wrapper');
+    }
+
+    public function testLayoutSetOnAMountedChildReachesTheNode(): void
+    {
+        // mount() hands back an Element, so a parent placing a child in a column reaches
+        // for the layout it needs there — `flex_grow` on the row that should take up the
+        // slack is the everyday case. Losing it is silent: the frame publishes, the screen
+        // renders, and the row simply does not grow.
+        $frame = $this->screen(new MountedChildLayoutFixture())->frame();
+
+        self::assertSame(['flex_grow' => 1], $frame['children'][0]['layout'] ?? null);
+    }
+
+    public function testAKeyOnAMountedChildKeepsItsNodeIdAcrossAReorder(): void
+    {
+        // What Element::key() is for (contract §3): identity that survives a reorder, so
+        // the renderer keeps each row's native state instead of handing row 2's scroll
+        // position and focus to row 1.
+        $root = new MountedListFixture();
+        $screen = $this->screen($root);
+
+        $before = $this->fullFrame($screen);
+        $root->order = ['b', 'a'];
+        $after = $this->fullFrame($screen);
+
+        self::assertSame(
+            $this->idOfText($before, 'row a'),
+            $this->idOfText($after, 'row a'),
+            'A keyed row must keep its node id when the list reorders.',
+        );
     }
 
     // ── Props ────────────────────────────────────────
@@ -752,7 +794,7 @@ final class GrandparentFixture extends NativeComponent
     }
 }
 
-final class BoundaryShapeFixture extends NativeComponent
+final class MountShapeFixture extends NativeComponent
 {
     public function __construct(private readonly bool $withChild = true)
     {
@@ -775,6 +817,41 @@ final class LeafFixture extends NativeComponent
     protected function render(): Element
     {
         return Text::make('leaf');
+    }
+}
+
+final class MountedChildLayoutFixture extends NativeComponent
+{
+    protected function render(): Element
+    {
+        return Column::make($this->mount(LeafFixture::class)->layout(['flex_grow' => 1]));
+    }
+}
+
+final class MountedListFixture extends NativeComponent
+{
+    /** @var list<string> */
+    public array $order = ['a', 'b'];
+
+    protected function render(): Element
+    {
+        $rows = [];
+
+        foreach ($this->order as $name) {
+            $rows[] = $this->mount(RowFixture::class, ['label' => $name], key: $name)->key('row-'.$name);
+        }
+
+        return Column::make(...$rows);
+    }
+}
+
+final class RowFixture extends NativeComponent
+{
+    public string $label = '';
+
+    protected function render(): Element
+    {
+        return Text::make('row '.$this->label);
     }
 }
 
