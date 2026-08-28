@@ -104,6 +104,23 @@ final class StyleApplier
      */
     private const UNIVERSAL_PROPS = ['selectable' => true, 'glass' => true];
 
+    /**
+     * `safe_area` is a u8 edge mask, not a boolean: 1 both, 2 top, 3 bottom. All three
+     * flags write that one byte, so they are applied in this order — upstream's — and the
+     * last one present wins.
+     *
+     * @var array<string, int>
+     */
+    private const SAFE_AREA = ['safeArea' => 1, 'safeAreaTop' => 2, 'safeAreaBottom' => 3];
+
+    /**
+     * `w-full`/`h-full` are booleans in the parser's vocabulary and the value `'fill'` on
+     * the wire, where they share the slot an explicit `w-6`/`h-12` writes.
+     *
+     * @var array<string, true>
+     */
+    private const FILLS = ['fill' => true, 'fillWidth' => true, 'fillHeight' => true];
+
     /** @var array<string, string> */
     private const STYLE = [
         // Not a rename to snake_case but a rename outright: the parser calls it `bg`
@@ -186,6 +203,32 @@ final class StyleApplier
             }
         }
 
+        // The keys below are the only ones where two parser keys write one wire key, so
+        // they are the only ones whose result could depend on the order the author typed
+        // the classes. Upstream's buildLayoutArray resolves them in a fixed order instead:
+        // the fills are seeded and an explicit `width`/`height` overwrites them, and the
+        // safe-area flags are tested both/top/bottom so the bottom mask wins. Reading them
+        // off the parsed map's insertion order made `h-12 h-full` 'fill' here and 48 in the
+        // Laravel package, from one class string.
+        if (!empty($parsed['fill'])) {
+            $layout['width'] = 'fill';
+            $layout['height'] = 'fill';
+        }
+
+        if (!empty($parsed['fillWidth'])) {
+            $layout['width'] = 'fill';
+        }
+
+        if (!empty($parsed['fillHeight'])) {
+            $layout['height'] = 'fill';
+        }
+
+        foreach (self::SAFE_AREA as $flag => $mask) {
+            if (!empty($parsed[$flag])) {
+                $layout['safe_area'] = $mask;
+            }
+        }
+
         foreach ($parsed as $key => $value) {
             // `dark` and `gradient` are nested companions, not properties. `dark` is
             // consumed by darkProps() above; flattening either here would put a
@@ -194,23 +237,8 @@ final class StyleApplier
                 continue;
             }
 
-            // safe_area is a u8 edge mask, not a boolean: 1 both, 2 top, 3 bottom.
-            // Sending `true` collapsed all three to the same thing at best, and the
-            // top-only and bottom-only variants had no mapping at all — so content
-            // sat under the notch or the home indicator.
-            if (\in_array($key, ['safeArea', 'safeAreaTop', 'safeAreaBottom'], true)) {
-                if ($value) {
-                    $layout['safe_area'] = match ($key) {
-                        'safeArea' => 1,
-                        'safeAreaTop' => 2,
-                        'safeAreaBottom' => 3,
-                    };
-                }
-
-                continue;
-            }
-
-            if (isset(self::UNIVERSAL_PROPS[$key])) {
+            // Resolved above, in upstream's order rather than this loop's.
+            if (isset(self::SAFE_AREA[$key]) || isset(self::FILLS[$key]) || isset(self::UNIVERSAL_PROPS[$key])) {
                 continue;
             }
 
@@ -222,26 +250,6 @@ final class StyleApplier
 
             if (isset(self::STYLE[$key])) {
                 $style[self::STYLE[$key]] = $this->cast(self::STYLE[$key], $value);
-
-                continue;
-            }
-
-            // `w-full` is a boolean in the parser's vocabulary and a value on the wire.
-            if ('fillWidth' === $key && $value) {
-                $layout['width'] = 'fill';
-
-                continue;
-            }
-
-            if ('fillHeight' === $key && $value) {
-                $layout['height'] = 'fill';
-
-                continue;
-            }
-
-            if ('fill' === $key && $value) {
-                $layout['width'] = 'fill';
-                $layout['height'] = 'fill';
 
                 continue;
             }
