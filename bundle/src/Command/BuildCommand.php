@@ -143,6 +143,12 @@ final class BuildCommand extends Command
             }
         }
 
+        // Unconditional, and not part of the composer step: a package carries the PHP
+        // binary for its own target and no others. With the prune inside
+        // installProductionDependencies(), --skip-composer also skipped it and staged
+        // every platform's php-bin archive into the package.
+        $builder->pruneVendorDirectory();
+
         $this->warnAboutPackagedSecrets($builder, $io);
 
         $io->section('Installing the CA bundle and icons');

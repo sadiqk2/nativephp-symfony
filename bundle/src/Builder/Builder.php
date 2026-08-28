@@ -236,18 +236,24 @@ final class Builder
             }
         });
 
-        if (0 !== $exit) {
-            return false;
-        }
+        return 0 === $exit;
+    }
 
-        // php-bin is tens of megabytes of binaries for every platform; only the one
-        // the runtime unzipped is needed, and that lives outside app/.
+    /**
+     * Drop from the staged vendor/ what the package must not carry.
+     *
+     * php-bin is tens of megabytes of binaries for every platform; only the one the
+     * runtime unzipped is needed, and that lives outside app/. vendor/bin is dev-only
+     * entry points. Deliberately not part of installProductionDependencies(): a
+     * package contains the PHP binary for its own target and no others, whether or
+     * not this build reinstalled its dependencies.
+     */
+    public function pruneVendorDirectory(): void
+    {
         $this->fs->remove([
             $this->appPath('vendor/nativephp/php-bin'),
             $this->appPath('vendor/bin'),
         ]);
-
-        return true;
     }
 
     /**
