@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Native\Symfony\Desktop\Testing;
 
+use Native\Symfony\Desktop\Client\RuntimeCallFailed;
 use Native\Symfony\Desktop\Client\RuntimeNotAvailable;
 use Native\Symfony\Desktop\Contract\ClientInterface;
 use Native\Symfony\Desktop\Contract\Response;
@@ -37,7 +38,9 @@ use Native\Symfony\Desktop\Contract\Response;
  *    to "no data"). Reads therefore return their zero values unless scripted;
  *  - when the fake is marked unavailable, every call throws RuntimeNotAvailable
  *    exactly as the real client does outside the runtime — so `isAvailable()`
- *    guards can be tested.
+ *    guards can be tested;
+ *  - a POST or DELETE payload that cannot be JSON-encoded throws RuntimeCallFailed
+ *    rather than being recorded, because the real client cannot send one either.
  */
 final class FakeRuntime implements ClientInterface
 {
@@ -321,6 +324,23 @@ final class FakeRuntime implements ClientInterface
         // test asserting on the throw should not also see a phantom request.
         if (!$this->available) {
             throw RuntimeNotAvailable::forEndpoint($endpoint);
+        }
+
+        // Same reasoning: the wire is JSON, so a body that cannot be encoded is a
+        // call that never happened. The real client hands POST and DELETE payloads
+        // to the HTTP client as its `json` option, which encodes them with
+        // JSON_THROW_ON_ERROR and 512 levels of depth and turns any failure into a
+        // transport error — so recording the call here let assertNotificationSent()
+        // pass for a notification that throws the moment the app runs for real. An
+        // app reaches this with a filename, a clipboard string or a legacy database
+        // column that is not UTF-8. GET is exempt because query parameters go
+        // through http_build_query, which urlencodes bytes and validates nothing.
+        if ('GET' !== $method) {
+            try {
+                json_encode($payload, \JSON_THROW_ON_ERROR, 512);
+            } catch (\JsonException $e) {
+                throw RuntimeCallFailed::transport($method, $endpoint, $e);
+            }
         }
 
         $call = new RecordedCall(\count($this->calls) + 1, $method, $endpoint, $payload);
