@@ -287,6 +287,92 @@ final class MobileBuildTest extends TestCase
         self::assertNotContains('stage/.version', $names);
     }
 
+    public function testASymlinkLoopDoesNotCopyTheTreeOverAndOver(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // `public/storage -> ..` is a link people actually write, and staging follows
+        // symlinks. Without a cycle guard it re-enters the tree until opendir() gives up
+        // on the path length and the iterator stops silently, so the symptom is an app
+        // bundle quietly dozens of times too large — on mobile, where the store enforces
+        // a size limit, that is the difference between shipping and not.
+        $this->givenAnApplication();
+        symlink($this->projectDir, $this->projectDir.'/storage');
+
+        $builder = $this->builder();
+        $copied = $builder->stageApplication();
+
+        self::assertFileExists($builder->stagePath('bin/console'));
+        self::assertFileExists($builder->stagePath('src/Kernel.php'));
+
+        // Each real file exactly once, and no second copy underneath the link.
+        self::assertSame(4, $copied);
+        self::assertFileDoesNotExist($builder->stagePath('storage/src/Kernel.php'));
+    }
+
+    public function testTwoDirectoriesLinkedToEachOtherTerminate(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // A mutual cycle, which an "is my target my own parent" test would miss: the
+        // repeat only shows up as an ancestor further down the path.
+        $this->fs->dumpFile($this->projectDir.'/one/a.txt', 'a');
+        $this->fs->dumpFile($this->projectDir.'/two/b.txt', 'b');
+        symlink($this->projectDir.'/two', $this->projectDir.'/one/to-two');
+        symlink($this->projectDir.'/one', $this->projectDir.'/two/to-one');
+
+        $copied = $this->builder()->stageApplication();
+
+        // Terminates, and every real file is reachable from both sides exactly once more
+        // than its own copy: a.txt, b.txt, one/to-two/b.txt, two/to-one/a.txt.
+        self::assertSame(4, $copied);
+    }
+
+    public function testADanglingSymlinkIsSkippedRatherThanAbortingTheBuild(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // Left behind whenever a link's target is deleted, or an absolute link is carried
+        // over from another machine. copy() throws on one and MobileBuildCommand has no
+        // catch, so the whole build dies with a stack trace over a link nobody needs.
+        $this->givenAnApplication();
+        symlink('/nonexistent/target.txt', $this->projectDir.'/public-storage');
+
+        $builder = $this->builder();
+        $copied = $builder->stageApplication();
+
+        self::assertSame(4, $copied);
+        self::assertFileExists($builder->stagePath('src/Kernel.php'));
+    }
+
+    public function testAssetsInstallSymlinksAreStillStaged(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // The guard must not reject ordinary links. `assets:install --symlink --relative`
+        // is the Flex default, and a guard that skips any directory it has already visited
+        // drops one of the two paths — which one depends on readdir order — packaging an
+        // app whose bundle assets all 404 while the build still reports success.
+        $this->givenAnApplication();
+        $this->fs->dumpFile($this->projectDir.'/vendor/acme/admin-bundle/public/admin.css', 'body{}');
+        $this->fs->mkdir($this->projectDir.'/public/bundles');
+        symlink('../../vendor/acme/admin-bundle/public', $this->projectDir.'/public/bundles/acmeadmin');
+
+        $builder = $this->builder();
+        $builder->stageApplication();
+
+        self::assertFileExists($builder->stagePath('public/bundles/acmeadmin/admin.css'));
+        self::assertFileExists($builder->stagePath('vendor/acme/admin-bundle/public/admin.css'));
+    }
+
     // ── bundle_meta.json: the two guards from §7b ───
 
     public function testBothShapesUseTheirOwnKeyNameForTheSameList(): void

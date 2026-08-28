@@ -152,7 +152,20 @@ final class MobileBuilder
 
         $filtered = new \RecursiveCallbackFilterIterator(
             $directories,
-            fn (\SplFileInfo $current): bool => !$this->isExcluded($this->relative($current->getPathname())),
+            function (\SplFileInfo $current): bool {
+                if ($this->isExcluded($this->relative($current->getPathname()))) {
+                    return false;
+                }
+
+                if ($current->isDir()) {
+                    return !$this->closesASymlinkCycle($current->getPathname());
+                }
+
+                // A dangling symlink reports neither isDir() nor isFile(), and copy() on
+                // one throws — which aborted the whole build over a link whose target
+                // someone deleted months ago.
+                return $current->isFile();
+            },
         );
 
         foreach (new \RecursiveIteratorIterator($filtered, \RecursiveIteratorIterator::SELF_FIRST) as $item) {
@@ -522,6 +535,57 @@ final class MobileBuilder
             'Warm the production cache',
             timeout: 600,
         );
+    }
+
+    /**
+     * Whether entering this directory would re-enter one already on the path to it.
+     *
+     * `FOLLOW_SYMLINKS` has no cycle protection of its own, and a link pointing at one of
+     * its own ancestors — `public/storage -> ..`, which people do write — is otherwise
+     * walked again every time it is reached. Forty levels down the name is long enough
+     * that the link no longer resolves, and `copy()` throws: the build dies with a stack
+     * trace rather than producing an app.
+     *
+     * Comparing against the *ancestor chain* rather than a set of every directory already
+     * visited is the whole point. A global set also collapses two paths that legitimately
+     * resolve to the same place, and `assets:install --symlink` — the Flex default —
+     * produces exactly that: `public/bundles/acme -> ../../vendor/...`. Skipping the loser
+     * there drops every bundle asset from the package while the build still reports
+     * success, and which side loses is readdir order.
+     *
+     * Walking up the ancestors also catches mutual cycles (a -> b, b -> a), which a simple
+     * "is my target my own parent" test does not: the repeated directory always reappears
+     * as an ancestor of itself somewhere along the path.
+     *
+     * Duplicated from the desktop builder rather than shared: the two bundles depend on
+     * nothing of each other's, and a consumer takes either one alone.
+     */
+    private function closesASymlinkCycle(string $path): bool
+    {
+        $real = realpath($path);
+
+        if (false === $real) {
+            return true;
+        }
+
+        $ancestor = \dirname($path);
+        $stop = \dirname($this->sourcePath());
+
+        while ($ancestor !== $stop && '/' !== $ancestor && '.' !== $ancestor) {
+            if (realpath($ancestor) === $real) {
+                return true;
+            }
+
+            $parent = \dirname($ancestor);
+
+            if ($parent === $ancestor) {
+                break;
+            }
+
+            $ancestor = $parent;
+        }
+
+        return false;
     }
 
     private function relative(string $absolute): string
