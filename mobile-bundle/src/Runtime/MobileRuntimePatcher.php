@@ -64,6 +64,27 @@ final class MobileRuntimePatcher
         'ios' => ['Include/Bridge/PHP.c'],
     ];
 
+    /**
+     * The iOS sources naming a bootstrap script, and whether a present one must match.
+     *
+     * Android keeps all four of its paths in `PHPBridge.kt`; iOS spreads them over four
+     * files. The app entry point is only the cold, file-per-request path — the persistent,
+     * webview and queue runtimes each boot `bootstrap/ios/persistent.php` for themselves,
+     * and `NativePHPApp.swift` names `persistent.php` nowhere. Patching the entry point
+     * alone therefore retargeted no `persistent.php` reference at all, and persistent mode
+     * is the default. `AppUpdateManager.swift` probes for mobile-lite's bootstrap instead,
+     * which this port shims nothing for, so it is allowed to match nothing.
+     *
+     * @var array<string, bool>
+     */
+    private const IOS_SOURCES = [
+        'NativePHPApp.swift' => true,
+        'Bridge/PersistentPHPRuntime.swift' => true,
+        'Bridge/WebviewPHPRuntime.swift' => true,
+        'Bridge/PHPQueueWorker.swift' => true,
+        'AppUpdateManager.swift' => false,
+    ];
+
     public function __construct(private readonly string $shimDir = self::SHIM_DIR)
     {
     }
@@ -89,16 +110,16 @@ final class MobileRuntimePatcher
         $applied = [];
         $root = rtrim($projectPath, '/').'/NativePHP';
 
-        foreach (['NativePHPApp.swift', 'AppUpdateManager.swift'] as $file) {
+        foreach (self::IOS_SOURCES as $file => $strict) {
             $path = $root.'/'.$file;
 
             if (!is_file($path)) {
-                // AppUpdateManager references mobile-lite and may legitimately be
-                // absent depending on the upstream version.
+                // A file this upstream version does not ship is not an error; a file it
+                // ships whose paths no longer match is, which is what `strict` decides.
                 continue;
             }
 
-            $applied = [...$applied, ...$this->patchFile($path, 'ios', 'iOS '.$file, strict: 'NativePHPApp.swift' === $file)];
+            $applied = [...$applied, ...$this->patchFile($path, 'ios', 'iOS '.$file, $strict)];
         }
 
         if ([] === $applied) {
