@@ -35,11 +35,11 @@ final class BridgePayloadKeyContractTest extends TestCase
     /**
      * How many methods this bundle calls, all of which the wrapper comparison covers.
      * Named rather than floored so a discovery regression fails loudly instead of
-     * passing with less. Not upstream's whole bridge: 57 of its 62, the five that start
-     * or locate a position having no wrapper here at all. BridgeCoverageTest owns that
-     * number and names those five.
+     * passing with less. All 62 of upstream's bridge now, since the five Geolocation
+     * methods that start or locate a position got wrappers; BridgeCoverageTest owns the
+     * question of whether anything is left unwrapped.
      */
-    private const METHODS_WE_CALL = 57;
+    private const METHODS_WE_CALL = 62;
 
     /**
      * Methods whose upstream payload merges a caller-supplied options array, so its key
@@ -82,6 +82,25 @@ final class BridgePayloadKeyContractTest extends TestCase
         'Camera.PickMedia',
         'Camera.RecordVideo',
         'Microphone.Start',
+    ];
+
+    /**
+     * Keys the wrapper parser reads onto a method upstream does not send them for.
+     *
+     * `PendingGeolocation::get()` picks the method name with one `match` and the payload
+     * with another, and the parser cannot pair the arms — so `fineAccuracy`, which only
+     * the getCurrentPosition arm sends, is read onto all three names. A permission check
+     * has no accuracy to choose and upstream's arm for it carries id and event alone, so
+     * sending one to satisfy this test would be inventing a key.
+     *
+     * Only the reverse direction subtracts these, and each is asserted to still be
+     * over-read, so an entry cannot outlive the limitation it describes.
+     *
+     * @var array<string, list<string>>
+     */
+    private const UNPAIRED_MATCH_ARMS = [
+        'Geolocation.CheckPermissions' => ['fineAccuracy'],
+        'Geolocation.RequestPermissions' => ['fineAccuracy'],
     ];
 
     public function testEveryKeyWeSendIsReadByTheAndroidHost(): void
@@ -188,7 +207,14 @@ final class BridgePayloadKeyContractTest extends TestCase
             }
 
             ++$compared;
-            $missing = array_values(array_diff($upstream[$method], $keys));
+            $overRead = self::UNPAIRED_MATCH_ARMS[$method] ?? [];
+            $missing = array_values(array_diff($upstream[$method], $keys, $overRead));
+
+            if ([] !== array_diff($overRead, $upstream[$method])) {
+                $stale[] = $method;
+
+                continue;
+            }
 
             if (\in_array($method, self::INCOMPLETE_PAYLOAD, true)) {
                 if ([] === $missing) {
@@ -209,7 +235,7 @@ final class BridgePayloadKeyContractTest extends TestCase
         }
 
         self::assertSame(self::METHODS_WE_CALL, $compared, 'Fewer methods were compared than this bundle calls — the discovery has silently narrowed.');
-        self::assertSame([], $stale, "These no longer send less than upstream; drop them from INCOMPLETE_PAYLOAD:\n".implode("\n", $stale));
+        self::assertSame([], $stale, "These no longer send less than upstream; drop them from INCOMPLETE_PAYLOAD or UNPAIRED_MATCH_ARMS:\n".implode("\n", $stale));
         self::assertSame([], $problems, "A key upstream sends and we do not is an instruction the host never receives:\n".implode("\n", $problems));
     }
 
@@ -242,7 +268,7 @@ final class BridgePayloadKeyContractTest extends TestCase
             }
         }
 
-        // Eight, measured rather than hoped for: only 27 of the 57 methods are in
+        // Eight, measured rather than hoped for: only 27 of the 62 methods are in
         // BridgeFunctionRegistration and the rest ship in plugins this checkout does not
         // contain. The floor exists to catch the parser breaking, not to claim coverage —
         // the wrapper check below is the one that compares every method.
