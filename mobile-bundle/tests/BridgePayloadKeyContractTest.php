@@ -34,10 +34,10 @@ final class BridgePayloadKeyContractTest extends TestCase
     /**
      * How many methods this bundle calls, all of which the wrapper comparison covers.
      * Named rather than floored so a discovery regression fails loudly instead of
-     * passing with less. Upstream's bridge is wider — BridgeCoverageTest owns that
-     * number and the three methods nothing here wraps.
+     * passing with less. It is now upstream's whole bridge, the three methods that had
+     * no wrapper here having gained one; BridgeCoverageTest owns that number.
      */
-    private const METHODS_WE_CALL = 54;
+    private const METHODS_WE_CALL = 57;
 
     /**
      * Methods whose upstream payload merges a caller-supplied options array, so its key
@@ -240,7 +240,7 @@ final class BridgePayloadKeyContractTest extends TestCase
             }
         }
 
-        // Eight, measured rather than hoped for: only 27 of the 54 methods are in
+        // Eight, measured rather than hoped for: only 27 of the 57 methods are in
         // BridgeFunctionRegistration and the rest ship in plugins this checkout does not
         // contain. The floor exists to catch the parser breaking, not to claim coverage —
         // the wrapper check below is the one that compares every method.

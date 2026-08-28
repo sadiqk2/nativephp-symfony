@@ -77,9 +77,25 @@ final class ContainerWiringTest extends TestCase
         self::assertInstanceOf(Bridge::class, $container->get(BridgeInterface::class));
     }
 
+    public function testEveryApiClassIsWiredAndHoldsTheBridge(): void
+    {
+        // The extension names the API classes in a literal list, and `autowire(false)`
+        // means one left out of it is a service the container simply does not have —
+        // `$container->get(Api\Scanner::class)` throwing on first boot in an
+        // application, with nothing here to say so first.
+        $container = $this->compiled();
+
+        foreach (glob(__DIR__.'/../src/Api/*.php') ?: [] as $file) {
+            $class = 'Native\Symfony\Mobile\Api\\'.basename($file, '.php');
+
+            self::assertTrue($container->has($class), $class.' is not registered by the extension.');
+            self::assertSame($container->get(BridgeInterface::class), $this->bridgeOf($container->get($class)), $class);
+        }
+    }
+
     public function testFakeBridgeReplacesItWhereverItIsInjected(): void
     {
-        // Not just the alias: every one of the 16 API classes takes the interface, so a
+        // Not just the alias: every one of the 17 API classes takes the interface, so a
         // fake that only replaced the alias would leave them talking to a bridge that is
         // unavailable outside a device — which is the whole point of the flag.
         $container = $this->compiled(['fake_bridge' => true]);

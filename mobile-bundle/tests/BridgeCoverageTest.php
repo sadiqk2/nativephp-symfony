@@ -22,13 +22,14 @@ final class BridgeCoverageTest extends TestCase
      * Upstream methods with no wrapper here, named rather than left to a count that
      * happens to agree.
      *
-     * All three are called as `nativephp_call(\n    'Method',` — the argument on its own
-     * line. The parser used to require the quote immediately after the parenthesis, so
-     * none of them was ever discovered, the count read 54, and a test called
-     * "every upstream bridge method is wrapped" passed while three were not. The same
-     * miscount is why MOBILE-ANALYSIS.md scoped the port at 54 methods.
+     * Empty, and meant to stay that way. It held Dialog.Alert, Scanner.Scan and
+     * PushNotification.RequestPermission: all three are called as
+     * `nativephp_call(\n    'Method',` — the argument on its own line — so the parser
+     * that required the quote immediately after the parenthesis never discovered them,
+     * the count read 54, and a test called "every upstream bridge method is wrapped"
+     * passed while three were not. The parser was widened first; the wrappers followed.
      */
-    private const array UNWRAPPED = ['Dialog.Alert', 'PushNotification.RequestPermission', 'Scanner.Scan'];
+    private const array UNWRAPPED = [];
 
     public function testTheOnlyUnwrappedBridgeMethodsAreTheOnesNamedHere(): void
     {

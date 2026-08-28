@@ -8,8 +8,34 @@ use Native\Symfony\Mobile\Bridge\BridgeInterface;
 
 final class PushNotifications
 {
+    /**
+     * The event name upstream's enrollment sends. The hosts use it only as a label to
+     * echo back, so nothing here has to be able to load it.
+     */
+    public const TOKEN_GENERATED = 'Native\\Mobile\\Events\\PushNotification\\TokenGenerated';
+
     public function __construct(private readonly BridgeInterface $bridge)
     {
+    }
+
+    /**
+     * Ask for permission to send push notifications, and enrol with APNs or FCM.
+     *
+     * The one call here that prompts the user. Asynchronous: a true means the prompt was
+     * requested, and the token arrives later as the event named by $event — which is
+     * also the only way to learn it on a first launch, since {@see self::token()} is
+     * null until enrolment completes.
+     *
+     * @param string|null $id Echoed back in the event so a listener can tell which
+     *                        enrolment answered. Generated when absent, as upstream
+     *                        does, rather than left off the wire
+     */
+    public function enroll(?string $id = null, string $event = self::TOKEN_GENERATED): bool
+    {
+        return $this->bridge->dispatch('PushNotification.RequestPermission', [
+            'id' => $id ?? bin2hex(random_bytes(8)),
+            'event' => $event,
+        ]);
     }
 
     /**
@@ -26,7 +52,7 @@ final class PushNotifications
         return \is_string($token) && '' !== $token ? $token : null;
     }
 
-    /** @return array<string, mixed> Authorisation state; may prompt the user on first call */
+    /** @return array<string, mixed> Authorisation state, read without prompting — that is enroll() */
     public function checkPermission(): array
     {
         return $this->bridge->call('PushNotification.CheckPermission') ?? [];
