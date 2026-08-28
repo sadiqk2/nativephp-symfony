@@ -53,6 +53,8 @@ final class DoctorCommand extends Command
         private readonly ?object $firewallMap = null,
         /** Whether RuntimeRoutesAccessMap is decorating the access map. */
         private readonly bool $exemptRuntimeFirewall = true,
+        /** native_desktop.block_browser_access; the gate the exemption is conditional on. */
+        private readonly bool $blockBrowserAccess = true,
     ) {
         parent::__construct();
     }
@@ -169,11 +171,22 @@ final class DoctorCommand extends Command
         // about. Checking the map here would report the *console's* answer anyway —
         // `running` is false on a command line, so the decorator passes straight
         // through and every healthy app would look broken.
-        if ($this->exemptRuntimeFirewall) {
+        //
+        // Only while the secret gate is on, though. RuntimeRoutesAccessMap hands the
+        // application's rules away only when something is enforcing in their place,
+        // so `block_browser_access: false` — one documented line — silently switches
+        // the exemption off too. Claiming it regardless would report the broken app
+        // as healthy, which is the one answer this command must never give.
+        if ($this->exemptRuntimeFirewall && $this->blockBrowserAccess) {
             $io->text(' ✓ access_control is neutralised on '.RuntimeAccessSubscriber::RUNTIME_PREFIX.' inside the runtime');
             $io->text('   (native_desktop.exempt_runtime_firewall; outside the runtime your firewall still applies).');
 
             return 0;
+        }
+
+        if ($this->exemptRuntimeFirewall) {
+            $io->text(' – exempt_runtime_firewall is on but block_browser_access is off, so nothing exempts');
+            $io->text('   these paths: the exemption applies only while the shared secret is checked.');
         }
 
         $gated = [];
@@ -214,10 +227,16 @@ final class DoctorCommand extends Command
         $io->warning([
             'access_control covers the runtime endpoints, so the runtime cannot boot the app:',
             'its POST is redirected to your login page and AppBootstrapper::boot() never runs.',
-            'These two paths carry the shared secret and are checked by RuntimeAccessSubscriber',
-            'before your firewall sees them, so exempting them costs you nothing.',
-            'Either set native_desktop.exempt_runtime_firewall: true — which does this for you,',
-            'and only while running inside the runtime — or write the firewall yourself:',
+            ...($this->blockBrowserAccess ? [
+                'These two paths carry the shared secret and are checked by RuntimeAccessSubscriber',
+                'before your firewall sees them, so exempting them costs you nothing.',
+                'Either set native_desktop.exempt_runtime_firewall: true — which does this for you,',
+                'and only while running inside the runtime — or write the firewall yourself:',
+            ] : [
+                'Nothing checks the shared secret either: block_browser_access is off, which is also',
+                'why exempt_runtime_firewall cannot help here. Turn the gate back on, or exempt the',
+                'paths in your own firewall and accept that any local process can then reach them:',
+            ]),
         ]);
 
         $io->writeln([

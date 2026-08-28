@@ -243,7 +243,10 @@ final class NativeDesktopBundle extends AbstractBundle
                         'Reject requests that carry neither the _php_native cookie nor the '.
                         'X-NativePHP-Secret header while running inside the runtime. Leave this on: '.
                         'the app is served on a real loopback port and the secret is the only thing '.
-                        'keeping other local processes out.'
+                        'keeping other local processes out. Turning it off also switches off '.
+                        'exempt_runtime_firewall, which hands your access_control away only while '.
+                        'this gate is enforcing in its place — so an app with a rule of ^/ then '.
+                        'stops booting, which native:doctor reports.'
                     )
                 ->end()
                 ->booleanNode('exempt_runtime_firewall')
@@ -255,7 +258,8 @@ final class NativeDesktopBundle extends AbstractBundle
                         'the app boots to a window that never does anything. Outside the runtime your '.
                         'firewall still applies in full — that path dispatches events by name, so it '.
                         'must stay protected on the web. Only applies when the security bundle is '.
-                        'installed; inside the runtime the shared secret is checked first regardless.'
+                        'installed and block_browser_access is on, since the exemption relies on the '.
+                        'shared secret being checked in place of the rules it hands away.'
                     )
                 ->end()
             ->end();
@@ -507,6 +511,7 @@ final class NativeDesktopBundle extends AbstractBundle
                 service('security.access_map')->nullOnInvalid(),
                 service('security.firewall.map')->nullOnInvalid(),
                 $config['exempt_runtime_firewall'] && interface_exists(AccessMapInterface::class),
+                $config['block_browser_access'],
             ])
             ->tag('console.command');
 
