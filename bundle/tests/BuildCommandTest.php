@@ -260,6 +260,58 @@ final class BuildCommandTest extends TestCase
         self::assertSame('DEFAULT', file_get_contents($build.'/IconTemplate@2x.png'));
     }
 
+    /**
+     * A package contains the PHP binary for its own target and no others.
+     *
+     * That is upstream's stated contract: `PrunesVendorDirectory` exists to remove
+     * `app/vendor/nativephp/php-bin` and `app/vendor/bin` from the staged tree, because
+     * php-bin carries a full static PHP runtime for every platform it supports and the
+     * one the packaged app uses is unzipped into `php/` from outside app/. Ours did the
+     * same removal — but from inside `installProductionDependencies()`, so
+     * `--skip-composer` (the documented fast path, and what every other test here uses)
+     * took the prune with it and shipped every platform's binaries plus the dev-only
+     * vendor/bin entry points.
+     */
+    public function testTheStagedVendorNeverCarriesPhpBinWhateverSkipComposerSays(): void
+    {
+        $fs = new Filesystem();
+
+        foreach (['linux/x64', 'linux/arm64', 'mac/x64', 'mac/arm64', 'win/x64'] as $target) {
+            $fs->dumpFile($this->project.'/vendor/nativephp/php-bin/bin/'.$target.'/php-8.4.zip', 'BINARY');
+        }
+
+        $fs->dumpFile($this->project.'/vendor/nativephp/php-bin/cacert.pem', 'PEM');
+        $fs->dumpFile($this->project.'/vendor/bin/phpunit', "#!/bin/sh\n");
+        $fs->dumpFile($this->project.'/vendor/autoload.php', '<?php // autoload');
+        $fs->dumpFile($this->project.'/vendor/symfony/console/Application.php', '<?php // console');
+
+        $tester = $this->execute(
+            ['os' => 'linux', 'arch' => 'x64', '--skip-composer' => true],
+            ['build' => [
+                // Everything but `vendor`: staging it is the whole point here.
+                'exclude' => ['.stubs', 'nativephp'],
+                'keep' => ['var/cache', 'var/log'],
+                'env_defaults' => ['APP_ENV' => 'prod'],
+                'env_remove' => [],
+                'env_keep' => [],
+            ]],
+        );
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode(), $tester->getDisplay());
+
+        $app = $this->project.'/nativephp/build/app';
+
+        self::assertDirectoryDoesNotExist(
+            $app.'/vendor/nativephp/php-bin',
+            'The staged app ships a PHP runtime for every platform php-bin supports.',
+        );
+        self::assertDirectoryDoesNotExist($app.'/vendor/bin');
+
+        // Only those two: the rest of the vendor tree is what the packaged app runs on.
+        self::assertFileExists($app.'/vendor/autoload.php');
+        self::assertFileExists($app.'/vendor/symfony/console/Application.php');
+    }
+
     // ── failures ────────────────────────────────────────────────────────────
 
     public function testAFailingPreBuildHookStopsBeforeAnythingIsStaged(): void
