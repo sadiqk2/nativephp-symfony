@@ -168,6 +168,12 @@ Set `onlyShowContextMenu()` for a tray icon with no popover window. Remember sha
 response convention: every `menu-bar/*` endpoint acknowledges before acting, so a `200` here
 tells you nothing about success.
 
+- **`label`, `tooltip` and `url` are effectively required, and the bundle sends them for
+  you.** The runtime hands `label` to `Tray.setTitle()` and, in tray-only mode, `tooltip`
+  to `Tray.setToolTip()`, both of which take a required string and refuse anything else —
+  and an absent `url` makes the popover load a `file://` path a NativePHP build does not
+  have. `PendingMenuBar::create()` defaults them to `''`, `''` and `/`, matching upstream.
+
 ### Dock (macOS only)
 
 `DockManager` — `menu()`, `show()`, `hide()`, `icon()`, `badge()`, `setBadge()`,
