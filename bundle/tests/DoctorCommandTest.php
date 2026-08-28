@@ -6,12 +6,19 @@ namespace Native\Symfony\Desktop\Tests;
 
 use Native\Symfony\Desktop\Command\DoctorCommand;
 use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Http\BootedController;
+use Native\Symfony\Desktop\Http\EventsController;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Loader\PhpFileLoader;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
+use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\Router;
 
 /**
  * `native:doctor`.
@@ -24,6 +31,21 @@ use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
  */
 final class DoctorCommandTest extends TestCase
 {
+    /** How every SPA front end is routed, and what an app's own routing file holds. */
+    private const CATCH_ALL = "    \$routes->add('app_spa', '/{path}')->controller('App\\\\Controller\\\\SpaController')->requirements(['path' => '.*'])->defaults(['path' => ''])";
+
+    private string $root;
+
+    protected function setUp(): void
+    {
+        $this->root = sys_get_temp_dir().'/np-doctor-'.bin2hex(random_bytes(6));
+    }
+
+    protected function tearDown(): void
+    {
+        (new Filesystem())->remove($this->root);
+    }
+
     public function testItPassesWhenTheRuntimeEndpointsRoute(): void
     {
         $tester = $this->doctor(router: $this->routerMatching(['/_native/api/booted', '/_native/api/events']));
@@ -238,6 +260,129 @@ final class DoctorCommandTest extends TestCase
         self::assertStringContainsString('No router is available', $tester->getDisplay());
     }
 
+    public function testItFailsWhenAnApplicationCatchAllSwallowsTheRuntimeEndpoints(): void
+    {
+        // The check this replaces asked only whether the paths routed *somewhere*.
+        // Every SPA is wired with a `/{path}` front-end route, and if it is declared
+        // before the bundle's import the router hands both endpoints to it — the
+        // compiled matcher demotes a static route behind an earlier dynamic one that
+        // covers it, precisely to keep declaration order. So the runtime POSTs, the
+        // app's own controller answers with its index page, boot() never runs, and
+        // the one command that reports on this used to print a tick.
+        $tester = $this->doctor(router: $this->appRouter(
+            self::CATCH_ALL.";\n".self::bundleImport(),
+        ));
+
+        self::assertSame(Command::FAILURE, $tester->getStatusCode());
+        self::assertStringContainsString('SpaController', $tester->getDisplay());
+        self::assertStringContainsString('before', $tester->getDisplay());
+    }
+
+    public function testItFailsWhenAnApplicationRouteShadowsTheBundlesRouteName(): void
+    {
+        // Why the match's controller and not its route name: RouteCollection::add
+        // replaces silently by name, so a second, stale native_desktop.yaml — or a
+        // hand-written import that kept the bundle's names — leaves `_route` reading
+        // native_desktop_booted while the app's controller is what runs. Nothing
+        // anywhere warns about the collision.
+        $tester = $this->doctor(router: $this->appRouter(
+            self::bundleImport()."\n".
+            "    \$routes->add('native_desktop_booted', '/_native/api/booted')".
+            "->controller('App\\\\Controller\\\\Shadow')->methods(['POST']);",
+        ));
+
+        self::assertSame(Command::FAILURE, $tester->getStatusCode());
+        self::assertStringContainsString('App\\Controller\\Shadow', $tester->getDisplay());
+    }
+
+    public function testTheBundlesOwnRoutesImportPasses(): void
+    {
+        // Drives the real routes.php, so the constant naming the two controllers
+        // cannot drift from the file that registers them.
+        $tester = $this->doctor(router: $this->appRouter(self::bundleImport()));
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode());
+        self::assertStringContainsString(' ✓ POST /_native/api/booted', $tester->getDisplay());
+    }
+
+    public function testACatchAllDeclaredAfterTheImportIsNotAFailure(): void
+    {
+        // The false positive to avoid: this is the correct wiring, and it is what
+        // `native:install` produces. A later dynamic route never displaces a static
+        // one, so both endpoints still reach the bundle.
+        $tester = $this->doctor(router: $this->appRouter(
+            self::bundleImport()."\n".self::CATCH_ALL.';',
+        ));
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode());
+    }
+
+    public function testACatchAllRestrictedToGetIsNotAFailure(): void
+    {
+        // Also not a failure, for a reason worth pinning: the matcher records the
+        // method mismatch and keeps looking, so a GET-only front-end route declared
+        // first still leaves the runtime's POST with the bundle's controller.
+        $tester = $this->doctor(router: $this->appRouter(
+            self::CATCH_ALL."->methods(['GET']);\n".self::bundleImport(),
+        ));
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode());
+    }
+
+    public function testAHandWrittenImportNamingTheInvokeMethodPasses(): void
+    {
+        // `controller: Native\...\BootedController::__invoke` is the same controller
+        // written the long way, and the routing docs show that form, so comparing the
+        // whole `_controller` string would report a working app as broken.
+        $tester = $this->doctor(router: $this->appRouter(
+            "    \$routes->add('booted', '/_native/api/booted')->controller('".
+            addslashes(BootedController::class)."::__invoke')->methods(['POST']);\n".
+            "    \$routes->add('events', '/_native/api/events')->controller('".
+            addslashes(EventsController::class)."::__invoke')->methods(['POST']);",
+        ));
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode());
+    }
+
+    public function testARouteWithNoControllerAtAllIsAFailure(): void
+    {
+        $tester = $this->doctor(router: $this->appRouter(
+            "    \$routes->add('booted', '/_native/api/booted')->methods(['POST']);\n".
+            "    \$routes->add('events', '/_native/api/events')->methods(['POST']);",
+        ));
+
+        self::assertSame(Command::FAILURE, $tester->getStatusCode());
+        self::assertStringContainsString('no controller', $tester->getDisplay());
+    }
+
+    /** The line `native:install` writes into config/routes/native_desktop.yaml. */
+    private static function bundleImport(): string
+    {
+        return "    \$routes->import('".\dirname(__DIR__)."/src/Resources/config/routes.php', 'php');";
+    }
+
+    /**
+     * A real compiled Router over an application routing file, which is the only
+     * thing that can answer an ordering question: a stub matcher has no order.
+     */
+    private function appRouter(string $body): RequestMatcherInterface
+    {
+        (new Filesystem())->mkdir($this->root.'/cache');
+
+        file_put_contents(
+            $this->root.'/app_routes.php',
+            "<?php\n\nuse Symfony\\Component\\Routing\\Loader\\Configurator\\RoutingConfigurator;\n\n".
+            "return static function (RoutingConfigurator \$routes): void {\n".$body."\n};\n",
+        );
+
+        return new Router(
+            new PhpFileLoader(new FileLocator([$this->root])),
+            'app_routes.php',
+            ['cache_dir' => $this->root.'/cache'],
+            new RequestContext(),
+        );
+    }
+
     /** @param list<string> $paths */
     private function routerMatching(array $paths): RequestMatcherInterface
     {
@@ -253,7 +398,12 @@ final class DoctorCommandTest extends TestCase
                     throw new ResourceNotFoundException($request->getPathInfo());
                 }
 
-                return ['_route' => 'native_desktop'];
+                return [
+                    '_route' => 'native_desktop',
+                    '_controller' => '/_native/api/booted' === $request->getPathInfo()
+                        ? BootedController::class
+                        : EventsController::class,
+                ];
             }
         };
     }
