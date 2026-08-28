@@ -16,20 +16,35 @@ use PHPUnit\Framework\TestCase;
  */
 final class BridgeCoverageTest extends TestCase
 {
-    private const int EXPECTED_METHODS = 57;
+    use ParsesNativeCalls;
+
+    private const int EXPECTED_METHODS = 62;
 
     /**
      * Upstream methods with no wrapper here, named rather than left to a count that
      * happens to agree.
      *
-     * Empty, and meant to stay that way. It held Dialog.Alert, Scanner.Scan and
-     * PushNotification.RequestPermission: all three are called as
-     * `nativephp_call(\n    'Method',` — the argument on its own line — so the parser
-     * that required the quote immediately after the parenthesis never discovered them,
-     * the count read 54, and a test called "every upstream bridge method is wrapped"
-     * passed while three were not. The parser was widened first; the wrappers followed.
+     * This list has now been wrong twice for the same reason, and both times the parser
+     * was the cause rather than the port. It first held Dialog.Alert, Scanner.Scan and
+     * PushNotification.RequestPermission, called as `nativephp_call(\n    'Method',` with
+     * the argument on its own line: the parser required the quote immediately after the
+     * parenthesis, so none was discovered, the count read 54, and a test called "every
+     * upstream bridge method is wrapped" passed while three were not. Those three now
+     * have wrappers.
+     *
+     * The five below were invisible one step further on: upstream computes their names
+     * above the call site rather than writing them at it, so the count read 57. Every one
+     * of them starts or locates a position, which `Api\Geolocation` does not do at all —
+     * it addresses a watch that something else started — so they are stated as gaps
+     * rather than wrapped to keep this list short.
      */
-    private const array UNWRAPPED = [];
+    private const array UNWRAPPED = [
+        'Geolocation.CheckPermissions',
+        'Geolocation.GetCurrentPosition',
+        'Geolocation.RequestPermissions',
+        'Geolocation.StartBackgroundWatch',
+        'Geolocation.WatchPosition',
+    ];
 
     public function testTheOnlyUnwrappedBridgeMethodsAreTheOnesNamedHere(): void
     {
@@ -63,27 +78,52 @@ final class BridgeCoverageTest extends TestCase
         self::assertCount(self::EXPECTED_METHODS, $upstream);
     }
 
-    /** @return list<string> */
+    /**
+     * The shapes that were invisible, named so a narrowing of the parser fails here for
+     * the stated reason instead of showing up as a count that is quietly five short.
+     *
+     * `PendingLocationWatch::start()` picks the method with a ternary and
+     * `PendingGeolocation::get()` with a `match` — neither writes the name where the call
+     * is made, which is the only place the old regex looked.
+     */
+    public function testAMethodNameComputedAboveTheCallSiteIsStillDiscovered(): void
+    {
+        $upstream = $this->upstreamMethods();
+
+        if ([] === $upstream) {
+            self::markTestSkipped('Upstream mobile sources not available.');
+        }
+
+        foreach ([
+            'Geolocation.StartBackgroundWatch',
+            'Geolocation.WatchPosition',
+            'Geolocation.CheckPermissions',
+            'Geolocation.GetCurrentPosition',
+            'Geolocation.RequestPermissions',
+        ] as $method) {
+            self::assertContains(
+                $method,
+                $upstream,
+                sprintf('%s is chosen by a ternary or a match rather than written at the call site, and this test has gone blind to it again.', $method),
+            );
+        }
+    }
+
+    /**
+     * Every native method upstream calls, from the parser BridgePayloadKeyContractTest
+     * uses to read the same call sites.
+     *
+     * Shared rather than reimplemented: this used to match a quoted literal straight
+     * after `nativephp_call(`, which is only one of the three shapes upstream writes.
+     * A name assigned above the call — by a ternary in `PendingLocationWatch::start()`,
+     * by a `match` in `PendingGeolocation::get()` — never matched, so five methods were
+     * outside a test whose whole job is to notice a method being outside it.
+     *
+     * @return list<string>
+     */
     private function upstreamMethods(): array
     {
-        $dir = __DIR__.'/../../upstream/np-mobile/src';
-
-        if (!is_dir($dir)) {
-            return [];
-        }
-
-        $methods = [];
-
-        foreach ($this->phpFiles($dir) as $file) {
-            // `\s*` is load-bearing: three upstream calls put the method name on its own
-            // line, and without it they were invisible to this whole test.
-            preg_match_all("/nativephp_call\\(\\s*'([A-Za-z.]+)'/", (string) file_get_contents($file), $matches);
-            foreach ($matches[1] as $method) {
-                $methods[$method] = true;
-            }
-        }
-
-        $names = array_keys($methods);
+        $names = array_keys($this->upstreamPayloads());
         sort($names);
 
         return $names;
@@ -98,21 +138,5 @@ final class BridgeCoverageTest extends TestCase
         }
 
         return $source;
-    }
-
-    /** @return list<string> */
-    private function phpFiles(string $dir): array
-    {
-        $files = [];
-        $it = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS));
-
-        /** @var \SplFileInfo $file */
-        foreach ($it as $file) {
-            if ($file->isFile() && 'php' === $file->getExtension()) {
-                $files[] = $file->getPathname();
-            }
-        }
-
-        return $files;
     }
 }
