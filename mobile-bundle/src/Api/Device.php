@@ -52,8 +52,13 @@ final class Device
         return $this->bridge->dispatch('Device.Vibrate');
     }
 
-    public function toggleFlashlight(?bool $on = null): bool
+    /**
+     * Flip the torch. There is no way to ask for a particular state: both hosts read no
+     * parameters and toggle whatever the torch is currently doing, so a `$on` argument
+     * would be accepted and dropped. Read `state` off the reply to learn where it landed.
+     */
+    public function toggleFlashlight(): bool
     {
-        return $this->bridge->dispatch('Device.ToggleFlashlight', null === $on ? [] : ['on' => $on]);
+        return $this->bridge->dispatch('Device.ToggleFlashlight');
     }
 }

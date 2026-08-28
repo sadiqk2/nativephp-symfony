@@ -19,7 +19,9 @@ use PHPUnit\Framework\TestCase;
  * Both hosts are parsed, because agreeing with one is not agreeing with the contract:
  * `BridgeFunctionRegistration.{kt,swift}` maps a method name to a function class, and that
  * class's body is read for `parameters["key"]`. A method whose class cannot be found is
- * skipped rather than guessed at.
+ * skipped rather than guessed at — which covered barely half the bridge, so the third
+ * check reads upstream's own PHP wrappers instead. Those exist for every method, so
+ * nothing is skipped and the number compared is asserted.
  *
  * Skips when the upstream mobile sources are not checked out, as BridgeCoverageTest does.
  */
@@ -27,6 +29,34 @@ final class BridgePayloadKeyContractTest extends TestCase
 {
     private const ANDROID = 'upstream/np-mobile/resources/androidstudio/app/src/main/java/com/nativephp/mobile/bridge';
     private const IOS = 'upstream/np-mobile/resources/xcode/NativePHP/Bridge';
+    private const UPSTREAM_WRAPPERS = 'upstream/np-mobile/src';
+
+    /**
+     * How many methods this bundle calls, all of which the wrapper comparison covers.
+     * Named rather than floored so a discovery regression fails loudly instead of
+     * passing with less. Upstream's bridge is wider — BridgeCoverageTest owns that
+     * number and the three methods nothing here wraps.
+     */
+    private const METHODS_WE_CALL = 54;
+
+    /**
+     * Methods whose upstream payload merges a caller-supplied options array, so its key
+     * set is open and an extra key of ours cannot be called wrong. Both are Camera's:
+     * `Camera::getPhoto(array $options)` and `Camera::recordVideo(array $options)` pass
+     * the bag through untouched, and no Camera handler is in this checkout to adjudicate
+     * what it accepts — the handlers live in a plugin.
+     */
+    private const OPEN_PAYLOAD = ['Camera.GetPhoto', 'Camera.RecordVideo'];
+
+    /**
+     * Divergences that are real and not yet fixed, named here so they are visible in
+     * code rather than invisible in a skip. Each is asserted to still diverge, so an
+     * entry cannot outlive the problem it describes.
+     */
+    private const KNOWN_DIVERGENT = [
+        'Geolocation.DrainWatchBuffer' => 'ours models one implicit watch and pages with `limit`; upstream keys every buffer call by watch `id` and pages with a byte `cursor`, and returns `fixes` where we read `positions`',
+        'Geolocation.TrimWatchBuffer' => 'same shape: ours sends `keep`, upstream sends the watch `id` and the `upTo` offset it drained to',
+    ];
 
     public function testEveryKeyWeSendIsReadByTheAndroidHost(): void
     {
@@ -36,6 +66,69 @@ final class BridgePayloadKeyContractTest extends TestCase
     public function testEveryKeyWeSendIsReadByTheIosHost(): void
     {
         $this->assertKeysAreRead($this->iosHandlers(), 'iOS');
+    }
+
+    /**
+     * Every key we send must be one upstream's own PHP wrapper sends.
+     *
+     * The two checks above read the native handlers, and can only see the 27 methods
+     * `BridgeFunctionRegistration.{kt,swift}` names — the other half of the bridge ships
+     * in plugins this checkout does not contain, so `continue` dropped them without
+     * saying so. Four wrong keys reached main through that hole. Upstream's own
+     * `src/*.php` wrappers are in the checkout for every method and carry the same wire
+     * contract, so they close it: nothing is skipped, the number of methods compared is
+     * asserted rather than hoped for, and a method with no wrapper at all is a failure
+     * instead of a silent pass.
+     */
+    public function testEveryKeyWeSendIsOneUpstreamsOwnWrapperSends(): void
+    {
+        $upstream = $this->upstreamPayloads();
+
+        if ([] === $upstream) {
+            self::markTestSkipped('Upstream mobile sources not available.');
+        }
+
+        // Upstream wraps everything we do and more, so a floor rather than a count:
+        // upstream's own growth cannot turn this red, but a broken parser can.
+        self::assertGreaterThanOrEqual(self::METHODS_WE_CALL, \count($upstream), 'The upstream wrapper parser has stopped finding payloads.');
+
+        $compared = 0;
+        $withoutWrapper = [];
+        $problems = [];
+        $stale = [];
+
+        foreach ($this->payloadsWeSend() as $method => $keys) {
+            if (!isset($upstream[$method])) {
+                $withoutWrapper[] = $method;
+
+                continue;
+            }
+
+            ++$compared;
+            $unknown = array_values(array_diff($keys, $upstream[$method]));
+
+            if (isset(self::KNOWN_DIVERGENT[$method])) {
+                if ([] === $unknown) {
+                    $stale[] = $method;
+                }
+
+                continue;
+            }
+
+            if ([] !== $unknown && !\in_array($method, self::OPEN_PAYLOAD, true)) {
+                $problems[] = sprintf(
+                    '%s sends [%s] — upstream sends [%s]',
+                    $method,
+                    implode(', ', $unknown),
+                    [] === $upstream[$method] ? 'nothing' : implode(', ', $upstream[$method]),
+                );
+            }
+        }
+
+        self::assertSame([], $withoutWrapper, "No upstream wrapper to compare against, so these went unchecked:\n".implode("\n", $withoutWrapper));
+        self::assertSame(self::METHODS_WE_CALL, $compared, 'Fewer methods were compared than this bundle calls — the discovery has silently narrowed.');
+        self::assertSame([], $stale, "These no longer diverge; drop them from KNOWN_DIVERGENT:\n".implode("\n", $stale));
+        self::assertSame([], $problems, "A key upstream never sends is a call that succeeds and does nothing:\n".implode("\n", $problems));
     }
 
     /** @param array<string, list<string>> $handlers */
@@ -68,9 +161,9 @@ final class BridgePayloadKeyContractTest extends TestCase
         }
 
         // Eight, measured rather than hoped for: only 27 of the 54 methods are in
-        // BridgeFunctionRegistration, the rest are dispatched by a path this checkout does
-        // not expose in parseable form, and only some of ours carry a literal payload. The
-        // floor exists to catch the parser breaking, not to claim full coverage.
+        // BridgeFunctionRegistration and the rest ship in plugins this checkout does not
+        // contain. The floor exists to catch the parser breaking, not to claim coverage —
+        // the wrapper check below is the one that compares every method.
         self::assertGreaterThanOrEqual(8, $checked, sprintf('Almost no %s handlers were matched, so this test has stopped working.', $platform));
         self::assertSame([], $problems, "A key the host never reads is a call that succeeds and does nothing:\n".implode("\n", $problems));
     }
@@ -130,31 +223,13 @@ final class BridgePayloadKeyContractTest extends TestCase
     }
 
     /**
-     * Literal payloads we pass to `call()` and `dispatch()`, keyed by native method.
+     * Payloads we pass to `call()` and `dispatch()`, keyed by native method.
      *
      * @return array<string, list<string>>
      */
     private function payloadsWeSend(): array
     {
-        $found = [];
-
-        foreach (glob(__DIR__.'/../src/Api/*.php') ?: [] as $file) {
-            $source = (string) file_get_contents($file);
-
-            if (!preg_match_all('/->(?:call|dispatch)\(\s*\'([^\']+)\'\s*,\s*(?=\[)/', $source, $matches, \PREG_OFFSET_CAPTURE)) {
-                continue;
-            }
-
-            foreach ($matches[1] as $i => [$method, $_]) {
-                $start = $matches[0][$i][1] + \strlen($matches[0][$i][0]);
-
-                foreach ($this->topLevelKeys($this->balancedArray($source, $start)) as $key) {
-                    $found[$method][$key] = true;
-                }
-            }
-        }
-
-        return array_map(static fn (array $keys): array => array_keys($keys), $found);
+        return $this->phpPayloads(__DIR__.'/../src/Api', '/\$this->bridge->(?:call|dispatch)\s*\(/');
     }
 
     /** @return array<string, list<string>> */
@@ -259,21 +334,377 @@ final class BridgePayloadKeyContractTest extends TestCase
         return substr($source, $open);
     }
 
-    private function balancedArray(string $source, int $start): string
+    /**
+     * Payloads upstream's own wrappers pass to `nativephp_call()`, keyed by native method.
+     *
+     * @return array<string, list<string>>
+     */
+    private function upstreamPayloads(): array
+    {
+        $root = \dirname(__DIR__, 2).'/'.self::UPSTREAM_WRAPPERS;
+
+        if (!is_dir($root)) {
+            return [];
+        }
+
+        return $this->phpPayloads($root, '/nativephp_call\s*\(/', ['Testing', 'Commands', 'Http', 'JumpBridge', 'jump_bridge_functions']);
+    }
+
+    /**
+     * Native method → the payload keys the PHP under $root sends with it.
+     *
+     * One parser for both sides, because two would drift. A payload built in a variable,
+     * a ternary or a `match` counts: the regex the Android and iOS checks used to rely on
+     * only saw a literal array typed straight after the method name, which is why
+     * `Device.ToggleFlashlight`'s `on` and `Perf.StartCaptureWindow`'s `label` were
+     * invisible to a test that reads the handlers ignoring both.
+     *
+     * @param list<string> $skip path fragments to leave out
+     *
+     * @return array<string, list<string>>
+     */
+    private function phpPayloads(string $root, string $callPattern, array $skip = []): array
+    {
+        $found = [];
+
+        foreach ($this->phpFiles($root) as $file) {
+            foreach ($skip as $fragment) {
+                if (str_contains($file, $fragment)) {
+                    continue 2;
+                }
+            }
+
+            $source = (string) file_get_contents($file);
+
+            if (!preg_match_all($callPattern, $source, $matches, \PREG_OFFSET_CAPTURE)) {
+                continue;
+            }
+
+            $bodies = $this->functionBodies($source);
+
+            foreach ($matches[0] as [$literal, $at]) {
+                $body = $this->innermostBody($bodies, $at);
+                $arguments = $this->splitArguments($this->balanced($source, $at + \strlen($literal) - 1, '(', ')'));
+
+                if ([] === $arguments) {
+                    continue;
+                }
+
+                foreach ($this->methodNames($arguments[0], $body) as $method) {
+                    $found[$method] ??= [];
+
+                    foreach ($this->payloadKeys($arguments[1] ?? "'{}'", $body) as $key) {
+                        $found[$method][$key] = true;
+                    }
+                }
+            }
+        }
+
+        return array_map(static fn (array $keys): array => array_keys($keys), $found);
+    }
+
+    /** @return list<string> */
+    private function phpFiles(string $root): array
+    {
+        $files = [];
+        $directory = new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS);
+
+        foreach (new \RecursiveIteratorIterator($directory) as $file) {
+            if ($file instanceof \SplFileInfo && 'php' === $file->getExtension()) {
+                $files[] = $file->getPathname();
+            }
+        }
+
+        sort($files);
+
+        return $files;
+    }
+
+    /**
+     * The method name a call's first argument resolves to: a literal, or every dotted
+     * string assigned to the variable it names (upstream picks one with `match` or `?:`).
+     *
+     * @return list<string>
+     */
+    private function methodNames(string $argument, string $body): array
+    {
+        if (preg_match("/^'([^']+)'$/", $argument, $matches)) {
+            return [$matches[1]];
+        }
+
+        if (!preg_match('/^\$(\w+)$/', $argument, $matches)) {
+            return [];
+        }
+
+        $names = [];
+
+        foreach ($this->assignments($body, $matches[1]) as $statement) {
+            preg_match_all("/'([A-Za-z][A-Za-z0-9_]*\.[A-Za-z][A-Za-z0-9_.]*)'/", $statement, $found);
+
+            foreach ($found[1] as $name) {
+                $names[$name] = true;
+            }
+        }
+
+        return array_keys($names);
+    }
+
+    /**
+     * The keys a call's payload argument carries, whether written inline or built above.
+     *
+     * @return list<string>
+     */
+    private function payloadKeys(string $argument, string $body): array
+    {
+        $keys = [];
+
+        foreach ($this->arrayLiterals($argument) as $literal) {
+            foreach ($this->topLevelKeys($literal) as $key) {
+                $keys[$key] = true;
+            }
+        }
+
+        if ([] !== $keys || !preg_match('/\$(\w+)/', $argument, $matches)) {
+            return array_keys($keys);
+        }
+
+        foreach ($this->assignments($body, $matches[1]) as $statement) {
+            foreach ($this->arrayLiterals($statement) as $literal) {
+                foreach ($this->topLevelKeys($literal) as $key) {
+                    $keys[$key] = true;
+                }
+            }
+        }
+
+        foreach ($this->indexAssignments($body, $matches[1]) as $key) {
+            $keys[$key] = true;
+        }
+
+        return array_keys($keys);
+    }
+
+    /**
+     * The right-hand side of every `$name = ...;` in $body.
+     *
+     * @return list<string>
+     */
+    private function assignments(string $body, string $name): array
+    {
+        $statements = [];
+        $needle = '$'.$name;
+        $offset = 0;
+
+        while (false !== ($at = strpos($body, $needle, $offset))) {
+            $offset = $at + \strlen($needle);
+            $rest = substr($body, $offset);
+
+            if (preg_match('/^\s*=(?!=)/', $rest, $matches)) {
+                $statements[] = $this->statement(substr($rest, \strlen($matches[0])));
+            }
+        }
+
+        return $statements;
+    }
+
+    /**
+     * Keys added one at a time, as `$payload['quality'] = ...`.
+     *
+     * @return list<string>
+     */
+    private function indexAssignments(string $body, string $name): array
+    {
+        preg_match_all('/\$'.preg_quote($name, '/')."\[\s*'([A-Za-z_][A-Za-z0-9_]*)'\s*\]\s*=(?!=)/", $body, $matches);
+
+        return $matches[1];
+    }
+
+    /** Everything up to the `;` that ends the statement, ignoring nesting and strings. */
+    private function statement(string $source): string
+    {
+        $depth = 0;
+        $quote = null;
+
+        for ($i = 0, $length = \strlen($source); $i < $length; ++$i) {
+            $char = $source[$i];
+
+            if (null !== $quote) {
+                if ('\\' === $char) {
+                    ++$i;
+                } elseif ($char === $quote) {
+                    $quote = null;
+                }
+
+                continue;
+            }
+
+            if ("'" === $char || '"' === $char) {
+                $quote = $char;
+            } elseif (false !== strpos('([{', $char)) {
+                ++$depth;
+            } elseif (false !== strpos(')]}', $char)) {
+                --$depth;
+            } elseif (';' === $char && 0 === $depth) {
+                return substr($source, 0, $i);
+            }
+        }
+
+        return $source;
+    }
+
+    /**
+     * Every outermost `[...]` in a chunk of PHP — a `match` has one arm per branch.
+     *
+     * @return list<string>
+     */
+    private function arrayLiterals(string $source): array
+    {
+        $literals = [];
+        $depth = 0;
+        $quote = null;
+        $start = null;
+
+        for ($i = 0, $length = \strlen($source); $i < $length; ++$i) {
+            $char = $source[$i];
+
+            if (null !== $quote) {
+                if ('\\' === $char) {
+                    ++$i;
+                } elseif ($char === $quote) {
+                    $quote = null;
+                }
+
+                continue;
+            }
+
+            if ("'" === $char || '"' === $char) {
+                $quote = $char;
+            } elseif ('[' === $char) {
+                if (0 === $depth) {
+                    $start = $i;
+                }
+
+                ++$depth;
+            } elseif (']' === $char) {
+                if (1 === $depth && null !== $start) {
+                    $literals[] = substr($source, $start, $i - $start + 1);
+                    $start = null;
+                }
+
+                $depth = max(0, $depth - 1);
+            }
+        }
+
+        return $literals;
+    }
+
+    /**
+     * The body of every function in a PHP source, with the offset it starts at.
+     *
+     * @return list<array{int, string}>
+     */
+    private function functionBodies(string $source): array
+    {
+        preg_match_all('/function\s+\w*\s*\(/', $source, $matches, \PREG_OFFSET_CAPTURE);
+
+        $bodies = [];
+
+        foreach ($matches[0] as [$_, $at]) {
+            $open = strpos($source, '{', $at);
+
+            if (false === $open) {
+                continue;
+            }
+
+            $body = $this->balanced($source, $open, '{', '}');
+
+            if ('' !== $body) {
+                $bodies[] = [$open, $body];
+            }
+        }
+
+        return $bodies;
+    }
+
+    /** @param list<array{int, string}> $bodies */
+    private function innermostBody(array $bodies, int $at): string
+    {
+        $found = '';
+        $shortest = \PHP_INT_MAX;
+
+        foreach ($bodies as [$offset, $body]) {
+            $length = \strlen($body);
+
+            if ($offset <= $at && $at < $offset + $length && $length < $shortest) {
+                $found = $body;
+                $shortest = $length;
+            }
+        }
+
+        return $found;
+    }
+
+    /**
+     * A parenthesised argument list split on its top-level commas.
+     *
+     * @return list<string>
+     */
+    private function splitArguments(string $parenthesised): array
+    {
+        $arguments = [];
+        $source = substr($parenthesised, 1, -1);
+        $current = '';
+        $depth = 0;
+        $quote = null;
+
+        for ($i = 0, $length = \strlen($source); $i < $length; ++$i) {
+            $char = $source[$i];
+            $current .= $char;
+
+            if (null !== $quote) {
+                if ('\\' === $char) {
+                    $current .= $source[++$i] ?? '';
+                } elseif ($char === $quote) {
+                    $quote = null;
+                }
+
+                continue;
+            }
+
+            if ("'" === $char || '"' === $char) {
+                $quote = $char;
+            } elseif (false !== strpos('([{', $char)) {
+                ++$depth;
+            } elseif (false !== strpos(')]}', $char)) {
+                --$depth;
+            } elseif (',' === $char && 0 === $depth) {
+                $arguments[] = trim(substr($current, 0, -1));
+                $current = '';
+            }
+        }
+
+        if ('' !== trim($current)) {
+            $arguments[] = trim($current);
+        }
+
+        return $arguments;
+    }
+
+    /** The $open-balanced run starting at $start, brackets or parentheses. */
+    private function balanced(string $source, int $start, string $open, string $close): string
     {
         $depth = 0;
 
         for ($i = $start, $length = \strlen($source); $i < $length; ++$i) {
-            if ('[' === $source[$i]) {
+            if ($open === $source[$i]) {
                 ++$depth;
-            } elseif (']' === $source[$i]) {
+            } elseif ($close === $source[$i]) {
                 if (0 === --$depth) {
                     return substr($source, $start, $i - $start + 1);
                 }
             }
         }
 
-        return '';
+        return substr($source, $start);
     }
 
     /** @return list<string> */

@@ -29,7 +29,7 @@ final class MobileWallet
     /**
      * @param int    $amount   Minor units (cents), never a float — a float here is
      *                         how rounding bugs get into payments
-     * @param string $currency ISO 4217
+     * @param string $currency ISO 4217, lower case on the wire
      *
      * @return array<string, mixed> The created intent, including its id
      */
@@ -37,25 +37,47 @@ final class MobileWallet
     {
         return $this->bridge->call('MobileWallet.CreatePaymentIntent', [
             'amount' => $amount,
-            'currency' => strtoupper($currency),
+            'currency' => strtolower($currency),
             'metadata' => $metadata,
         ]) ?? [];
     }
 
-    public function presentPaymentSheet(string $intentId): bool
-    {
-        return $this->bridge->dispatch('MobileWallet.PresentPaymentSheet', ['intentId' => $intentId]);
+    /**
+     * The sheet needs the intent's client secret and the merchant's own identity — an
+     * intent id alone is not enough to present it, and Stripe's SDK is initialised from
+     * the publishable key here rather than from anything native.
+     *
+     * @param string               $clientSecret        From createPaymentIntent(), not the intent id
+     * @param string               $merchantCountryCode ISO 3166-1 alpha-2
+     * @param array<string, mixed> $options             Passed through to the sheet
+     */
+    public function presentPaymentSheet(
+        string $clientSecret,
+        string $merchantDisplayName,
+        string $publishableKey,
+        string $merchantId,
+        string $merchantCountryCode = 'US',
+        array $options = [],
+    ): bool {
+        return $this->bridge->dispatch('MobileWallet.PresentPaymentSheet', [
+            'clientSecret' => $clientSecret,
+            'merchantDisplayName' => $merchantDisplayName,
+            'publishableKey' => $publishableKey,
+            'merchantId' => $merchantId,
+            'merchantCountryCode' => $merchantCountryCode,
+            'options' => $options,
+        ]);
     }
 
     /** @return array<string, mixed> */
-    public function confirmPayment(string $intentId): array
+    public function confirmPayment(string $paymentIntentId): array
     {
-        return $this->bridge->call('MobileWallet.ConfirmPayment', ['intentId' => $intentId]) ?? [];
+        return $this->bridge->call('MobileWallet.ConfirmPayment', ['paymentIntentId' => $paymentIntentId]) ?? [];
     }
 
     /** @return array<string, mixed> The authoritative outcome — always check this */
-    public function paymentStatus(string $intentId): array
+    public function paymentStatus(string $paymentIntentId): array
     {
-        return $this->bridge->call('MobileWallet.GetPaymentStatus', ['intentId' => $intentId]) ?? [];
+        return $this->bridge->call('MobileWallet.GetPaymentStatus', ['paymentIntentId' => $paymentIntentId]) ?? [];
     }
 }

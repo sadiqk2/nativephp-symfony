@@ -18,15 +18,12 @@ final class Biometric
      * Asynchronous: the outcome arrives as an event, not as a return value. A true
      * here means the prompt was shown, nothing more — treating it as "the user
      * authenticated" would be an authentication bypass.
+     *
+     * The prompt's wording is not ours to set: the bridge method takes no reason or
+     * fallback title, so each OS shows its own copy.
      */
-    public function prompt(string $reason = 'Authenticate', ?string $fallbackTitle = null): bool
+    public function prompt(): bool
     {
-        $payload = ['reason' => $reason];
-
-        if (null !== $fallbackTitle) {
-            $payload['fallbackTitle'] = $fallbackTitle;
-        }
-
-        return $this->bridge->dispatch('Biometric.Prompt', $payload);
+        return $this->bridge->dispatch('Biometric.Prompt');
     }
 }

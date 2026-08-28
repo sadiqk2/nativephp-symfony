@@ -41,7 +41,7 @@ final class ApiTest extends TestCase
         // authentication bypass, which is why these live on dispatch().
         $bridge = new FakeBridge();
 
-        self::assertTrue((new Api\Biometric($bridge))->prompt('Unlock'));
+        self::assertTrue((new Api\Biometric($bridge))->prompt());
         self::assertTrue((new Api\Camera($bridge))->photo());
 
         self::assertSame(['Biometric.Prompt', 'Camera.GetPhoto'], $bridge->methods());
@@ -121,10 +121,11 @@ final class ApiTest extends TestCase
         $bridge = new FakeBridge();
         $bridge->willReturn('MobileWallet.CreatePaymentIntent', ['id' => 'pi_1']);
 
-        (new Api\MobileWallet($bridge))->createPaymentIntent(1999, 'eur');
+        (new Api\MobileWallet($bridge))->createPaymentIntent(1999, 'EUR');
 
         self::assertSame(1999, $bridge->lastCall()['payload']['amount']);
-        self::assertSame('EUR', $bridge->lastCall()['payload']['currency']);
+        // Lower case, as upstream sends it — Stripe's API rejects an upper-case code.
+        self::assertSame('eur', $bridge->lastCall()['payload']['currency']);
     }
 
     public function testWalletPresentationIsNotAPaymentOutcome(): void
@@ -134,7 +135,7 @@ final class ApiTest extends TestCase
 
         $wallet = new Api\MobileWallet($bridge);
 
-        self::assertTrue($wallet->presentPaymentSheet('pi_1'));
+        self::assertTrue($wallet->presentPaymentSheet('pi_1_secret_x', 'Acme', 'pk_test_1', 'merchant.test.acme'));
         self::assertSame('requires_action', $wallet->paymentStatus('pi_1')['status']);
     }
 
@@ -187,8 +188,84 @@ final class ApiTest extends TestCase
 
     public function testFlashlightOmitsStateWhenToggling(): void
     {
+        // Neither host reads a parameter here: both flip whatever the torch is doing. The
+        // old signature took `?bool $on` and sent it as `on`, so asking for a particular
+        // state was accepted and dropped, and the torch could come back the other way.
         $bridge = new FakeBridge();
         (new Api\Device($bridge))->toggleFlashlight();
+
+        self::assertSame([], $bridge->lastCall()['payload']);
+    }
+
+    public function testTheWalletSendsThePaymentIntentIdUnderTheNameStripeReads(): void
+    {
+        // `intentId` is not a key any handler reads: confirm and status both take
+        // `paymentIntentId`, so a confirmation used to come back empty while returning a
+        // successful-looking array, and the payment sheet needs the client secret and the
+        // merchant's identity — an intent id alone cannot present it.
+        $bridge = new FakeBridge();
+        $wallet = new Api\MobileWallet($bridge);
+
+        $wallet->confirmPayment('pi_1');
+        self::assertSame(['paymentIntentId' => 'pi_1'], $bridge->lastCall()['payload']);
+
+        $wallet->paymentStatus('pi_1');
+        self::assertSame(['paymentIntentId' => 'pi_1'], $bridge->lastCall()['payload']);
+
+        $wallet->presentPaymentSheet('pi_1_secret_x', 'Acme', 'pk_test_1', 'merchant.test.acme', 'NL', ['style' => 'dark']);
+        self::assertSame([
+            'clientSecret' => 'pi_1_secret_x',
+            'merchantDisplayName' => 'Acme',
+            'publishableKey' => 'pk_test_1',
+            'merchantId' => 'merchant.test.acme',
+            'merchantCountryCode' => 'NL',
+            'options' => ['style' => 'dark'],
+        ], $bridge->lastCall()['payload']);
+    }
+
+    public function testTheMediaPickerNamesTheMediaTypeTheWayThePickerReadsIt(): void
+    {
+        // `type` is not a key the picker reads — it takes `mediaType`, plus the `maxItems`
+        // cap we never sent. The gallery opened with its own defaults, so asking for
+        // videos gave you everything and a multiple selection was capped at ten.
+        $bridge = new FakeBridge();
+
+        (new Api\Camera($bridge))->pickMedia('video', true, 4);
+
+        self::assertSame(
+            ['mediaType' => 'video', 'multiple' => true, 'maxItems' => 4],
+            $bridge->lastCall()['payload'],
+        );
+    }
+
+    public function testTheTransitionIsNamedTypeAsBothRenderersReadIt(): void
+    {
+        // `UIFunctions.SetTransition` reads `type` and falls back to crossfade without it,
+        // so every transition we asked for animated as a crossfade.
+        $bridge = new FakeBridge();
+
+        (new Api\NativeUi($bridge))->setTransition('slide_from_right');
+
+        self::assertSame(['type' => 'slide_from_right'], $bridge->lastCall()['payload']);
+    }
+
+    public function testTheBiometricPromptCarriesNoWordingBecauseNeitherHostReadsAny(): void
+    {
+        // The old signature took a reason and a fallback title and sent them as `reason`
+        // and `fallbackTitle`; upstream's wrapper has no way to send either, so both were
+        // accepted and dropped while the OS showed its own copy.
+        $bridge = new FakeBridge();
+
+        (new Api\Biometric($bridge))->prompt();
+
+        self::assertSame([], $bridge->lastCall()['payload']);
+    }
+
+    public function testTheCaptureWindowCarriesNoLabel(): void
+    {
+        $bridge = new FakeBridge();
+
+        (new Api\Performance($bridge))->startCaptureWindow();
 
         self::assertSame([], $bridge->lastCall()['payload']);
     }
@@ -200,10 +277,10 @@ final class ApiTest extends TestCase
 
         $browser->open('https://a.test');
         $browser->openInApp('https://b.test');
-        $browser->openAuth('https://c.test', 'myapp');
+        $browser->openAuth('https://c.test');
 
         self::assertSame(['Browser.Open', 'Browser.OpenInApp', 'Browser.OpenAuth'], $bridge->methods());
-        self::assertSame('myapp', $bridge->lastCall()['payload']['callbackScheme']);
+        self::assertSame(['url' => 'https://c.test'], $bridge->lastCall()['payload']);
     }
 
     public function testMicrophoneIsRecordingReadsStatus(): void
