@@ -81,22 +81,37 @@ store has. Use a flat separator if you care.
 
 ### Geolocation — `Api\Geolocation`
 
-This reads unlike a browser's geolocation API on purpose. Background positions are buffered
+This reads unlike a browser's geolocation API on purpose. Background fixes are buffered
 natively, because a phone can accumulate thousands while the app is asleep and waking PHP for
 each would drain the battery.
 
+Every method takes the id of the watch it acts on. Several watches can run at once, and the
+ids come from whatever started them.
+
 ```php
-$geo->backgroundWatchStatus();      // array — active? permission state?
-$geo->drainWatchBuffer(limit: 500); // list<array> — DESTRUCTIVE, the buffer is emptied
-$geo->trimWatchBuffer(keep: 0);     // drop without reading
-$geo->stopBackgroundWatch();
-$geo->clearWatch();
+$watch = $geo->backgroundWatchStatus();   // array|null — the watch that outlived this process
+$id = $watch['id'];
+
+$page = $geo->drainWatch($id, $cursor);   // ['fixes' => list<array>, 'cursor' => int, 'size' => int]
+// ... store $page['fixes'] durably ...
+$geo->trimWatch($id, $page['cursor']);    // DESTRUCTIVE — reclaims the space; offsets rebase to 0
+
+$geo->stopBackgroundWatch($id);           // keeps the buffer, so a final drain gets the tail
+$geo->stopBackgroundWatch($id, clearBuffer: true);
+$geo->clearWatch($id);                    // a foreground watch
 ```
 
-`drainWatchBuffer()` removes what it returns. Persist before doing anything that might fail.
+`drainWatch()` does not remove what it returns: the buffer is append-only and `cursor` is a
+byte offset into it, so persist the cursor that comes back and pass it in next time to read
+only what is new. `trimWatch()` is the destructive half — call it only with a cursor a drain
+returned, and only once those fixes are stored. Without trimming, the buffer grows until the
+watch is stopped with `clearBuffer`.
 
-There is no `start`/`request` method here — starting a background watch is not one of the 54
-bridge methods.
+`backgroundWatchStatus()` returns null when nothing is watching, rather than an array with an
+`active` flag in it — an array is truthy either way.
+
+There is no `start`/`request` method here — starting a watch is not one of the 54 bridge
+methods this bundle wraps.
 
 ### Microphone — `Api\Microphone`
 
