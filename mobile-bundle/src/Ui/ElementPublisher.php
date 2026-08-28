@@ -13,7 +13,7 @@ namespace Native\Symfony\Mobile\Ui;
  *
  * Keeps the `lastNodeHashes` map between frames, which is what enables subtree
  * reuse — upstream leaves that to the caller, and without it every frame is a full
- * repaint.
+ * repaint. The map holds one frame only: it is pruned to the ids each publish emitted.
  */
 class ElementPublisher
 {
@@ -75,6 +75,13 @@ class ElementPublisher
         $emittedIds = [];
 
         $tree = $root->toArray($registry, $nextId, '', 0, $emittedIds, $this->lastNodeHashes);
+
+        // Drop hashes for ids this frame did not emit. A REUSE marker asks the renderer
+        // to keep a node it already holds, and it dropped every node the last frame left
+        // out — so a hash that outlives its frame makes a subtree that unmounts and comes
+        // back splice nothing, and leaves the map growing for the life of the process.
+        // Upstream prunes the same way, in NativeComponent::memoizedToArray().
+        $this->lastNodeHashes = array_intersect_key($this->lastNodeHashes, $emittedIds);
 
         if ($this->isAvailable()) {
             nativephp_element_publish($tree);

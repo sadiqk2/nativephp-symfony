@@ -346,4 +346,73 @@ final class NativeUiAuthoringTest extends TestCase
 
         self::assertArrayNotHasKey('flags', $second);
     }
+
+    public function testASubtreeThatUnmountedAndCameBackIsRepaintedInFull(): void
+    {
+        // A REUSE marker tells the renderer to keep the node it already has. Once a
+        // conditional subtree has been left out of a frame the renderer has dropped it,
+        // so a marker for it on the way back splices nothing and the panel stays gone.
+        // Upstream prunes its hash map to the ids each frame emitted for this reason.
+        $publisher = new ElementPublisher();
+        $registry = new CallbackRegistry();
+        $factory = new ElementFactory();
+
+        $build = static function (bool $withPanel) use ($factory): Element {
+            $children = [$factory->create('text', ['text' => 'always here'])];
+
+            if ($withPanel) {
+                $children[] = $factory->create('text', ['text' => 'conditional panel']);
+            }
+
+            return $factory->create('column', [], $children);
+        };
+
+        $publisher->publish($build(true), $registry);
+        $publisher->publish($build(false), $registry);
+        $back = $publisher->publish($build(true), $registry);
+
+        $panel = $back['children'][1];
+
+        self::assertArrayNotHasKey('flags', $panel);
+        self::assertSame('conditional panel', $panel['props']['text']);
+    }
+
+    public function testTheHashMapOnlyRemembersTheFrameItJustPublished(): void
+    {
+        // Mobile's runtime boots once and serves every frame for the life of the app, so
+        // a map that only ever grows is a leak on a device with a hard memory ceiling —
+        // and every id it holds past its frame is a subtree that can come back blank.
+        $publisher = new ElementPublisher();
+        $registry = new CallbackRegistry();
+        $factory = new ElementFactory();
+
+        $window = static function (int $first) use ($factory): Element {
+            $rows = [];
+
+            for ($i = $first; $i < $first + 5; ++$i) {
+                $rows[] = $factory->create('text', ['text' => 'row '.$i, 'key' => 'r'.$i]);
+            }
+
+            return $factory->create('column', [], $rows);
+        };
+
+        for ($frame = 0; $frame < 300; ++$frame) {
+            $publisher->publish($window($frame), $registry);
+        }
+
+        $hashes = new \ReflectionProperty(ElementPublisher::class, 'lastNodeHashes');
+
+        // Six: the column and the five rows on screen, not the 300 rows scrolled past.
+        self::assertCount(6, $hashes->getValue($publisher));
+
+        // The behavioural half of the same thing: scrolling back to rows the renderer
+        // dropped long ago has to repaint them, not hand it markers for nodes it lost.
+        $back = $publisher->publish($window(0), $registry);
+
+        foreach ($back['children'] as $row) {
+            self::assertArrayNotHasKey('flags', $row);
+        }
+
+        self::assertSame('row 0', $back['children'][0]['props']['text']);
+    }
 }
