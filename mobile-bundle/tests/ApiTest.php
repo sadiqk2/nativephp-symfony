@@ -99,20 +99,97 @@ final class ApiTest extends TestCase
         self::assertTrue((new Api\System($bridge))->isDarkMode());
     }
 
-    public function testGeolocationDrainAcceptsEitherPayloadKey(): void
+    public function testGeolocationClearWatchNamesTheWatchItStops(): void
     {
-        // The native side has been seen using both 'positions' and 'locations'.
-        foreach (['positions', 'locations'] as $key) {
-            $bridge = new FakeBridge();
-            $bridge->willReturn('Geolocation.DrainWatchBuffer', [$key => [['lat' => 1.0, 'lng' => 2.0]]]);
+        // Naming the watch is the whole point of the id: several can run at once, so a
+        // clearWatch that names none stops nothing or stops the wrong stream — and a
+        // location watch that will not stop is a battery drain the user cannot escape.
+        $bridge = new FakeBridge();
 
-            self::assertCount(1, (new Api\Geolocation($bridge))->drainWatchBuffer());
-        }
+        (new Api\Geolocation($bridge))->clearWatch('watch-2');
+
+        self::assertSame(
+            ['method' => 'Geolocation.ClearWatch', 'payload' => ['id' => 'watch-2']],
+            $bridge->lastCall(),
+        );
     }
 
-    public function testGeolocationDrainIsEmptyNotNullWhenNothingBuffered(): void
+    public function testGeolocationStopBackgroundWatchKeepsTheBufferUnlessAsked(): void
     {
-        self::assertSame([], (new Api\Geolocation(new FakeBridge()))->drainWatchBuffer());
+        // The fixes outlive the watch by default so a final drain can collect the tail.
+        $bridge = new FakeBridge();
+        $geolocation = new Api\Geolocation($bridge);
+
+        $geolocation->stopBackgroundWatch('watch-2');
+        self::assertSame(['id' => 'watch-2', 'clearBuffer' => false], $bridge->lastCall()['payload']);
+
+        $geolocation->stopBackgroundWatch('watch-2', clearBuffer: true);
+        self::assertSame(['id' => 'watch-2', 'clearBuffer' => true], $bridge->lastCall()['payload']);
+    }
+
+    public function testGeolocationDrainPagesOneWatchByByteCursor(): void
+    {
+        $bridge = new FakeBridge();
+        $bridge->willReturn('Geolocation.DrainWatchBuffer', [
+            'fixes' => [['latitude' => 51.5, 'longitude' => -0.12]],
+            'cursor' => 4096,
+            'size' => 8192,
+        ]);
+
+        $result = (new Api\Geolocation($bridge))->drainWatch('watch-2', 1024);
+
+        self::assertSame(['id' => 'watch-2', 'cursor' => 1024], $bridge->lastCall()['payload']);
+        self::assertSame(
+            ['fixes' => [['latitude' => 51.5, 'longitude' => -0.12]], 'cursor' => 4096, 'size' => 8192],
+            $result,
+        );
+    }
+
+    public function testGeolocationDrainKeepsTheCursorItWasGivenWhenNothingComesBack(): void
+    {
+        // Falling back to 0 would re-read the whole buffer on the next drain.
+        self::assertSame(
+            ['fixes' => [], 'cursor' => 1024, 'size' => 0],
+            (new Api\Geolocation(new FakeBridge()))->drainWatch('watch-2', 1024),
+        );
+    }
+
+    public function testGeolocationTrimSendsTheOffsetItDrainedTo(): void
+    {
+        $bridge = new FakeBridge();
+
+        (new Api\Geolocation($bridge))->trimWatch('watch-2', 4096);
+
+        self::assertSame(
+            ['method' => 'Geolocation.TrimWatchBuffer', 'payload' => ['id' => 'watch-2', 'upTo' => 4096]],
+            $bridge->lastCall(),
+        );
+    }
+
+    public function testGeolocationBackgroundWatchStatusIsNullWhenNothingIsWatching(): void
+    {
+        // `['active' => false]` is a truthy array: returning it as-is tells every
+        // `if ($status)` caller a watch is running when none is.
+        $bridge = new FakeBridge();
+        $bridge->willReturn('Geolocation.BackgroundWatchStatus', ['active' => false]);
+
+        self::assertNull((new Api\Geolocation($bridge))->backgroundWatchStatus());
+        self::assertNull((new Api\Geolocation(new FakeBridge()))->backgroundWatchStatus());
+    }
+
+    public function testGeolocationBackgroundWatchStatusReturnsTheWatchWithoutItsFlag(): void
+    {
+        $bridge = new FakeBridge();
+        $bridge->willReturn('Geolocation.BackgroundWatchStatus', [
+            'active' => true,
+            'id' => 'watch-2',
+            'bufferBytes' => 8192,
+        ]);
+
+        self::assertSame(
+            ['id' => 'watch-2', 'bufferBytes' => 8192],
+            (new Api\Geolocation($bridge))->backgroundWatchStatus(),
+        );
     }
 
     public function testWalletAmountsStayIntegerMinorUnits(): void

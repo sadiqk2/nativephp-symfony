@@ -49,13 +49,37 @@ final class BridgePayloadKeyContractTest extends TestCase
     private const OPEN_PAYLOAD = ['Camera.GetPhoto', 'Camera.RecordVideo'];
 
     /**
-     * Divergences that are real and not yet fixed, named here so they are visible in
-     * code rather than invisible in a skip. Each is asserted to still diverge, so an
-     * entry cannot outlive the problem it describes.
+     * Divergences that are real and not yet fixed, named here so they would be visible
+     * in code rather than invisible in a skip. Each is asserted to still diverge, so an
+     * entry cannot outlive the problem it describes — which is why this is now empty:
+     * both Geolocation buffer methods that were listed here have been fixed.
+     *
+     * @var array<string, string>
      */
-    private const KNOWN_DIVERGENT = [
-        'Geolocation.DrainWatchBuffer' => 'ours models one implicit watch and pages with `limit`; upstream keys every buffer call by watch `id` and pages with a byte `cursor`, and returns `fixes` where we read `positions`',
-        'Geolocation.TrimWatchBuffer' => 'same shape: ours sends `keep`, upstream sends the watch `id` and the `upTo` offset it drained to',
+    private const KNOWN_DIVERGENT = [];
+
+    /**
+     * Methods where upstream's payload carries a key this bundle deliberately omits.
+     *
+     * All five omit the same pair — `id` and `event`, the correlation handle and
+     * listener class that route an asynchronous result back to PHP. This bundle
+     * implements no PHP-side receiver for mobile events (see docs/mobile-api.md), so
+     * there is nothing for a correlation id to correlate; the result reaches the page
+     * through the host's JS bridge instead.
+     *
+     * Not to be confused with Geolocation's watch `id`, which is a control handle
+     * rather than an event correlation: `clearWatch`, `drainWatch` and `trimWatch`
+     * each address one of several concurrent streams with it, so omitting that one was
+     * a defect and is fixed. Each entry here is asserted to still be incomplete.
+     *
+     * @var list<string>
+     */
+    private const INCOMPLETE_PAYLOAD = [
+        'Biometric.Prompt',
+        'Camera.GetPhoto',
+        'Camera.PickMedia',
+        'Camera.RecordVideo',
+        'Microphone.Start',
     ];
 
     public function testEveryKeyWeSendIsReadByTheAndroidHost(): void
@@ -129,6 +153,62 @@ final class BridgePayloadKeyContractTest extends TestCase
         self::assertSame(self::METHODS_WE_CALL, $compared, 'Fewer methods were compared than this bundle calls — the discovery has silently narrowed.');
         self::assertSame([], $stale, "These no longer diverge; drop them from KNOWN_DIVERGENT:\n".implode("\n", $stale));
         self::assertSame([], $problems, "A key upstream never sends is a call that succeeds and does nothing:\n".implode("\n", $problems));
+    }
+
+    /**
+     * And the other direction: every key upstream's wrapper sends, we must send too.
+     *
+     * The check above only catches a key we invent. An omitted key is invisible to it,
+     * because an empty payload differs from nothing upstream sends — which is how
+     * `Geolocation.ClearWatch` and `Geolocation.StopBackgroundWatch` came to send no
+     * payload at all while upstream addresses a specific watch by `id`. A watch that
+     * cannot be named cannot be stopped, and a location stream that will not stop is a
+     * battery drain the user cannot escape.
+     *
+     * The five methods that legitimately send less are named in INCOMPLETE_PAYLOAD with
+     * the reason, and asserted to still send less so the list cannot outlive the gap.
+     */
+    public function testEveryKeyUpstreamsOwnWrapperSendsIsOneWeSendToo(): void
+    {
+        $upstream = $this->upstreamPayloads();
+
+        if ([] === $upstream) {
+            self::markTestSkipped('Upstream mobile sources not available.');
+        }
+
+        $compared = 0;
+        $problems = [];
+        $stale = [];
+
+        foreach ($this->payloadsWeSend() as $method => $keys) {
+            if (!isset($upstream[$method])) {
+                continue;
+            }
+
+            ++$compared;
+            $missing = array_values(array_diff($upstream[$method], $keys));
+
+            if (\in_array($method, self::INCOMPLETE_PAYLOAD, true)) {
+                if ([] === $missing) {
+                    $stale[] = $method;
+                }
+
+                continue;
+            }
+
+            if ([] !== $missing) {
+                $problems[] = sprintf(
+                    '%s omits [%s] — upstream sends [%s]',
+                    $method,
+                    implode(', ', $missing),
+                    implode(', ', $upstream[$method]),
+                );
+            }
+        }
+
+        self::assertSame(self::METHODS_WE_CALL, $compared, 'Fewer methods were compared than this bundle calls — the discovery has silently narrowed.');
+        self::assertSame([], $stale, "These no longer send less than upstream; drop them from INCOMPLETE_PAYLOAD:\n".implode("\n", $stale));
+        self::assertSame([], $problems, "A key upstream sends and we do not is an instruction the host never receives:\n".implode("\n", $problems));
     }
 
     /** @param array<string, list<string>> $handlers */
