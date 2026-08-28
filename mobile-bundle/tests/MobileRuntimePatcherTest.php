@@ -159,6 +159,72 @@ final class MobileRuntimePatcherTest extends TestCase
         (new MobileRuntimePatcher())->patchIos($this->root.'/ios');
     }
 
+    /**
+     * Every iOS source that names a bootstrap script, read from the host's own tree.
+     *
+     * A fixture of these paths is a copy of the one thing that has to stay in step, so
+     * this mirrors the Xcode project `native:mobile:install` copies. Upstream spreads the
+     * paths over four Swift files: `NativePHPApp.swift` and the persistent, webview and
+     * queue runtimes, each of which boots `bootstrap/ios/persistent.php` for itself. A
+     * surviving path points into a package a Symfony app does not have, and the runtime
+     * that reads it never boots — an app that launches and then answers nothing.
+     */
+    public function testEveryIosBootstrapPathInTheHostsOwnSourcesIsRetargeted(): void
+    {
+        $upstream = \dirname(__DIR__, 2).'/upstream/np-mobile/resources/xcode/NativePHP';
+
+        if (!is_dir($upstream)) {
+            self::markTestSkipped('upstream/np-mobile is not checked out; clone it to check the bootstrap paths.');
+        }
+
+        $root = $this->root.'/ios';
+        (new Filesystem())->mirror($upstream, $root.'/NativePHP');
+
+        self::assertGreaterThanOrEqual(
+            7,
+            array_sum($this->iosBootstrapSites($root)),
+            'The iOS sources barely name a bootstrap script, so this test is checking nothing.',
+        );
+
+        (new MobileRuntimePatcher())->patchIos($root);
+
+        self::assertSame(
+            [],
+            $this->iosBootstrapSites($root),
+            'These iOS sources still load PHP out of vendor/nativephp/mobile.',
+        );
+    }
+
+    /**
+     * Which Swift sources under a project still name a bootstrap script, and how often.
+     *
+     * `mobile-lite` is deliberately not counted: `AppUpdateManager.swift` probes for that
+     * other package's bootstrap and this port shims nothing there.
+     *
+     * @return array<string, int>
+     */
+    private function iosBootstrapSites(string $root): array
+    {
+        $found = [];
+        $files = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root, \FilesystemIterator::SKIP_DOTS));
+
+        foreach ($files as $file) {
+            if (!$file->isFile() || 'swift' !== $file->getExtension()) {
+                continue;
+            }
+
+            $sites = substr_count((string) file_get_contents($file->getPathname()), '/vendor/nativephp/mobile/bootstrap/');
+
+            if ($sites > 0) {
+                $found[str_replace($root.'/', '', $file->getPathname())] = $sites;
+            }
+        }
+
+        ksort($found);
+
+        return $found;
+    }
+
     private function bridge(): string
     {
         return $this->root.'/android/app/src/main/java/com/nativephp/mobile/bridge/PHPBridge.kt';
