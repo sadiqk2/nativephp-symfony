@@ -213,4 +213,22 @@ final class ApiTest extends TestCase
 
         self::assertTrue((new Api\Microphone($bridge))->isRecording());
     }
+
+    public function testShareFileNamesThePathTheWayTheShareSheetReadsIt(): void
+    {
+        // Upstream's own wrapper (np-mobile src/Share.php) sends `filePath` and `message`
+        // for a file — only a URL share is `url`/`title`/`text`. Sending `path` and `text`
+        // meant the sheet opened with nothing attached while dispatch() returned true.
+        $bridge = new FakeBridge();
+        $share = new Api\Share($bridge);
+
+        $share->file('/docs/invoice.pdf', 'Invoice', 'Here you go');
+        self::assertSame(
+            ['title' => 'Invoice', 'message' => 'Here you go', 'filePath' => '/docs/invoice.pdf'],
+            $bridge->lastCall()['payload'],
+        );
+
+        $share->url('https://a.test', 'Link', 'Have a look');
+        self::assertSame(['url', 'title', 'text'], array_keys($bridge->lastCall()['payload']));
+    }
 }

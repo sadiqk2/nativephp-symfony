@@ -21,13 +21,20 @@ final class Share
         ]);
     }
 
-    /** @param string $path An absolute on-device path the app can read */
+    /**
+     * A file share names its keys differently from a URL share: the sheet reads
+     * `filePath` and `message`, not `path` and `text` (see upstream's own wrapper,
+     * np-mobile src/Share.php). Sending the URL spelling opened a sheet with nothing
+     * attached, and dispatch() still returned true.
+     *
+     * @param string $path An absolute on-device path the app can read
+     */
     public function file(string $path, string $title = '', string $text = ''): bool
     {
         return $this->bridge->dispatch('Share.File', [
-            'path' => $path,
             'title' => $title,
-            'text' => $text,
+            'message' => $text,
+            'filePath' => $path,
         ]);
     }
 }
