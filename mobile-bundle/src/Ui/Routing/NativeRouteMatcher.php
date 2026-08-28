@@ -176,16 +176,25 @@ final class NativeRouteMatcher
     }
 
     /**
-     * The canonical form of a pattern: exactly one leading slash, as upstream's
-     * `NativeRouter::register()` stores it.
+     * The canonical form of a pattern: exactly one leading slash and the segments {@see matches()}
+     * would compare, joined back up.
      *
-     * Only the stored key is normalised — the segment matcher does not care — but the
-     * manifest carries these strings verbatim to the device, and a stable form keeps the
-     * baked list and the runtime dump comparable by eye when a boot decision goes wrong.
+     * Upstream's `NativeRouter::register()` only fixes the leading slash, which is enough for
+     * a registry that lets the last registration win. It is not enough here, because this is
+     * also the key {@see NativeRouteRegistry} looks a path up under, and matching is
+     * segment-wise: `/items/new`, `/items/new/` and `/items//new` are one pattern to
+     * `BootPlanner` and to `matches()`, so they have to be one key. Leaving them as three cost
+     * two silent failures — the duplicate-pattern guard was bypassed by a spelling, and the
+     * exact-over-placeholder precedence in `resolve()` flipped to declaration order for any
+     * start path not spelled byte-for-byte like its pattern, which for a deep link is normal.
+     *
+     * The manifest carries these strings to the device, and the device compares segments too,
+     * so canonicalising here changes no boot decision — it only makes the baked list and the
+     * runtime dump comparable by eye when one goes wrong.
      */
     public static function normalizePattern(string $pattern): string
     {
-        return '/'.ltrim($pattern, '/');
+        return '/'.implode('/', self::segments($pattern));
     }
 
     /**

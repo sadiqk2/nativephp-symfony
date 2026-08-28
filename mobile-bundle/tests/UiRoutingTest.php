@@ -162,6 +162,38 @@ final class UiRoutingTest extends TestCase
         $registry->register('/items', HomeScreen::class);
     }
 
+    /**
+     * Canonicalisation has to reach as deep as matching does, or the duplicate guard above is
+     * bypassed by a spelling: `matches()` is segment-wise, so `/items/new/` and `/items//new`
+     * are the same pattern to the device, and keying them separately lets two different
+     * screens claim it — the coin toss decided by discovery order that the guard exists to
+     * refuse.
+     */
+    public function testEquivalentPatternSpellingsAreOnePattern(): void
+    {
+        $registry = new NativeRouteRegistry();
+        $registry->register('/items/new', ItemsController::class, 'create');
+
+        // Same screen, other spellings: tolerated, and they must not add entries.
+        $registry->register('/items/new/', ItemsController::class, 'create');
+        $registry->register('items//new', ItemsController::class, 'create');
+
+        self::assertSame(['/items/new'], $registry->patterns());
+        self::assertSame('/items/new', $registry->get('/items/new/')?->pattern);
+
+        // One declaration, one HTTP route, at the canonical path. The route name is derived
+        // from the pattern, so two spellings of it collide on one name and Symfony's
+        // collection silently keeps whichever came last — leaving the browser answering for a
+        // pattern `resolve()` does not pick.
+        $collection = (new NativeScreenRouteLoader($registry))->load('.', 'native_screens');
+        self::assertSame(['native_screen.items_new'], array_keys($collection->all()));
+        self::assertSame('/items/new', $collection->get('native_screen.items_new')?->getPath());
+        self::assertSame('/items/new', $collection->get('native_screen.items_new')?->getDefault('_native_screen'));
+
+        $this->expectException(\LogicException::class);
+        $registry->register('/items/new/', HomeScreen::class);
+    }
+
     public function testResolvePrefersAnExactPatternOverAPlaceholder(): void
     {
         $registry = new NativeRouteRegistry();
@@ -171,6 +203,16 @@ final class UiRoutingTest extends TestCase
 
         self::assertSame('/items/new', $registry->resolve('/items/new')?->route->pattern);
         self::assertSame('/items/{id}', $registry->resolve('/items/42')?->route->pattern);
+
+        // …and for every spelling of that path the matcher calls equivalent. A start path is a
+        // deep link, not something a developer typed, so a trailing or doubled slash is normal
+        // input — and the device boots all of these natively, because BootPlanner compares
+        // segments. Anything reaching the placeholder here renders the wrong screen: item
+        // "new" instead of the create screen, decided by declaration order.
+        foreach (['/items/new/', 'items/new', '/items//new', '//items/new', '/items/new?from=push'] as $path) {
+            self::assertSame('/items/new', $registry->resolve($path)?->route->pattern, $path);
+            self::assertSame([], $registry->resolve($path)?->parameters, $path);
+        }
     }
 
     public function testResolveCarriesParametersPathAndTolerantSlashes(): void
@@ -189,9 +231,13 @@ final class UiRoutingTest extends TestCase
         // it was reached by, and pattern + params does not round-trip `/items//42`.
         self::assertSame('/items/42', $match->path);
 
-        // A trailing slash misses the exact-key lookup and is caught by the segment matcher,
-        // which is how upstream behaves too.
-        self::assertSame('/items/{id}', $registry->resolve('/items/42/')?->route->pattern);
+        // Slashes are insignificant here because they are insignificant to `BootPlanner`, which
+        // is what decided to boot natively in the first place. Upstream's `NativeRouter::resolve()`
+        // disagrees with its own boot planner on all three of these — its regex is anchored, so
+        // `/items/42/` and `/items//42` return null and the runloop starts with nothing to render.
+        foreach (['/items/42/', '/items//42', 'items/42'] as $path) {
+            self::assertSame('/items/{id}', $registry->resolve($path)?->route->pattern, $path);
+        }
 
         self::assertNull($registry->resolve('/orders/42'));
         self::assertTrue($registry->isNativePath('/items/42'));

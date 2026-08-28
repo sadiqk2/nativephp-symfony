@@ -15,7 +15,7 @@ namespace Native\Symfony\Mobile\Ui\Routing;
 final class NativeRoute
 {
     /**
-     * @param string      $pattern URI pattern in Laravel syntax, canonicalised with one leading slash
+     * @param string      $pattern URI pattern in Laravel syntax, canonicalised by {@see NativeRouteMatcher::normalizePattern()}
      * @param class-string $screen  The controller/component class that renders the screen
      * @param string|null $action  Method on $screen, or null when the class itself is the screen
      * @param string|null $layout  Opaque layout identifier, for the component lifecycle to interpret
