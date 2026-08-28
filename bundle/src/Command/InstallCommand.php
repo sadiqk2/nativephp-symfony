@@ -91,6 +91,8 @@ final class InstallCommand extends Command
         $fs->mirror($source, $target, options: ['override' => true, 'delete' => true]);
         $io->text(sprintf('Copied to %s', $target));
 
+        $this->keepDefaultIcons($fs, $source, $target, $io);
+
         $io->section('Patching the runtime for Symfony');
         foreach ($this->patcher->patch($target) as $line) {
             $io->text(' • '.$line);
@@ -131,6 +133,40 @@ final class InstallCommand extends Command
         $io->text('Check the wiring first with: bin/console native:doctor');
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * The runtime's default icons, kept where the build can find them again.
+     *
+     * `resources/build/` is a sibling of the `resources/electron/` this installer is
+     * pointed at, and it *is* upstream's $NATIVEPHP_BUILD_PATH: its .gitignore whitelists
+     * exactly `icon.png`, `IconTemplate.png` and `IconTemplate@2x.png`, so every packaged
+     * Laravel app carries all three whether or not it has icons of its own. `native:build`
+     * assembles that directory from scratch here, and nothing else in this port has a copy
+     * of the two tray templates — so they are taken now, while the source tree is still to
+     * hand, and left beside the Electron project's own build/icon.png.
+     *
+     * Without them the packaged app hands Electron a dock icon and a tray image that do
+     * not exist, and Electron will not load a Tray from a missing file.
+     */
+    private function keepDefaultIcons(Filesystem $fs, string $source, string $target, SymfonyStyle $io): void
+    {
+        $kept = [];
+
+        foreach (['icon.png', 'IconTemplate.png', 'IconTemplate@2x.png'] as $icon) {
+            $default = \dirname($source).'/build/'.$icon;
+
+            // The mirror has already brought over resources/electron/build/icon.png, and
+            // that is the same image; only take what is missing.
+            if (is_file($default) && !is_file($target.'/build/'.$icon)) {
+                $fs->copy($default, $target.'/build/'.$icon);
+                $kept[] = $icon;
+            }
+        }
+
+        if ([] !== $kept) {
+            $io->text('Default icons: '.implode(', ', $kept));
+        }
     }
 
     /**

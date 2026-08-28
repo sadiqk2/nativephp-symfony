@@ -122,20 +122,30 @@ final class RunCommand extends Command
     }
 
     /**
-     * $NATIVEPHP_BUILD_PATH needs exactly three things: an icon, a CA bundle and
-     * a PHP binary. Laravel gets the first two from the desktop package's
-     * resources/build; we take them from the installed Electron project, which
-     * carries its own build/icon.png.
+     * $NATIVEPHP_BUILD_PATH needs an icon, the two tray templates, a CA bundle and a
+     * PHP binary. Laravel gets everything but the binary from the desktop package's
+     * resources/build, whose .gitignore whitelists exactly icon.png, IconTemplate.png
+     * and IconTemplate@2x.png; we take them from the installed Electron project, where
+     * native:install leaves the same three.
+     *
+     * The templates are not decoration: MenuBar::create() defaults its tray image to
+     * state.icon with icon.png swapped for IconTemplate.png, and Electron refuses a Tray
+     * image it cannot load — so leaving them out breaks the menu bar in development
+     * while everything else works.
      */
     private function prepareBuildPath(string $buildPath, string $php, string $electron, SymfonyStyle $io): int
     {
         $fs = new \Symfony\Component\Filesystem\Filesystem();
         $fs->mkdir($buildPath.'/php');
 
-        if (!is_file($buildPath.'/icon.png')) {
-            foreach ([$electron.'/build/icon.png', $electron.'/../build/icon.png'] as $candidate) {
+        foreach (['icon.png', 'IconTemplate.png', 'IconTemplate@2x.png'] as $icon) {
+            if (is_file($buildPath.'/'.$icon)) {
+                continue;
+            }
+
+            foreach ([$electron.'/build/'.$icon, $electron.'/../build/'.$icon] as $candidate) {
                 if (is_file($candidate)) {
-                    $fs->copy($candidate, $buildPath.'/icon.png');
+                    $fs->copy($candidate, $buildPath.'/'.$icon);
                     break;
                 }
             }
