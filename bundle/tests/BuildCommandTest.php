@@ -236,6 +236,30 @@ final class BuildCommandTest extends TestCase
         self::assertStringNotContainsString('STRIPE_KEY', $env);
     }
 
+    /**
+     * src/main/index.js reads $NATIVEPHP_BUILD_PATH/icon.png for the dock and the Linux
+     * window icon, and menuBar.ts reads the same path with icon.png swapped for
+     * IconTemplate.png for the tray MenuBar::create() builds by default. Upstream's
+     * build path ships all three, so a Laravel app with an empty public/ still has them.
+     * Ours was assembled from nothing and the build said "electron-builder will use its
+     * default" — which is only true of the installer icon, not of the three files the
+     * runtime itself opens.
+     */
+    public function testABuildWithoutAppIconsStillCarriesTheRuntimesOwn(): void
+    {
+        (new Filesystem())->remove($this->project.'/public/icon.png');
+
+        $tester = $this->execute(['os' => 'linux', '--skip-composer' => true]);
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode(), $tester->getDisplay());
+
+        $build = $this->project.'/nativephp/build';
+
+        self::assertSame('DEFAULT', file_get_contents($build.'/icon.png'));
+        self::assertSame('DEFAULT', file_get_contents($build.'/IconTemplate.png'));
+        self::assertSame('DEFAULT', file_get_contents($build.'/IconTemplate@2x.png'));
+    }
+
     // ── failures ────────────────────────────────────────────────────────────
 
     public function testAFailingPreBuildHookStopsBeforeAnythingIsStaged(): void
@@ -316,10 +340,18 @@ final class BuildCommandTest extends TestCase
             'publish:win-x64' => 'x',
         ];
 
-        (new Filesystem())->dumpFile(
+        $fs = new Filesystem();
+
+        $fs->dumpFile(
             $this->project.'/nativephp/electron/package.json',
             json_encode(['name' => 'nativephp', 'version' => '1.0.0', 'scripts' => $scripts], \JSON_PRETTY_PRINT | \JSON_THROW_ON_ERROR),
         );
+
+        // native:install leaves the runtime's default icons here: build/icon.png comes
+        // from resources/electron, the two tray templates from resources/build.
+        $fs->dumpFile($this->project.'/nativephp/electron/build/icon.png', 'DEFAULT');
+        $fs->dumpFile($this->project.'/nativephp/electron/build/IconTemplate.png', 'DEFAULT');
+        $fs->dumpFile($this->project.'/nativephp/electron/build/IconTemplate@2x.png', 'DEFAULT');
     }
 
     /** @return array<string, string> */

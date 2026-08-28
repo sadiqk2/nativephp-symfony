@@ -37,6 +37,8 @@ final class RunCommandTest extends TestCase
         $fs->dumpFile($this->project.'/nativephp/electron/package.json', '{"name":"nativephp"}');
         $fs->mkdir($this->project.'/nativephp/electron/node_modules');
         $fs->dumpFile($this->project.'/nativephp/electron/build/icon.png', 'png');
+        $fs->dumpFile($this->project.'/nativephp/electron/build/IconTemplate.png', 'tray');
+        $fs->dumpFile($this->project.'/nativephp/electron/build/IconTemplate@2x.png', 'tray2x');
         $fs->dumpFile($this->project.'/vendor/nativephp/php-bin/cacert.pem', 'CERT');
 
         $fs->dumpFile($this->stubs.'/npx', sprintf(
@@ -66,6 +68,11 @@ final class RunCommandTest extends TestCase
         $build = $this->project.'/nativephp/build';
 
         self::assertFileExists($build.'/icon.png');
+        // MenuBar::create() defaults its tray image to state.icon with icon.png swapped
+        // for IconTemplate.png, and Electron refuses a Tray image it cannot load — so
+        // the templates belong in the build path just as much as the icon does.
+        self::assertSame('tray', file_get_contents($build.'/IconTemplate.png'));
+        self::assertSame('tray2x', file_get_contents($build.'/IconTemplate@2x.png'));
         self::assertSame('CERT', file_get_contents($build.'/cacert.pem'));
         self::assertFileExists($build.'/php/php');
         self::assertTrue(is_executable($build.'/php/php'));

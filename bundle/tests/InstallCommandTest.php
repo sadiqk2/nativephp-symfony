@@ -164,6 +164,40 @@ final class InstallCommandTest extends TestCase
         self::assertStringContainsString("['bin/console', 'native:config']", $php);
     }
 
+    /**
+     * The desktop package keeps the runtime's default icons in `resources/build/`, a
+     * sibling of the `resources/electron/` this installer is pointed at, and its
+     * `.gitignore` whitelists exactly `icon.png`, `IconTemplate.png` and
+     * `IconTemplate@2x.png`. That directory *is* upstream's $NATIVEPHP_BUILD_PATH, so a
+     * packaged Laravel app always has all three. Ours is assembled from nothing, and
+     * nothing else in this port has a copy of the two tray templates — so they are
+     * taken now, while the source tree is still to hand, and kept next to the Electron
+     * project's own build resources for `native:build` and `native:run` to seed from.
+     */
+    public function testItKeepsTheRuntimesDefaultIcons(): void
+    {
+        $fs = new Filesystem();
+        $fs->dumpFile($this->source.'/build/icon.png', 'PROJECT');
+        $fs->dumpFile(\dirname($this->source).'/build/IconTemplate.png', 'TEMPLATE');
+        $fs->dumpFile(\dirname($this->source).'/build/IconTemplate@2x.png', 'TEMPLATE2X');
+
+        $this->install();
+
+        $build = $this->project.'/nativephp/electron/build';
+
+        self::assertSame('PROJECT', file_get_contents($build.'/icon.png'));
+        self::assertSame('TEMPLATE', file_get_contents($build.'/IconTemplate.png'));
+        self::assertSame('TEMPLATE2X', file_get_contents($build.'/IconTemplate@2x.png'));
+    }
+
+    public function testWithoutTheDefaultIconsAlongsideTheSourceItStillInstalls(): void
+    {
+        // Someone may point --source at a copy of resources/electron on its own.
+        $tester = $this->install();
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode(), $tester->getDisplay());
+    }
+
     public function testAMissingSourceIsRefusedWithTheCommandToRun(): void
     {
         $tester = new CommandTester(new InstallCommand($this->project, new RuntimePatcher()));

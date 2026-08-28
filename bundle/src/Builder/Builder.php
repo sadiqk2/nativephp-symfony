@@ -428,6 +428,16 @@ final class Builder
      * Icons, from public/ into both the build directory and the Electron project's
      * buildResources (where electron-builder looks for icon.png / .ico / .icns).
      *
+     * An app that ships none of its own still needs them there. Upstream's build path is
+     * not assembled from nothing: `resources/build/.gitignore` whitelists exactly
+     * `icon.png`, `IconTemplate.png` and `IconTemplate@2x.png`, so every packaged Laravel
+     * app carries all three and `installIcon()` only overrides them. Ours started empty,
+     * and the packaged runtime opens `$NATIVEPHP_BUILD_PATH/icon.png` for the dock and the
+     * Linux window icon, and the same path with `icon.png` swapped for `IconTemplate.png`
+     * for the tray `MenuBar::create()` builds when given no icon of its own — which
+     * Electron refuses to load when the file is not there. So the runtime's own copies,
+     * which `native:install` keeps in the Electron project's build/, are the fallback.
+     *
      * @return list<string> The icon basenames that were found and copied
      */
     public function installIcons(string $electronPath): array
@@ -435,7 +445,8 @@ final class Builder
         $installed = [];
 
         foreach (['icon.png', 'icon.ico', 'icon.icns', 'IconTemplate.png', 'IconTemplate@2x.png'] as $icon) {
-            $source = $this->sourcePath('public/'.$icon);
+            $own = $this->sourcePath('public/'.$icon);
+            $source = is_file($own) ? $own : Path::join($electronPath, 'build', $icon);
 
             if (!is_file($source)) {
                 continue;
@@ -443,8 +454,10 @@ final class Builder
 
             $this->fs->copy($source, $this->buildPath($icon), true);
 
-            if (str_starts_with($icon, 'icon.')) {
-                $this->fs->copy($source, Path::join($electronPath, 'build', $icon), true);
+            // Only the app's own goes back into buildResources — the runtime's default
+            // is already there, and that is the file this just read.
+            if ($source === $own && str_starts_with($icon, 'icon.')) {
+                $this->fs->copy($own, Path::join($electronPath, 'build', $icon), true);
             }
 
             $installed[] = $icon;

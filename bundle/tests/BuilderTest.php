@@ -320,6 +320,44 @@ final class BuilderTest extends TestCase
         self::assertFileDoesNotExist($electron.'/build/IconTemplate.png');
     }
 
+    /**
+     * Upstream's build path is not built from nothing: `resources/build/.gitignore`
+     * whitelists exactly `icon.png`, `IconTemplate.png` and `IconTemplate@2x.png`, so
+     * every packaged Laravel app has all three whether or not it ships its own, and
+     * `installIcon()` only overrides them. Ours starts empty, and the packaged runtime
+     * reads `$NATIVEPHP_BUILD_PATH/icon.png` for the dock and the Linux window icon and
+     * the same path with `icon.png` swapped for `IconTemplate.png` for the tray that
+     * `MenuBar::create()` builds by default — so an app with an empty public/ handed
+     * Electron two paths that do not exist.
+     */
+    public function testTheRuntimesOwnIconsAreUsedWhenTheAppShipsNone(): void
+    {
+        $electron = \dirname($this->source).'/electron';
+        $this->fs->dumpFile($electron.'/build/icon.png', 'DEFAULT');
+        $this->fs->dumpFile($electron.'/build/IconTemplate.png', 'DEFAULT');
+        $this->fs->dumpFile($electron.'/build/IconTemplate@2x.png', 'DEFAULT');
+
+        $installed = $this->builder([])->installIcons($electron);
+
+        self::assertSame(['icon.png', 'IconTemplate.png', 'IconTemplate@2x.png'], $installed);
+        self::assertSame('DEFAULT', file_get_contents($this->build.'/icon.png'));
+        self::assertSame('DEFAULT', file_get_contents($this->build.'/IconTemplate.png'));
+        self::assertSame('DEFAULT', file_get_contents($this->build.'/IconTemplate@2x.png'));
+    }
+
+    public function testTheAppsOwnIconStillWinsOverTheRuntimesDefault(): void
+    {
+        $this->write('public/icon.png', 'MINE');
+
+        $electron = \dirname($this->source).'/electron';
+        $this->fs->dumpFile($electron.'/build/icon.png', 'DEFAULT');
+
+        $this->builder([])->installIcons($electron);
+
+        self::assertSame('MINE', file_get_contents($this->build.'/icon.png'));
+        self::assertSame('MINE', file_get_contents($electron.'/build/icon.png'));
+    }
+
     public function testMissingIconsAreSkippedQuietly(): void
     {
         $electron = \dirname($this->source).'/electron';

@@ -157,9 +157,20 @@ final class BuildCommand extends Command
         }
 
         $icons = $builder->installIcons($electron);
-        $io->text([] === $icons
-            ? 'No icons in public/; electron-builder will use its default.'
-            : 'Icons: '.implode(', ', $icons));
+
+        if ([] === $icons) {
+            // Not "electron-builder will use its default", which it says nothing about:
+            // the runtime opens icon.png and IconTemplate.png out of the build path
+            // itself, so with neither the app's nor the runtime's copies there, the
+            // packaged app has no dock icon and its menu bar cannot start.
+            $io->warning([
+                'No icons in public/, and none in '.$electron.'/build either.',
+                'The packaged app will have no icon and MenuBar::create() will fail.',
+                'Re-run native:install, or put an icon.png in public/.',
+            ]);
+        } else {
+            $io->text('Icons: '.implode(', ', $icons));
+        }
 
         // -- package -------------------------------------------------------------
         $io->section(sprintf('Packaging for %s-%s', $os, $arch));
