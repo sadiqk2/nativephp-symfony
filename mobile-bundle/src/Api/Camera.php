@@ -30,12 +30,16 @@ final class Camera
         return $this->bridge->dispatch('Camera.GetPhoto', $payload);
     }
 
-    /** @param 'image'|'video'|'any' $type */
-    public function pickMedia(string $type = 'any', bool $multiple = false): bool
+    /**
+     * @param 'image'|'video'|'all' $type
+     * @param int                   $maxItems Cap on a multiple selection; ignored when $multiple is false
+     */
+    public function pickMedia(string $type = 'all', bool $multiple = false, int $maxItems = 10): bool
     {
         return $this->bridge->dispatch('Camera.PickMedia', [
-            'type' => $type,
+            'mediaType' => $type,
             'multiple' => $multiple,
+            'maxItems' => $maxItems,
         ]);
     }
 

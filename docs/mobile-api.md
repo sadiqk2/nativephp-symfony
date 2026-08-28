@@ -48,7 +48,7 @@ that when you design a flow around `Camera`, `Biometric`, `Microphone` or `Mobil
 
 ```php
 $camera->photo(quality: 85, front: false);          // quality clamped to 1–100
-$camera->pickMedia(type: 'image', multiple: true);  // 'image' | 'video' | 'any'
+$camera->pickMedia(type: 'image', multiple: true, maxItems: 5);  // 'image' | 'video' | 'all'
 $camera->recordVideo(maxSeconds: 30, front: true);
 ```
 
@@ -61,7 +61,7 @@ $device->info();          // array<string,mixed>; [] when the bridge is absent
 $device->id();            // ?string
 $device->batteryInfo();   // array
 $device->vibrate();       // no duration: Android hardcodes 200ms, iOS has none
-$device->toggleFlashlight(true);   // null argument toggles
+$device->toggleFlashlight();       // toggles; there is no way to ask for a state
 ```
 
 ### Secure storage — `Api\SecureStorage`
@@ -106,7 +106,7 @@ bridge methods.
 ### Biometric — `Api\Biometric`
 
 ```php
-$biometric->prompt('Unlock your vault', fallbackTitle: 'Use passcode');
+$biometric->prompt();   // the OS supplies the wording; the bridge takes none
 ```
 
 Asynchronous. See the warning above.
@@ -118,7 +118,8 @@ Asynchronous. See the warning above.
 ### Browser — `Api\Browser`
 
 `open($url)` hands off to the system browser; `openInApp($url)` uses the in-app browser;
-`openAuth($url, $callbackScheme)` opens an ephemeral OAuth session.
+`openAuth($url)` opens an ephemeral OAuth session, using the callback scheme from the app's
+own deeplink configuration.
 
 ### Share — `Api\Share`
 
@@ -147,10 +148,16 @@ filesystem functions.
 
 ```php
 if ($wallet->isAvailable()) {
-    $intent = $wallet->createPaymentIntent(1999, 'EUR', ['order' => '123']);
-    $wallet->presentPaymentSheet($intent['id'] ?? '');
+    $intent = $wallet->createPaymentIntent(1999, 'eur', ['order' => '123']);
+    $wallet->presentPaymentSheet(
+        $intent['client_secret'] ?? '',
+        'Acme BV',
+        $stripePublishableKey,
+        'merchant.com.acme',
+        'NL',
+    );
     // …later, from a route the page calls back:
-    $status = $wallet->paymentStatus($intentId);
+    $status = $wallet->paymentStatus($intent['id'] ?? '');
 }
 ```
 
@@ -159,7 +166,7 @@ status back; never infer it from the presentation call.
 
 ### Performance — `Api\Performance`
 
-`enable()`, `disable()`, `export()`, `showFpsOverlay()`, `startCaptureWindow($label)`,
+`enable()`, `disable()`, `export()`, `showFpsOverlay()`, `startCaptureWindow()`,
 `stopCaptureWindow()`, plus three input simulators — `simulatePress($callbackId, $nodeId = 0)`,
 `simulateTextChange($callbackId, $text, $nodeId = 0)`,
 `simulateToggle($callbackId, $value, $nodeId = 0)` — which drive the native UI for

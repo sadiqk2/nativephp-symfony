@@ -32,6 +32,6 @@ final class NativeUi
      */
     public function setTransition(string $transition): bool
     {
-        return $this->bridge->dispatch('NativeUI.Transition.Set', ['transition' => $transition]);
+        return $this->bridge->dispatch('NativeUI.Transition.Set', ['type' => $transition]);
     }
 }

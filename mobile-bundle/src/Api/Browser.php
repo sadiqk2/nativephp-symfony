@@ -29,15 +29,12 @@ final class Browser
      *
      * Shares cookies with the system browser, which is what makes an existing SSO
      * session usable — the in-app browser deliberately does not.
+     *
+     * The callback scheme comes from the app's own deeplink configuration, not from here:
+     * the bridge method reads only the URL.
      */
-    public function openAuth(string $url, ?string $callbackScheme = null): bool
+    public function openAuth(string $url): bool
     {
-        $payload = ['url' => $url];
-
-        if (null !== $callbackScheme) {
-            $payload['callbackScheme'] = $callbackScheme;
-        }
-
-        return $this->bridge->dispatch('Browser.OpenAuth', $payload);
+        return $this->bridge->dispatch('Browser.OpenAuth', ['url' => $url]);
     }
 }

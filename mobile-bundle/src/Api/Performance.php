@@ -40,9 +40,10 @@ final class Performance
         return $this->bridge->dispatch('Perf.SetFpsOverlayEnabled', ['enabled' => $enabled]);
     }
 
-    public function startCaptureWindow(?string $label = null): bool
+    /** Windows are not named: both hosts read no parameters here. */
+    public function startCaptureWindow(): bool
     {
-        return $this->bridge->dispatch('Perf.StartCaptureWindow', null === $label ? [] : ['label' => $label]);
+        return $this->bridge->dispatch('Perf.StartCaptureWindow');
     }
 
     public function stopCaptureWindow(): bool
