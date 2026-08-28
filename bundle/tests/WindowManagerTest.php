@@ -47,6 +47,29 @@ final class WindowManagerTest extends TestCase
         self::assertSame(1.25, $client->lastCall()['data']['zoomFactor']);
     }
 
+    public function testOpenAlwaysSendsWindowButtonVisibility(): void
+    {
+        // On macOS the runtime calls setWindowButtonVisibility(windowButtonVisibility)
+        // for every window it opens, with no guard and no default. An absent value is
+        // not `true` there, so leaving the key out is how a window loses its close,
+        // minimize and zoom buttons. Laravel's Window defaults the property to true and
+        // always serialises it, which is why upstream never sees this.
+        [$manager, $client] = $this->manager($this->requestFor('http://127.0.0.1:8100/'));
+
+        $manager->open('main')->open();
+
+        self::assertTrue($client->lastCall()['data']['windowButtonVisibility']);
+    }
+
+    public function testHidingTheWindowButtonsStillWins(): void
+    {
+        [$manager, $client] = $this->manager($this->requestFor('http://127.0.0.1:8100/'));
+
+        $manager->open('main')->windowButtonVisibility(false)->open();
+
+        self::assertFalse($client->lastCall()['data']['windowButtonVisibility']);
+    }
+
     public function testPendingWindowOmitsKeysThatWereNeverSet(): void
     {
         [$manager] = $this->manager();
