@@ -306,6 +306,12 @@ final class PendingWindow
         // to 1.0 and always serialises it, which hides the bug upstream.
         $payload['zoomFactor'] ??= 1.0;
 
+        // Same story on macOS: the runtime does setWindowButtonVisibility(windowButtonVisibility)
+        // for every window on darwin, unguarded, and an absent value is not `true` — the close,
+        // minimize and zoom buttons simply go missing. Laravel's Window defaults the property to
+        // true and always serialises it.
+        $payload['windowButtonVisibility'] ??= true;
+
         $this->client->post('window/open', $payload);
     }
 
