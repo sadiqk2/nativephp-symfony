@@ -317,7 +317,7 @@ handler** — otherwise it is a dead button on a device with no error anywhere.
 
 Both bundles carry coverage tests that parse upstream's own sources, so upstream drift becomes
 a failing test rather than a discovery in production: `ContractCoverageTest` (the 116 express
-routes and the 44 event names), `BridgeCoverageTest` (the 54 bridge methods) and
+routes and the 44 event names), `BridgeCoverageTest` (the 62 bridge methods, 5 of which nothing here wraps yet) and
 `UiElementCoverageTest` (the 36 element types, asserted in **both** directions, since a type
 the renderers do not know produces a missing region on the device and no error anywhere).
 Those live in the bundles, not in your app.

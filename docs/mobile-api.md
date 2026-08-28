@@ -110,8 +110,12 @@ watch is stopped with `clearBuffer`.
 `backgroundWatchStatus()` returns null when nothing is watching, rather than an array with an
 `active` flag in it — an array is truthy either way.
 
-There is no `start`/`request` method here — starting a watch is not one of the 54 bridge
-methods this bundle wraps.
+There is no `start`/`request` method here. Upstream's bridge does have
+`Geolocation.WatchPosition`, `Geolocation.StartBackgroundWatch`,
+`Geolocation.GetCurrentPosition`, `Geolocation.CheckPermissions` and
+`Geolocation.RequestPermissions` — this bundle wraps none of them, and
+`BridgeCoverageTest::UNWRAPPED` names all five so the gap is stated rather than counted
+over. Something outside this bundle has to start the watch whose id you pass in here.
 
 ### Microphone — `Api\Microphone`
 

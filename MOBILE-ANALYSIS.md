@@ -86,7 +86,7 @@ kind of problem with the same kind of solution: three hardcoded paths in the nat
 
 ### 2b. The native bridge
 
-`nativephp_call($method, $jsonPayload)` — a PHP extension function. **57 distinct methods**
+`nativephp_call($method, $jsonPayload)` — a PHP extension function. **62 distinct methods**
 in the current PHP surface:
 
 | Group | Methods |
@@ -94,7 +94,7 @@ in the current PHP surface:
 | Camera | GetPhoto, PickMedia, RecordVideo |
 | Device | GetInfo, GetId, GetBatteryInfo, Vibrate, ToggleFlashlight |
 | Microphone | Start, Stop, Pause, Resume, GetStatus, GetRecording |
-| Geolocation | ClearWatch, DrainWatchBuffer, TrimWatchBuffer, StopBackgroundWatch, BackgroundWatchStatus |
+| Geolocation | GetCurrentPosition, CheckPermissions, RequestPermissions, WatchPosition, ClearWatch, StartBackgroundWatch, StopBackgroundWatch, BackgroundWatchStatus, DrainWatchBuffer, TrimWatchBuffer |
 | SecureStorage | Get, Set, Delete |
 | PushNotification | GetToken, CheckPermission, ClearBadge, RequestPermission |
 | Browser | Open, OpenInApp, OpenAuth |
@@ -111,9 +111,12 @@ in the current PHP surface:
 
 **The bridge itself is entirely framework-agnostic** — a function name and a JSON string. The
 PHP wrappers around it are the same mechanical work as desktop's endpoint wrappers, and there
-are fewer of them (57 vs 116). Three of the 57 — `Dialog.Alert`, `Scanner.Scan` and
-`PushNotification.RequestPermission` — have no wrapper here yet; `BridgeCoverageTest` names
-them so the gap is stated rather than counted over.
+are fewer of them (62 vs 116). Five of the 62 have no wrapper here yet, all Geolocation and
+all of them starting or locating a position rather than addressing a watch already running:
+`GetCurrentPosition`, `CheckPermissions`, `RequestPermissions`, `WatchPosition` and
+`StartBackgroundWatch`. `BridgeCoverageTest` names them so the gap is stated rather than
+counted over — the count read 57 until that test learned to read a method name computed
+above its call site, which is where all five were hiding.
 
 ---
 
@@ -133,7 +136,7 @@ upstream fix is the same too: declare them in a manifest.
 
 | | desktop | mobile (WebView path) | mobile (native UI) |
 |---|---|---|---|
-| Transport | localhost HTTP, 116 endpoints | `nativephp_call`, 57 methods | same |
+| Transport | localhost HTTP, 116 endpoints | `nativephp_call`, 62 methods | same |
 | Framework leak in the native layer | 8 string literals, 1 file | 3 bootstrap paths, 2 files | plus Blade-coupled rendering |
 | SAPI shim needed | no (`php -S` + router) | **yes, ~100 LOC** | yes |
 | UI work | none | **none** | reimplement 17,316 LOC for Twig |
@@ -154,7 +157,7 @@ second half.
    across requests, which is where mobile's performance comes from.
 2. **A `MobileRuntimePatcher`** — retarget the three hardcoded bootstrap paths in the copied
    Android/iOS projects, and force `entry_mode: web`.
-3. **PHP wrappers for the 57 bridge methods**, typed, in the shape already established by the
+3. **PHP wrappers for the 62 bridge methods**, typed, in the shape already established by the
    desktop bundle.
 4. **Build commands** — `native:mobile:install`, `native:mobile:run android|ios`.
 

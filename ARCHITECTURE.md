@@ -104,7 +104,7 @@ guesses into diffs.
 ### 3. Parse upstream's source as a test (both)
 
 `ContractCoverageTest` reads the runtime's express routers and fails if an endpoint is
-uncovered. `BridgeCoverageTest` and `UiElementCoverageTest` do the same for the 54 bridge
+uncovered. `BridgeCoverageTest` and `UiElementCoverageTest` do the same for the 62 bridge
 methods and the 36 element types — the last asserting in **both** directions, since a type
 the renderers do not know produces a missing region on the device with no error anywhere.
 
