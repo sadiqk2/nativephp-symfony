@@ -14,6 +14,7 @@
     "version": "0.1.0",
     "require": {
         "php": "^8.3",
+        "psr/container": "^1.1|^2.0",
         "psr/log": "^2.0|^3.0",
         "symfony/config": "^7.0|^8.0",
         "symfony/console": "^7.0|^8.0",
@@ -27,6 +28,7 @@
         "phpunit/phpunit": "^11.0|^12.0",
         "symfony/dotenv": "^7.0|^8.0",
         "symfony/framework-bundle": "^7.0|^8.0",
+        "symfony/routing": "^7.0|^8.0",
         "twig/twig": "^3.0"
     },
     "autoload": {
@@ -46,6 +48,7 @@
     "suggest": {
         "ext-zip": "To package the application archive that native:mobile:build writes; the hosts extract a zip at boot",
         "symfony/dotenv": "To resolve the packaged application's .env at boot; without it the shims fall back to the host environment",
+        "symfony/routing": "To expose declared native screens as ordinary HTTP routes (NativeScreenRouteLoader), so a screen's URI also works in a browser",
         "symfony/twig-bundle": "To render the application UI in the WebView path",
         "twig/twig": "To author native element trees from Twig templates (the native-UI path)"
     }

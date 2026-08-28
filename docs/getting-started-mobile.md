@@ -242,8 +242,9 @@ Three failure modes there are silent and each costs a fallback to the WebView: t
 and the dump's directory must exist (`writeRuntimeDump()` creates it and throws on failure).
 
 A screen's URI is not an HTTP route unless you make it one. If you want the same URI to work
-in a browser — a shared link, a smoke test — register `NativeScreenRouteLoader` yourself as a
-service tagged `routing.loader` and import it:
+in a browser — a shared link, a smoke test — install `symfony/routing` (the bundle suggests it
+rather than requiring it, because this is the only thing that needs it) and register
+`NativeScreenRouteLoader` yourself as a service tagged `routing.loader`, then import it:
 
 ```yaml
 # config/routes.yaml
