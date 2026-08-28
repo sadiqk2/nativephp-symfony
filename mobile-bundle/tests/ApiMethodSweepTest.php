@@ -9,7 +9,7 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Every method of the sixteen API classes, called once, with the bridge method recorded.
+ * Every method of the seventeen API classes, called once, with the bridge method recorded.
  *
  * The desktop managers got this sweep; the mobile API is the same shape and carries the
  * same blind spot. `BridgeCoverage` asks whether every native method upstream exposes is

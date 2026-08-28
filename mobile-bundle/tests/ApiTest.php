@@ -6,6 +6,7 @@ namespace Native\Symfony\Mobile\Tests;
 
 use Native\Symfony\Mobile\Api;
 use Native\Symfony\Mobile\Bridge\FakeBridge;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 final class ApiTest extends TestCase
@@ -384,5 +385,115 @@ final class ApiTest extends TestCase
 
         $share->url('https://a.test', 'Link', 'Have a look');
         self::assertSame(['url', 'title', 'text'], array_keys($bridge->lastCall()['payload']));
+    }
+
+    public function testAlertCarriesTheFiveKeysBothHostsRead(): void
+    {
+        // Upstream's PendingAlert sends title/message/buttons/id/event, and both host
+        // handlers read exactly those five (DialogFunctions.kt, DialogFunctions.swift).
+        // `buttons` is reindexed on the way out: a string-keyed array encodes as a JSON
+        // object, which neither host recognises as a list, so it substitutes a single OK
+        // and the app's own buttons vanish.
+        $bridge = new FakeBridge();
+        $dialog = new Api\Dialog($bridge);
+
+        self::assertTrue($dialog->alert('Delete file?', 'This cannot be undone', [
+            3 => 'Cancel',
+            7 => ['label' => 'Delete', 'style' => 'destructive'],
+        ], id: 'delete-42'));
+
+        self::assertSame('Dialog.Alert', $bridge->lastCall()['method']);
+        self::assertSame([
+            'title' => 'Delete file?',
+            'message' => 'This cannot be undone',
+            'buttons' => ['Cancel', ['label' => 'Delete', 'style' => 'destructive']],
+            'id' => 'delete-42',
+            'event' => 'Native\Mobile\Events\Alert\ButtonPressed',
+        ], $bridge->lastCall()['payload']);
+    }
+
+    public function testAlertAlwaysSendsAnIdEvenWhenTheCallerDidNotChooseOne(): void
+    {
+        // The hosts put `id` in the button-press event only when the payload carried one,
+        // and upstream generates one rather than leave the event uncorrelatable.
+        $bridge = new FakeBridge();
+
+        (new Api\Dialog($bridge))->alert('Hello', 'World');
+
+        $payload = $bridge->lastCall()['payload'];
+
+        self::assertIsString($payload['id']);
+        self::assertNotSame('', $payload['id']);
+        self::assertSame([], $payload['buttons']);
+    }
+
+    #[DataProvider('malformedAlertButtons')]
+    public function testAlertRefusesAButtonNeitherHostCouldRender(mixed $button): void
+    {
+        // Same refusal as upstream's normalizeButton(): a style outside the three the
+        // hosts map would silently render as a plain button.
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new Api\Dialog(new FakeBridge()))->alert('Title', 'Message', [$button]);
+    }
+
+    public function testScannerSendsThePromptFormatsAndCorrelationKeysUpstreamSends(): void
+    {
+        // upstream src/PendingScanner.php — prompt/continuous/formats/id/event.
+        $bridge = new FakeBridge();
+        $scanner = new Api\Scanner($bridge);
+
+        self::assertTrue($scanner->scan(
+            prompt: 'Scan the shelf label',
+            continuous: true,
+            formats: [2 => 'ean13', 5 => 'qr'],
+            id: 'stocktake-7',
+        ));
+
+        self::assertSame('Scanner.Scan', $bridge->lastCall()['method']);
+        self::assertSame([
+            'prompt' => 'Scan the shelf label',
+            'continuous' => true,
+            'formats' => ['ean13', 'qr'],
+            'id' => 'stocktake-7',
+            'event' => 'Native\Mobile\Events\Scanner\CodeScanned',
+        ], $bridge->lastCall()['payload']);
+    }
+
+    public function testScannerDefaultsMatchUpstreamsOwnDefaults(): void
+    {
+        $bridge = new FakeBridge();
+
+        (new Api\Scanner($bridge))->scan();
+
+        $payload = $bridge->lastCall()['payload'];
+
+        self::assertSame('Scan QR Code', $payload['prompt']);
+        self::assertFalse($payload['continuous']);
+        self::assertSame(['qr'], $payload['formats']);
+        self::assertNotSame('', $payload['id']);
+    }
+
+    public function testEnrollingForPushNotificationsAsksForPermissionAndNamesTheTokenEvent(): void
+    {
+        // upstream src/PendingPushNotificationEnrollment.php — id/event, nothing else.
+        $bridge = new FakeBridge();
+
+        self::assertTrue((new Api\PushNotifications($bridge))->enroll(id: 'signup'));
+
+        self::assertSame('PushNotification.RequestPermission', $bridge->lastCall()['method']);
+        self::assertSame([
+            'id' => 'signup',
+            'event' => 'Native\Mobile\Events\PushNotification\TokenGenerated',
+        ], $bridge->lastCall()['payload']);
+    }
+
+    /** @return iterable<string, array{mixed}> */
+    public static function malformedAlertButtons(): iterable
+    {
+        yield 'a style the hosts do not map' => [['label' => 'Go', 'style' => 'warning']];
+        yield 'no label' => [['style' => 'cancel']];
+        yield 'a label that is not a string' => [['label' => 12]];
+        yield 'neither a string nor an array' => [12];
     }
 }

@@ -1,6 +1,6 @@
 # Mobile API reference
 
-All classes live under `Native\Symfony\Mobile\`. The sixteen API services are registered
+All classes live under `Native\Symfony\Mobile\`. The seventeen API services are registered
 `public` and autowirable; they are thin, typed wrappers over
 `nativephp_call($method, $jsonPayload)`.
 
@@ -128,7 +128,10 @@ Asynchronous. See the warning above.
 
 ### Push notifications — `Api\PushNotifications`
 
-`token()` (`?string`), `checkPermission()` (array), `isAuthorised()`, `clearBadge()`.
+`enroll($id = null, $event = TOKEN_GENERATED)` is the one call that prompts the user, and the
+only way to learn the token on a first launch: it dispatches, and the token arrives as the
+event named by `$event`. `token()` (`?string`), `checkPermission()` (array, reads the state
+without prompting), `isAuthorised()`, `clearBadge()`.
 
 ### Browser — `Api\Browser`
 
@@ -142,7 +145,26 @@ own deeplink configuration.
 
 ### Dialog — `Api\Dialog`
 
-`toast($message, $duration = 'long')`. One method; native alerts are not part of the bridge.
+`toast($message, $duration = 'long')` for a transient message.
+
+```php
+$dialog->alert('Delete file?', 'This cannot be undone', [
+    'Cancel',
+    ['label' => 'Delete', 'style' => 'destructive'],
+], id: 'delete-42');
+```
+
+Asynchronous: the tap arrives as an event carrying `index`, `label` and the `id`. Button
+styles are `default`, `cancel` and `destructive` — anything else is refused rather than
+rendered as a plain button. Pass no buttons and both hosts substitute a single OK.
+
+### Scanner — `Api\Scanner`
+
+`scan($prompt = null, $continuous = false, $formats = ['qr'], $id = null, $event = CODE_SCANNED)`.
+Opens the native scanner screen, which owns the camera until it closes. Codes arrive as
+events, so a continuous scan reports each one as it is read instead of a list at the end; a
+scanner the user closes without scanning reports `Scanner::SCANNER_CANCELLED`. Formats are
+any of `qr`, `ean13`, `ean8`, `code128`, `code39`, `upca`, `upce`, `all`.
 
 ### Files — `Api\Files`
 

@@ -144,7 +144,7 @@ final class NativeMobileBundle extends AbstractBundle
             $services->alias(BridgeInterface::class, Bridge::class)->public();
         }
 
-        // --- the 54-method API surface ---------------------------------------
+        // --- the 57-method API surface ---------------------------------------
         foreach ([
             Api\Biometric::class,
             Api\Browser::class,
@@ -159,6 +159,7 @@ final class NativeMobileBundle extends AbstractBundle
             Api\Network::class,
             Api\Performance::class,
             Api\PushNotifications::class,
+            Api\Scanner::class,
             Api\SecureStorage::class,
             Api\Share::class,
             Api\System::class,
