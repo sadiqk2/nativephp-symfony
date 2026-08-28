@@ -113,6 +113,10 @@ $fake = FakeRuntime::available()
   contract shape 1 (express sends the status phrase, which the real client normalises to "no
   data"), so reads return their zero values unless you script them. Smoothing that would let a
   test pass against a runtime that would fail.
+- **A POST or DELETE payload that cannot be JSON-encoded throws `RuntimeCallFailed`** instead
+  of being recorded, because the real client cannot send one either — a string that is not
+  UTF-8 (a filename, a legacy database column) fails while the request is being prepared. GET
+  is exempt: query parameters go through `http_build_query`, which validates nothing.
 
 ### Scripting the user
 

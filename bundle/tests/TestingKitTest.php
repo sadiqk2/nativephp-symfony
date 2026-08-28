@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Native\Symfony\Desktop\Tests;
 
 use Native\Symfony\Desktop\App\AppManager;
+use Native\Symfony\Desktop\Client\Client;
+use Native\Symfony\Desktop\Client\RuntimeCallFailed;
 use Native\Symfony\Desktop\Client\RuntimeNotAvailable;
 use Native\Symfony\Desktop\Contract\ClientInterface;
 use Native\Symfony\Desktop\Contract\Response;
@@ -26,8 +28,11 @@ use Native\Symfony\Desktop\Testing\RecordedCall;
 use Native\Symfony\Desktop\Testing\RuntimeEventSimulator;
 use Native\Symfony\Desktop\Testing\RuntimeExpectations;
 use PHPUnit\Framework\AssertionFailedError;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\HttpClient\MockHttpClient;
+use Symfony\Component\HttpClient\Response\MockResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 
@@ -144,6 +149,69 @@ final class TestingKitTest extends TestCase
 
         self::assertSame([], $fake->calls());
         self::assertSame(['version' => '2.0.0'], $fake->get('app/version')->data);
+    }
+
+    /** @param array<string, mixed> $payload */
+    #[DataProvider('unsendablePayloads')]
+    public function testAPayloadTheRealClientCouldNotSendIsRefusedRatherThanRecorded(array $payload, string $reason): void
+    {
+        // The wire is JSON, so a payload that cannot be encoded is a call that
+        // cannot be made. The real client hands POST and DELETE bodies to the HTTP
+        // client as its `json` option, which refuses them — and a fake that
+        // recorded the call instead let assertNotificationSent() pass for a
+        // notification that throws the moment the app runs for real.
+        $real = new Client(
+            new MockHttpClient(static fn (): MockResponse => new MockResponse('', ['http_code' => 200])),
+            'http://127.0.0.1:4000/api/',
+            'secret',
+        );
+
+        foreach ([$real, $fake = FakeRuntime::available()] as $client) {
+            try {
+                $client->post('notification', $payload);
+                self::fail(sprintf('%s accepted a payload that cannot be JSON-encoded.', $client::class));
+            } catch (RuntimeCallFailed $e) {
+                self::assertStringContainsString('Runtime call POST notification failed', $e->getMessage());
+                self::assertStringContainsString($reason, $e->getMessage());
+            }
+        }
+
+        self::assertSame([], $fake->calls(), 'The call never left the process, so it is not a recorded request.');
+    }
+
+    /** @return iterable<string, array{array<string, mixed>, string}> */
+    public static function unsendablePayloads(): iterable
+    {
+        // How an app actually reaches this: a filename, a clipboard string or a
+        // legacy database column that is not UTF-8.
+        yield 'a string that is not UTF-8' => [['body' => "Rapport termin\xE9"], 'Malformed UTF-8'];
+
+        yield 'a value no JSON type covers' => [['body' => \INF], 'Inf and NaN'];
+
+        yield 'more nesting than the encoder allows' => [['body' => self::nested(600)], 'Maximum stack depth'];
+    }
+
+    /** @return array<string, mixed>|string */
+    private static function nested(int $depth): array|string
+    {
+        $value = 'leaf';
+
+        for ($i = 0; $i < $depth; ++$i) {
+            $value = ['child' => $value];
+        }
+
+        return $value;
+    }
+
+    public function testANonUtf8GetQueryIsStillAcceptedBecauseTheRealClientAcceptsIt(): void
+    {
+        // Query parameters go through http_build_query, which urlencodes bytes and
+        // validates nothing — the real client sends this, so the fake must too.
+        $fake = FakeRuntime::available();
+
+        $fake->get('app/path/home', ['q' => "termin\xE9"]);
+
+        self::assertCount(1, $fake->calls());
     }
 
     // --- canned dialog answers ------------------------------------------------
