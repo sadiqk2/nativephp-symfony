@@ -7,6 +7,7 @@ namespace Native\Symfony\Mobile\Tests;
 use Native\Symfony\Mobile\Api;
 use Native\Symfony\Mobile\Bridge\Bridge;
 use Native\Symfony\Mobile\Bridge\FakeBridge;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\AbstractLogger;
 
@@ -100,6 +101,104 @@ final class BridgeTest extends TestCase
         $bridge->raw('Share.File', ['path' => '/a/b/c.pdf', 'title' => 'Café — naïve']);
 
         self::assertSame('{"path":"/a/b/c.pdf","title":"Café — naïve"}', $seen);
+    }
+
+    /**
+     * Both bridges, the same payloads, one loop: whatever the real one refuses the
+     * fake has to refuse too, or a green test certifies a call that throws on a
+     * device.
+     *
+     * @param array<string, mixed> $payload
+     */
+    #[DataProvider('unsendablePayloads')]
+    public function testAPayloadTheRealBridgeCannotSendIsRefusedByTheFakeToo(array $payload, string $reason): void
+    {
+        foreach (['raw', 'call', 'dispatch'] as $operation) {
+            $fake = new FakeBridge();
+            $bridges = [
+                Bridge::class => new Bridge(invoker: static fn (): string => '{"ok":true}'),
+                FakeBridge::class => $fake,
+            ];
+
+            foreach ($bridges as $name => $bridge) {
+                try {
+                    $bridge->{$operation}('Dialog.Toast', $payload);
+                    self::fail(sprintf('%s::%s() accepted a payload that cannot be JSON-encoded.', $name, $operation));
+                } catch (\InvalidArgumentException $e) {
+                    self::assertStringContainsString('not JSON-encodable', $e->getMessage());
+                    self::assertStringContainsString($reason, $e->getMessage());
+                }
+            }
+
+            self::assertSame([], $fake->calls, 'The call never reached the native side, so it is not a recorded call.');
+        }
+    }
+
+    /** @return iterable<string, array{array<string, mixed>, string}> */
+    public static function unsendablePayloads(): iterable
+    {
+        // How an app actually reaches this: a filename, a scanned barcode or a
+        // database column that is not UTF-8.
+        yield 'a string that is not UTF-8' => [['message' => "Fichier enregistr\xE9"], 'Malformed UTF-8'];
+
+        yield 'a value no JSON type covers' => [['message' => \INF], 'Inf and NaN'];
+
+        yield 'more nesting than the encoder allows' => [['message' => self::nested(600)], 'Maximum stack depth'];
+    }
+
+    /** @return array<string, mixed>|string */
+    private static function nested(int $depth): array|string
+    {
+        $value = 'leaf';
+
+        for ($i = 0; $i < $depth; ++$i) {
+            $value = ['child' => $value];
+        }
+
+        return $value;
+    }
+
+    /**
+     * The other direction of the same seam: a reply the native side really can
+     * give. The real bridge reads all of these as "no answer"; a fake that read
+     * them as data answered with a shape the app can never see.
+     */
+    #[DataProvider('repliesThatCarryNoData')]
+    public function testAReplyTheRealBridgeReadsAsNothingIsNothingToTheFakeToo(?string $reply): void
+    {
+        $real = new Bridge(invoker: static fn (): ?string => $reply);
+        $fake = new FakeBridge();
+        $fake->willReturn('Device.GetInfo', $reply);
+
+        self::assertNull($real->call('Device.GetInfo'));
+        self::assertNull($fake->call('Device.GetInfo'));
+
+        // Device::info() is `call(...) ?? []`, so the difference is visible: an
+        // empty array is falsy where ['value' => null] is not.
+        self::assertSame([], (new Api\Device($real))->info());
+        self::assertSame([], (new Api\Device($fake))->info());
+    }
+
+    /** @return iterable<string, array{string|null}> */
+    public static function repliesThatCarryNoData(): iterable
+    {
+        yield 'nothing at all' => [null];
+
+        yield 'an empty string' => [''];
+
+        yield 'whitespace only' => ["  \n"];
+
+        yield 'not JSON' => ['<not json>'];
+
+        yield 'truncated JSON' => ['{"ok":'];
+
+        yield 'JSON behind a byte order mark' => ["\xEF\xBB\xBF{\"ok\":1}"];
+
+        yield 'a NUL byte' => ["\0"];
+
+        yield 'a string that is not UTF-8' => ["\"termin\xE9\""];
+
+        yield 'more nesting than the decoder allows' => [str_repeat('[', 600).'1'.str_repeat(']', 600)];
     }
 
     public function testAScalarJsonReplyIsWrappedRatherThanDiscarded(): void
