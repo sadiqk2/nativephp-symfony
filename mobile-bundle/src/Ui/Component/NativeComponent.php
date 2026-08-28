@@ -300,7 +300,10 @@ abstract class NativeComponent
             $child->onMount();
         }
 
-        return ComponentBoundary::around($child->renderTree(), $child->callbacks());
+        // The child's own root element, pinned to the child's registry — not wrapped in
+        // one. The caller gets the element it asked for, so a `key()` or a `layout()` on
+        // the mounted row lands on the node the renderer sees.
+        return $child->renderTree()->ownCallbacks($child->callbacks());
     }
 
     /** The component this one was mounted by, or null for a screen's root. */

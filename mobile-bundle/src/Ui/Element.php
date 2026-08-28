@@ -48,6 +48,8 @@ abstract class Element
     /** @var array<string, mixed> */
     protected array $appliedProps = [];
 
+    protected ?CallbackRegistry $ownedCallbacks = null;
+
     public function type(): string
     {
         return $this->type;
@@ -139,6 +141,28 @@ abstract class Element
     }
 
     /**
+     * Register this subtree's callbacks here rather than in the caller's registry.
+     *
+     * A component's registry is scoped to its identity, so two sibling rows both
+     * offering `remove` get distinct ids and a tap resolves to the instance that owns
+     * it. `toArray()` otherwise takes the registry from its caller and passes the same
+     * one down the whole tree, so a mounted child's elements would register into the
+     * screen's registry and the tap would dispatch to the screen.
+     *
+     * Set by {@see NativeComponent::mount()} on the child's own root element, which is
+     * also what upstream's `Element::ownCallbacks()` does. Pinning it here rather than
+     * in a wrapper element is what lets the caller keep treating the mounted child as
+     * the element it is: a wrapper that forwards `toArray()` and nothing else swallows
+     * every `key()`, `layout()` and `style()` a parent puts on the row.
+     */
+    public function ownCallbacks(CallbackRegistry $registry): static
+    {
+        $this->ownedCallbacks = $registry;
+
+        return $this;
+    }
+
+    /**
      * Per-element layout defaults, merged *under* anything the author set.
      *
      * The reason this hook exists rather than being folded into a constructor: a
@@ -202,6 +226,10 @@ abstract class Element
         array &$emittedIds = [],
         array &$lastNodeHashes = [],
     ): array {
+        // An element that owns a registry is a mounted component's root: its subtree's
+        // callbacks belong to that component, not to whoever placed it.
+        $registry = $this->ownedCallbacks ?? $registry;
+
         [$id, $myKeyPath] = $this->resolveId($parentKeyPath, $indexInParent, $nextId, $emittedIds);
 
         $layout = $this->resolvedLayout();
