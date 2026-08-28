@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Native\Symfony\Desktop\Command;
 
 use Native\Symfony\Desktop\Contract\AppBootstrapper;
+use Native\Symfony\Desktop\Http\BootedController;
+use Native\Symfony\Desktop\Http\EventsController;
 use Native\Symfony\Desktop\Security\RuntimeAccessSubscriber;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -31,8 +33,16 @@ use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 #[AsCommand(name: 'native:doctor', description: 'Check that the runtime can reach this application')]
 final class DoctorCommand extends Command
 {
-    /** The two paths the runtime POSTs to; see Resources/config/routes.php. */
-    private const RUNTIME_PATHS = ['/_native/api/booted', '/_native/api/events'];
+    /**
+     * The two paths the runtime POSTs to, and the controller each must reach.
+     *
+     * Kept in step with Resources/config/routes.php; DoctorCommandTest drives that
+     * file through a real router, so the pairing cannot drift from it.
+     */
+    private const RUNTIME_PATHS = [
+        '/_native/api/booted' => BootedController::class,
+        '/_native/api/events' => EventsController::class,
+    ];
 
     public function __construct(
         private readonly string $projectDir,
@@ -100,6 +110,14 @@ final class DoctorCommand extends Command
      * Matching a real Request rather than a path also catches the case where the
      * routes exist but under the wrong method — the runtime only ever POSTs, so a
      * GET-only registration is as dead as no registration at all.
+     *
+     * And matching is not enough on its own: the question is not whether the path
+     * routes but whether it routes *here*. A `/{path}` front-end route — how every
+     * SPA is wired — declared before the bundle's import takes both endpoints, and
+     * the compiled matcher honours that order deliberately (it demotes a static
+     * route behind an earlier dynamic one that covers it). The runtime then POSTs
+     * into the application's own controller, which answers 200 with an index page,
+     * and boot() still never runs. So compare the controller the match resolves to.
      */
     private function checkRoutes(SymfonyStyle $io): int
     {
@@ -111,38 +129,89 @@ final class DoctorCommand extends Command
             return 0;
         }
 
-        $missing = [];
+        $missing = $swallowed = [];
 
-        foreach (self::RUNTIME_PATHS as $path) {
+        foreach (self::RUNTIME_PATHS as $path => $controller) {
             try {
-                $this->router->matchRequest(Request::create($path, 'POST'));
-                $io->text(sprintf(' ✓ POST %s', $path));
+                $match = $this->router->matchRequest(Request::create($path, 'POST'));
             } catch (RoutingException) {
                 $missing[] = $path;
                 $io->text(sprintf(' ✗ POST %s — does not route', $path));
+
+                continue;
             }
+
+            $handler = self::handlerOf($match);
+
+            if (null === $handler || !is_a($handler, $controller, true)) {
+                $swallowed[] = $path;
+                $io->text(sprintf(
+                    ' ✗ POST %s routes to %s, not %s',
+                    $path,
+                    $handler ?? 'a route with no controller',
+                    $controller,
+                ));
+
+                continue;
+            }
+
+            $io->text(sprintf(' ✓ POST %s', $path));
         }
 
-        if ([] === $missing) {
-            return 0;
+        if ([] !== $swallowed) {
+            $io->warning([
+                'Something in this application answers the runtime endpoints instead of the bundle,',
+                'so the runtime POSTs, gets someone else\'s 200, and AppBootstrapper::boot() never runs.',
+                'The router takes the first route that matches in declaration order, so import the',
+                'bundle\'s routes before any catch-all of your own — and check that no route of yours',
+                'reuses the names native_desktop_booted or native_desktop_events, which replace it.',
+            ]);
         }
 
-        $io->warning([
-            'The runtime endpoints are not registered, so the app will boot and show nothing:',
-            'the runtime POSTs to /booted, gets a 404, and AppBootstrapper::boot() never runs.',
-            'Run `bin/console native:install`, or write config/routes/native_desktop.yaml yourself.',
-        ]);
+        if ([] !== $missing) {
+            $io->warning([
+                'The runtime endpoints are not registered, so the app will boot and show nothing:',
+                'the runtime POSTs to /booted, gets a 404, and AppBootstrapper::boot() never runs.',
+                'Run `bin/console native:install`, or write config/routes/native_desktop.yaml yourself.',
+            ]);
 
-        // Outside the warning block on purpose: SymfonyStyle blank-lines every entry
-        // of a block, which turns a YAML snippet into something that cannot be copied.
-        $io->writeln([
-            '  native_desktop:',
-            "      resource: '@NativeDesktopBundle/src/Resources/config/routes.php'",
-            '      type: php',
-            '',
-        ]);
+            // Outside the warning block on purpose: SymfonyStyle blank-lines every
+            // entry of a block, which turns a YAML snippet into something that
+            // cannot be copied. Only for a missing import — when the import is
+            // there but loses, repeating it is not the advice.
+            $io->writeln([
+                '  native_desktop:',
+                "      resource: '@NativeDesktopBundle/src/Resources/config/routes.php'",
+                '      type: php',
+                '',
+            ]);
+        }
 
-        return 1;
+        return [] === $missing && [] === $swallowed ? 0 : 1;
+    }
+
+    /**
+     * The class that will handle a match, or null when the match names none.
+     *
+     * A route may carry the invokable class, `Class::method`, a `[$service, 'm']`
+     * pair or a closure. Only the first three can be compared to a class at all,
+     * and all three put it in front; a closure is not the bundle's controller.
+     *
+     * @param array<string, mixed> $match
+     */
+    private static function handlerOf(array $match): ?string
+    {
+        $controller = $match['_controller'] ?? null;
+
+        if (\is_array($controller) && isset($controller[0])) {
+            $controller = \is_object($controller[0]) ? $controller[0]::class : $controller[0];
+        }
+
+        if (!\is_string($controller) || '' === $controller) {
+            return null;
+        }
+
+        return strstr($controller, '::', true) ?: $controller;
     }
 
     /**
@@ -191,7 +260,7 @@ final class DoctorCommand extends Command
 
         $gated = [];
 
-        foreach (self::RUNTIME_PATHS as $path) {
+        foreach (array_keys(self::RUNTIME_PATHS) as $path) {
             $request = Request::create($path, 'POST');
 
             // access_control rules live in the access map whether or not anything

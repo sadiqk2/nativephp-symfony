@@ -32,7 +32,7 @@ would swallow: a missing bootstrapper, a non-JSON response, a failed broadcast.
 
 ### My app boots to a blank window, or to no window at all
 
-Five distinct causes. `native:doctor` checks for the first — and the second is handled for
+Six distinct causes. `native:doctor` checks for the first two — and the third is handled for
 you by default:
 
 ```bash
@@ -50,6 +50,30 @@ bin/console debug:router | grep _native
 
 If they are missing, add the import shown in
 [getting started](getting-started-desktop.md#2-import-the-bundles-routes).
+
+**The routes are imported, but something of yours answers them first.** Routes match in
+declaration order and the first match wins — the same rule as firewalls, below. A front-end
+catch-all, which is how every SPA is wired, covers `/_native/api/booted` as readily as
+anything else:
+
+```yaml
+# config/routes.yaml — the wrong way round
+app_spa:
+    path: /{path}
+    controller: App\Controller\SpaController
+    requirements: { path: '.*' }
+
+native_desktop:
+    resource: '@NativeDesktopBundle/src/Resources/config/routes.php'
+    type: php
+```
+
+`debug:router` still lists both runtime routes, so it looks fine; the runtime's POST reaches
+your controller, which answers 200 with your index page, and `boot()` never runs. Import the
+bundle's routes *before* any catch-all of your own. The same happens if a route of yours
+reuses the names `native_desktop_booted` or `native_desktop_events`, since a later route of
+the same name replaces the earlier one silently. `native:doctor` compares the controller each
+path actually resolves to, not merely that it resolves.
 
 **Your firewall covers the runtime's own endpoints.** **The bundle handles this for you by
 default** — but it is worth knowing about, because the symptom is indistinguishable from the
