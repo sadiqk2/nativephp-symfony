@@ -141,6 +141,60 @@ final class EventSimulatorSweepTest extends TestCase
         }
     }
 
+    public function testAPayloadTheWireCannotCarryIsRefusedRatherThanDropped(): void
+    {
+        // A Linux file path is bytes, not UTF-8, so this is what `open with` on a
+        // Latin-1 filename hands an app's test. json_encode() fails on it, and the
+        // cast of its `false` to a string left the controller with an empty body,
+        // answering 400 — which dispatch() discards, since the runtime discards the
+        // app's answer too. The event simply never happened: no listener ran, and
+        // nothing said why. Same reasoning as the FakeRuntime payload guard.
+        $recorder = new RecordingDispatcher();
+        $simulator = new RuntimeEventSimulator($recorder);
+
+        try {
+            $simulator->fileOpened("/tmp/caf\xE9.txt");
+            self::fail('A payload that cannot be JSON-encoded was accepted.');
+        } catch (\InvalidArgumentException $e) {
+            self::assertStringContainsString('OpenFile', $e->getMessage());
+        }
+
+        self::assertSame([], $recorder->events);
+    }
+
+    public function testMakeRefusesTheSamePayloadDispatchRefuses(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        (new RuntimeEventSimulator(new RecordingDispatcher()))
+            ->make('Native\Desktop\Events\App\OpenFile', ["/tmp/caf\xE9.txt"]);
+    }
+
+    public function testMakeProducesTheEventDispatchWouldProduce(): void
+    {
+        // make() exists to check that a payload reaches the constructor argument you
+        // think it does, so it has to model the same wire dispatch() does. It skipped
+        // the JSON round trip, and the wire flattens an object into an array — so an
+        // assertion on make() could hold for a value no listener will ever see. This
+        // project has already been bitten by a payload that did not survive encoding:
+        // every AutoUpdater event degraded to NativeEvent for that reason.
+        $recorder = new RecordingDispatcher();
+        $simulator = new RuntimeEventSimulator($recorder);
+
+        $value = new class {
+            public int $width = 760;
+        };
+
+        $simulator->settingChanged('window', $value);
+        $simulator->settingChanged('window', $value);
+
+        $dispatched = $recorder->events[0];
+        $made = $simulator->make('Native\Desktop\Events\Settings\SettingChanged', ['key' => 'window', 'value' => $value]);
+
+        self::assertEquals($dispatched, $made);
+        self::assertSame(['width' => 760], $made->value);
+    }
+
     // ── helpers ─────────────────────────────────────────────────────────────
 
     /** @return list<\ReflectionMethod> */

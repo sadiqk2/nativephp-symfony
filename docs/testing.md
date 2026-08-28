@@ -254,6 +254,12 @@ $simulator->dispatch('App\Menu\NewReport', ['from' => 'toolbar']);   // → Nati
 `dispatch()` returns nothing on purpose: the runtime discards your answer, so there is no
 outcome to hand back. What a test asserts on is what its own listener did.
 
+**A payload that cannot be JSON-encoded throws `InvalidArgumentException`** rather than being
+dropped. The runtime could not have pushed one either, and the alternative is worse than an
+error: the encoding failed, the controller saw an empty body and answered 400, `dispatch()`
+discarded it, and the event never happened — no listener ran and nothing said why. An app
+reaches this with a file path that is not UTF-8, which on Linux is any sequence of bytes.
+
 To check the mapping itself — that a payload really reaches the constructor argument you think
 it does — use `make()`:
 
@@ -261,6 +267,10 @@ it does — use `make()`:
 $event = $simulator->make('Native\Desktop\Events\ChildProcess\ProcessExited', ['alias' => 'x', 'code' => 1]);
 self::assertSame(1, $event->code);
 ```
+
+`make()` goes through the same JSON round trip as `dispatch()`, so the two cannot disagree
+about the same payload — the wire flattens an object into an array, and an assertion made
+against the object would hold for a value no listener ever sees.
 
 If you construct the simulator yourself and test events your app dispatches by class name,
 pass your app's own `EventFactory` — the one configured with `events.allowed_namespaces` — as

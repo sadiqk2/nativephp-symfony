@@ -18,7 +18,8 @@ use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
  * that path and a simulator that skipped them would prove nothing:
  *
  *  - the payload is JSON-encoded and decoded again, so a test gets the same
- *    types the wire produces;
+ *    types the wire produces — and a payload that cannot be encoded is refused
+ *    rather than quietly dropped, since the runtime could not have pushed it;
  *  - {@see EventFactory}'s dual spreading applies — a list payload lands on the
  *    constructor positionally, a string-keyed one as named arguments. An app
  *    that mixed the two up would pass a test that skipped this and fail on a
@@ -62,7 +63,7 @@ final class RuntimeEventSimulator
             '/_native/api/events',
             'POST',
             server: ['CONTENT_TYPE' => 'application/json'],
-            content: (string) json_encode(['event' => $event, 'payload' => $payload]),
+            content: self::body($event, $payload),
         ));
     }
 
@@ -70,13 +71,22 @@ final class RuntimeEventSimulator
      * The event object a payload would produce, without dispatching it.
      *
      * For asserting on the mapping itself — that a payload really reaches the
-     * constructor argument you think it does.
+     * constructor argument you think it does. Through the same JSON round trip
+     * `dispatch()` performs, or the two answer differently for the same payload:
+     * the wire flattens an object into an array and rejects bytes that are not
+     * UTF-8, so an assertion here would otherwise hold for a value no listener
+     * will ever see. This project has been bitten by that already — every
+     * AutoUpdater event degraded to NativeEvent because its payload keys did not
+     * survive encoding.
      *
      * @param array<array-key, mixed> $payload
      */
     public function make(string $event, array $payload = []): object
     {
-        return $this->factory->create($event, $payload);
+        /** @var array{event: string, payload: array<array-key, mixed>} $body */
+        $body = json_decode(self::body($event, $payload), true, 512, \JSON_THROW_ON_ERROR);
+
+        return $this->factory->create($event, $body['payload']);
     }
 
     // --- the events apps actually listen for ---------------------------------
@@ -190,6 +200,33 @@ final class RuntimeEventSimulator
     public function shortcutPressed(string $event, string $key): void
     {
         $this->dispatch($event, [$key]);
+    }
+
+    /**
+     * The request body the runtime would send, or a refusal.
+     *
+     * Encoding used to be `(string) json_encode(...)`, and a payload it cannot
+     * encode — a filename or clipboard string that is not UTF-8, an INF, a
+     * resource — turned into `''`. The controller answers an empty body with a
+     * 400, `dispatch()` discards the response because the runtime discards it
+     * too, and the event simply never happened: no listener ran, nothing said
+     * why, and a test asserting that nothing happened passed for the wrong
+     * reason. The runtime could never have pushed such a payload, so say so
+     * where it was written, as FakeRuntime does for a call the client cannot make.
+     *
+     * @param array<array-key, mixed> $payload
+     */
+    private static function body(string $event, array $payload): string
+    {
+        try {
+            return json_encode(['event' => $event, 'payload' => $payload], \JSON_THROW_ON_ERROR, 512);
+        } catch (\JsonException $e) {
+            throw new \InvalidArgumentException(sprintf(
+                'The payload for "%s" cannot be JSON-encoded, so the runtime could never push it: %s.',
+                $event,
+                $e->getMessage(),
+            ), previous: $e);
+        }
     }
 
     /** The runtime's namespace, which is the wire protocol and not a local class. */
