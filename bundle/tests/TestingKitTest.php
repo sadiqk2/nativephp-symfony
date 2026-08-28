@@ -603,6 +603,9 @@ final class TestingKitTest extends TestCase
         $container->setParameter('kernel.project_dir', '/app');
         $container->setParameter('kernel.environment', 'test');
         $container->setParameter('kernel.debug', true);
+        // Symfony 7 resolves this while loading a bundle extension; 8 does not. A real
+        // app always has it from FrameworkBundle, so only this fixture went without.
+        $container->setParameter('kernel.build_dir', '/app/var/cache/test');
 
         (new NativeDesktopBundle())->getContainerExtension()?->load([$config], $container);
 

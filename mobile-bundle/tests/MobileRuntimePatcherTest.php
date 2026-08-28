@@ -76,6 +76,10 @@ final class MobileRuntimePatcherTest extends TestCase
     {
         // Reported as applied while the file on disk still points at another vendor's
         // package — the launches-to-nothing failure, produced by a discarded return value.
+        if (0 === posix_geteuid()) {
+            self::markTestSkipped('root ignores file permissions, so the failure cannot be provoked.');
+        }
+
         chmod($this->bridge(), 0o444);
 
         try {
