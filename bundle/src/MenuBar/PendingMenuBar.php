@@ -175,8 +175,21 @@ final class PendingMenuBar
     {
         $payload = $this->payload;
 
-        if (isset($payload['url'])) {
-            $payload['url'] = $this->urls->absolute((string) $payload['url']);
+        // The runtime hands these to Tray::setTitle() and Tray::setToolTip(), which
+        // take a required string and refuse anything else, with no guard and no
+        // default of its own — so an absent key throws there, after the 200 has
+        // already gone out. Upstream's MenuBar declares both `string = ''` and
+        // serialises them on every create, which is why it never sees this.
+        $payload['label'] ??= '';
+        $payload['tooltip'] ??= '';
+
+        // Without a url the popover window loads file://<appPath>/index.html, which a
+        // NativePHP build does not have. Upstream defaults to url('/'), as
+        // PendingWindow::open() already does here. Tray-only mode has no window and
+        // the runtime never reads the key there, so leave it out rather than make a
+        // console-time tray icon depend on a resolvable base URL.
+        if (isset($payload['url']) || !($payload['onlyShowContextMenu'] ?? false)) {
+            $payload['url'] = $this->urls->absolute((string) ($payload['url'] ?? '/'));
         }
 
         $this->client->post('menu-bar/create', $payload);

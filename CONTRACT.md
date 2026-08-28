@@ -231,6 +231,13 @@ caller's `settings`.
 `windowPosition` (default `trayCenter`), `showOnAllWorkspaces` (default `false`),
 `contextMenu`, `webPreferences`.
 
+`label`, `tooltip` and `url` are optional only on paper. The runtime passes `label` to
+`Tray.setTitle()` and, in tray-only mode, `tooltip` to `Tray.setToolTip()` with no guard;
+both take a required string and refuse anything else, so an absent key throws *after* the
+`200` has gone out. `url` becomes the popover's `index`, and the vendored menubar library
+substitutes `file://<appPath>/index.html`, which a NativePHP build does not have. Always
+send them — `''`, `''` and `url('/')` are the upstream defaults.
+
 Two distinct modes:
 
 - `onlyShowContextMenu: true` → a bare `Tray` with a context menu, no window.
