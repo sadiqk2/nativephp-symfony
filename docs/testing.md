@@ -338,10 +338,16 @@ handler** — otherwise it is a dead button on a device with no error anywhere.
 
 Both bundles carry coverage tests that parse upstream's own sources, so upstream drift becomes
 a failing test rather than a discovery in production: `ContractCoverageTest` (the 116 express
-routes and the 44 event names), `BridgeCoverageTest` (the 62 bridge methods, 5 of which nothing here wraps yet) and
+routes and the 44 event names), `BridgeCoverageTest` (the 62 bridge methods) and
 `UiElementCoverageTest` (the 36 element types, asserted in **both** directions, since a type
 the renderers do not know produces a missing region on the device and no error anywhere).
 Those live in the bundles, not in your app.
+
+`PayloadKeyContractTest` and its mobile twin go one level down, to what is *in* each call,
+and also in both directions. A key the runtime never reads is a silent no-op; a key it reads
+with no default of its own — `tray.setTitle(label)`, `setWindowButtonVisibility(v)`,
+`setZoomFactor(parseFloat(zoomFactor))` — has to be in every payload rather than only when
+the caller set it, because the runtime acknowledges the request before it gets that far.
 
 What no test in your app can establish:
 
