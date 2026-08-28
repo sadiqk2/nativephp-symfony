@@ -86,7 +86,7 @@ kind of problem with the same kind of solution: three hardcoded paths in the nat
 
 ### 2b. The native bridge
 
-`nativephp_call($method, $jsonPayload)` — a PHP extension function. **54 distinct methods**
+`nativephp_call($method, $jsonPayload)` — a PHP extension function. **57 distinct methods**
 in the current PHP surface:
 
 | Group | Methods |
@@ -96,13 +96,14 @@ in the current PHP surface:
 | Microphone | Start, Stop, Pause, Resume, GetStatus, GetRecording |
 | Geolocation | ClearWatch, DrainWatchBuffer, TrimWatchBuffer, StopBackgroundWatch, BackgroundWatchStatus |
 | SecureStorage | Get, Set, Delete |
-| PushNotification | GetToken, CheckPermission, ClearBadge |
+| PushNotification | GetToken, CheckPermission, ClearBadge, RequestPermission |
 | Browser | Open, OpenInApp, OpenAuth |
 | Share | Url, File |
 | MobileWallet | IsAvailable, CreatePaymentIntent, ConfirmPayment, PresentPaymentSheet, GetPaymentStatus |
 | System | GetAppearance, MinimizeApp, OpenAppSettings |
 | Biometric | Prompt |
-| Dialog | Toast |
+| Dialog | Toast, Alert |
+| Scanner | Scan |
 | File | Copy, Move |
 | Network | Status |
 | UI / NativeUI | SetBackground, Transition.Set |
@@ -110,7 +111,9 @@ in the current PHP surface:
 
 **The bridge itself is entirely framework-agnostic** — a function name and a JSON string. The
 PHP wrappers around it are the same mechanical work as desktop's endpoint wrappers, and there
-are fewer of them (54 vs 116).
+are fewer of them (57 vs 116). Three of the 57 — `Dialog.Alert`, `Scanner.Scan` and
+`PushNotification.RequestPermission` — have no wrapper here yet; `BridgeCoverageTest` names
+them so the gap is stated rather than counted over.
 
 ---
 
@@ -130,7 +133,7 @@ upstream fix is the same too: declare them in a manifest.
 
 | | desktop | mobile (WebView path) | mobile (native UI) |
 |---|---|---|---|
-| Transport | localhost HTTP, 116 endpoints | `nativephp_call`, 54 methods | same |
+| Transport | localhost HTTP, 116 endpoints | `nativephp_call`, 57 methods | same |
 | Framework leak in the native layer | 8 string literals, 1 file | 3 bootstrap paths, 2 files | plus Blade-coupled rendering |
 | SAPI shim needed | no (`php -S` + router) | **yes, ~100 LOC** | yes |
 | UI work | none | **none** | reimplement 17,316 LOC for Twig |
@@ -151,7 +154,7 @@ second half.
    across requests, which is where mobile's performance comes from.
 2. **A `MobileRuntimePatcher`** — retarget the three hardcoded bootstrap paths in the copied
    Android/iOS projects, and force `entry_mode: web`.
-3. **PHP wrappers for the 54 bridge methods**, typed, in the shape already established by the
+3. **PHP wrappers for the 57 bridge methods**, typed, in the shape already established by the
    desktop bundle.
 4. **Build commands** — `native:mobile:install`, `native:mobile:run android|ios`.
 

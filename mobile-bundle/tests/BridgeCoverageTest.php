@@ -16,9 +16,21 @@ use PHPUnit\Framework\TestCase;
  */
 final class BridgeCoverageTest extends TestCase
 {
-    private const EXPECTED_METHODS = 54;
+    private const int EXPECTED_METHODS = 57;
 
-    public function testEveryUpstreamBridgeMethodIsWrapped(): void
+    /**
+     * Upstream methods with no wrapper here, named rather than left to a count that
+     * happens to agree.
+     *
+     * All three are called as `nativephp_call(\n    'Method',` — the argument on its own
+     * line. The parser used to require the quote immediately after the parenthesis, so
+     * none of them was ever discovered, the count read 54, and a test called
+     * "every upstream bridge method is wrapped" passed while three were not. The same
+     * miscount is why MOBILE-ANALYSIS.md scoped the port at 54 methods.
+     */
+    private const array UNWRAPPED = ['Dialog.Alert', 'PushNotification.RequestPermission', 'Scanner.Scan'];
+
+    public function testTheOnlyUnwrappedBridgeMethodsAreTheOnesNamedHere(): void
     {
         $upstream = $this->upstreamMethods();
 
@@ -32,7 +44,9 @@ final class BridgeCoverageTest extends TestCase
             static fn (string $method): bool => !str_contains($source, "'".$method."'"),
         ));
 
-        self::assertSame([], $missing, 'These native methods have no wrapper: '.implode(', ', $missing));
+        // Both directions: a method upstream adds and nothing here wraps fails, and so
+        // does one that gets wrapped without being struck off this list.
+        self::assertSame(self::UNWRAPPED, $missing, 'The set of unwrapped native methods has changed: '.implode(', ', $missing));
     }
 
     public function testTheMethodCountHasNotChanged(): void
@@ -60,7 +74,9 @@ final class BridgeCoverageTest extends TestCase
         $methods = [];
 
         foreach ($this->phpFiles($dir) as $file) {
-            preg_match_all("/nativephp_call\\('([A-Za-z.]+)'/", (string) file_get_contents($file), $matches);
+            // `\s*` is load-bearing: three upstream calls put the method name on its own
+            // line, and without it they were invisible to this whole test.
+            preg_match_all("/nativephp_call\\(\\s*'([A-Za-z.]+)'/", (string) file_get_contents($file), $matches);
             foreach ($matches[1] as $method) {
                 $methods[$method] = true;
             }

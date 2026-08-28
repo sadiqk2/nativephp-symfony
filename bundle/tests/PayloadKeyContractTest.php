@@ -28,6 +28,12 @@ use PHPUnit\Framework\TestCase;
  */
 final class PayloadKeyContractTest extends TestCase
 {
+    /**
+     * Endpoints actually compared. ContractCoverageTest pins the mount table this relies
+     * on, so a module upstream adds cannot quietly drop out of both.
+     */
+    private const int EXPECTED_COMPARISONS = 55;
+
     /** Mount points from the runtime's api.ts, as ContractCoverageTest lists them. */
     private const MOUNTS = [
         'alert' => 'alert', 'app' => 'app', 'autoUpdater' => 'auto-updater',
@@ -73,7 +79,10 @@ final class PayloadKeyContractTest extends TestCase
             }
         }
 
-        self::assertGreaterThan(40, $checked, 'The parser found almost nothing to compare, which means it has stopped working.');
+        // Exact, not a floor: a floor lets the parser stop recognising a call shape and
+        // compare fewer endpoints while still reporting OK, which is how the clipboard's
+        // query-string calls sat outside this check unnoticed. Changing it is a decision.
+        self::assertSame(self::EXPECTED_COMPARISONS, $checked, 'A different number of endpoints was compared than this test accounts for.');
 
         // Stated, not implied: the builders are the payloads most worth comparing and the
         // ones most easily left out, so name them rather than trusting the total.
@@ -105,16 +114,28 @@ final class PayloadKeyContractTest extends TestCase
         foreach ($this->sourceFiles(__DIR__.'/../src') as $file) {
             $source = (string) file_get_contents($file);
 
-            if (!preg_match_all('/->(?:post|get|delete)\(\s*\'([^\']+)\'\s*,\s*(?=\[)/', $source, $matches, \PREG_OFFSET_CAPTURE)) {
+            // The optional `.$value` tail matters: ClipboardManager posts to
+            // `'clipboard/text?type='.$type->value`, and requiring the comma straight after
+            // the quote meant its three payload-carrying calls were not in this comparison
+            // at all — renaming the key the runtime reads for any of them changed nothing.
+            if (!preg_match_all('/->(?:post|get|delete)\(\s*\'([^\']+)\'(\s*\.[^,]+)?\s*,\s*(?=\[)/', $source, $matches, \PREG_OFFSET_CAPTURE)) {
                 continue;
             }
 
             foreach ($matches[1] as $i => [$endpoint, $_]) {
+                // A tail is only readable when the literal already carries the query
+                // string. `'settings/'.rawurlencode($key)` has its *path* completed at
+                // runtime, so pairing it with a handler would compare the wrong route —
+                // it stays out, exactly as before.
+                if ('' !== $matches[2][$i][0] && !str_contains($endpoint, '?')) {
+                    continue;
+                }
+
                 $start = $matches[0][$i][1] + \strlen($matches[0][$i][0]);
                 $literal = $this->balancedArray($source, $start);
 
                 foreach ($this->topLevelKeys($literal) as $key) {
-                    $found[rtrim($endpoint, '/')][$key] = true;
+                    $found[$this->normalise($endpoint)][$key] = true;
                 }
             }
         }
@@ -159,7 +180,7 @@ final class PayloadKeyContractTest extends TestCase
                 'keys' => array_values(array_unique($keys[1])),
                 // More than one endpoint from one payload would make the association
                 // ambiguous, and guessing is how a check like this compares the wrong pair.
-                'endpoint' => 1 === \count($endpoints) ? rtrim($endpoints[0], '/') : null,
+                'endpoint' => 1 === \count($endpoints) ? $this->normalise($endpoints[0]) : null,
             ];
         }
 
@@ -238,6 +259,17 @@ final class PayloadKeyContractTest extends TestCase
         }
 
         return $handlers;
+    }
+
+    /**
+     * An endpoint as the runtime's router sees it: no query string, no trailing slash.
+     *
+     * `clipboard/text?type=` and `clipboard/text` are one route; keeping them apart meant
+     * the first had no upstream handler to compare against and was silently skipped.
+     */
+    private function normalise(string $endpoint): string
+    {
+        return rtrim(explode('?', $endpoint)[0], '/');
     }
 
     /** @return list<string> */

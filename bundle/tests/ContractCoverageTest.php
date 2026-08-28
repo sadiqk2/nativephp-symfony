@@ -19,7 +19,14 @@ use PHPUnit\Framework\TestCase;
  */
 final class ContractCoverageTest extends TestCase
 {
-    /** Mount points from the runtime's api.ts. */
+    /**
+     * Mount points from the runtime's api.ts.
+     *
+     * `testTheMountTableCoversEveryModuleTheRuntimeMounts` keeps this honest. Without it a
+     * module upstream adds is simply not in the table, `parseRuntimeEndpoints` skips the
+     * file, the pinned endpoint count still matches and every endpoint in it goes
+     * uncovered while this test reports OK — which is the opposite of what it is for.
+     */
     private const MOUNTS = [
         'alert' => 'alert', 'app' => 'app', 'autoUpdater' => 'auto-updater',
         'broadcasting' => 'broadcast', 'childProcess' => 'child-process',
@@ -54,6 +61,29 @@ final class ContractCoverageTest extends TestCase
         // A change here is not necessarily a bug, but it must be a decision:
         // re-read the new endpoints and update CONTRACT.md before bumping this.
         self::assertCount(self::EXPECTED_ENDPOINTS, $endpoints);
+    }
+
+    public function testTheMountTableCoversEveryModuleTheRuntimeMounts(): void
+    {
+        $mounted = self::parseRuntimeMounts();
+
+        if ([] === $mounted) {
+            self::markTestSkipped('Runtime sources not available.');
+        }
+
+        self::assertSame(
+            self::MOUNTS,
+            $mounted,
+            'api.ts mounts a different set of modules than MOUNTS lists, so some of them are being skipped silently.',
+        );
+
+        // PayloadKeyContractTest keeps its own copy and skips unknown modules the same way,
+        // so the two tables have to stay the same table.
+        self::assertSame(
+            self::MOUNTS,
+            (new \ReflectionClass(PayloadKeyContractTest::class))->getConstant('MOUNTS'),
+            'The two contract tests no longer agree on the runtime\'s mount points.',
+        );
     }
 
     public function testEveryRuntimeEventIsMapped(): void
@@ -149,6 +179,46 @@ final class ContractCoverageTest extends TestCase
         }
 
         return $endpoints;
+    }
+
+    /**
+     * Module name → mount path, read out of api.ts's own `httpServer.use()` calls.
+     *
+     * @return array<string, string>
+     */
+    private static function parseRuntimeMounts(): array
+    {
+        $dir = self::runtimeSourceDir();
+
+        if (null === $dir || !is_file($dir.'/api.ts')) {
+            return [];
+        }
+
+        $source = (string) file_get_contents($dir.'/api.ts');
+
+        // `import windowRoutes from './api/window.js'` ties the local name to the file, and
+        // `httpServer.use('/api/window', windowRoutes)` ties it to the mount path.
+        preg_match_all("/import\s+(\w+)\s+from\s+'\.\/api\/([\w-]+)\.js'/", $source, $imports, \PREG_SET_ORDER);
+
+        $modules = [];
+
+        foreach ($imports as [, $local, $module]) {
+            $modules[$local] = $module;
+        }
+
+        preg_match_all("/httpServer\.use\(\s*'\/api\/([\w-]+)'\s*,\s*(\w+)\s*\)/", $source, $mounts, \PREG_SET_ORDER);
+
+        $found = [];
+
+        foreach ($mounts as [, $mount, $local]) {
+            if (isset($modules[$local])) {
+                $found[$modules[$local]] = $mount;
+            }
+        }
+
+        ksort($found);
+
+        return $found;
     }
 
     private static function runtimeSourceDir(): ?string

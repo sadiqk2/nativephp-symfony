@@ -21,12 +21,39 @@ use PHPUnit\Framework\TestCase;
  * The two events with more than one positional value are asserted by name below, because
  * arity alone cannot catch a swap and there are few enough to state exactly.
  *
+ * Every `notifyLaravel('events', { … })` site in the runtime is accounted for, and the
+ * counts below are exact rather than floors — a parser that quietly stops recognising a
+ * form has to fail here instead of comparing fewer sites and still reporting OK.
+ *
  * Skips when the runtime sources are not checked out, as the other contract tests do.
  */
 final class EventPayloadShapeTest extends TestCase
 {
-    /** @var array<string, list<string>> Object payloads, collected while parsing */
+    /**
+     * The runtime's event sites, counted. Every `notifyLaravel('events', …)` object falls
+     * into exactly one of these four buckets, and they sum to EVENT_SITES — so a form the
+     * parser stops recognising cannot slip out of the comparison unnoticed.
+     */
+    private const int EVENT_SITES = 48;
+    private const int POSITIONAL_SITES = 13;
+    private const int NAMED_SITES = 25;
+    private const int PAYLOADLESS_SITES = 9;
+    /** `globalShortcut` sends whatever event class the request registered, so there is no name to compare. */
+    private const int DYNAMIC_NAME_SITES = 1;
+
+    /**
+     * Object payloads, collected while parsing.
+     *
+     * A list per event name, not one payload: three sites send `StartupError` and two send
+     * `PowerStateChanged`, and keying by name alone let the last site overwrite the others —
+     * a wrong key at any but the last of them was compared against nothing.
+     *
+     * @var array<string, list<list<string>>>
+     */
     private array $named = [];
+
+    /** @var array{sites: int, payloadless: int, dynamic: int} */
+    private array $counts = ['sites' => 0, 'payloadless' => 0, 'dynamic' => 0];
 
     /**
      * The factory's event map, read by reflection.
@@ -56,7 +83,7 @@ final class EventPayloadShapeTest extends TestCase
         $checked = 0;
         $problems = [];
 
-        foreach ($sent as $event => $values) {
+        foreach ($sent as $event => $variants) {
             $class = $map[$event] ?? null;
 
             if (null === $class || !class_exists($class)) {
@@ -67,26 +94,26 @@ final class EventPayloadShapeTest extends TestCase
             $parameters = null === $constructor ? [] : $constructor->getParameters();
             $required = \count(array_filter($parameters, static fn (\ReflectionParameter $p): bool => !$p->isOptional()));
 
-            ++$checked;
+            foreach ($variants as $values) {
+                ++$checked;
 
-            if (\count($values) < $required || \count($values) > \count($parameters)) {
-                $problems[] = sprintf(
-                    '%s: the runtime sends %d value(s), %s takes %d (%d required)',
-                    $event,
-                    \count($values),
-                    $class,
-                    \count($parameters),
-                    $required,
-                );
+                if (\count($values) < $required || \count($values) > \count($parameters)) {
+                    $problems[] = sprintf(
+                        '%s: the runtime sends %d value(s), %s takes %d (%d required)',
+                        $event,
+                        \count($values),
+                        $class,
+                        \count($parameters),
+                        $required,
+                    );
+                }
             }
         }
 
-        // Thirteen, measured: of the 44 events, these are the ones sent with a literal
-        // `payload: [...]` that this parser can read — the rest build their payload
-        // elsewhere and are skipped rather than guessed at. Every one of the thirteen is in
-        // the factory's map, so the gap is parseability, not coverage. The floor catches the
-        // parser rotting; it does not claim the surface.
-        self::assertGreaterThanOrEqual(13, $checked, 'Almost no events were compared, so this test has stopped working.');
+        // Exact, not a floor. Every site sending a literal `payload: [...]` is in the
+        // factory's map, so the count is the surface, and a floor here would let a parser
+        // change compare fewer sites and still report OK.
+        self::assertSame(self::POSITIONAL_SITES, $checked, 'Fewer positional payloads were compared than the runtime sends, so this test has stopped covering them.');
         self::assertSame([], $problems, "A payload the constructor cannot take degrades the event to NativeEvent:\n".implode("\n", $problems));
     }
 
@@ -103,9 +130,10 @@ final class EventPayloadShapeTest extends TestCase
             self::markTestSkipped('Runtime sources not available.');
         }
 
+        $checked = 0;
         $problems = [];
 
-        foreach ($this->named as $event => $keys) {
+        foreach ($this->named as $event => $variants) {
             $class = $map[$event] ?? null;
 
             if (null === $class || !class_exists($class)) {
@@ -116,29 +144,56 @@ final class EventPayloadShapeTest extends TestCase
             $parameters = null === $constructor ? [] : $constructor->getParameters();
             $names = array_map(static fn (\ReflectionParameter $p): string => $p->getName(), $parameters);
 
-            $unknown = array_values(array_diff($keys, $names));
-            $unfilled = array_values(array_diff(
-                array_map(
-                    static fn (\ReflectionParameter $p): string => $p->getName(),
-                    array_filter($parameters, static fn (\ReflectionParameter $p): bool => !$p->isOptional()),
-                ),
-                $keys,
-            ));
+            foreach ($variants as $keys) {
+                ++$checked;
 
-            if ([] !== $unknown || [] !== $unfilled) {
-                $problems[] = sprintf(
-                    '%s sends [%s]; %s takes [%s]%s',
-                    $event,
-                    implode(', ', $keys),
-                    $class,
-                    implode(', ', $names),
-                    [] === $unfilled ? '' : sprintf(' — required and unfilled: %s', implode(', ', $unfilled)),
-                );
+                $unknown = array_values(array_diff($keys, $names));
+                $unfilled = array_values(array_diff(
+                    array_map(
+                        static fn (\ReflectionParameter $p): string => $p->getName(),
+                        array_filter($parameters, static fn (\ReflectionParameter $p): bool => !$p->isOptional()),
+                    ),
+                    $keys,
+                ));
+
+                if ([] !== $unknown || [] !== $unfilled) {
+                    $problems[] = sprintf(
+                        '%s sends [%s]; %s takes [%s]%s',
+                        $event,
+                        implode(', ', $keys),
+                        $class,
+                        implode(', ', $names),
+                        [] === $unfilled ? '' : sprintf(' — required and unfilled: %s', implode(', ', $unfilled)),
+                    );
+                }
             }
         }
 
-        self::assertGreaterThanOrEqual(12, \count($this->named), 'Almost no named payloads were found, so this test has stopped working.');
+        // Sites, not names: `StartupError` is sent from three places and `PowerStateChanged`
+        // from two, and counting names would let two of the three go uncompared.
+        self::assertSame(self::NAMED_SITES, $checked, 'Fewer named payloads were compared than the runtime sends, so this test has stopped covering them.');
         self::assertSame([], $problems, "A named payload that does not fit the constructor degrades the event:\n".implode("\n", $problems));
+    }
+
+    public function testTheParserAccountsForEveryEventSiteInTheRuntime(): void
+    {
+        $sent = $this->payloadsTheRuntimeSends();
+
+        if ([] === $sent) {
+            self::markTestSkipped('Runtime sources not available.');
+        }
+
+        // The point of the sum: a site the parser stops recognising has to land somewhere,
+        // and every bucket is pinned, so it cannot quietly leave the comparison. Bump these
+        // only after reading the new sites — that is the decision this test forces.
+        self::assertSame(self::EVENT_SITES, $this->counts['sites'], 'The runtime has a different number of event sites than this test accounts for.');
+        self::assertSame(self::PAYLOADLESS_SITES, $this->counts['payloadless'], 'A site gained or lost its payload.');
+        self::assertSame(self::DYNAMIC_NAME_SITES, $this->counts['dynamic'], 'A site names its event class dynamically, so nothing here can compare it.');
+        self::assertSame(
+            self::EVENT_SITES,
+            self::POSITIONAL_SITES + self::NAMED_SITES + self::PAYLOADLESS_SITES + self::DYNAMIC_NAME_SITES,
+            'The four buckets no longer add up to the number of sites, so some are counted twice or not at all.',
+        );
     }
 
     public function testTheTwoEventsWithSeveralValuesAreInTheRightOrder(): void
@@ -152,15 +207,16 @@ final class EventPayloadShapeTest extends TestCase
 
         // Electron's getSize() returns [width, height], and the runtime spreads it in that
         // order after the window id. A swap here is invisible: both are ints, both are
-        // plausible, and nothing downstream can tell.
+        // plausible, and nothing downstream can tell. One entry each, so this also pins
+        // that neither event grew a second site sending something else.
         self::assertSame(
-            ['id', 'window.getSize()[0]', 'window.getSize()[1]'],
+            [['id', 'window.getSize()[0]', 'window.getSize()[1]']],
             $sent['Native\\Desktop\\Events\\Windows\\WindowResized'] ?? [],
             'WindowResized: if upstream reorders this, $width and $height silently swap.',
         );
 
         self::assertSame(
-            ['alias', 'proc.pid'],
+            [['alias', 'proc.pid']],
             $sent['Native\\Desktop\\Events\\ChildProcess\\ProcessSpawned'] ?? [],
             'ProcessSpawned: alias first, pid second.',
         );
@@ -182,12 +238,12 @@ final class EventPayloadShapeTest extends TestCase
     }
 
     /**
-     * Event class → the positional payload the runtime sends, as source expressions.
+     * Event class → the positional payloads the runtime sends, as source expressions.
      *
-     * Only `payload: [...]` literals: a site building its payload elsewhere is skipped rather
-     * than guessed at.
+     * One entry per *site*, not per event name. Only `payload: [...]` literals: a site
+     * building its payload elsewhere is counted but not guessed at.
      *
-     * @return array<string, list<string>>
+     * @return array<string, list<list<string>>>
      */
     private function payloadsTheRuntimeSends(): array
     {
@@ -198,6 +254,10 @@ final class EventPayloadShapeTest extends TestCase
         }
 
         $sent = [];
+        // Reset, because both collections now append per site: parsing twice in one test
+        // would otherwise double every count.
+        $this->named = [];
+        $this->counts = ['sites' => 0, 'payloadless' => 0, 'dynamic' => 0];
 
         foreach ($this->sources($root) as $file) {
             $source = (string) file_get_contents($file);
@@ -207,23 +267,38 @@ final class EventPayloadShapeTest extends TestCase
             }
 
             foreach ($matches[0] as [$match, $offset]) {
+                // childProcess.ts keeps a commented-out `error` listener as a note to
+                // itself. It is not a site, and counting it made StartupError look as
+                // though it sent a payload of comment markers.
+                if ($this->isCommentedOut($source, $offset)) {
+                    continue;
+                }
+
                 $object = $this->balanced($source, strpos($source, '{', $offset) ?: $offset, '{', '}');
+                ++$this->counts['sites'];
 
-                if (!preg_match("/event:\\s*'([^']+)'/", $object, $event)) {
+                // The event class is written three ways: a single-quoted literal, a
+                // backtick-quoted one (every AutoUpdater and PowerMonitor site), and a
+                // fallback `menuItem.event || '…'`. Matching only the first left eighteen of the
+                // forty-eight sites out of the comparison while this test still reported OK.
+                if (!preg_match('/event:\\s*(?:[^\'`,\\n]*\\|\\|\\s*)?[\'`]([^\'`]+)[\'`]/', $object, $event)) {
+                    ++$this->counts['dynamic'];
+
                     continue;
                 }
 
-                if (!preg_match('/payload:\\s*/', $object, $_, \PREG_OFFSET_CAPTURE)) {
+                if (!preg_match('/payload:\\s*/', $object, $payloadAt, \PREG_OFFSET_CAPTURE)) {
+                    ++$this->counts['payloadless'];
+
                     continue;
                 }
 
-                preg_match('/payload:\\s*/', $object, $payloadAt, \PREG_OFFSET_CAPTURE);
                 $after = ltrim(substr($object, $payloadAt[0][1] + \strlen($payloadAt[0][0])));
 
                 $name = ltrim(str_replace('\\\\', '\\', $event[1]), '\\');
 
                 if (str_starts_with($after, '[')) {
-                    $sent[$name] = $this->topLevelItems($this->balanced($after, 0, '[', ']'));
+                    $sent[$name][] = $this->topLevelItems($this->balanced($after, 0, '[', ']'));
 
                     continue;
                 }
@@ -238,7 +313,7 @@ final class EventPayloadShapeTest extends TestCase
                         $keys[] = trim(explode(':', $entry, 2)[0]);
                     }
 
-                    $this->named[$name] = array_values(array_filter($keys));
+                    $this->named[$name][] = array_values(array_filter($keys));
                 }
             }
         }
@@ -261,6 +336,15 @@ final class EventPayloadShapeTest extends TestCase
         }
 
         return $files;
+    }
+
+    /** Whether the match at `$offset` sits behind a `//` on its own line. */
+    private function isCommentedOut(string $source, int $offset): bool
+    {
+        $before = substr($source, 0, $offset);
+        $lineStart = strrpos($before, "\n");
+
+        return str_contains(false === $lineStart ? $before : substr($before, $lineStart), '//');
     }
 
     private function balanced(string $source, int $start, string $open, string $close): string
