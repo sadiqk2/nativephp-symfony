@@ -1,0 +1,81 @@
+name: Device verification report
+description: You ran a mobile build on a real Mac or Android SDK — the one thing this project cannot do itself
+labels: [mobile, device-verification]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Thank you.** `native:mobile:build` stages, cleans and archives the
+        application and then hands off to Gradle or Xcode, and neither toolchain
+        exists in the environment this was built in. No build produced by these
+        commands has been opened by one, and no screen has been rendered on a
+        phone.
+
+        A report here is useful **whether it worked or not**. "It built and
+        launched to a blank screen" is as valuable as "it worked", and rather
+        more actionable.
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Android
+        - iOS
+        - both
+    validations:
+      required: true
+
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: How far did it get?
+      options:
+        - "--stage-only completed"
+        - Gradle/Xcode produced an artifact
+        - Installed on a device or simulator
+        - Application launched and rendered
+        - Failed before staging finished
+        - Failed during Gradle/Xcode
+        - Launched to a blank screen
+    validations:
+      required: true
+
+  - type: dropdown
+    id: path
+    attributes:
+      label: Render path
+      description: An application declaring no `#[NativeScreen]` takes the WebView path by construction.
+      options:
+        - WebView
+        - native UI
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the command you ran and whatever the toolchain said.
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Toolchain
+      value: |
+        - macOS / Linux / Windows version:
+        - Xcode version (iOS):
+        - Android SDK / Gradle / JDK versions:
+        - Device or simulator, and OS version:
+        - `native:mobile:doctor` output:
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: A screenshot, if anything rendered
+      description: Even a blank one. Especially a blank one.

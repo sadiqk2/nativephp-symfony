@@ -1,0 +1,17 @@
+# Kept out of the dist archive Composer downloads. Everything here is needed to
+# *develop* the bundle and nothing needs it to *run*.
+#
+# src/Bridge/FakeBridge.php is deliberately not in this list: it is shipped API —
+# `nativephp_call()` only exists inside a packaged app, so an application's own
+# test suite has nothing else to run against.
+#
+# tests/fixtures/ carries the tailwind corpus, which is ~200KB of comparison data
+# for the style parser. It goes with the rest of tests/.
+
+/tests            export-ignore
+/phpunit.xml.dist export-ignore
+/.gitattributes   export-ignore
+/.github          export-ignore
+/composer.lock    export-ignore
+
+* text=auto eol=lf

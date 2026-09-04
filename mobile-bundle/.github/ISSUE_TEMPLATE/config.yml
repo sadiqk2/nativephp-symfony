@@ -1,0 +1,10 @@
+# This file is inert in the monorepo — GitHub only reads .github/ at a repository
+# root — and active in the read-only split mirror, which is the point of it.
+blank_issues_enabled: false
+contact_links:
+  - name: This repository is a read-only mirror
+    url: https://github.com/sadiqk2/nativephp-symfony/issues
+    about: native-symfony/mobile-bundle is published from the nativephp-symfony monorepo by subtree split. Issues and pull requests belong there; anything opened here cannot be merged.
+  - name: You ran a build on a real device
+    url: https://github.com/sadiqk2/nativephp-symfony/issues/new?template=device_verification.yml
+    about: No build produced by native:mobile:build has been opened by Xcode or Android Studio. A report is the single most valuable contribution to this bundle, whether it worked or not.

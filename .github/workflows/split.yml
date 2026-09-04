@@ -1,0 +1,90 @@
+name: split
+
+# Packagist reads a composer.json at a repository *root*, so a monorepo holding two
+# packages cannot be published as it stands. This mirrors each package directory into
+# its own repository, history and all, and those mirrors are what Packagist watches.
+#
+# The mirrors are read-only. Nothing is ever pushed to them by hand, and a pull request
+# opened against one cannot be merged — bundle/.github/ISSUE_TEMPLATE/config.yml says so
+# on each of them, which is why that file exists in a directory GitHub ignores here.
+#
+# Requires a secret, SPLIT_TOKEN: a fine-grained personal access token with Contents:
+# write on both mirror repositories. The default GITHUB_TOKEN is scoped to this
+# repository alone and cannot push across, which is the one thing an Action cannot
+# grant itself.
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # Splits are pushes to a shared branch on another repository. Two of them racing
+  # would interleave, and the loser would be rejected as non-fast-forward — so they
+  # queue rather than run together, and a queued one is not cancelled.
+  group: split
+  cancel-in-progress: false
+
+jobs:
+  split:
+    name: ${{ matrix.package }} → ${{ matrix.mirror }}
+    runs-on: ubuntu-latest
+    if: github.repository == 'sadiqk2/nativephp-symfony'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - package: bundle
+            mirror: nativephp-symfony-desktop-bundle
+          - package: mobile-bundle
+            mirror: nativephp-symfony-mobile-bundle
+
+    steps:
+      # The whole history: `git subtree split` rewrites every commit that touched the
+      # prefix, so a shallow clone would produce a mirror whose history begins at an
+      # arbitrary point and whose commit shas change on the next run.
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Check the token is present
+        env:
+          SPLIT_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+        run: |
+          if [ -z "$SPLIT_TOKEN" ]; then
+            echo "::error::SPLIT_TOKEN is not set. See RELEASING.md — the mirrors cannot be" \
+                 "pushed to with the default GITHUB_TOKEN, which is scoped to this repository."
+            exit 1
+          fi
+
+      - name: Split ${{ matrix.package }}/
+        id: split
+        run: |
+          git config user.name  'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+          sha="$(git subtree split --prefix=${{ matrix.package }} HEAD)"
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "Split ${{ matrix.package }}/ to $sha"
+
+      # A tag push and a branch push are different jobs on purpose. A tag is what
+      # Packagist turns into a release, so it has to land on the mirror pointing at the
+      # split commit rather than at this repository's commit, which the mirror has never
+      # seen. Pushing main as well keeps `dev-main` resolvable between releases.
+      - name: Push to the mirror
+        env:
+          SPLIT_TOKEN: ${{ secrets.SPLIT_TOKEN }}
+          MIRROR: https://x-access-token:${{ secrets.SPLIT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.mirror }}.git
+          SHA: ${{ steps.split.outputs.sha }}
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = 'tag' ]; then
+            echo "Tagging ${GITHUB_REF_NAME} at ${SHA} on ${{ matrix.mirror }}"
+            git tag -f "${GITHUB_REF_NAME}" "${SHA}"
+            git push "${MIRROR}" "refs/tags/${GITHUB_REF_NAME}"
+          else
+            echo "Pushing ${SHA} to ${{ matrix.mirror }} main"
+            git push "${MIRROR}" "${SHA}:refs/heads/main"
+          fi

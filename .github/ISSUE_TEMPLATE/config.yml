@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Troubleshooting — read this first
+    url: https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/troubleshooting.md
+    about: Symptom → cause → fix. This runtime usually fails silently rather than with an error, so the symptom is the way in.
+  - name: A bug in NativePHP's runtime itself
+    url: https://github.com/NativePHP/desktop/issues
+    about: This project patches a copy of that runtime but does not maintain it. Defects in the Electron runtime or the mobile hosts belong upstream.
+  - name: Security vulnerability
+    url: https://github.com/sadiqk2/nativephp-symfony/security/advisories/new
+    about: Report privately, not as an issue. SECURITY.md describes the trust boundary so a report can be aimed correctly.

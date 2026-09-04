@@ -1,0 +1,15 @@
+# Kept out of the dist archive Composer downloads. Everything here is needed to
+# *develop* the bundle and nothing needs it to *run*, so an application that
+# requires this package should not be paying to unpack it.
+#
+# src/Testing/ is deliberately not in this list: FakeRuntime, RuntimeExpectations
+# and RuntimeEventSimulator are shipped API, used by the consuming application's
+# own test suite. Only this package's own tests are excluded.
+
+/tests            export-ignore
+/phpunit.xml.dist export-ignore
+/.gitattributes   export-ignore
+/.github          export-ignore
+/composer.lock    export-ignore
+
+* text=auto eol=lf

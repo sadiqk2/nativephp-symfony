@@ -11,7 +11,19 @@
     ],
     "license": "MIT",
     "type": "symfony-bundle",
-    "version": "0.1.0",
+    "homepage": "https://github.com/sadiqk2/nativephp-symfony",
+    "authors": [
+        {
+            "name": "Sadiq Ali Khan",
+            "homepage": "https://github.com/sadiqk2",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/sadiqk2/nativephp-symfony/issues",
+        "source": "https://github.com/sadiqk2/nativephp-symfony/tree/main/mobile-bundle",
+        "docs": "https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/README.md"
+    },
     "require": {
         "php": "^8.3",
         "psr/container": "^1.1|^2.0",
@@ -44,7 +56,13 @@
     "config": {
         "sort-packages": true
     },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
+        }
+    },
     "minimum-stability": "stable",
+    "prefer-stable": true,
     "suggest": {
         "ext-zip": "To package the application archive that native:mobile:build writes; the hosts extract a zip at boot",
         "symfony/dotenv": "To resolve the packaged application's .env at boot; without it the shims fall back to the host environment",

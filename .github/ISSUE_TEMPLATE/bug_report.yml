@@ -1,0 +1,78 @@
+name: Bug report
+description: Something behaves differently than documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Before anything else, please run `bin/console native:doctor`** (or
+        `native:mobile:doctor`) and paste its output below. This runtime's usual
+        failure mode is silence rather than an error, and the doctor catches the
+        three commonest causes — a missing routes import, a firewall in front of
+        `/_native/api/`, and no bootstrapper — in a way a description cannot.
+
+        [`docs/troubleshooting.md`](https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/troubleshooting.md)
+        is organised symptom-first and may already have your answer.
+
+  - type: dropdown
+    id: bundle
+    attributes:
+      label: Which bundle?
+      options:
+        - desktop-bundle
+        - mobile-bundle
+        - both
+        - not sure
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: native:doctor output
+      description: Paste the whole thing, including the tables above the checks.
+      render: text
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what you expected instead
+      description: >
+        If the symptom is "nothing happens", say what the last thing that *did*
+        happen was — the window opened, the build finished, the command exited 0.
+        Where the silence starts is usually the whole diagnosis.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction
+      description: >
+        Smallest steps you have. A diff against `demo/` is ideal, since that
+        application is also the integration test and is known to work.
+    validations:
+      required: true
+
+  - type: textarea
+    id: versions
+    attributes:
+      label: Versions
+      value: |
+        - Bundle:
+        - Symfony:
+        - PHP:
+        - OS:
+        - Node (desktop only):
+        - NativePHP runtime commit / source you installed from:
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Runtime output
+      description: >
+        `bin/console native:run -v` logs every PHP command the runtime spawns.
+        For a packaged app, the Electron console. Redact your app secret.
+      render: text

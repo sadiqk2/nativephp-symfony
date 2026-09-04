@@ -1,0 +1,55 @@
+name: Feature request
+description: Something the bundles should do and do not
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Two things worth checking first, because they cover a fair share of
+        requests:
+
+        - **An endpoint with no wrapper is already reachable.** `ClientInterface`
+          takes `get()`, `post()` and `delete()` against any runtime path;
+          `FakeBridge` and the mobile `Bridge` are the same escape hatch on that
+          side. If the wrapper is missing rather than the capability, say so —
+          that is a much smaller change.
+        - **The runtime is upstream's.** If the capability does not exist in
+          NativePHP's Electron runtime or mobile hosts at all, it needs to be
+          built there first; a wrapper here cannot invent it.
+
+  - type: dropdown
+    id: bundle
+    attributes:
+      label: Which bundle?
+      options:
+        - desktop-bundle
+        - mobile-bundle
+        - both
+        - tooling / docs
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What are you trying to do?
+      description: The problem, not the solution. What does your application need that it cannot get?
+    validations:
+      required: true
+
+  - type: textarea
+    id: runtime
+    attributes:
+      label: Does the runtime already support it?
+      description: >
+        A path in NativePHP's own TypeScript, a bridge method name, or a link.
+        `CONTRACT.md` lists all 118 endpoints and all 46 events; if it is in
+        there and has no wrapper, that is the whole answer and this is an easy
+        change.
+
+  - type: textarea
+    id: shape
+    attributes:
+      label: What would the API look like?
+      description: Optional. A few lines of the PHP you would want to write.
+      render: php
