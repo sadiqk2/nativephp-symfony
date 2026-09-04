@@ -46,7 +46,7 @@ const NAV = [
     { group: 'Reference' },
     { src: 'docs/desktop-api.md', slug: 'desktop-api', title: 'Desktop API', blurb: 'Windows, menus, dialogs, processes, events' },
     { src: 'docs/mobile-api.md', slug: 'mobile-api', title: 'Mobile API', blurb: '54 bridge methods and the native-UI layers' },
-    { src: 'CONTRACT.md', slug: 'contract', title: 'Wire protocol', blurb: 'All 116 endpoints and 44 events, exactly' },
+    { src: 'CONTRACT.md', slug: 'contract', title: 'Wire protocol', blurb: 'All 118 endpoints and 46 events, exactly' },
     { src: 'NATIVE-UI-CONTRACT.md', slug: 'native-ui-contract', title: 'Native-UI format', blurb: 'What SwiftUI and Compose consume' },
 
     { group: 'Working with it' },
@@ -64,7 +64,14 @@ const NAV = [
     { src: 'bundle/README.md', slug: 'desktop-bundle', title: 'Desktop bundle', blurb: 'What ships in native-symfony/desktop-bundle' },
     { src: 'mobile-bundle/README.md', slug: 'mobile-bundle', title: 'Mobile bundle', blurb: 'What ships in native-symfony/mobile-bundle' },
     { src: 'demo/README.md', slug: 'demo', title: 'The demo app', blurb: 'Deskpad: both bundles, driven end to end' },
-    { src: 'upstream-patches/README.md', slug: 'upstream-patches', title: 'Upstream patches', blurb: 'Eleven fixes, ten of them open PRs' },
+    { src: 'upstream-patches/README.md', slug: 'upstream-patches', title: 'Upstream patches', blurb: 'Eleven fixes: four landed, six open' },
+
+    { group: 'Contributing' },
+    { src: 'CONTRIBUTING.md', slug: 'contributing', title: 'Contributing', blurb: 'The dev loop, and what a change needs' },
+    { src: 'RELEASING.md', slug: 'releasing', title: 'Releasing', blurb: 'The subtree split, and how Packagist sees it' },
+    { src: 'SECURITY.md', slug: 'security', title: 'Security', blurb: 'The trust boundary, and how to report' },
+    { src: 'bundle/CHANGELOG.md', slug: 'desktop-changelog', title: 'Desktop changelog', blurb: 'native-symfony/desktop-bundle, by version' },
+    { src: 'mobile-bundle/CHANGELOG.md', slug: 'mobile-changelog', title: 'Mobile changelog', blurb: 'native-symfony/mobile-bundle, by version' },
 
     { group: 'Record' },
     { src: 'SPIKE-RESULTS.md', slug: 'spike-results', title: 'M1 — the spike', blurb: 'Proving it possible at all' },

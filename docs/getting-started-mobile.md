@@ -56,10 +56,11 @@ Consequently there is no dev-server loop like `native:run`. What replaces it is
 composer require native-symfony/mobile-bundle:^0.1
 ```
 
-**Not on Packagist yet** — clone this repository and add a path repository pointing at
-`mobile-bundle/` with `"symlink": true`. The block is in the
-[root README](../README.md#0-install-the-packages); [`demo/composer.json`](../demo/composer.json)
-is a working example.
+> **Not yet submitted to Packagist**, so this resolves once the one-time publishing setup in
+> [RELEASING.md](../RELEASING.md#one-time-setup) has been done. Until then, use the checkout
+> route below. Delete this note when the package resolves.
+
+Flex registers the bundle for you. Without it, add it yourself:
 
 ```php
 // config/bundles.php
@@ -68,6 +69,11 @@ return [
     Native\Symfony\Mobile\NativeMobileBundle::class => ['all' => true],
 ];
 ```
+
+To work against a checkout instead, clone this repository and add a path repository pointing
+at `mobile-bundle/` with `"symlink": true` — without it Composer caches a copy and edits to
+the bundle appear to do nothing. [`demo/composer.json`](../demo/composer.json) is a working
+example.
 
 Then copy the two native projects into your application and retarget them:
 

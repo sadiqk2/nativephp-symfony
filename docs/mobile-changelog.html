@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Not found · NativePHP for Symfony</title>
-<meta name="description" content="That page does not exist — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<title>Mobile changelog · NativePHP for Symfony</title>
+<meta name="description" content="native-symfony/mobile-bundle, by version — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
@@ -63,7 +63,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
 <a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
 <a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
-<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
+<a class="nav-item active" href="mobile-changelog.html" aria-current="page"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -74,24 +74,69 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 
     <main id="main">
         <article class="prose">
-<h1>Not found</h1>
-<p>That page is not part of this documentation. Try the <a href="index.html">introduction</a>, the
-<a href="desktop.html">desktop guide</a>, or <a href="troubleshooting.html">troubleshooting</a> if
-something is broken.</p>
+<h1 id="changelog"><a class="anchor" href="#changelog">Changelog</a></h1>
+<p>All notable changes to <code>native-symfony/mobile-bundle</code>.</p>
+<p>The format is <a href="https://keepachangelog.com/en/1.1.0/" target="_blank" rel="noopener">Keep a Changelog</a> and this
+project follows <a href="https://semver.org/spec/v2.0.0.html" target="_blank" rel="noopener">Semantic Versioning</a> — with
+the caveat every <code>0.x</code> carries: the minor number is where breaking changes live
+until <code>1.0.0</code>.</p>
+<h2 id="unreleased"><a class="anchor" href="#unreleased">[Unreleased]</a></h2>
+<h2 id="010"><a class="anchor" href="#010">[0.1.0]</a></h2>
+<p>First public release. Read the caveat under <strong>Not verified</strong> before shipping
+anything with it.</p>
+<h3 id="added"><a class="anchor" href="#added">Added</a></h3>
+<ul>
+<li><strong>All 54 bridge methods</strong>, wrapped across 16 API groups: <code>Camera</code>, <code>Scanner</code>,
+<code>Geolocation</code>, <code>Biometric</code>, <code>SecureStorage</code>, <code>PushNotifications</code>, <code>Device</code>,
+<code>System</code>, <code>Network</code>, <code>Files</code>, <code>Dialog</code>, <code>Share</code>, <code>Browser</code>, <code>Microphone</code>,
+<code>Performance</code> and <code>MobileWallet</code>.</li>
+<li><strong><code>FakeBridge</code></strong>, and it is what makes development possible at all.
+<code>nativephp_call()</code> is a compiled extension that exists only inside a packaged
+app, so off a device every call returns <code>null</code> and a working application is
+indistinguishable from a broken one. The fake records instead.</li>
+<li><strong>The SAPI shim and persistent runtime</strong> — <code>MobileRuntime</code>,
+<code>ServerRequestFactory</code>, <code>ResponseEmitter</code> and the four bootstrap scripts the
+iOS and Android hosts load.</li>
+<li><strong>The full native-UI path</strong>: element trees, the Tailwind-subset style parser,
+<code>#[NativeScreen]</code> routing, and a component lifecycle with callbacks. Byte-
+verified against upstream&#39;s own renderers wherever a comparison exists.</li>
+<li><strong>A Twig authoring layer</strong> for element trees, so a native screen is written the
+way the rest of the application is.</li>
+<li><strong>Commands</strong>: <code>native:mobile:install</code>, <code>native:mobile:manifest</code>,
+<code>native:mobile:doctor</code>, <code>native:mobile:run</code> and <code>native:mobile:build</code>, the last
+with <code>--dry-run</code>, <code>--stage-only</code>, <code>--aab</code> and iOS export options.</li>
+</ul>
+<h3 id="not-verified"><a class="anchor" href="#not-verified">Not verified</a></h3>
+<p><strong>No build produced by these commands has been opened by Xcode or Android
+Studio, and no screen has been rendered on a phone.</strong> There is no Xcode or
+Android SDK in the environment this was built in. Everything up to that boundary
+is tested and <code>--stage-only</code> stops exactly there. Device verification is the
+single most valuable contribution anyone with a Mac or an Android SDK can make.</p>
+<h3 id="notes"><a class="anchor" href="#notes">Notes</a></h3>
+<ul>
+<li>The WebView path is what most applications want, and it is reached by
+construction: an application that declares no <code>#[NativeScreen]</code> produces no
+native-route manifest, so both platforms&#39; <code>BootPlanner</code> takes the WebView.
+Controllers and Twig templates are unchanged; the new thing is the device API.</li>
+<li><code>native:mobile:install</code> prints a licensing caution deliberately. NativePHP
+Mobile is sold as a product, though the <code>mobile-air</code> repository itself is MIT.
+Read its terms rather than either summary.</li>
+</ul>
+
         </article>
 
         <nav class="pager" aria-label="Pagination">
-            <span></span>
-            <span></span>
+            <a class="pager-link" href="desktop-changelog.html"><span>← Previous</span><strong>Desktop changelog</strong></a>
+            <a class="pager-link next" href="spike-results.html"><span>Next →</span><strong>M1 — the spike</strong></a>
         </nav>
 
         <footer class="footer">
-            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/mobile-bundle/CHANGELOG.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
             <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
 
-    <div class="toc-space"></div>
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#unreleased">[Unreleased]</a></li><li class="lvl2"><a href="#010">[0.1.0]</a></li><li class="lvl3"><a href="#added">Added</a></li><li class="lvl3"><a href="#not-verified">Not verified</a></li><li class="lvl3"><a href="#notes">Notes</a></li></ul></nav>
 </div>
 
 <script src="assets/site.js" defer></script>

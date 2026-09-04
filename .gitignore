@@ -9,6 +9,12 @@
 /bundle/.phpunit.cache/
 node_modules/
 
+# The docs build installs marked and highlight.js ad hoc (tools/README.md), which
+# scaffolds a package.json at the root. This is not a JavaScript project and does not
+# own one.
+/package.json
+/package-lock.json
+
 # Build output
 dist/
 /mobile-bundle/vendor/

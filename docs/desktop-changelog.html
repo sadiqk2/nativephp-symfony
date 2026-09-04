@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Not found · NativePHP for Symfony</title>
-<meta name="description" content="That page does not exist — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<title>Desktop changelog · NativePHP for Symfony</title>
+<meta name="description" content="native-symfony/desktop-bundle, by version — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
@@ -62,7 +62,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
 <a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
 <a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
-<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item active" href="desktop-changelog.html" aria-current="page"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
 <a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
@@ -74,24 +74,73 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 
     <main id="main">
         <article class="prose">
-<h1>Not found</h1>
-<p>That page is not part of this documentation. Try the <a href="index.html">introduction</a>, the
-<a href="desktop.html">desktop guide</a>, or <a href="troubleshooting.html">troubleshooting</a> if
-something is broken.</p>
+<h1 id="changelog"><a class="anchor" href="#changelog">Changelog</a></h1>
+<p>All notable changes to <code>native-symfony/desktop-bundle</code>.</p>
+<p>The format is <a href="https://keepachangelog.com/en/1.1.0/" target="_blank" rel="noopener">Keep a Changelog</a> and this
+project follows <a href="https://semver.org/spec/v2.0.0.html" target="_blank" rel="noopener">Semantic Versioning</a> — with
+the caveat every <code>0.x</code> carries: the minor number is where breaking changes live
+until <code>1.0.0</code>.</p>
+<h2 id="unreleased"><a class="anchor" href="#unreleased">[Unreleased]</a></h2>
+<h2 id="010"><a class="anchor" href="#010">[0.1.0]</a></h2>
+<p>First public release. The desktop half of the port is complete and has been
+verified by a packaged application that was built <em>and run</em>, not only by tests.</p>
+<h3 id="added"><a class="anchor" href="#added">Added</a></h3>
+<ul>
+<li><strong>All 118 runtime endpoints</strong>, wrapped by area: <code>WindowManager</code> (22),
+<code>AppManager</code>, <code>SystemManager</code> (11), <code>MenuManager</code>, <code>MenuBarManager</code>,
+<code>DialogManager</code>, <code>NotificationManager</code>, <code>ClipboardManager</code>, <code>SettingsManager</code>,
+<code>ScreenManager</code>, <code>ShellManager</code>, <code>PowerMonitorManager</code>, <code>DockManager</code>,
+<code>GlobalShortcutManager</code>, <code>ChildProcessManager</code>, <code>ProgressBar</code>, <code>RuntimeInfo</code>,
+<code>DebugLogger</code> and <code>UpdaterManager</code>. <code>ClientInterface</code> is the escape hatch for
+anything a wrapper does not cover.</li>
+<li><strong>All 46 pushed events</strong>, as typed classes dispatched through Symfony&#39;s own
+dispatcher. Unknown names still dispatch, as a <code>NativeEvent</code> — apps name their
+own events for shortcuts, menu items and notifications, so that path is
+load-bearing rather than a fallback.</li>
+<li><strong><code>AppBootstrapper</code></strong>, autoconfigured and aliased by a compiler pass: implement
+it and whatever it does on <code>/booted</code> is your application&#39;s startup.</li>
+<li><strong>A testing kit</strong> — <code>FakeRuntime</code>, <code>RuntimeExpectations</code> and
+<code>RuntimeEventSimulator</code> — that records against the real wire rather than
+stubbing a manager, so a test cannot assert a payload the runtime never sends.</li>
+<li><strong>Commands</strong>: <code>native:install</code>, <code>native:manifest</code>, <code>native:doctor</code>,
+<code>native:run</code>, <code>native:build</code>, <code>native:config</code>, <code>native:php-ini</code> and
+<code>native:schedule-tick</code>.</li>
+<li><strong><code>RuntimePatcher</code></strong>, which retargets the runtime&#39;s hardcoded Laravel strings at
+your application in the copy <code>native:install --publish</code> writes, and carries five
+runtime bug fixes with it. Non-strict hunks: a target that has moved — usually
+because the fix landed upstream — is reported, not fatal.</li>
+<li><strong><code>RuntimeRoutesAccessMap</code></strong>, which keeps an application&#39;s own <code>access_control</code>
+off <code>/_native/api/</code> while the shared-secret gate is enforcing. Without it,
+<code>access_control: ^/</code> makes <code>POST /_native/api/booted</code> a 401, the runtime
+discards it, and the app opens a window that does nothing forever.</li>
+<li><strong><code>native:doctor</code></strong>, which asks the router directly whether the two runtime
+endpoints resolve to this bundle&#39;s controllers and exits non-zero when they do
+not. This runtime&#39;s failure mode is silence, so the check is not ceremony.</li>
+</ul>
+<h3 id="notes"><a class="anchor" href="#notes">Notes</a></h3>
+<ul>
+<li>The bundle deliberately does <strong>not</strong> vendor the Electron runtime. Requiring
+<code>nativephp/desktop</code> would pull <code>illuminate/contracts</code> and <code>laravel/prompts</code> into
+a Symfony application; <code>native:install --source=</code> copies it instead.</li>
+<li><code>native:config</code> and <code>native:php-ini</code> must print nothing but JSON. The runtime
+runs them before its API server exists and <code>JSON.parse</code>s their stdout, so
+anything an application echoes during console boot breaks the parse silently.</li>
+</ul>
+
         </article>
 
         <nav class="pager" aria-label="Pagination">
-            <span></span>
-            <span></span>
+            <a class="pager-link" href="security.html"><span>← Previous</span><strong>Security</strong></a>
+            <a class="pager-link next" href="mobile-changelog.html"><span>Next →</span><strong>Mobile changelog</strong></a>
         </nav>
 
         <footer class="footer">
-            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/bundle/CHANGELOG.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
             <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
 
-    <div class="toc-space"></div>
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#unreleased">[Unreleased]</a></li><li class="lvl2"><a href="#010">[0.1.0]</a></li><li class="lvl3"><a href="#added">Added</a></li><li class="lvl3"><a href="#notes">Notes</a></li></ul></nav>
 </div>
 
 <script src="assets/site.js" defer></script>

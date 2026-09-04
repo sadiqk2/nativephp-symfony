@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Wire protocol · NativePHP for Symfony</title>
-<meta name="description" content="All 116 endpoints and 44 events, exactly — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="description" content="All 118 endpoints and 46 events, exactly — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item active" href="contract.html" aria-current="page"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item active" href="contract.html" aria-current="page"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -128,7 +134,7 @@ print-to-pdf, and clipboard-image paths; <code>404</code> from <code>window/get/
 <tr><td>IPC <code>log</code></td><td><code>{level, message, context}</code></td><td>Written to the devtools console by preload.</td></tr>
 </tbody></table></div>
 <hr>
-<h2 id="1-window--21-endpoints"><a class="anchor" href="#1-window--21-endpoints">1. Window — 21 endpoints</a></h2>
+<h2 id="1-window--22-endpoints"><a class="anchor" href="#1-window--22-endpoints">1. Window — 22 endpoints</a></h2>
 <p><code>state.windows</code> is a <code>Record&lt;developerId, BrowserWindow&gt;</code>. The <code>id</code> in every request
 is the <strong>developer-assigned string id</strong>, not Electron&#39;s numeric id. Unknown ids are
 silently ignored (<code>state.windows[id]?.…</code>) — no error.</p>
@@ -140,6 +146,7 @@ silently ignored (<code>state.windows[id]?.…</code>) — no error.</p>
 <tr><td>POST</td><td><code>window/maximize</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
 <tr><td>POST</td><td><code>window/unmaximize</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
 <tr><td>POST</td><td><code>window/minimize</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
+<tr><td>POST</td><td><code>window/fullscreen</code></td><td><code>{id, fullscreen: bool}</code></td><td><code>200</code></td></tr>
 <tr><td>POST</td><td><code>window/reload</code></td><td><code>{id}</code></td><td><code>200</code></td></tr>
 <tr><td>POST</td><td><code>window/resize</code></td><td><code>{id, width, height}</code></td><td><code>200</code> — <code>parseInt</code>&#39;d</td></tr>
 <tr><td>POST</td><td><code>window/position</code></td><td><code>{id, x, y, animate}</code></td><td><code>200</code> — <code>parseInt</code>&#39;d</td></tr>
@@ -243,14 +250,20 @@ process dies. Fire and forget.</p>
 <tr><td>POST</td><td><code>system/decrypt</code></td><td><code>{string: base64}</code></td><td><code>{result: string}</code>, or <code>400 {error}</code></td></tr>
 <tr><td>GET</td><td><code>system/printers</code></td><td>—</td><td><code>{printers: PrinterInfo[]}</code></td></tr>
 <tr><td>POST</td><td><code>system/print</code></td><td><code>{printer, html, settings?}</code></td><td><code>200</code> / <code>500</code></td></tr>
+<tr><td>POST</td><td><code>system/print-file</code></td><td><code>{path, printer, settings?}</code></td><td><code>200</code> / <code>500 {error}</code></td></tr>
 <tr><td>POST</td><td><code>system/print-to-pdf</code></td><td><code>{html, settings?}</code></td><td><code>{result: base64}</code> / <code>400 {error}</code></td></tr>
 <tr><td>GET</td><td><code>system/theme</code></td><td>—</td><td><code>{result: &#39;system&#39;|&#39;light&#39;|&#39;dark&#39;}</code></td></tr>
 <tr><td>POST</td><td><code>system/theme</code></td><td><code>{theme}</code></td><td><code>{result: theme}</code></td></tr>
 </tbody></table></div>
 <p><code>system/printers</code> reads from <code>BrowserWindow.getAllWindows()[0]</code> — <strong>throws if no
-window exists</strong>. Both print endpoints spin up a hidden <code>BrowserWindow</code> and load the
-HTML as a data URL; <code>print</code> merges <code>{silent:true, deviceName:printer}</code> under the
+window exists</strong>. The HTML print endpoints spin up a hidden <code>BrowserWindow</code> and load
+the HTML as a data URL; <code>print</code> merges <code>{silent:true, deviceName:printer}</code> under the
 caller&#39;s <code>settings</code>.</p>
+<p><code>print-file</code> takes a path on the <strong>runtime&#39;s</strong> filesystem, not the PHP process&#39;s,
+and is PDF-only: it parses the file&#39;s MediaBox to size the page and answers
+<code>500 {error}</code> when it cannot read the file or cannot find one. It then waits 1.5s
+after load for PDFium to paint before starting the job, so budget a longer timeout
+than the other calls.</p>
 <blockquote>
 <p><code>print-to-pdf</code> builds its data URL as <code>data:text/html;base64;charset=UTF-8,${html}</code>
 — a malformed media type (<code>;base64;</code> is not a valid parameter and the payload is
@@ -275,6 +288,12 @@ passed unencoded). Send percent-encoded HTML and expect quirks.</p>
 <code>vibrancy</code>, <code>backgroundColor</code>, <code>transparency</code>, <code>showDockIcon</code>, <code>onlyShowContextMenu</code>,
 <code>windowPosition</code> (default <code>trayCenter</code>), <code>showOnAllWorkspaces</code> (default <code>false</code>),
 <code>contextMenu</code>, <code>webPreferences</code>.</p>
+<p><code>label</code>, <code>tooltip</code> and <code>url</code> are optional only on paper. The runtime passes <code>label</code> to
+<code>Tray.setTitle()</code> and, in tray-only mode, <code>tooltip</code> to <code>Tray.setToolTip()</code> with no guard;
+both take a required string and refuse anything else, so an absent key throws <em>after</em> the
+<code>200</code> has gone out. <code>url</code> becomes the popover&#39;s <code>index</code>, and the vendored menubar library
+substitutes <code>file://&lt;appPath&gt;/index.html</code>, which a NativePHP build does not have. Always
+send them — <code>&#39;&#39;</code>, <code>&#39;&#39;</code> and <code>url(&#39;/&#39;)</code> are the upstream defaults.</p>
 <p>Two distinct modes:</p>
 <ul>
 <li><code>onlyShowContextMenu: true</code> → a bare <code>Tray</code> with a context menu, no window.
@@ -473,7 +492,7 @@ of drain waiting for <code>state.processes</code> to empty.</li>
 secure-bundle path. A framework-neutral runtime keys this off the manifest&#39;s CLI name
 (§14).</p>
 <hr>
-<h2 id="12-reverse-channel--44-events"><a class="anchor" href="#12-reverse-channel--44-events">12. Reverse channel — 44 events</a></h2>
+<h2 id="12-reverse-channel--46-events"><a class="anchor" href="#12-reverse-channel--46-events">12. Reverse channel — 46 events</a></h2>
 <p><code>POST /_native/api/events</code> with <code>{event: string, payload?: array|object}</code>.</p>
 <p>Reference dispatch (<code>DispatchEventFromAppController</code>):</p>
 <figure class="code">
@@ -500,6 +519,8 @@ load-bearing, not a fallback.</li>
 <tr><td><code>Windows\WindowHidden</code></td><td><code>[id]</code></td><td>positional</td></tr>
 <tr><td><code>Windows\WindowClosed</code></td><td><code>[id]</code></td><td>positional</td></tr>
 <tr><td><code>Windows\WindowResized</code></td><td><code>[id, width, height]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowFullscreened</code></td><td><code>[id]</code></td><td>positional</td></tr>
+<tr><td><code>Windows\WindowUnfullscreened</code></td><td><code>[id]</code></td><td>positional</td></tr>
 <tr><td><code>App\OpenedFromURL</code></td><td><code>[url]</code> <strong>or</strong> <code>{url}</code></td><td><strong>both</strong> — <code>open-url</code> sends a list, Windows/Linux <code>second-instance</code> sends an object</td></tr>
 <tr><td><code>App\OpenFile</code></td><td><code>[path]</code></td><td>positional</td></tr>
 <tr><td><code>Menu\MenuItemClicked</code></td><td><code>{item:{id,label,checked}, combo}</code></td><td>named</td></tr>
@@ -627,9 +648,9 @@ faithfully.</p>
 <hr>
 <h2 id="15-coverage"><a class="anchor" href="#15-coverage">15. Coverage</a></h2>
 <div class="table-scroll"><table><thead><tr><th>Section</th><th>Endpoints</th></tr></thead><tbody>
-<tr><td>Window</td><td>21</td></tr>
+<tr><td>Window</td><td>22</td></tr>
 <tr><td>App</td><td>19</td></tr>
-<tr><td>System</td><td>10</td></tr>
+<tr><td>System</td><td>11</td></tr>
 <tr><td>Menu bar</td><td>9</td></tr>
 <tr><td>Menu / dock / context / progress</td><td>12</td></tr>
 <tr><td>Child process</td><td>8</td></tr>
@@ -646,9 +667,9 @@ faithfully.</p>
 <tr><td>Process</td><td>1</td></tr>
 <tr><td>Broadcast</td><td>1</td></tr>
 <tr><td>Debug (dev only)</td><td>1</td></tr>
-<tr><td><strong>Total</strong></td><td><strong>116</strong></td></tr>
+<tr><td><strong>Total</strong></td><td><strong>118</strong></td></tr>
 </tbody></table></div>
-<p>Plus 2 inbound endpoints (<code>_native/api/{events,booted}</code>), 44 runtime-pushed event
+<p>Plus 2 inbound endpoints (<code>_native/api/{events,booted}</code>), 46 runtime-pushed event
 types, 24 environment variables, and 5 consumed config keys.</p>
 
         </article>
@@ -664,7 +685,7 @@ types, 24 environment variables, and 5 consumed config keys.</p>
         </footer>
     </main>
 
-    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#0-transport-and-conventions">0. Transport and conventions</a></li><li class="lvl3"><a href="#channel-a--app-→-runtime">Channel A — app → runtime</a></li><li class="lvl3"><a href="#response-conventions">Response conventions</a></li><li class="lvl3"><a href="#channel-b--runtime-→-app">Channel B — runtime → app</a></li><li class="lvl3"><a href="#channel-c--runtime-→-renderer">Channel C — runtime → renderer</a></li><li class="lvl2"><a href="#1-window--21-endpoints">1. Window — 21 endpoints</a></li><li class="lvl2"><a href="#2-app--19-endpoints">2. App — 19 endpoints</a></li><li class="lvl2"><a href="#3-system--10-endpoints">3. System — 10 endpoints</a></li><li class="lvl2"><a href="#4-menu-bar--tray--9-endpoints">4. Menu bar / tray — 9 endpoints</a></li><li class="lvl2"><a href="#5-menu-dock-context-menu--11-endpoints">5. Menu, dock, context menu — 11 endpoints</a></li><li class="lvl3"><a href="#menuitem-shape">MenuItem shape</a></li><li class="lvl2"><a href="#6-dialogs-and-alerts--4-endpoints">6. Dialogs and alerts — 4 endpoints</a></li><li class="lvl2"><a href="#7-clipboard--7-endpoints">7. Clipboard — 7 endpoints</a></li><li class="lvl2"><a href="#8-shell-screen-settings-process--13-endpoints">8. Shell, screen, settings, process — 13 endpoints</a></li><li class="lvl2"><a href="#8b-global-shortcuts--3-endpoints">8b. Global shortcuts — 3 endpoints</a></li><li class="lvl2"><a href="#9-notifications--1-endpoint">9. Notifications — 1 endpoint</a></li><li class="lvl2"><a href="#10-power-monitor--4-endpoints">10. Power monitor — 4 endpoints</a></li><li class="lvl2"><a href="#11-auto-updater-and-child-processes--11-endpoints">11. Auto-updater and child processes — 11 endpoints</a></li><li class="lvl2"><a href="#12-reverse-channel--44-events">12. Reverse channel — 44 events</a></li><li class="lvl3"><a href="#post-_nativeapibooted">POST /_native/api/booted</a></li><li class="lvl3"><a href="#post-apibroadcast-app-→-runtime-→-renderers">POST /api/broadcast (app → runtime → renderers)</a></li><li class="lvl2"><a href="#13-environment-contract">13. Environment contract</a></li><li class="lvl2"><a href="#14-what-the-runtime-requires-of-the-app">14. What the runtime requires of the app</a></li><li class="lvl3"><a href="#config-keys-the-runtime-consumes">Config keys the runtime consumes</a></li><li class="lvl3"><a href="#security-model">Security model</a></li><li class="lvl2"><a href="#15-coverage">15. Coverage</a></li></ul></nav>
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#0-transport-and-conventions">0. Transport and conventions</a></li><li class="lvl3"><a href="#channel-a--app-→-runtime">Channel A — app → runtime</a></li><li class="lvl3"><a href="#response-conventions">Response conventions</a></li><li class="lvl3"><a href="#channel-b--runtime-→-app">Channel B — runtime → app</a></li><li class="lvl3"><a href="#channel-c--runtime-→-renderer">Channel C — runtime → renderer</a></li><li class="lvl2"><a href="#1-window--22-endpoints">1. Window — 22 endpoints</a></li><li class="lvl2"><a href="#2-app--19-endpoints">2. App — 19 endpoints</a></li><li class="lvl2"><a href="#3-system--10-endpoints">3. System — 10 endpoints</a></li><li class="lvl2"><a href="#4-menu-bar--tray--9-endpoints">4. Menu bar / tray — 9 endpoints</a></li><li class="lvl2"><a href="#5-menu-dock-context-menu--11-endpoints">5. Menu, dock, context menu — 11 endpoints</a></li><li class="lvl3"><a href="#menuitem-shape">MenuItem shape</a></li><li class="lvl2"><a href="#6-dialogs-and-alerts--4-endpoints">6. Dialogs and alerts — 4 endpoints</a></li><li class="lvl2"><a href="#7-clipboard--7-endpoints">7. Clipboard — 7 endpoints</a></li><li class="lvl2"><a href="#8-shell-screen-settings-process--13-endpoints">8. Shell, screen, settings, process — 13 endpoints</a></li><li class="lvl2"><a href="#8b-global-shortcuts--3-endpoints">8b. Global shortcuts — 3 endpoints</a></li><li class="lvl2"><a href="#9-notifications--1-endpoint">9. Notifications — 1 endpoint</a></li><li class="lvl2"><a href="#10-power-monitor--4-endpoints">10. Power monitor — 4 endpoints</a></li><li class="lvl2"><a href="#11-auto-updater-and-child-processes--11-endpoints">11. Auto-updater and child processes — 11 endpoints</a></li><li class="lvl2"><a href="#12-reverse-channel--46-events">12. Reverse channel — 46 events</a></li><li class="lvl3"><a href="#post-_nativeapibooted">POST /_native/api/booted</a></li><li class="lvl3"><a href="#post-apibroadcast-app-→-runtime-→-renderers">POST /api/broadcast (app → runtime → renderers)</a></li><li class="lvl2"><a href="#13-environment-contract">13. Environment contract</a></li><li class="lvl2"><a href="#14-what-the-runtime-requires-of-the-app">14. What the runtime requires of the app</a></li><li class="lvl3"><a href="#config-keys-the-runtime-consumes">Config keys the runtime consumes</a></li><li class="lvl3"><a href="#security-model">Security model</a></li><li class="lvl2"><a href="#15-coverage">15. Coverage</a></li></ul></nav>
 </div>
 
 <script src="assets/site.js" defer></script>

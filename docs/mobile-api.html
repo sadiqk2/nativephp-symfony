@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item active" href="mobile-api.html" aria-current="page"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -69,7 +75,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <main id="main">
         <article class="prose">
 <h1 id="mobile-api-reference"><a class="anchor" href="#mobile-api-reference">Mobile API reference</a></h1>
-<p>All classes live under <code>Native\Symfony\Mobile\</code>. The sixteen API services are registered
+<p>All classes live under <code>Native\Symfony\Mobile\</code>. The seventeen API services are registered
 <code>public</code> and autowirable; they are thin, typed wrappers over
 <code>nativephp_call($method, $jsonPayload)</code>.</p>
 <p>For the native-UI wire format — node shapes, hashes, callback ids, style vocabulary — read
@@ -105,7 +111,7 @@ that when you design a flow around <code>Camera</code>, <code>Biometric</code>, 
 <figure class="code">
 <figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">photo</span>(<span class="hljs-attr">quality</span>: <span class="hljs-number">85</span>, <span class="hljs-attr">front</span>: <span class="hljs-literal">false</span>);          <span class="hljs-comment">// quality clamped to 1–100</span>
-<span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">pickMedia</span>(<span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;image&#x27;</span>, <span class="hljs-attr">multiple</span>: <span class="hljs-literal">true</span>);  <span class="hljs-comment">// &#x27;image&#x27; | &#x27;video&#x27; | &#x27;any&#x27;</span>
+<span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">pickMedia</span>(<span class="hljs-attr">type</span>: <span class="hljs-string">&#x27;image&#x27;</span>, <span class="hljs-attr">multiple</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">maxItems</span>: <span class="hljs-number">5</span>);  <span class="hljs-comment">// &#x27;image&#x27; | &#x27;video&#x27; | &#x27;all&#x27;</span>
 <span class="hljs-variable">$camera</span>-&gt;<span class="hljs-title function_ invoke__">recordVideo</span>(<span class="hljs-attr">maxSeconds</span>: <span class="hljs-number">30</span>, <span class="hljs-attr">front</span>: <span class="hljs-literal">true</span>);</code></pre>
 </figure>
 <p>All three are dispatches. Nothing is returned but &quot;the UI was presented&quot;.</p>
@@ -116,7 +122,7 @@ that when you design a flow around <code>Camera</code>, <code>Biometric</code>, 
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">id</span>();            <span class="hljs-comment">// ?string</span>
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">batteryInfo</span>();   <span class="hljs-comment">// array</span>
 <span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">vibrate</span>();       <span class="hljs-comment">// no duration: Android hardcodes 200ms, iOS has none</span>
-<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">toggleFlashlight</span>(<span class="hljs-literal">true</span>);   <span class="hljs-comment">// null argument toggles</span></code></pre>
+<span class="hljs-variable">$device</span>-&gt;<span class="hljs-title function_ invoke__">toggleFlashlight</span>();       <span class="hljs-comment">// toggles; there is no way to ask for a state</span></code></pre>
 </figure>
 <h3 id="secure-storage--apisecurestorage"><a class="anchor" href="#secure-storage--apisecurestorage">Secure storage — <code>Api\SecureStorage</code></a></h3>
 <p>iOS Keychain and Android Keystore. Values survive app updates but not a reinstall or a move
@@ -131,38 +137,87 @@ to another device — suitable for tokens, not for anything a user would be upse
 <p><strong>Dots in a key are not part of the key</strong> — the same dot-prop behaviour the desktop settings
 store has. Use a flat separator if you care.</p>
 <h3 id="geolocation--apigeolocation"><a class="anchor" href="#geolocation--apigeolocation">Geolocation — <code>Api\Geolocation</code></a></h3>
-<p>This reads unlike a browser&#39;s geolocation API on purpose. Background positions are buffered
+<p>This reads unlike a browser&#39;s geolocation API on purpose. Background fixes are buffered
 natively, because a phone can accumulate thousands while the app is asleep and waking PHP for
 each would drain the battery.</p>
+<p>Every method that acts on a watch takes its id, because several can run at once. The two
+that start one return the id they minted — hold on to it, because it is the only way to stop,
+drain or trim that watch later.</p>
 <figure class="code">
 <figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
-<pre><code class="language-php"><span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">backgroundWatchStatus</span>();      <span class="hljs-comment">// array — active? permission state?</span>
-<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">drainWatchBuffer</span>(<span class="hljs-attr">limit</span>: <span class="hljs-number">500</span>); <span class="hljs-comment">// list&lt;array&gt; — DESTRUCTIVE, the buffer is emptied</span>
-<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">trimWatchBuffer</span>(<span class="hljs-attr">keep</span>: <span class="hljs-number">0</span>);     <span class="hljs-comment">// drop without reading</span>
-<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">stopBackgroundWatch</span>();
-<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">clearWatch</span>();</code></pre>
+<pre><code class="language-php"><span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">requestPermissions</span>();               <span class="hljs-comment">// bool — the answer arrives as an event</span>
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">currentPosition</span>(<span class="hljs-attr">fineAccuracy</span>: <span class="hljs-literal">true</span>);<span class="hljs-comment">// bool — a single fix, also as an event</span>
+
+<span class="hljs-variable">$id</span> = <span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">watchPosition</span>(<span class="hljs-attr">interval</span>: <span class="hljs-number">2000</span>, <span class="hljs-attr">minDistance</span>: <span class="hljs-number">5.0</span>);   <span class="hljs-comment">// ?string — foreground stream</span>
+<span class="hljs-variable">$id</span> = <span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">startBackgroundWatch</span>();       <span class="hljs-comment">// ?string — survives backgrounding, death, reboot</span>
+
+<span class="hljs-variable">$watch</span> = <span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">backgroundWatchStatus</span>();   <span class="hljs-comment">// array|null — the watch that outlived this process</span>
+<span class="hljs-variable">$id</span> = <span class="hljs-variable">$watch</span>[<span class="hljs-string">&#x27;id&#x27;</span>];
+
+<span class="hljs-variable">$page</span> = <span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">drainWatch</span>(<span class="hljs-variable">$id</span>, <span class="hljs-variable">$cursor</span>);   <span class="hljs-comment">// [&#x27;fixes&#x27; =&gt; list&lt;array&gt;, &#x27;cursor&#x27; =&gt; int, &#x27;size&#x27; =&gt; int]</span>
+<span class="hljs-comment">// ... store $page[&#x27;fixes&#x27;] durably ...</span>
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">trimWatch</span>(<span class="hljs-variable">$id</span>, <span class="hljs-variable">$page</span>[<span class="hljs-string">&#x27;cursor&#x27;</span>]);    <span class="hljs-comment">// DESTRUCTIVE — reclaims the space; offsets rebase to 0</span>
+
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">stopBackgroundWatch</span>(<span class="hljs-variable">$id</span>);           <span class="hljs-comment">// keeps the buffer, so a final drain gets the tail</span>
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">stopBackgroundWatch</span>(<span class="hljs-variable">$id</span>, <span class="hljs-attr">clearBuffer</span>: <span class="hljs-literal">true</span>);
+<span class="hljs-variable">$geo</span>-&gt;<span class="hljs-title function_ invoke__">clearWatch</span>(<span class="hljs-variable">$id</span>);                    <span class="hljs-comment">// a foreground watch</span></code></pre>
 </figure>
-<p><code>drainWatchBuffer()</code> removes what it returns. Persist before doing anything that might fail.</p>
-<p>There is no <code>start</code>/<code>request</code> method here — starting a background watch is not one of the 54
-bridge methods.</p>
+<p><code>drainWatch()</code> does not remove what it returns: the buffer is append-only and <code>cursor</code> is a
+byte offset into it, so persist the cursor that comes back and pass it in next time to read
+only what is new. <code>trimWatch()</code> is the destructive half — call it only with a cursor a drain
+returned, and only once those fixes are stored. Without trimming, the buffer grows until the
+watch is stopped with <code>clearBuffer</code>.</p>
+<p><code>backgroundWatchStatus()</code> returns null when nothing is watching, rather than an array with an
+<code>active</code> flag in it — an array is truthy either way.</p>
+<p><code>watchPosition()</code> and <code>startBackgroundWatch()</code> return null when nothing was started, which
+off a device is the only outcome — no watch, so no id for one. The difference between them is
+the native method: a foreground stream stops being delivered once the app is backgrounded,
+and nothing here notices.</p>
+<p>Results never come back as a return value. <code>currentPosition()</code>, <code>checkPermissions()</code> and
+<code>requestPermissions()</code> are asynchronous — a true means the request reached the native layer,
+and the fix or the permission status arrives as the event named by <code>$event</code>, defaulting to
+the class upstream sends for that result. This bundle has no PHP-side receiver for mobile
+events, so that event reaches the page through the host&#39;s JS bridge; the <code>id</code> sent with each
+request is what a listener matches on, which is why one is always generated when you do not
+supply one.</p>
 <h3 id="microphone--apimicrophone"><a class="anchor" href="#microphone--apimicrophone">Microphone — <code>Api\Microphone</code></a></h3>
 <p><code>start()</code>, <code>stop()</code>, <code>pause()</code>, <code>resume()</code> (dispatches), <code>status()</code>, <code>isRecording()</code>,
 <code>recording()</code> (reads).</p>
 <h3 id="biometric--apibiometric"><a class="anchor" href="#biometric--apibiometric">Biometric — <code>Api\Biometric</code></a></h3>
 <figure class="code">
 <figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
-<pre><code class="language-php"><span class="hljs-variable">$biometric</span>-&gt;<span class="hljs-title function_ invoke__">prompt</span>(<span class="hljs-string">&#x27;Unlock your vault&#x27;</span>, <span class="hljs-attr">fallbackTitle</span>: <span class="hljs-string">&#x27;Use passcode&#x27;</span>);</code></pre>
+<pre><code class="language-php"><span class="hljs-variable">$biometric</span>-&gt;<span class="hljs-title function_ invoke__">prompt</span>();   <span class="hljs-comment">// the OS supplies the wording; the bridge takes none</span></code></pre>
 </figure>
 <p>Asynchronous. See the warning above.</p>
 <h3 id="push-notifications--apipushnotifications"><a class="anchor" href="#push-notifications--apipushnotifications">Push notifications — <code>Api\PushNotifications</code></a></h3>
-<p><code>token()</code> (<code>?string</code>), <code>checkPermission()</code> (array), <code>isAuthorised()</code>, <code>clearBadge()</code>.</p>
+<p><code>enroll($id = null, $event = TOKEN_GENERATED)</code> is the one call that prompts the user, and the
+only way to learn the token on a first launch: it dispatches, and the token arrives as the
+event named by <code>$event</code>. <code>token()</code> (<code>?string</code>), <code>checkPermission()</code> (array, reads the state
+without prompting), <code>isAuthorised()</code>, <code>clearBadge()</code>.</p>
 <h3 id="browser--apibrowser"><a class="anchor" href="#browser--apibrowser">Browser — <code>Api\Browser</code></a></h3>
 <p><code>open($url)</code> hands off to the system browser; <code>openInApp($url)</code> uses the in-app browser;
-<code>openAuth($url, $callbackScheme)</code> opens an ephemeral OAuth session.</p>
+<code>openAuth($url)</code> opens an ephemeral OAuth session, using the callback scheme from the app&#39;s
+own deeplink configuration.</p>
 <h3 id="share--apishare"><a class="anchor" href="#share--apishare">Share — <code>Api\Share</code></a></h3>
 <p><code>url($url, $title, $text)</code>, <code>file($path, $title, $text)</code>.</p>
 <h3 id="dialog--apidialog"><a class="anchor" href="#dialog--apidialog">Dialog — <code>Api\Dialog</code></a></h3>
-<p><code>toast($message, $duration = &#39;long&#39;)</code>. One method; native alerts are not part of the bridge.</p>
+<p><code>toast($message, $duration = &#39;long&#39;)</code> for a transient message.</p>
+<figure class="code">
+<figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-php"><span class="hljs-variable">$dialog</span>-&gt;<span class="hljs-title function_ invoke__">alert</span>(<span class="hljs-string">&#x27;Delete file?&#x27;</span>, <span class="hljs-string">&#x27;This cannot be undone&#x27;</span>, [
+    <span class="hljs-string">&#x27;Cancel&#x27;</span>,
+    [<span class="hljs-string">&#x27;label&#x27;</span> =&gt; <span class="hljs-string">&#x27;Delete&#x27;</span>, <span class="hljs-string">&#x27;style&#x27;</span> =&gt; <span class="hljs-string">&#x27;destructive&#x27;</span>],
+], <span class="hljs-attr">id</span>: <span class="hljs-string">&#x27;delete-42&#x27;</span>);</code></pre>
+</figure>
+<p>Asynchronous: the tap arrives as an event carrying <code>index</code>, <code>label</code> and the <code>id</code>. Button
+styles are <code>default</code>, <code>cancel</code> and <code>destructive</code> — anything else is refused rather than
+rendered as a plain button. Pass no buttons and both hosts substitute a single OK.</p>
+<h3 id="scanner--apiscanner"><a class="anchor" href="#scanner--apiscanner">Scanner — <code>Api\Scanner</code></a></h3>
+<p><code>scan($prompt = null, $continuous = false, $formats = [&#39;qr&#39;], $id = null, $event = CODE_SCANNED)</code>.
+Opens the native scanner screen, which owns the camera until it closes. Codes arrive as
+events, so a continuous scan reports each one as it is read instead of a list at the end; a
+scanner the user closes without scanning reports <code>Scanner::SCANNER_CANCELLED</code>. Formats are
+any of <code>qr</code>, <code>ean13</code>, <code>ean8</code>, <code>code128</code>, <code>code39</code>, <code>upca</code>, <code>upce</code>, <code>all</code>.</p>
 <h3 id="files--apifiles"><a class="anchor" href="#files--apifiles">Files — <code>Api\Files</code></a></h3>
 <p><code>copy($from, $to)</code>, <code>move($from, $to)</code>. Only for places PHP cannot reach — <code>content://</code> URIs
 on Android, security-scoped URLs on iOS. For ordinary paths in the app sandbox use PHP&#39;s own
@@ -176,16 +231,22 @@ filesystem functions.</p>
 <figure class="code">
 <figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-keyword">if</span> (<span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">isAvailable</span>()) {
-    <span class="hljs-variable">$intent</span> = <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">createPaymentIntent</span>(<span class="hljs-number">1999</span>, <span class="hljs-string">&#x27;EUR&#x27;</span>, [<span class="hljs-string">&#x27;order&#x27;</span> =&gt; <span class="hljs-string">&#x27;123&#x27;</span>]);
-    <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">presentPaymentSheet</span>(<span class="hljs-variable">$intent</span>[<span class="hljs-string">&#x27;id&#x27;</span>] ?? <span class="hljs-string">&#x27;&#x27;</span>);
+    <span class="hljs-variable">$intent</span> = <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">createPaymentIntent</span>(<span class="hljs-number">1999</span>, <span class="hljs-string">&#x27;eur&#x27;</span>, [<span class="hljs-string">&#x27;order&#x27;</span> =&gt; <span class="hljs-string">&#x27;123&#x27;</span>]);
+    <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">presentPaymentSheet</span>(
+        <span class="hljs-variable">$intent</span>[<span class="hljs-string">&#x27;client_secret&#x27;</span>] ?? <span class="hljs-string">&#x27;&#x27;</span>,
+        <span class="hljs-string">&#x27;Acme BV&#x27;</span>,
+        <span class="hljs-variable">$stripePublishableKey</span>,
+        <span class="hljs-string">&#x27;merchant.com.acme&#x27;</span>,
+        <span class="hljs-string">&#x27;NL&#x27;</span>,
+    );
     <span class="hljs-comment">// …later, from a route the page calls back:</span>
-    <span class="hljs-variable">$status</span> = <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">paymentStatus</span>(<span class="hljs-variable">$intentId</span>);
+    <span class="hljs-variable">$status</span> = <span class="hljs-variable">$wallet</span>-&gt;<span class="hljs-title function_ invoke__">paymentStatus</span>(<span class="hljs-variable">$intent</span>[<span class="hljs-string">&#x27;id&#x27;</span>] ?? <span class="hljs-string">&#x27;&#x27;</span>);
 }</code></pre>
 </figure>
 <p><code>presentPaymentSheet()</code> returning <code>true</code> is <strong>not</strong> a completed payment. Always read the
 status back; never infer it from the presentation call.</p>
 <h3 id="performance--apiperformance"><a class="anchor" href="#performance--apiperformance">Performance — <code>Api\Performance</code></a></h3>
-<p><code>enable()</code>, <code>disable()</code>, <code>export()</code>, <code>showFpsOverlay()</code>, <code>startCaptureWindow($label)</code>,
+<p><code>enable()</code>, <code>disable()</code>, <code>export()</code>, <code>showFpsOverlay()</code>, <code>startCaptureWindow()</code>,
 <code>stopCaptureWindow()</code>, plus three input simulators — <code>simulatePress($callbackId, $nodeId = 0)</code>,
 <code>simulateTextChange($callbackId, $text, $nodeId = 0)</code>,
 <code>simulateToggle($callbackId, $value, $nodeId = 0)</code> — which drive the native UI for
@@ -447,7 +508,7 @@ have and have not actually executed in this environment.</p>
         </footer>
     </main>
 
-    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#the-bridge">The bridge</a></li><li class="lvl3"><a href="#where-do-the-results-arrive">Where do the results arrive?</a></li><li class="lvl2"><a href="#the-groups">The groups</a></li><li class="lvl3"><a href="#camera--apicamera">Camera — Api\Camera</a></li><li class="lvl3"><a href="#device--apidevice">Device — Api\Device</a></li><li class="lvl3"><a href="#secure-storage--apisecurestorage">Secure storage — Api\SecureStorage</a></li><li class="lvl3"><a href="#geolocation--apigeolocation">Geolocation — Api\Geolocation</a></li><li class="lvl3"><a href="#microphone--apimicrophone">Microphone — Api\Microphone</a></li><li class="lvl3"><a href="#biometric--apibiometric">Biometric — Api\Biometric</a></li><li class="lvl3"><a href="#push-notifications--apipushnotifications">Push notifications — Api\PushNotifications</a></li><li class="lvl3"><a href="#browser--apibrowser">Browser — Api\Browser</a></li><li class="lvl3"><a href="#share--apishare">Share — Api\Share</a></li><li class="lvl3"><a href="#dialog--apidialog">Dialog — Api\Dialog</a></li><li class="lvl3"><a href="#files--apifiles">Files — Api\Files</a></li><li class="lvl3"><a href="#network--apinetwork">Network — Api\Network</a></li><li class="lvl3"><a href="#system--apisystem">System — Api\System</a></li><li class="lvl3"><a href="#wallet--apimobilewallet">Wallet — Api\MobileWallet</a></li><li class="lvl3"><a href="#performance--apiperformance">Performance — Api\Performance</a></li><li class="lvl3"><a href="#native-ui-transitions--apinativeui">Native UI transitions — Api\NativeUi</a></li><li class="lvl2"><a href="#testing-the-bridge">Testing the bridge</a></li><li class="lvl2"><a href="#native-ui">Native UI</a></li><li class="lvl3"><a href="#elements">Elements</a></li><li class="lvl3"><a href="#publishing-a-frame">Publishing a frame</a></li><li class="lvl3"><a href="#callbacks">Callbacks</a></li><li class="lvl3"><a href="#components">Components</a></li><li class="lvl3"><a href="#twig-authoring">Twig authoring</a></li><li class="lvl3"><a href="#styling">Styling</a></li><li class="lvl2"><a href="#commands">Commands</a></li></ul></nav>
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#the-bridge">The bridge</a></li><li class="lvl3"><a href="#where-do-the-results-arrive">Where do the results arrive?</a></li><li class="lvl2"><a href="#the-groups">The groups</a></li><li class="lvl3"><a href="#camera--apicamera">Camera — Api\Camera</a></li><li class="lvl3"><a href="#device--apidevice">Device — Api\Device</a></li><li class="lvl3"><a href="#secure-storage--apisecurestorage">Secure storage — Api\SecureStorage</a></li><li class="lvl3"><a href="#geolocation--apigeolocation">Geolocation — Api\Geolocation</a></li><li class="lvl3"><a href="#microphone--apimicrophone">Microphone — Api\Microphone</a></li><li class="lvl3"><a href="#biometric--apibiometric">Biometric — Api\Biometric</a></li><li class="lvl3"><a href="#push-notifications--apipushnotifications">Push notifications — Api\PushNotifications</a></li><li class="lvl3"><a href="#browser--apibrowser">Browser — Api\Browser</a></li><li class="lvl3"><a href="#share--apishare">Share — Api\Share</a></li><li class="lvl3"><a href="#dialog--apidialog">Dialog — Api\Dialog</a></li><li class="lvl3"><a href="#scanner--apiscanner">Scanner — Api\Scanner</a></li><li class="lvl3"><a href="#files--apifiles">Files — Api\Files</a></li><li class="lvl3"><a href="#network--apinetwork">Network — Api\Network</a></li><li class="lvl3"><a href="#system--apisystem">System — Api\System</a></li><li class="lvl3"><a href="#wallet--apimobilewallet">Wallet — Api\MobileWallet</a></li><li class="lvl3"><a href="#performance--apiperformance">Performance — Api\Performance</a></li><li class="lvl3"><a href="#native-ui-transitions--apinativeui">Native UI transitions — Api\NativeUi</a></li><li class="lvl2"><a href="#testing-the-bridge">Testing the bridge</a></li><li class="lvl2"><a href="#native-ui">Native UI</a></li><li class="lvl3"><a href="#elements">Elements</a></li><li class="lvl3"><a href="#publishing-a-frame">Publishing a frame</a></li><li class="lvl3"><a href="#callbacks">Callbacks</a></li><li class="lvl3"><a href="#components">Components</a></li><li class="lvl3"><a href="#twig-authoring">Twig authoring</a></li><li class="lvl3"><a href="#styling">Styling</a></li><li class="lvl2"><a href="#commands">Commands</a></li></ul></nav>
 </div>
 
 <script src="assets/site.js" defer></script>

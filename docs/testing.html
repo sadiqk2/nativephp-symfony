@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -142,7 +148,7 @@ cannot distinguish a correct fallback from a lost id.</p>
 <p><code>Native\Symfony\Desktop\Testing\FakeRuntime</code> implements <code>ClientInterface</code>, records every request, and
 answers with whatever the test scripted. Because only the transport is faked, the real
 <code>WindowManager</code> and the real <code>PendingWindow</code> build the payload — so what you assert on is the
-wire, not a stub. All 116 endpoints are covered the day they are added, including the ones
+wire, not a stub. All 118 endpoints are covered the day they are added, including the ones
 with no manager.</p>
 <p>Overriding the alias by hand still works if you prefer it:</p>
 <figure class="code">
@@ -170,6 +176,10 @@ last repeats, so polling an endpoint twice needs only one script entry.</li>
 contract shape 1 (express sends the status phrase, which the real client normalises to &quot;no
 data&quot;), so reads return their zero values unless you script them. Smoothing that would let a
 test pass against a runtime that would fail.</li>
+<li><strong>A POST or DELETE payload that cannot be JSON-encoded throws <code>RuntimeCallFailed</code></strong> instead
+of being recorded, because the real client cannot send one either — a string that is not
+UTF-8 (a filename, a legacy database column) fails while the request is being prepared. GET
+is exempt: query parameters go through <code>http_build_query</code>, which validates nothing.</li>
 </ul>
 <h3 id="scripting-the-user"><a class="anchor" href="#scripting-the-user">Scripting the user</a></h3>
 <p>Dialogs cannot be tested any other way — they block the runtime&#39;s event loop and their return
@@ -203,6 +213,9 @@ altogether.</p>
 <p><code>noCurrentWindow()</code> is not an edge case: it is <code>window/current</code>&#39;s documented behaviour when
 the app is backgrounded, since the runtime dereferences <code>getFocusedWindow().id</code> with no null
 guard. Any code that reads the current window should have a test for it.</p>
+<p>Any id works, including one with a space or a slash: <code>WindowManager::get()</code> rawurlencodes the
+id because it reaches the URL, and both scripting helpers encode it the same way, so <code>get()</code>
+and <code>all()</code> cannot disagree about a window.</p>
 <h3 id="inspecting-the-log"><a class="anchor" href="#inspecting-the-log">Inspecting the log</a></h3>
 <figure class="code">
 <figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
@@ -245,7 +258,7 @@ it do instead?&quot;.</p>
 <span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertQuitRequested</span>();
 <span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNoQuitRequested</span>();
 
-<span class="hljs-comment">// 116 endpoints will always outrun the named helpers:</span>
+<span class="hljs-comment">// 118 endpoints will always outrun the named helpers:</span>
 <span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertCalled</span>(<span class="hljs-string">&#x27;settings/theme&#x27;</span>, [<span class="hljs-string">&#x27;value&#x27;</span> =&gt; <span class="hljs-string">&#x27;dark&#x27;</span>]);
 <span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertNotCalled</span>(<span class="hljs-string">&#x27;app/relaunch&#x27;</span>);
 <span class="hljs-variable">$expect</span>-&gt;<span class="hljs-title function_ invoke__">assertCalledTimes</span>(<span class="hljs-number">2</span>, <span class="hljs-string">&#x27;window/show&#x27;</span>);
@@ -288,6 +301,11 @@ that skipped those would prove nothing.</p>
 </figure>
 <p><code>dispatch()</code> returns nothing on purpose: the runtime discards your answer, so there is no
 outcome to hand back. What a test asserts on is what its own listener did.</p>
+<p><strong>A payload that cannot be JSON-encoded throws <code>InvalidArgumentException</code></strong> rather than being
+dropped. The runtime could not have pushed one either, and the alternative is worse than an
+error: the encoding failed, the controller saw an empty body and answered 400, <code>dispatch()</code>
+discarded it, and the event never happened — no listener ran and nothing said why. An app
+reaches this with a file path that is not UTF-8, which on Linux is any sequence of bytes.</p>
 <p>To check the mapping itself — that a payload really reaches the constructor argument you think
 it does — use <code>make()</code>:</p>
 <figure class="code">
@@ -295,6 +313,9 @@ it does — use <code>make()</code>:</p>
 <pre><code class="language-php"><span class="hljs-variable">$event</span> = <span class="hljs-variable">$simulator</span>-&gt;<span class="hljs-title function_ invoke__">make</span>(<span class="hljs-string">&#x27;Native\Desktop\Events\ChildProcess\ProcessExited&#x27;</span>, [<span class="hljs-string">&#x27;alias&#x27;</span> =&gt; <span class="hljs-string">&#x27;x&#x27;</span>, <span class="hljs-string">&#x27;code&#x27;</span> =&gt; <span class="hljs-number">1</span>]);
 <span class="hljs-built_in">self</span>::<span class="hljs-title function_ invoke__">assertSame</span>(<span class="hljs-number">1</span>, <span class="hljs-variable">$event</span>-&gt;code);</code></pre>
 </figure>
+<p><code>make()</code> goes through the same JSON round trip as <code>dispatch()</code>, so the two cannot disagree
+about the same payload — the wire flattens an object into an array, and an assertion made
+against the object would hold for a value no listener ever sees.</p>
 <p>If you construct the simulator yourself and test events your app dispatches by class name,
 pass your app&#39;s own <code>EventFactory</code> — the one configured with <code>events.allowed_namespaces</code> — as
 the second constructor argument. <code>nativeEvents()</code> and the container-registered service already
@@ -313,6 +334,12 @@ do that.</p>
 </figure>
 <p><code>new FakeBridge(available: false)</code> models being outside a packaged app. Through the container,
 set <code>native_mobile.fake_bridge: true</code> in <code>config/packages/test/native_mobile.yaml</code>.</p>
+<p>Two things the fake copies from the real bridge rather than smoothing over. A payload that
+cannot be JSON-encoded throws <code>InvalidArgumentException</code> instead of being recorded, because
+the wire is JSON and <code>Bridge::raw()</code> refuses one too — an app reaches this with a filename, a
+scanned barcode or a database column that is not UTF-8. And a scripted reply that is empty,
+whitespace or not JSON reads as <code>null</code> from <code>call()</code>, which is what the real bridge does with
+whatever the native side actually answered.</p>
 <p>The real <code>Bridge</code> accepts an <code>$invoker</code> callable in place of the extension function, so the
 real class can be tested too:</p>
 <figure class="code">
@@ -345,11 +372,16 @@ a test needs (the device learns ids from the frame). <code>frame()</code> also r
 handler</strong> — otherwise it is a dead button on a device with no error anywhere.</p>
 <h2 id="what-these-tests-cannot-tell-you"><a class="anchor" href="#what-these-tests-cannot-tell-you">What these tests cannot tell you</a></h2>
 <p>Both bundles carry coverage tests that parse upstream&#39;s own sources, so upstream drift becomes
-a failing test rather than a discovery in production: <code>ContractCoverageTest</code> (the 116 express
-routes and the 44 event names), <code>BridgeCoverageTest</code> (the 54 bridge methods) and
+a failing test rather than a discovery in production: <code>ContractCoverageTest</code> (the 118 express
+routes and the 46 event names), <code>BridgeCoverageTest</code> (the 62 bridge methods) and
 <code>UiElementCoverageTest</code> (the 36 element types, asserted in <strong>both</strong> directions, since a type
 the renderers do not know produces a missing region on the device and no error anywhere).
 Those live in the bundles, not in your app.</p>
+<p><code>PayloadKeyContractTest</code> and its mobile twin go one level down, to what is <em>in</em> each call,
+and also in both directions. A key the runtime never reads is a silent no-op; a key it reads
+with no default of its own — <code>tray.setTitle(label)</code>, <code>setWindowButtonVisibility(v)</code>,
+<code>setZoomFactor(parseFloat(zoomFactor))</code> — has to be in every payload rather than only when
+the caller set it, because the runtime acknowledges the request before it gets that far.</p>
 <p>What no test in your app can establish:</p>
 <ul>
 <li>that a window was <em>seen</em>. Every assertion above is about a request.</li>

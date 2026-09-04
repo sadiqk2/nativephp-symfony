@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item active" href="desktop-api.html" aria-current="page"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -74,7 +80,7 @@ facades and no static helpers: inject <code>WindowManager</code>, <code>DialogMa
 and so on. If you came from the Laravel version, that is the largest day-to-day difference —
 <code>Window::open()</code> becomes an injected <code>$this-&gt;windows-&gt;open()</code>.</p>
 <p>This page shows the shape of each area and flags what behaves surprisingly. For the
-exhaustive list of all 116 endpoints with request and response shapes, read
+exhaustive list of all 118 endpoints with request and response shapes, read
 <a href="contract.html"><code>../CONTRACT.md</code></a>; it is the specification, this is the guide.</p>
 <h2 id="three-things-that-apply-everywhere"><a class="anchor" href="#three-things-that-apply-everywhere">Three things that apply everywhere</a></h2>
 <p><strong>A dispatch is not an outcome.</strong> Most endpoints answer <code>200</code> with the body <code>OK</code>, and
@@ -96,7 +102,7 @@ must guard:</p>
 and a <code>403</code> (the shared secret did not match).</p>
 <hr>
 <h2 id="windows"><a class="anchor" href="#windows">Windows</a></h2>
-<p><code>Native\Symfony\Desktop\Window\WindowManager</code> — 21 endpoints.</p>
+<p><code>Native\Symfony\Desktop\Window\WindowManager</code> — 22 endpoints.</p>
 <figure class="code">
 <figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-php"><span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">open</span>(<span class="hljs-string">&#x27;settings&#x27;</span>)            <span class="hljs-comment">// returns PendingWindow; nothing happens until open()</span>
@@ -111,6 +117,7 @@ and a <code>403</code> (the shared secret did not match).</p>
 <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">resize</span>(<span class="hljs-number">1200</span>, <span class="hljs-number">800</span>, <span class="hljs-string">&#x27;main&#x27;</span>);
 <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">position</span>(<span class="hljs-attr">x</span>: <span class="hljs-number">40</span>, <span class="hljs-attr">y</span>: <span class="hljs-number">40</span>, <span class="hljs-attr">animate</span>: <span class="hljs-literal">true</span>, <span class="hljs-attr">id</span>: <span class="hljs-string">&#x27;main&#x27;</span>);
 <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">navigate</span>(<span class="hljs-string">&#x27;/reports&#x27;</span>, <span class="hljs-string">&#x27;main&#x27;</span>);
+<span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">fullscreen</span>(<span class="hljs-literal">true</span>, <span class="hljs-string">&#x27;main&#x27;</span>);
 <span class="hljs-variable">$windows</span>-&gt;<span class="hljs-title function_ invoke__">close</span>(<span class="hljs-string">&#x27;settings&#x27;</span>);</code></pre>
 </figure>
 <p><code>PendingWindow</code> covers all 39 <code>window/open</code> keys — geometry, <code>frameless()</code>,
@@ -138,11 +145,15 @@ it throws on its side and answers 500. You get <code>null</code>, never an excep
 <code>$windows-&gt;current()-&gt;id</code>.</li>
 <li><strong>A programmatic resize emits no <code>WindowResized</code>.</strong> The runtime listens for Electron&#39;s
 <code>resized</code>, which fires for user drags but not <code>setSize()</code>. <code>window/resize</code> succeeds and
-<code>window/get</code> reflects the new size; no event arrives.</li>
+<code>window/get</code> reflects the new size; no event arrives. <code>fullscreen()</code> is the opposite and
+does emit — <code>enter-full-screen</code> fires however the change was made — so a layout that
+reacts to full screen can be driven from the event either way.</li>
 <li><strong><code>zoomFactor</code> is effectively required, and the bundle sends it for you.</strong> The runtime
-does <code>setZoomFactor(parseFloat(zoomFactor))</code> on <code>dom-ready</code> with no guard, so an absent
-value is <code>NaN</code> and renders the page at an absurd zoom. <code>PendingWindow::open()</code> defaults it
-to <code>1.0</code>.</li>
+used to do <code>setZoomFactor(parseFloat(zoomFactor))</code> on <code>dom-ready</code> with no guard, so an
+absent value was <code>NaN</code> and rendered the page at an absurd zoom. Upstream has since taken
+this repository&#39;s fix, and a current runtime falls back to <code>1</code>. <code>PendingWindow::open()</code>
+still defaults it, because the runtime in your <code>nativephp/electron</code> is whichever one you
+installed.</li>
 <li><strong>The document <code>&lt;title&gt;</code> never reaches the title bar.</strong> The runtime <code>preventDefault()</code>s
 Electron&#39;s <code>page-title-updated</code>. <code>$windows-&gt;title()</code> is the only way.</li>
 <li>Window URLs must be absolute. <code>UrlResolver</code> builds them from the current request, so
@@ -214,6 +225,13 @@ not queryable afterwards — persist it if you need it.</p>
 <p>Set <code>onlyShowContextMenu()</code> for a tray icon with no popover window. Remember shape 3 of the
 response convention: every <code>menu-bar/*</code> endpoint acknowledges before acting, so a <code>200</code> here
 tells you nothing about success.</p>
+<ul>
+<li><strong><code>label</code>, <code>tooltip</code> and <code>url</code> are effectively required, and the bundle sends them for
+you.</strong> The runtime hands <code>label</code> to <code>Tray.setTitle()</code> and, in tray-only mode, <code>tooltip</code>
+to <code>Tray.setToolTip()</code>, both of which take a required string and refuse anything else —
+and an absent <code>url</code> makes the popover load a <code>file://</code> path a NativePHP build does not
+have. <code>PendingMenuBar::create()</code> defaults them to <code>&#39;&#39;</code>, <code>&#39;&#39;</code> and <code>/</code>, matching upstream.</li>
+</ul>
 <h3 id="dock-macos-only"><a class="anchor" href="#dock-macos-only">Dock (macOS only)</a></h3>
 <p><code>DockManager</code> — <code>menu()</code>, <code>show()</code>, <code>hide()</code>, <code>icon()</code>, <code>badge()</code>, <code>setBadge()</code>,
 <code>bounce(DockBounce::Informational)</code>, <code>cancelBounce()</code>. Every method checks the platform and
@@ -362,7 +380,7 @@ tree-kill, so Messenger can finish the message in flight). The ini <code>memory_
 twice <code>--memory-limit</code>, because otherwise PHP fatals before Messenger notices its own limit.
 Aliases are namespaced <code>messenger_*</code> so they cannot collide with your own.</p>
 <h2 id="events"><a class="anchor" href="#events">Events</a></h2>
-<p>The runtime pushes 44 typed events plus any number of caller-named ones. Typed events
+<p>The runtime pushes 46 typed events plus any number of caller-named ones. Typed events
 dispatch under their class name, so a listener is ordinary Symfony:</p>
 <figure class="code">
 <figcaption><span class="code-lang">php</span><button class="copy" type="button">Copy</button></figcaption>
@@ -378,7 +396,7 @@ dispatch under their class name, so a listener is ordinary Symfony:</p>
     }
 }</code></pre>
 </figure>
-<p>Namespaces under <code>Native\Symfony\Desktop\Event\</code>: <code>Windows\</code> (9), <code>App\</code> (3, including
+<p>Namespaces under <code>Native\Symfony\Desktop\Event\</code>: <code>Windows\</code> (11), <code>App\</code> (3, including
 <code>ApplicationBooted</code> which the bundle dispatches itself), <code>Menu\</code>, <code>MenuBar\</code> (7),
 <code>Notifications\</code> (4), <code>ChildProcess\</code> (5), <code>PowerMonitor\</code> (8), <code>Settings\</code>,
 <code>AutoUpdater\</code> (7).</p>
@@ -433,7 +451,7 @@ thrown, so it cannot take down whatever dispatched it.</p>
 <div class="table-scroll"><table><thead><tr><th>Service</th><th>What it does</th><th>Worth knowing</th></tr></thead><tbody>
 <tr><td><code>App\AppManager</code></td><td><code>quit()</code>, <code>relaunch()</code>, <code>show()</code>, <code>hide()</code>, <code>isHidden()</code>, <code>locale()</code>, <code>version()</code>, <code>path(AppPath)</code>, <code>badgeCount()</code>, <code>openAtLogin()</code>, recent documents, emoji panel</td><td><code>path()</code> queries live; prefer <code>NativePaths</code> for the ten paths already in the environment</td></tr>
 <tr><td><code>Support\NativePaths</code></td><td><code>home()</code>, <code>userData()</code>, <code>documents()</code>, <code>downloads()</code>, <code>storage()</code>, <code>database()</code>, …</td><td>Read from <code>NATIVEPHP_*_PATH</code>; <strong>no round-trip</strong>, and every getter is nullable</td></tr>
-<tr><td><code>System\SystemManager</code></td><td>TouchID, keychain <code>encrypt()</code>/<code>decrypt()</code>, <code>printers()</code>, <code>print()</code>, <code>printToPdf()</code>, <code>theme()</code>, <code>setTheme()</code></td><td><code>canEncrypt()</code> is false without an OS keyring — including most containers</td></tr>
+<tr><td><code>System\SystemManager</code></td><td>TouchID, keychain <code>encrypt()</code>/<code>decrypt()</code>, <code>printers()</code>, <code>print()</code>, <code>printFile()</code>, <code>printToPdf()</code>, <code>theme()</code>, <code>setTheme()</code></td><td><code>canEncrypt()</code> is false without an OS keyring — including most containers. <code>printFile()</code> is PDF-only and takes a path on the <em>runtime&#39;s</em> filesystem</td></tr>
 <tr><td><code>Screen\ScreenManager</code></td><td><code>displays()</code>, <code>primaryDisplay()</code>, <code>cursorPosition()</code>, <code>activeDisplay()</code></td><td>The last two return <strong>unwrapped</strong> objects; the wrappers hide that</td></tr>
 <tr><td><code>Shell\ShellManager</code></td><td><code>showInFolder()</code>, <code>openPath()</code>, <code>openExternal()</code>, <code>trash()</code></td><td><code>openExternal()</code> can answer 500</td></tr>
 <tr><td><code>PowerMonitor\PowerMonitorManager</code></td><td><code>idleState()</code>, <code>idleTime()</code>, <code>thermalState()</code>, <code>onBatteryPower()</code></td><td>Returns <code>IdleState</code> / <code>ThermalState</code> enums</td></tr>

@@ -17,6 +17,7 @@ full API, packaged into a distributable app that has been built *and run*.
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
 | [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. **Four have landed in upstream's `main`**; six are open PRs ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2) and [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)), and the manifest patch is the one still held. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
+| [`RELEASING.md`](RELEASING.md) | How the two packages reach Packagist: Packagist reads a `composer.json` at a repository root, so each directory is subtree-split into a read-only mirror on every push and tag. |
 
 ## Adding it to an existing Symfony app
 
@@ -28,8 +29,30 @@ You need PHP 8.3+, Symfony 7 or 8, and (for desktop) Node 20+ and `git`.
 
 ### 0. Install the packages
 
-Neither bundle is on Packagist yet, so point Composer at a checkout. This is what the
-[`demo/`](demo/README.md) does, and it is the only step that changes once they are published.
+```bash
+composer require native-symfony/desktop-bundle:^0.1   # desktop
+composer require native-symfony/mobile-bundle:^0.1    # iOS and Android
+```
+
+Take one or both — they share no code and neither requires the other. `^0.1` pins to `0.1.*`
+deliberately: this is a `0.x` project, so under SemVer the minor number is where breaking
+changes live until `1.0.0`.
+
+Both are published from this repository by subtree split, so the Packagist entries point at
+read-only mirrors and everything — issues, pull requests, the history — lives here. See
+[RELEASING.md](RELEASING.md).
+
+> **Not yet submitted to Packagist.** Everything needed to publish is in place — the mirrors
+> are produced automatically on push and tag — but creating the two mirror repositories, the
+> push token and the Packagist entries needs an account, not a commit. See
+> [RELEASING.md § one-time setup](RELEASING.md#one-time-setup); until it is done, use the
+> checkout route below. Delete this note when the packages resolve.
+
+<details>
+<summary>Working against a checkout instead</summary>
+
+To try an unreleased fix, or to change the bundles themselves, point Composer at a clone.
+This is what [`demo/`](demo/README.md) does.
 
 ```bash
 git clone https://github.com/sadiqk2/nativephp-symfony /path/to/nativephp-symfony
@@ -42,13 +65,10 @@ git clone https://github.com/sadiqk2/nativephp-symfony /path/to/nativephp-symfon
 ]
 ```
 
-```bash
-composer require native-symfony/desktop-bundle:^0.1   # desktop
-composer require native-symfony/mobile-bundle:^0.1    # iOS and Android
-```
+Use `symlink: true`: without it Composer caches a copy and edits to the bundle appear to do
+nothing. Nothing after this step depends on how the package arrived.
 
-Take one or both — they share no code and neither requires the other. Use `symlink: true`:
-without it Composer caches a copy and edits to the bundle appear to do nothing.
+</details>
 
 Flex registers both for you. If it is not installed, add them yourself:
 
@@ -237,7 +257,7 @@ the rule above holding in a stock app.
 
 **[`docs/`](docs/README.md) is the documentation for building an application with this**, and
 every document in this repository is also a page on a static site: `tools/build-docs.mjs`
-renders all 21 of them into `docs/*.html` with search, light and dark themes, build-time syntax
+renders all 26 of them into `docs/*.html` with search, light and dark themes, build-time syntax
 highlighting and no external requests of any kind — ready for GitHub Pages (Settings → Pages →
 `main` / `/docs`). See [`tools/README.md`](tools/README.md) to rebuild, preview or edit it.
 Getting started for [desktop](docs/getting-started-desktop.md) and
@@ -329,7 +349,25 @@ What is left is not code:
    produce source-exposed builds — which `native:build` warns about at every invocation
    rather than letting anyone ship source unknowingly.
 
+## Contributing
+
+[CONTRIBUTING.md](CONTRIBUTING.md) has the development loop — and the one thing worth
+knowing before reading any of the code: this runtime's failure mode is *silence*, not an
+error, and almost every design decision here is downstream of that. Also
+[SECURITY.md](SECURITY.md), which describes the trust boundary so a report can be aimed
+correctly, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+The most valuable contribution is still device verification for mobile: if you have a Mac or
+an Android SDK, running `native:mobile:build` on the demo and
+[reporting what happened](https://github.com/sadiqk2/nativephp-symfony/issues/new?template=device_verification.yml)
+— whether it worked or not — is worth more than any amount of additional test coverage.
+
 ## Licence
 
-MIT, matching `nativephp/desktop`. The `native-symfony` vendor name is provisional —
-`nativephp/*` is someone else's brand, and asking comes before claiming it.
+MIT, matching `nativephp/desktop`. Changelogs: [desktop](bundle/CHANGELOG.md),
+[mobile](mobile-bundle/CHANGELOG.md).
+
+The `native-symfony` vendor name is deliberate rather than a placeholder: `nativephp/*` is
+someone else's brand and this does not claim it. The courtesy conversation with upstream is
+still owed, and it comes before `1.0.0` rather than before publishing under a name nobody
+else is using.

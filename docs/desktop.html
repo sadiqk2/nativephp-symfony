@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -80,11 +86,18 @@ at it.</p>
 <figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">composer require native-symfony/desktop-bundle:^0.1</code></pre>
 </figure>
-<p><strong>Not on Packagist yet</strong>, so that resolves only once Composer knows where to find it: clone
-this repository and add a path repository pointing at <code>bundle/</code>, with <code>&quot;symlink&quot;: true</code> (a
-copy goes stale and edits to the bundle appear to do nothing). The exact block is in the
-<a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/README.md#0-install-the-packages" target="_blank" rel="noopener">root README</a>, and <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/composer.json" target="_blank" rel="noopener"><code>demo/composer.json</code></a>
-is a working example. Everything after this step is unaffected by how the package arrived.</p>
+<p><code>^0.1</code> pins to <code>0.1.*</code> deliberately: this is a <code>0.x</code> project, so under SemVer the minor
+number is where breaking changes live.</p>
+<blockquote>
+<p><strong>Not yet submitted to Packagist</strong>, so this resolves once the one-time publishing setup in
+<a href="releasing.html#one-time-setup">RELEASING.md</a> has been done. Until then, use the checkout
+route below. Delete this note when the package resolves.</p>
+</blockquote>
+<p>To work against a checkout instead — to try an unreleased fix, or because you are changing
+the bundle — clone this repository and add a path repository pointing at <code>bundle/</code>, with
+<code>&quot;symlink&quot;: true</code>; without it Composer caches a copy and edits to the bundle appear to do
+nothing. <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/composer.json" target="_blank" rel="noopener"><code>demo/composer.json</code></a> is a working example. Everything after
+this step is unaffected by how the package arrived.</p>
 <p>Flex registers the bundle for you: it derives candidate class names from the PSR-4 namespace,
 and <code>Native\Symfony\Desktop\</code> yields <code>Native\Symfony\Desktop\NativeDesktopBundle</code>. That is
 what the namespace is shaped for — the bundle used to be <code>Native\Symfony\</code>, where the
@@ -333,6 +346,41 @@ dispatch your own event classes by class name. Upstream&#39;s Laravel controller
 <code>class_exists($event) ? new $event(...$payload)</code> straight from the request body; here only
 the 44 known runtime events and namespaces you list are constructed, and anything else
 becomes a <code>NativeEvent</code> carrying the payload as data.</p>
+<h3 id="configuring-the-updater"><a class="anchor" href="#configuring-the-updater">Configuring the updater</a></h3>
+<p><code>providers</code> is a map of names to provider configurations, and <code>default</code> names the one a
+build publishes to. Each provider needs a <code>driver</code> — <code>github</code>, <code>s3</code> or <code>spaces</code>, the three
+the Electron runtime ships with — and the keys that driver requires:</p>
+<figure class="code">
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-yaml"><span class="hljs-attr">native_desktop:</span>
+    <span class="hljs-attr">updater:</span>
+        <span class="hljs-attr">enabled:</span> <span class="hljs-literal">true</span>
+        <span class="hljs-attr">default:</span> <span class="hljs-string">github</span>
+        <span class="hljs-attr">providers:</span>
+            <span class="hljs-attr">github:</span>
+                <span class="hljs-attr">driver:</span> <span class="hljs-string">github</span>
+                <span class="hljs-attr">owner:</span> <span class="hljs-string">your-org</span>
+                <span class="hljs-attr">repo:</span> <span class="hljs-string">your-app</span>
+                <span class="hljs-attr">token:</span> <span class="hljs-string">&#x27;%env(GITHUB_TOKEN)%&#x27;</span>    <span class="hljs-comment"># uploads the release</span>
+                <span class="hljs-comment"># optional: private, autoupdate_token, channel, releaseType, vPrefixedTagName</span>
+            <span class="hljs-attr">releases:</span>
+                <span class="hljs-attr">driver:</span> <span class="hljs-string">s3</span>
+                <span class="hljs-attr">bucket:</span> <span class="hljs-string">your-bucket</span>
+                <span class="hljs-attr">region:</span> <span class="hljs-string">eu-west-1</span>
+                <span class="hljs-attr">key:</span> <span class="hljs-string">&#x27;%env(AWS_ACCESS_KEY_ID)%&#x27;</span>
+                <span class="hljs-attr">secret:</span> <span class="hljs-string">&#x27;%env(AWS_SECRET_ACCESS_KEY)%&#x27;</span></code></pre>
+</figure>
+<p>Two consumers read this tree and they want different things from it, which is worth knowing
+if you are debugging an update that never arrives. The <strong>runtime</strong> reads
+<code>updater.providers[default].public_url</code> out of <code>native:config</code> to check for updates at
+launch. <strong>electron-builder</strong> is handed a publish target derived from the provider above,
+plus its upload credentials in the environment — <code>GH_TOKEN</code> for GitHub, <code>AWS_*</code> for S3,
+<code>DO_*</code> for Spaces — so a <code>token</code> or <code>key</code>/<code>secret</code> in your configuration is what makes
+<code>native:build --publish</code> able to upload at all.</p>
+<p><code>enabled: false</code> (the default) sends electron-builder no publish target, and <code>--publish</code>
+then produces the same package a plain build does. With it enabled, a provider that is
+missing or missing a required key fails the build rather than producing a package that
+quietly cannot update.</p>
 <h2 id="9-where-to-go-next"><a class="anchor" href="#9-where-to-go-next">9. Where to go next</a></h2>
 <p><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/" target="_blank" rel="noopener"><code>../demo/</code></a> is a working application using both bundles — bootstrapper,
 multi-window inspector, notes over the settings store, a jobs page, a routed menu, and a
@@ -358,7 +406,7 @@ wrong, which with this runtime is the usual failure mode.</li>
         </footer>
     </main>
 
-    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#1-install-the-bundle">1. Install the bundle</a></li><li class="lvl2"><a href="#2-import-the-bundles-routes">2. Import the bundle's routes</a></li><li class="lvl2"><a href="#3-implement-appbootstrapper">3. Implement AppBootstrapper</a></li><li class="lvl2"><a href="#4-install-the-electron-runtime-into-your-project">4. Install the Electron runtime into your project</a></li><li class="lvl3"><a href="#why-the-runtime-needs-patching">Why the runtime needs patching</a></li><li class="lvl3"><a href="#what-the-bundle-fixes-in-the-runtime">What the bundle fixes in the runtime</a></li><li class="lvl3"><a href="#check-it-before-you-run-it">Check it before you run it</a></li><li class="lvl2"><a href="#5-run-it">5. Run it</a></li><li class="lvl2"><a href="#6-two-commands-that-must-print-nothing-but-json">6. Two commands that must print nothing but JSON</a></li><li class="lvl2"><a href="#7-optional-write-a-manifest">7. Optional: write a manifest</a></li><li class="lvl2"><a href="#8-configuration">8. Configuration</a></li><li class="lvl2"><a href="#9-where-to-go-next">9. Where to go next</a></li></ul></nav>
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#1-install-the-bundle">1. Install the bundle</a></li><li class="lvl2"><a href="#2-import-the-bundles-routes">2. Import the bundle's routes</a></li><li class="lvl2"><a href="#3-implement-appbootstrapper">3. Implement AppBootstrapper</a></li><li class="lvl2"><a href="#4-install-the-electron-runtime-into-your-project">4. Install the Electron runtime into your project</a></li><li class="lvl3"><a href="#why-the-runtime-needs-patching">Why the runtime needs patching</a></li><li class="lvl3"><a href="#what-the-bundle-fixes-in-the-runtime">What the bundle fixes in the runtime</a></li><li class="lvl3"><a href="#check-it-before-you-run-it">Check it before you run it</a></li><li class="lvl2"><a href="#5-run-it">5. Run it</a></li><li class="lvl2"><a href="#6-two-commands-that-must-print-nothing-but-json">6. Two commands that must print nothing but JSON</a></li><li class="lvl2"><a href="#7-optional-write-a-manifest">7. Optional: write a manifest</a></li><li class="lvl2"><a href="#8-configuration">8. Configuration</a></li><li class="lvl3"><a href="#configuring-the-updater">Configuring the updater</a></li><li class="lvl2"><a href="#9-where-to-go-next">9. Where to go next</a></li></ul></nav>
 </div>
 
 <script src="assets/site.js" defer></script>

@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -137,21 +143,22 @@ dispatches subsequent requests through <code>Runtime::dispatch()</code> via <cod
 <p><strong>This is the mobile equivalent of desktop&#39;s hardcoded router script</strong>, and it is the same
 kind of problem with the same kind of solution: three hardcoded paths in the native sources.</p>
 <h3 id="2b-the-native-bridge"><a class="anchor" href="#2b-the-native-bridge">2b. The native bridge</a></h3>
-<p><code>nativephp_call($method, $jsonPayload)</code> — a PHP extension function. <strong>54 distinct methods</strong>
+<p><code>nativephp_call($method, $jsonPayload)</code> — a PHP extension function. <strong>62 distinct methods</strong>
 in the current PHP surface:</p>
 <div class="table-scroll"><table><thead><tr><th>Group</th><th>Methods</th></tr></thead><tbody>
 <tr><td>Camera</td><td>GetPhoto, PickMedia, RecordVideo</td></tr>
 <tr><td>Device</td><td>GetInfo, GetId, GetBatteryInfo, Vibrate, ToggleFlashlight</td></tr>
 <tr><td>Microphone</td><td>Start, Stop, Pause, Resume, GetStatus, GetRecording</td></tr>
-<tr><td>Geolocation</td><td>ClearWatch, DrainWatchBuffer, TrimWatchBuffer, StopBackgroundWatch, BackgroundWatchStatus</td></tr>
+<tr><td>Geolocation</td><td>GetCurrentPosition, CheckPermissions, RequestPermissions, WatchPosition, ClearWatch, StartBackgroundWatch, StopBackgroundWatch, BackgroundWatchStatus, DrainWatchBuffer, TrimWatchBuffer</td></tr>
 <tr><td>SecureStorage</td><td>Get, Set, Delete</td></tr>
-<tr><td>PushNotification</td><td>GetToken, CheckPermission, ClearBadge</td></tr>
+<tr><td>PushNotification</td><td>GetToken, CheckPermission, ClearBadge, RequestPermission</td></tr>
 <tr><td>Browser</td><td>Open, OpenInApp, OpenAuth</td></tr>
 <tr><td>Share</td><td>Url, File</td></tr>
 <tr><td>MobileWallet</td><td>IsAvailable, CreatePaymentIntent, ConfirmPayment, PresentPaymentSheet, GetPaymentStatus</td></tr>
 <tr><td>System</td><td>GetAppearance, MinimizeApp, OpenAppSettings</td></tr>
 <tr><td>Biometric</td><td>Prompt</td></tr>
-<tr><td>Dialog</td><td>Toast</td></tr>
+<tr><td>Dialog</td><td>Toast, Alert</td></tr>
+<tr><td>Scanner</td><td>Scan</td></tr>
 <tr><td>File</td><td>Copy, Move</td></tr>
 <tr><td>Network</td><td>Status</td></tr>
 <tr><td>UI / NativeUI</td><td>SetBackground, Transition.Set</td></tr>
@@ -159,7 +166,13 @@ in the current PHP surface:</p>
 </tbody></table></div>
 <p><strong>The bridge itself is entirely framework-agnostic</strong> — a function name and a JSON string. The
 PHP wrappers around it are the same mechanical work as desktop&#39;s endpoint wrappers, and there
-are fewer of them (54 vs 116).</p>
+are fewer of them (62 vs 116). All 62 have a wrapper. The last five to get one were the
+Geolocation methods that start or locate a position — <code>GetCurrentPosition</code>,
+<code>CheckPermissions</code>, <code>RequestPermissions</code>, <code>WatchPosition</code> and <code>StartBackgroundWatch</code> —
+which left <code>Api\Geolocation</code> able to stop and drain a watch it had no way to begin. The
+count read 57 until <code>BridgeCoverageTest</code> learned to read a method name computed above its
+call site, which is where all five were hiding; its <code>UNWRAPPED</code> list is empty and asserted
+to stay that way.</p>
 <hr>
 <h2 id="3-the-same-escape-hatch-exists"><a class="anchor" href="#3-the-same-escape-hatch-exists">3. The same escape hatch exists</a></h2>
 <p>Critically, the native projects are copied into the <em>user&#39;s</em> project, exactly as the Electron
@@ -171,7 +184,7 @@ upstream fix is the same too: declare them in a manifest.</p>
 <hr>
 <h2 id="4-revised-difficulty"><a class="anchor" href="#4-revised-difficulty">4. Revised difficulty</a></h2>
 <div class="table-scroll"><table><thead><tr><th></th><th>desktop</th><th>mobile (WebView path)</th><th>mobile (native UI)</th></tr></thead><tbody>
-<tr><td>Transport</td><td>localhost HTTP, 116 endpoints</td><td><code>nativephp_call</code>, 54 methods</td><td>same</td></tr>
+<tr><td>Transport</td><td>localhost HTTP, 116 endpoints</td><td><code>nativephp_call</code>, 62 methods</td><td>same</td></tr>
 <tr><td>Framework leak in the native layer</td><td>8 string literals, 1 file</td><td>3 bootstrap paths, 2 files</td><td>plus Blade-coupled rendering</td></tr>
 <tr><td>SAPI shim needed</td><td>no (<code>php -S</code> + router)</td><td><strong>yes, ~100 LOC</strong></td><td>yes</td></tr>
 <tr><td>UI work</td><td>none</td><td><strong>none</strong></td><td>reimplement 17,316 LOC for Twig</td></tr>
@@ -189,7 +202,7 @@ the kernel, emit a raw HTTP response. Plus a persistent variant that reuses the 
 across requests, which is where mobile&#39;s performance comes from.</li>
 <li><strong>A <code>MobileRuntimePatcher</code></strong> — retarget the three hardcoded bootstrap paths in the copied
 Android/iOS projects, and force <code>entry_mode: web</code>.</li>
-<li><strong>PHP wrappers for the 54 bridge methods</strong>, typed, in the shape already established by the
+<li><strong>PHP wrappers for the 62 bridge methods</strong>, typed, in the shape already established by the
 desktop bundle.</li>
 <li><strong>Build commands</strong> — <code>native:mobile:install</code>, <code>native:mobile:run android|ios</code>.</li>
 </ol>
