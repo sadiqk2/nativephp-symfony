@@ -63,7 +63,10 @@ final class MobileCommandPathsTest extends TestCase
         // Absolute on Windows only — on Linux `D:\builds` is one oddly-named directory, and
         // resolving it against the project is the right answer there.
         yield 'drive letter, on windows' => ['Windows', 'D:\\builds', 'D:/builds/android'];
-        yield 'drive letter, on linux' => ['Linux', 'D:\\builds', '{project}/D:\\builds/android'];
+        // Normalised in the relative branch too. It used to come back verbatim here, which
+        // was not a decision but `Path::join()`'s behaviour before symfony/filesystem 7.4 —
+        // and it changed underneath the expectation while the range still claimed both.
+        yield 'drive letter, on linux' => ['Linux', 'D:\\builds', '{project}/D:/builds/android'];
         yield 'unc, on windows' => ['Windows', '\\\\build\\share', '//build/share/android'];
 
         // The one row that discriminates from a leading-slash test on any platform.
@@ -81,25 +84,89 @@ final class MobileCommandPathsTest extends TestCase
     }
 
     /**
-     * The rule is a port of `Path::isAbsolute()` with the platform injected, so it has to
-     * agree with the original for the host platform — the only one `Path` can answer for.
+     * The rule, as a table rather than as a reading of the implementation — and asserted for
+     * both platforms on whatever host runs the suite, which is the reason the platform is an
+     * argument at all.
      */
     #[DataProvider('everyPathShape')]
-    public function testTheRuleAgreesWithSymfonyForThisHost(string $path): void
+    public function testTheRuleAnswersForBothPlatforms(string $path, bool $onPosix, bool $onWindows): void
     {
-        $paths = new ProjectPath($this->project, \PHP_OS_FAMILY);
-
-        self::assertSame(Path::isAbsolute($path), $paths->isAbsolute($path), sprintf('"%s" on %s', $path, \PHP_OS_FAMILY));
+        self::assertSame($onPosix, (new ProjectPath($this->project, 'Linux'))->isAbsolute($path));
+        self::assertSame($onWindows, (new ProjectPath($this->project, 'Windows'))->isAbsolute($path));
     }
 
-    /** @return iterable<string, array{string}> */
+    /**
+     * And the table pinned to Symfony's own answers, so it is not just a reading of the port.
+     *
+     * `Path::isAbsolute()` only became host-aware in symfony/filesystem 7.4 and 8.1, both
+     * inside this bundle's declared range: before that it answered for Windows on every host
+     * and called `D:x` absolute, which even Windows treats as drive-relative. A disagreement
+     * on a Windows-shaped input is that known difference, and the reason this port exists; a
+     * disagreement on a shape with nothing platform-specific in it means one of the two is
+     * wrong, and that holds on every version.
+     *
+     * Nothing skips. `--fail-on-skipped` is how CI notices an environment that has stopped
+     * covering something, and a version difference is not that.
+     */
+    public function testTheTableAgreesWithSymfonyForThisHost(): void
+    {
+        $onWindowsHost = 'Windows' === \PHP_OS_FAMILY;
+        $disagreements = [];
+
+        foreach (self::everyPathShape() as [$path, $onPosix, $onWindows]) {
+            if (Path::isAbsolute($path) !== ($onWindowsHost ? $onWindows : $onPosix)) {
+                $disagreements[] = $path;
+            }
+        }
+
+        self::assertSame(
+            [],
+            array_values(array_filter(
+                $disagreements,
+                static fn (string $path): bool => !str_contains($path, ':') && !str_contains($path, '\\'),
+            )),
+            'The table disagrees with Path::isAbsolute() about a shape with nothing '
+            .'platform-specific in it, so one of the two is wrong rather than merely older.',
+        );
+
+        // The strong form, on the version almost everyone will have resolved.
+        if (!$onWindowsHost && !Path::isAbsolute('D:\\builds')) {
+            self::assertSame(
+                [],
+                $disagreements,
+                'This symfony/filesystem is host-aware, so the port has to agree with it everywhere.',
+            );
+        }
+    }
+
+    /**
+     * @return iterable<string, array{string, bool, bool}> path, absolute on POSIX, on Windows
+     */
     public static function everyPathShape(): iterable
     {
         foreach ([
-            '/mnt/builds', 'var/staging', '', 'D:\\builds', 'D:/builds', 'D:', 'D:x', 'DD:/x',
-            '\\\\build\\share', '\\single', 'file:///mnt/builds', 'phar:///app.phar/x', './x', '../x',
-        ] as $path) {
-            yield ('' === $path ? '(empty)' : $path) => [$path];
+            ['/mnt/builds', true, true],
+            ['var/staging', false, false],
+            ['', false, false],
+            ['./x', false, false],
+            ['../x', false, false],
+
+            // Windows only.
+            ['D:\\builds', false, true],
+            ['D:/builds', false, true],
+            ['D:', false, true],
+            ['\\\\build\\share', false, true],
+            ['\\single', false, true],
+
+            // Near misses: drive-relative, and a two-letter prefix.
+            ['D:x', false, false],
+            ['DD:/x', false, false],
+
+            // A scheme is absolute everywhere.
+            ['file:///mnt/builds', true, true],
+            ['phar:///app.phar/x', true, true],
+        ] as [$path, $onPosix, $onWindows]) {
+            yield ('' === $path ? '(empty)' : $path) => [$path, $onPosix, $onWindows];
         }
     }
 

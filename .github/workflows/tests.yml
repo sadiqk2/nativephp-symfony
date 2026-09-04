@@ -10,13 +10,27 @@ permissions:
 
 jobs:
   tests:
-    name: ${{ matrix.suite }} on PHP ${{ matrix.php }}
+    name: ${{ matrix.suite }} — ${{ matrix.deps }} on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         suite: [bundle, mobile-bundle]
-        php: ['8.3', '8.4']
+        deps: [locked, highest, lowest]
+        include:
+          # The lock resolves Symfony 8, which needs PHP 8.4.1, so this is the only
+          # combination the committed lock can be installed on.
+          - { deps: locked, php: '8.4' }
+          # The declared ceiling on the oldest PHP: a fresh resolve, which on 8.3 is
+          # the Symfony 7 line.
+          - { deps: highest, php: '8.3' }
+          # And the declared *floor*, which is the leg that earns its place. Every
+          # constraint in composer.json is a promise, and until this ran the promise
+          # was false in three places: symfony/filesystem changed `Path::isAbsolute()`
+          # and `Path::join()` under us, symfony/routing's UrlMatcher did not take the
+          # method from the request before 7.4, and one test used an assertion PHPUnit
+          # only added in 11.5.
+          - { deps: lowest, php: '8.3' }
     steps:
       - uses: actions/checkout@v5
 
@@ -35,21 +49,22 @@ jobs:
           git clone --depth 1 https://github.com/NativePHP/desktop upstream/np-desktop
           git clone --depth 1 https://github.com/NativePHP/mobile-air upstream/np-mobile
 
-      # The lock resolves Symfony 8, which needs PHP 8.4.1, so the declared floor of
-      # ^8.3 can only be checked against a fresh resolve.
-      - name: Install dependencies
+      - name: Install dependencies (${{ matrix.deps }})
         working-directory: ${{ matrix.suite }}
-        env:
-          LOCKED: ${{ matrix.php == '8.4' }}
         run: |
-          if [ "$LOCKED" = "true" ]; then
-            composer install --no-interaction --no-progress
-          else
-            composer update --no-interaction --no-progress
-          fi
+          case '${{ matrix.deps }}' in
+            locked)  composer install --no-interaction --no-progress ;;
+            highest) composer update  --no-interaction --no-progress ;;
+            lowest)  composer update --prefer-lowest --prefer-stable --no-interaction --no-progress ;;
+          esac
 
       # --fail-on-skipped: a skip here means the environment lost coverage, not that a
       # test was irrelevant. Both suites run with zero skips on an unprivileged runner.
+      #
+      # Deprecations are not failed on: the floor pins Symfony 7.0 and PHPUnit 11.5,
+      # whose own signatures raise ~220 implicitly-nullable notices on PHP 8.3+. They
+      # are those packages' to fix, and failing on them would mean abandoning the floor
+      # rather than testing it.
       - name: Tests
         working-directory: ${{ matrix.suite }}
         run: php vendor/bin/phpunit --no-coverage --fail-on-skipped
@@ -77,12 +92,6 @@ jobs:
       - name: Validate composer.json
         working-directory: ${{ matrix.suite }}
         run: composer validate --strict --no-interaction
-
-      # The manifest must resolve on the declared floor, not only on the version the
-      # lock happens to hold. --dry-run so nothing is written and no cache is warmed.
-      - name: Check the dependencies resolve on the declared floor
-        working-directory: ${{ matrix.suite }}
-        run: composer update --prefer-lowest --prefer-stable --dry-run --no-interaction --no-progress
 
       # A dist archive that carries the test suite is a download every consumer pays
       # for and nobody unpacks. .gitattributes is the only thing keeping it out, and

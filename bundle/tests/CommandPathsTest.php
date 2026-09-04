@@ -119,47 +119,123 @@ final class CommandPathsTest extends TestCase
         // directory whose name contains a colon and backslashes, so resolving it against the
         // project is the correct answer rather than a compromise.
         yield 'drive letter, on windows' => ['Windows', 'C:\\dev\\electron', 'C:/dev/electron'];
-        yield 'drive letter, on linux' => ['Linux', 'C:\\dev\\electron', '{project}/C:\\dev\\electron'];
+        yield 'drive letter, on linux' => ['Linux', 'C:\\dev\\electron', '{project}/C:/dev/electron'];
         yield 'unc, on windows' => ['Windows', '\\\\server\\share\\electron', '//server/share/electron'];
 
         // A bare drive letter is absolute on Windows; `Path::isAbsolute()` special-cases it.
         yield 'bare drive letter, on windows' => ['Windows', 'C:', 'C:'];
 
-        yield 'relative, on windows' => ['Windows', 'nativephp\\electron', '{project}/nativephp\\electron'];
+        // Backslashes are normalised in the relative branch as well as the absolute one,
+        // and both of these rows say so. They used to expect the path back verbatim,
+        // which was not a decision — it was `Path::join()`'s behaviour before
+        // symfony/filesystem 7.4, and it changed underneath the expectation. Doing the
+        // normalisation in ProjectPath is what makes these two answers the same on every
+        // version in the declared range.
+        yield 'relative, on windows' => ['Windows', 'nativephp\\electron', '{project}/nativephp/electron'];
         yield 'relative, on linux' => ['Linux', 'nativephp/electron', '{project}/nativephp/electron'];
     }
 
     // ── The rule itself, pinned to Symfony's ──
 
     /**
-     * `ProjectPath::isAbsolute()` is a port of `Path::isAbsolute()` with the platform passed
-     * in, so the port has to agree with the original — for the *host* platform, which is the
-     * only one `Path` can answer for. On Linux this pins the POSIX and stream-wrapper
-     * branches; on a Windows runner it pins the drive-letter and UNC ones. Between the two the
-     * whole rule is covered by something other than my own reading of it.
+     * The rule itself, as a table rather than as a reading of the implementation.
+     *
+     * Every shape is asserted for both platforms on whatever host runs the suite, which is
+     * the whole reason the platform is an argument to {@see ProjectPath} — the Windows rows
+     * used to be skipped off Windows, and a skipped assertion is an unverified guess.
      */
     #[DataProvider('everyPathShape')]
-    public function testTheRuleAgreesWithSymfonyForThisHost(string $path): void
+    public function testTheRuleAnswersForBothPlatforms(string $path, bool $onPosix, bool $onWindows): void
     {
-        $mine = new ProjectPath($this->project, new Platform(\PHP_OS_FAMILY));
-
-        self::assertSame(
-            Path::isAbsolute($path),
-            $mine->isAbsolute($path),
-            sprintf('Disagreed with Path::isAbsolute() about "%s" on %s', $path, \PHP_OS_FAMILY),
-        );
+        self::assertSame($onPosix, (new ProjectPath($this->project, new Platform('Linux')))->isAbsolute($path));
+        self::assertSame($onWindows, (new ProjectPath($this->project, new Platform('Windows')))->isAbsolute($path));
     }
 
-    /** @return iterable<string, array{string}> */
+    /**
+     * And the table pinned to Symfony's own answers, so it is not just my reading of it.
+     *
+     * `ProjectPath::isAbsolute()` is a port of `Path::isAbsolute()` with the platform passed
+     * in rather than read from `DIRECTORY_SEPARATOR`, so on a `Path` that is itself
+     * host-aware the two must agree exactly for the host platform.
+     *
+     * `Path` only became host-aware in symfony/filesystem 7.4 and 8.1, which is inside this
+     * bundle's declared support range: before that it answered for Windows on every host,
+     * and called `C:x` absolute where even Windows treats it as drive-relative. So a
+     * disagreement on a Windows-shaped input is that known difference and is the reason the
+     * port exists; a disagreement on a shape with nothing platform-specific about it means
+     * one of the two is simply wrong, and that is asserted on every version.
+     *
+     * One test rather than one per row, because the useful statement is about the *set* of
+     * disagreements. Nothing here skips: `--fail-on-skipped` is how CI notices an
+     * environment that has quietly stopped covering something, and a version difference is
+     * not that.
+     */
+    public function testTheTableAgreesWithSymfonyForThisHost(): void
+    {
+        $onWindowsHost = 'Windows' === \PHP_OS_FAMILY;
+        $disagreements = [];
+
+        foreach (self::everyPathShape() as [$path, $onPosix, $onWindows]) {
+            if (Path::isAbsolute($path) !== ($onWindowsHost ? $onWindows : $onPosix)) {
+                $disagreements[] = $path;
+            }
+        }
+
+        self::assertSame(
+            [],
+            array_values(array_filter(
+                $disagreements,
+                static fn (string $path): bool => !str_contains($path, ':') && !str_contains($path, '\\'),
+            )),
+            'The table disagrees with Path::isAbsolute() about a shape with nothing '
+            .'platform-specific in it, so one of the two is wrong rather than merely older.',
+        );
+
+        // The strong form, on the version almost everyone will have resolved.
+        if (!$onWindowsHost && !Path::isAbsolute('C:\\dev')) {
+            self::assertSame(
+                [],
+                $disagreements,
+                'This symfony/filesystem is host-aware, so the port has to agree with it everywhere.',
+            );
+        }
+    }
+
+    /**
+     * @return iterable<string, array{string, bool, bool}> path, absolute on POSIX, on Windows
+     */
     public static function everyPathShape(): iterable
     {
         foreach ([
-            '/opt/electron', 'opt/electron', 'nativephp/electron', '',
-            'C:\\dev\\electron', 'C:/dev/electron', 'C:', 'C:x', 'CC:/x', '1:/x',
-            '\\\\server\\share', '\\single', 'file:///opt/electron', 'phar:///app.phar/x',
-            'https://example.com/x', './relative', '../up', 'a://b',
-        ] as $path) {
-            yield ('' === $path ? '(empty)' : $path) => [$path];
+            // Absolute everywhere, or nowhere.
+            ['/opt/electron', true, true],
+            ['opt/electron', false, false],
+            ['nativephp/electron', false, false],
+            ['', false, false],
+            ['./relative', false, false],
+            ['../up', false, false],
+
+            // Windows only: on POSIX these are one directory whose name happens to
+            // contain a colon and some backslashes.
+            ['C:\\dev\\electron', false, true],
+            ['C:/dev/electron', false, true],
+            ['C:', false, true],
+            ['\\\\server\\share', false, true],
+            ['\\single', false, true],
+
+            // Near misses that are relative on both: a two-letter prefix, a digit, and a
+            // drive letter followed by something other than a separator.
+            ['C:x', false, false],
+            ['CC:/x', false, false],
+            ['1:/x', false, false],
+
+            // A scheme is absolute everywhere.
+            ['file:///opt/electron', true, true],
+            ['phar:///app.phar/x', true, true],
+            ['https://example.com/x', true, true],
+            ['a://b', true, true],
+        ] as [$path, $onPosix, $onWindows]) {
+            yield ('' === $path ? '(empty)' : $path) => [$path, $onPosix, $onWindows];
         }
     }
 

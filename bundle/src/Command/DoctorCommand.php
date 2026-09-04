@@ -16,6 +16,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\ExceptionInterface as RoutingException;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
+use Symfony\Component\Routing\RequestContextAwareInterface;
 
 /**
  * Check that this application can actually be driven by the runtime.
@@ -133,7 +134,7 @@ final class DoctorCommand extends Command
 
         foreach (self::RUNTIME_PATHS as $path => $controller) {
             try {
-                $match = $this->router->matchRequest(Request::create($path, 'POST'));
+                $match = $this->matchPost($path);
             } catch (RoutingException) {
                 $missing[] = $path;
                 $io->text(sprintf(' ✗ POST %s — does not route', $path));
@@ -188,6 +189,56 @@ final class DoctorCommand extends Command
         }
 
         return [] === $missing && [] === $swallowed ? 0 : 1;
+    }
+
+    /**
+     * Match a POST to $path, on any supported Symfony.
+     *
+     * The method has to be set on the *context*, not only on the request. Symfony's
+     * `UrlMatcher::matchRequest()` only began deriving its context from the request
+     * it was handed in 7.4 and 8.1; before that it read the method off whatever
+     * context the router already carried, which in a console command is the default
+     * `GET`. Both runtime endpoints are POST-only — the runtime never issues
+     * anything else — so on 7.0 to 7.3 every one of them came back
+     * `MethodNotAllowed`, and this command told a correctly wired application that
+     * its runtime endpoints did not route.
+     *
+     * Which is the worst failure this command can have. It exists to turn a silent
+     * misconfiguration into a sentence, and there it invented one: the reader
+     * follows the advice, rewrites a routes file that was already right, and ends
+     * up further from a working app than before they ran it.
+     *
+     * @return array<string, mixed>
+     *
+     * @throws RoutingException
+     */
+    private function matchPost(string $path): array
+    {
+        \assert(null !== $this->router);
+
+        $request = Request::create($path, 'POST');
+
+        // A stub matcher — the tests use several — carries no context and needs
+        // none, since it is answering from a list rather than from a compiled
+        // matcher's method checks.
+        if (!$this->router instanceof RequestContextAwareInterface) {
+            return $this->router->matchRequest($request);
+        }
+
+        $context = $this->router->getContext();
+        $method = $context->getMethod();
+
+        // Restored rather than left set: the router is the application's own
+        // service, and a console command has no business leaving it configured for
+        // POST. Nothing else in this process routes afterwards today, which is
+        // exactly the sort of thing that stops being true without anyone noticing.
+        $context->setMethod('POST');
+
+        try {
+            return $this->router->matchRequest($request);
+        } finally {
+            $context->setMethod($method);
+        }
     }
 
     /**
