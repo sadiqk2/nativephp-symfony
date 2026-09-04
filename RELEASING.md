@@ -146,6 +146,15 @@ package page after submission. Without it a new tag can take hours to appear.
    Then rebuild the documentation site, since all three are pages on it. Steps 1 to 4 above
    are one-time; this one goes with them.
 
+   Same edit, same reason: the README's badge row deliberately carries no Packagist badges
+   yet, because a badge for a package that does not exist renders as a broken image. Add
+   them once the packages resolve:
+
+   ```markdown
+   [![desktop-bundle](https://img.shields.io/packagist/v/native-symfony/desktop-bundle)](https://packagist.org/packages/native-symfony/desktop-bundle)
+   [![mobile-bundle](https://img.shields.io/packagist/v/native-symfony/mobile-bundle)](https://packagist.org/packages/native-symfony/mobile-bundle)
+   ```
+
 ## Versioning
 
 Both packages follow [SemVer](https://semver.org/), with the caveat every `0.x`

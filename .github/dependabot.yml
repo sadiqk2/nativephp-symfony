@@ -1,0 +1,24 @@
+version: 2
+updates:
+  # The workflows pin third-party actions by commit sha, which is the right call and also
+  # the reason they cannot be updated by reading a tag. This is what moves them.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'ci'
+
+  # Both packages carry a lock, and both CI legs that matter resolve fresh anyway
+  # (highest and lowest), so this is about the locked leg staying representative rather
+  # than about a consumer's resolution — a consumer never sees these locks.
+  - package-ecosystem: composer
+    directories:
+      - /bundle
+      - /mobile-bundle
+    schedule:
+      interval: monthly
+    # Dev-only: nothing in `require` is updated here, because raising a floor is a
+    # decision about what the package supports and belongs in a considered commit.
+    allow:
+      - dependency-type: development
