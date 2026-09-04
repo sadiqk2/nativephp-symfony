@@ -1,5 +1,10 @@
 # NativePHP for Symfony
 
+[![tests](https://github.com/sadiqk2/nativephp-symfony/actions/workflows/tests.yml/badge.svg)](https://github.com/sadiqk2/nativephp-symfony/actions/workflows/tests.yml)
+[![PHP 8.3+](https://img.shields.io/badge/php-8.3%2B-777bb4)](https://www.php.net/)
+[![Symfony 7 | 8](https://img.shields.io/badge/symfony-7%20%7C%208-000000)](https://symfony.com/)
+[![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
+
 Bringing [NativePHP](https://nativephp.com)'s desktop runtime to Symfony: build desktop
 applications with Symfony and PHP, on the same Electron runtime the Laravel version uses.
 
