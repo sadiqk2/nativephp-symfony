@@ -4,9 +4,11 @@ name: split
 # packages cannot be published as it stands. This mirrors each package directory into
 # its own repository, history and all, and those mirrors are what Packagist watches.
 #
-# The mirrors are read-only. Nothing is ever pushed to them by hand, and a pull request
-# opened against one cannot be merged — bundle/.github/ISSUE_TEMPLATE/config.yml says so
-# on each of them, which is why that file exists in a directory GitHub ignores here.
+# The mirrors are read-only. Nothing is ever pushed to them by hand, and neither an issue
+# nor a pull request opened against one can be acted on — each package carries its own
+# .github/ISSUE_TEMPLATE/config.yml and .github/pull_request_template.md saying so, which
+# is why those files exist in a directory GitHub ignores here. An ISSUE_TEMPLATE config is
+# only ever shown on the New Issue page, so the pull-request half needs its own file.
 #
 # Requires a secret, SPLIT_TOKEN: a fine-grained personal access token with Contents:
 # write on both mirror repositories. The default GITHUB_TOKEN is scoped to this
@@ -23,10 +25,17 @@ permissions:
   contents: read
 
 concurrency:
-  # Splits are pushes to a shared branch on another repository. Two of them racing
-  # would interleave, and the loser would be rejected as non-fast-forward — so they
-  # queue rather than run together, and a queued one is not cancelled.
-  group: split
+  # Splits are pushes to a shared branch on another repository. Two runs for the *same*
+  # ref racing would interleave, and the loser would be rejected as non-fast-forward — so
+  # they queue, and `cancel-in-progress: false` keeps the running one alive.
+  #
+  # Keyed on the ref, not on one global group, because GitHub allows exactly one *pending*
+  # run per group and cancels the previously pending one whenever another is queued. A
+  # release is `git push origin main` immediately followed by `git push origin v0.1.0`:
+  # under one shared group the tag run is the pending one, and the next push to main —
+  # a README fix, a changelog tidy — would cancel it silently. The mirror would then never
+  # receive the tag, Packagist would never see the version, and nothing would say so.
+  group: split-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
@@ -84,7 +93,15 @@ jobs:
             echo "Tagging ${GITHUB_REF_NAME} at ${SHA} on ${{ matrix.mirror }}"
             git tag -f "${GITHUB_REF_NAME}" "${SHA}"
             git push "${MIRROR}" "refs/tags/${GITHUB_REF_NAME}"
-          else
+          elif [ "${GITHUB_REF_NAME}" = 'main' ]; then
             echo "Pushing ${SHA} to ${{ matrix.mirror }} main"
             git push "${MIRROR}" "${SHA}:refs/heads/main"
+          else
+            # workflow_dispatch takes a ref, and the branch picker defaults to whatever
+            # the person last looked at. Without this, running it from a feature branch
+            # publishes that branch's tree as the mirror's main — which Packagist then
+            # serves as dev-main to anyone tracking it. A non-fast-forward would be
+            # rejected, but a branch cut from main is a fast-forward, so the accident is
+            # exactly the plausible one.
+            echo "::notice::Ref is ${GITHUB_REF_NAME}, not main or a tag — split to ${SHA}, nothing pushed."
           fi

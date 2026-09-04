@@ -28,6 +28,18 @@ the bundle — clone this repository and add a path repository pointing at `bund
 nothing. [`demo/composer.json`](../demo/composer.json) is a working example. Everything after
 this step is unaffected by how the package arrived.
 
+On that route the constraint has to carry a stability flag:
+
+```bash
+composer require native-symfony/desktop-bundle:^0.1@dev
+```
+
+The manifest deliberately has no `version` field — Composer takes a released version from the
+git tag, and `composer validate --strict` fails on a hardcoded one — so a path repository
+resolves to `dev-main`, which `extra.branch-alias` aliases to `0.1.x-dev`. Under the default
+`minimum-stability: stable` a plain `^0.1` therefore fails to resolve. The flag applies to
+this one constraint, not to the application.
+
 Flex registers the bundle for you: it derives candidate class names from the PSR-4 namespace,
 and `Native\Symfony\Desktop\` yields `Native\Symfony\Desktop\NativeDesktopBundle`. That is
 what the namespace is shaped for — the bundle used to be `Native\Symfony\`, where the

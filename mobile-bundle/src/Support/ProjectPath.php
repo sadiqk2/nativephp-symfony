@@ -33,22 +33,31 @@ final class ProjectPath
     }
 
     /**
-     * The path as an absolute one, with separators normalised, so output and messages carry
-     * one shape rather than two.
+     * The path as an absolute one, with separators normalised **on Windows only**, so
+     * output and messages carry one shape rather than two.
      *
-     * The relative branch used to lean on `Path::join()` to normalise for it. That stopped
-     * being true in symfony/filesystem 7.4 and 8.1, both inside the declared support range,
-     * so the method quietly answered two different things depending on which patch release a
-     * consumer had resolved. Normalising here is what makes the answer the version's
-     * business no longer.
+     * The condition is the point. On Windows a backslash is a separator, so rewriting it
+     * is free. On POSIX it is an ordinary character in a filename, so rewriting one names
+     * a different directory — and this method's answer is what staging passes to `mkdir`
+     * before copying the whole application into it, which is the reason `--stage-dir`
+     * needed this class in the first place. It is also the fact `isAbsolute()` below turns
+     * on, where `D:\builds` off Windows is one oddly-named relative directory.
+     *
+     * Doing it here rather than leaving it to `Path::join()` is what keeps the answer off
+     * the resolver: `Path::join()` used to rewrite backslashes and stopped in
+     * symfony/filesystem 7.4 and 8.1, both inside the declared range. The one case still
+     * left to it is a *relative* POSIX path containing a literal backslash, which is
+     * pathological input on a platform where the character is legal but nobody uses it.
      */
     public function absolute(string $path): string
     {
-        $normalised = str_replace('\\', '/', $path);
+        if ('Windows' === $this->osFamily) {
+            $path = str_replace('\\', '/', $path);
+        }
 
         return $this->isAbsolute($path)
-            ? $normalised
-            : Path::join($this->projectDir, $normalised);
+            ? $path
+            : Path::join($this->projectDir, $path);
     }
 
     /**

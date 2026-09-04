@@ -73,7 +73,17 @@ return [
 To work against a checkout instead, clone this repository and add a path repository pointing
 at `mobile-bundle/` with `"symlink": true` — without it Composer caches a copy and edits to
 the bundle appear to do nothing. [`demo/composer.json`](../demo/composer.json) is a working
-example.
+example. On that route the constraint has to carry a stability flag:
+
+```bash
+composer require native-symfony/mobile-bundle:^0.1@dev
+```
+
+The manifest deliberately has no `version` field — Composer takes a released version from the
+git tag, and `composer validate --strict` fails on a hardcoded one — so a path repository
+resolves to `dev-main`, which `extra.branch-alias` aliases to `0.1.x-dev`. Under the default
+`minimum-stability: stable` a plain `^0.1` therefore fails to resolve. The flag applies to
+this one constraint, not to the application.
 
 Then copy the two native projects into your application and retarget them:
 

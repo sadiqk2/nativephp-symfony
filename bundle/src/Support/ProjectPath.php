@@ -39,23 +39,36 @@ final class ProjectPath
 
     /**
      * The path as an absolute one: unchanged if it already is, joined onto the project
-     * directory if not. Separators come back normalised either way, because a message
-     * quoting `C:/dev` beats one quoting `C:\dev` mixed into a `/`-separated string.
+     * directory if not.
      *
-     * The normalisation is done here rather than left to `Path::join()`, which used to
-     * do it and no longer does: it stopped rewriting backslashes in symfony/filesystem
-     * 7.4 and 8.1. So this method quietly answered two different things across the
-     * declared support range — normalised on 7.0 to 7.3, not on 7.4 and up — while its
-     * own documentation claimed one. Doing it explicitly is the only way the answer
-     * does not depend on which patch release a consumer happens to have resolved.
+     * Separators are rewritten **on Windows only**, and that condition is the whole
+     * point of the method. There a backslash *is* a separator, so `C:\dev` and `C:/dev`
+     * name the same directory and rewriting is free — worth doing, because a message
+     * quoting `C:/dev` beats one quoting `C:\dev` mixed into a `/`-separated string.
+     * On POSIX a backslash is an ordinary character in a filename, so rewriting one
+     * addresses a *different* directory: this is the same fact `isAbsolute()` below
+     * turns on, where `C:\dev` on Linux is one oddly-named relative directory rather
+     * than a drive. Rewriting unconditionally would have made this method contradict
+     * the one underneath it, and made `--electron-path='my\dir'` report a real
+     * directory missing.
+     *
+     * Doing it here rather than leaving it to `Path::join()` is what keeps the answer
+     * off the resolver: `Path::join()` used to rewrite backslashes and stopped in
+     * symfony/filesystem 7.4 and 8.1, both inside the declared range, so this method
+     * quietly answered two different things depending on which patch a consumer had.
+     * One case is still `Path::join()`'s and cannot be taken back from it — a *relative*
+     * POSIX path containing a literal backslash — which is pathological input on a
+     * platform where the character is legal but nobody uses it.
      */
     public function absolute(string $path): string
     {
-        $normalised = str_replace('\\', '/', $path);
+        if ($this->platform->isWindows()) {
+            $path = str_replace('\\', '/', $path);
+        }
 
         return $this->isAbsolute($path)
-            ? $normalised
-            : Path::join($this->projectDir, $normalised);
+            ? $path
+            : Path::join($this->projectDir, $path);
     }
 
     /**

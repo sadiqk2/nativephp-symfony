@@ -169,6 +169,15 @@ disagrees with a tag, and `composer validate` warns about it for that reason.
 `extra.branch-alias` maps `dev-main` to `0.1.x-dev`, so someone tracking the
 development branch resolves against the same constraint as a released `^0.1`.
 
+**The cost lands on the path-repository route**, and it is worth knowing before
+someone hits it. A `path` repository has no tag to read, so Composer infers
+`dev-main` and the alias makes that `0.1.x-dev` — a *dev* stability. Under the
+default `minimum-stability: stable` a plain `^0.1` then answers *"found
+…[dev-main, 0.1.x-dev (alias of dev-main)] but it does not match your
+minimum-stability"*. Requiring `^0.1@dev` flags that one constraint and resolves.
+Both getting-started pages and the README say so, because until the packages are
+on Packagist that route is the only one there is.
+
 ## What `1.0.0` would need
 
 Not a decision to take by tagging. The two things standing between here and a

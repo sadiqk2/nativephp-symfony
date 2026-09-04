@@ -220,6 +220,14 @@ derives the version from the git tag; a hardcoded one goes stale the moment it
 disagrees with a tag, and <code>composer validate</code> warns about it for that reason.</p>
 <p><code>extra.branch-alias</code> maps <code>dev-main</code> to <code>0.1.x-dev</code>, so someone tracking the
 development branch resolves against the same constraint as a released <code>^0.1</code>.</p>
+<p><strong>The cost lands on the path-repository route</strong>, and it is worth knowing before
+someone hits it. A <code>path</code> repository has no tag to read, so Composer infers
+<code>dev-main</code> and the alias makes that <code>0.1.x-dev</code> — a <em>dev</em> stability. Under the
+default <code>minimum-stability: stable</code> a plain <code>^0.1</code> then answers <em>&quot;found
+…[dev-main, 0.1.x-dev (alias of dev-main)] but it does not match your
+minimum-stability&quot;</em>. Requiring <code>^0.1@dev</code> flags that one constraint and resolves.
+Both getting-started pages and the README say so, because until the packages are
+on Packagist that route is the only one there is.</p>
 <h2 id="what-100-would-need"><a class="anchor" href="#what-100-would-need">What <code>1.0.0</code> would need</a></h2>
 <p>Not a decision to take by tagging. The two things standing between here and a
 stable promise:</p>

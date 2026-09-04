@@ -98,6 +98,16 @@ the bundle — clone this repository and add a path repository pointing at <code
 <code>&quot;symlink&quot;: true</code>; without it Composer caches a copy and edits to the bundle appear to do
 nothing. <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/demo/composer.json" target="_blank" rel="noopener"><code>demo/composer.json</code></a> is a working example. Everything after
 this step is unaffected by how the package arrived.</p>
+<p>On that route the constraint has to carry a stability flag:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">composer require native-symfony/desktop-bundle:^0.1@dev</code></pre>
+</figure>
+<p>The manifest deliberately has no <code>version</code> field — Composer takes a released version from the
+git tag, and <code>composer validate --strict</code> fails on a hardcoded one — so a path repository
+resolves to <code>dev-main</code>, which <code>extra.branch-alias</code> aliases to <code>0.1.x-dev</code>. Under the default
+<code>minimum-stability: stable</code> a plain <code>^0.1</code> therefore fails to resolve. The flag applies to
+this one constraint, not to the application.</p>
 <p>Flex registers the bundle for you: it derives candidate class names from the PSR-4 namespace,
 and <code>Native\Symfony\Desktop\</code> yields <code>Native\Symfony\Desktop\NativeDesktopBundle</code>. That is
 what the namespace is shaped for — the bundle used to be <code>Native\Symfony\</code>, where the
