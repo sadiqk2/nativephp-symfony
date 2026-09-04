@@ -14,10 +14,12 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Loader\PhpFileLoader;
 use Symfony\Component\Routing\Matcher\RequestMatcherInterface;
 use Symfony\Component\Routing\RequestContext;
+use Symfony\Component\Routing\RequestContextAwareInterface;
 use Symfony\Component\Routing\Router;
 
 /**
@@ -303,6 +305,70 @@ final class DoctorCommandTest extends TestCase
 
         self::assertSame(Command::SUCCESS, $tester->getStatusCode());
         self::assertStringContainsString(' ✓ POST /_native/api/booted', $tester->getDisplay());
+    }
+
+    public function testAPostOnlyRouteIsMatchedWhateverMethodTheRoutersContextCarries(): void
+    {
+        // A console command's router carries the default context, whose method is
+        // GET. Symfony's UrlMatcher only began deriving its context from the request
+        // it is handed in 7.4 and 8.1; before that it read the method off that
+        // context, so both POST-only runtime endpoints came back MethodNotAllowed
+        // and this command told a correctly wired application that its runtime
+        // endpoints did not route — the one failure a diagnostic must never have.
+        //
+        // The double reproduces that older semantics rather than relying on an older
+        // Symfony being installed, which is what makes this assert on every version:
+        // against 7.4 and above a real Router answers from the request whatever the
+        // context says, so a test built on one would pass with the fix reverted.
+        // `testTheBundlesOwnRoutesImportPasses` is the real-Router half, and on CI's
+        // lowest-dependency leg it is running against the genuine article.
+        $router = new class implements RequestContextAwareInterface, RequestMatcherInterface {
+            /** @var list<string> */
+            public array $methodsSeen = [];
+
+            private RequestContext $context;
+
+            public function __construct()
+            {
+                $this->context = new RequestContext();
+            }
+
+            public function setContext(RequestContext $context): void
+            {
+                $this->context = $context;
+            }
+
+            public function getContext(): RequestContext
+            {
+                return $this->context;
+            }
+
+            public function matchRequest(Request $request): array
+            {
+                $this->methodsSeen[] = $this->context->getMethod();
+
+                if ('POST' !== $this->context->getMethod()) {
+                    throw new MethodNotAllowedException(['POST']);
+                }
+
+                return ['_controller' => '/_native/api/booted' === $request->getPathInfo()
+                    ? BootedController::class
+                    : EventsController::class];
+            }
+        };
+
+        self::assertSame('GET', $router->getContext()->getMethod(), 'A default context is GET; without that this test proves nothing.');
+
+        $tester = $this->doctor(router: $router);
+
+        self::assertSame(Command::SUCCESS, $tester->getStatusCode());
+        self::assertStringContainsString(' ✓ POST /_native/api/booted', $tester->getDisplay());
+        self::assertStringContainsString(' ✓ POST /_native/api/events', $tester->getDisplay());
+        self::assertSame(['POST', 'POST'], $router->methodsSeen);
+
+        // And put back. The router is the application's own service, not this
+        // command's to reconfigure on the way past.
+        self::assertSame('GET', $router->getContext()->getMethod());
     }
 
     public function testACatchAllDeclaredAfterTheImportIsNotAFailure(): void

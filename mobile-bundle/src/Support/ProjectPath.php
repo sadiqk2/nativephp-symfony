@@ -33,14 +33,22 @@ final class ProjectPath
     }
 
     /**
-     * The path as an absolute one, with separators normalised. `Path::join()` normalises the
-     * relative case anyway, so doing it for both keeps one shape in output and in messages.
+     * The path as an absolute one, with separators normalised, so output and messages carry
+     * one shape rather than two.
+     *
+     * The relative branch used to lean on `Path::join()` to normalise for it. That stopped
+     * being true in symfony/filesystem 7.4 and 8.1, both inside the declared support range,
+     * so the method quietly answered two different things depending on which patch release a
+     * consumer had resolved. Normalising here is what makes the answer the version's
+     * business no longer.
      */
     public function absolute(string $path): string
     {
+        $normalised = str_replace('\\', '/', $path);
+
         return $this->isAbsolute($path)
-            ? str_replace('\\', '/', $path)
-            : Path::join($this->projectDir, $path);
+            ? $normalised
+            : Path::join($this->projectDir, $normalised);
     }
 
     /**

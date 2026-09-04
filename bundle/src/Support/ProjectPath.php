@@ -39,15 +39,23 @@ final class ProjectPath
 
     /**
      * The path as an absolute one: unchanged if it already is, joined onto the project
-     * directory if not. Separators come back normalised either way — `Path::join()` does
-     * that for the relative case, and a message quoting `C:/dev` beats one quoting
-     * `C:\dev` mixed into a `/`-separated string.
+     * directory if not. Separators come back normalised either way, because a message
+     * quoting `C:/dev` beats one quoting `C:\dev` mixed into a `/`-separated string.
+     *
+     * The normalisation is done here rather than left to `Path::join()`, which used to
+     * do it and no longer does: it stopped rewriting backslashes in symfony/filesystem
+     * 7.4 and 8.1. So this method quietly answered two different things across the
+     * declared support range — normalised on 7.0 to 7.3, not on 7.4 and up — while its
+     * own documentation claimed one. Doing it explicitly is the only way the answer
+     * does not depend on which patch release a consumer happens to have resolved.
      */
     public function absolute(string $path): string
     {
+        $normalised = str_replace('\\', '/', $path);
+
         return $this->isAbsolute($path)
-            ? str_replace('\\', '/', $path)
-            : Path::join($this->projectDir, $path);
+            ? $normalised
+            : Path::join($this->projectDir, $normalised);
     }
 
     /**
