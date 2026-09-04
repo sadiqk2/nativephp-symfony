@@ -39,7 +39,7 @@ final class PayloadKeyContractTest extends TestCase
      * Endpoints actually compared. ContractCoverageTest pins the mount table this relies
      * on, so a module upstream adds cannot quietly drop out of both.
      */
-    private const int EXPECTED_COMPARISONS = 55;
+    private const int EXPECTED_COMPARISONS = 57;
 
     /**
      * Endpoints compared in the omitted-key direction, and how many of them the runtime
@@ -49,9 +49,16 @@ final class PayloadKeyContractTest extends TestCase
      * parser that found no requirements at all, so a count of the endpoints carrying one
      * is the only thing that keeps this direction from quietly becoming a no-op — the
      * same reason EXPECTED_COMPARISONS above is exact rather than a floor.
+     *
+     * The second number has moved twice, in opposite directions, and both moves are the
+     * point of pinning it. `window/set-zoom-factor` stopped demanding one when upstream
+     * merged this repository's own patch #137 and put `parseZoomFactor()` in front of the
+     * read — a demand disappearing is exactly what a floor would have missed. Then
+     * `window/fullscreen` and `system/print-file` arrived, each handing its key straight
+     * to a call, and put it back over.
      */
-    private const int EXPECTED_REVERSE_COMPARISONS = 56;
-    private const int ENDPOINTS_THAT_DEMAND_A_KEY = 25;
+    private const int EXPECTED_REVERSE_COMPARISONS = 58;
+    private const int ENDPOINTS_THAT_DEMAND_A_KEY = 26;
     // One more than EXPECTED_COMPARISONS, and the extra is `alert/message`: it is built
     // with an `array_filter` rather than key by key, so the forward direction finds no
     // keys for it and never makes an entry, while this direction records that the endpoint
@@ -205,9 +212,20 @@ final class PayloadKeyContractTest extends TestCase
         // The three defects that produced this check, named so a future refactor of either
         // parser cannot drop them without saying so.
         self::assertContains('windowButtonVisibility', $upstream['window/open']['required'], 'setWindowButtonVisibility() takes it unguarded; that key going missing was one of the three.');
-        self::assertContains('zoomFactor', $upstream['window/open']['required'], 'setZoomFactor(parseFloat(...)) takes it unguarded; an absent value is NaN.');
         self::assertContains('label', $upstream['menu-bar/create']['required'], 'Tray.setTitle() takes it unguarded; that key going missing was one of the three.');
         self::assertContains('tooltip', $upstream['menu-bar/create']['required'], 'Tray.setToolTip() takes it unguarded; that key going missing was one of the three.');
+
+        // zoomFactor was the fourth, and is the one that has since been fixed at the
+        // source: upstream merged this repository's patch #137, so both use sites now go
+        // through parseZoomFactor() and an absent value is 1 rather than NaN. It is no
+        // longer a demand, which is why it cannot be asserted as one — but the guard
+        // standing is what makes that true, so assert the guard instead. We keep sending
+        // the key regardless; a consumer on an unpatched runtime still needs it.
+        self::assertStringContainsString(
+            'setZoomFactor(parseZoomFactor(zoomFactor))',
+            (string) file_get_contents(__DIR__.'/../../upstream/np-desktop/resources/electron/electron-plugin/src/server/api/window.ts'),
+            'The zoom factor is being read raw again, so it is a demand once more and belongs back in the count above.',
+        );
 
         self::assertSame([], $problems, "A key the runtime reads with no default of its own has to be in every payload:\n".implode("\n", $problems));
     }

@@ -117,6 +117,16 @@ final class RuntimeEventSimulator
         $this->dispatch(self::name('Windows\WindowClosed'), [$id]);
     }
 
+    public function windowFullscreened(string $id): void
+    {
+        $this->dispatch(self::name('Windows\WindowFullscreened'), [$id]);
+    }
+
+    public function windowUnfullscreened(string $id): void
+    {
+        $this->dispatch(self::name('Windows\WindowUnfullscreened'), [$id]);
+    }
+
     /**
      * @param bool $asObject The runtime sends a list from macOS `open-url` and an
      *                       object from the Windows/Linux `second-instance` path.

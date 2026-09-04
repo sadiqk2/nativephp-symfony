@@ -8,7 +8,7 @@ use Native\Symfony\Desktop\Contract\ClientInterface;
 use Native\Symfony\Desktop\Enums\SystemTheme;
 
 /**
- * OS integration — 10 endpoints: biometrics, OS-keychain encryption, printing and
+ * OS integration — 11 endpoints: biometrics, OS-keychain encryption, printing and
  * the system theme.
  */
 final class SystemManager
@@ -108,6 +108,33 @@ final class SystemManager
         return $this->client->post('system/print', [
             'printer' => $printer,
             'html' => rawurlencode($html),
+            'settings' => $settings,
+        ], $timeout)->successful();
+    }
+
+    /**
+     * Print a PDF that already exists on disk.
+     *
+     * The path is read by the *runtime*, not by this process: it is a path on the
+     * machine Electron is running on, and in a packaged app that is the same machine,
+     * but nothing here checks that the file exists — an unreadable one comes back as a
+     * failed call, not an exception.
+     *
+     * The runtime parses the PDF's MediaBox to size the page and refuses anything it
+     * cannot measure, so this is for PDFs specifically; print() is the route for HTML.
+     *
+     * Bounded for the same reason as print(), and more generously: the runtime waits
+     * 1.5s after load for PDFium to paint before it even starts the job.
+     *
+     * @param string               $printer  A device name from printers()
+     * @param array<string, mixed> $settings Electron webContents.print options, merged
+     *                                       over the page size the runtime derived
+     */
+    public function printFile(string $path, string $printer, array $settings = [], int $timeout = 300): bool
+    {
+        return $this->client->post('system/print-file', [
+            'path' => $path,
+            'printer' => $printer,
             'settings' => $settings,
         ], $timeout)->successful();
     }

@@ -34,8 +34,8 @@ final class EventPayloadShapeTest extends TestCase
      * into exactly one of these four buckets, and they sum to EVENT_SITES — so a form the
      * parser stops recognising cannot slip out of the comparison unnoticed.
      */
-    private const int EVENT_SITES = 48;
-    private const int POSITIONAL_SITES = 13;
+    private const int EVENT_SITES = 50;
+    private const int POSITIONAL_SITES = 15;
     private const int NAMED_SITES = 25;
     private const int PAYLOADLESS_SITES = 9;
     /** `globalShortcut` sends whatever event class the request registered, so there is no name to compare. */

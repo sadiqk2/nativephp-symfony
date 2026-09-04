@@ -31,7 +31,7 @@ you are checking a payload shape.
 
 | | |
 |---|---|
-| [`../CONTRACT.md`](../CONTRACT.md) | The desktop wire protocol: all 116 endpoints with request and response shapes, all 44 events, the environment contract, and the seven things the runtime requires of any PHP app |
+| [`../CONTRACT.md`](../CONTRACT.md) | The desktop wire protocol: all 118 endpoints with request and response shapes, all 46 events, the environment contract, and the seven things the runtime requires of any PHP app |
 | [`../NATIVE-UI-CONTRACT.md`](../NATIVE-UI-CONTRACT.md) | The mobile native-UI wire format: node shapes, content hashes, id derivation, the callback protocol, the style vocabulary |
 | [`../bundle/README.md`](../bundle/README.md) | Desktop package overview |
 | [`../mobile-bundle/README.md`](../mobile-bundle/README.md) | Mobile package overview |
@@ -55,7 +55,7 @@ Not needed to build an application with it.
 | [`../PLAN.md`](../PLAN.md) | What NativePHP is, where Laravel leaks, and the milestone roadmap |
 | [`../ANALYSIS.md`](../ANALYSIS.md) | The deep dive: boot sequence, per-directory port map with LOC, the eight Laravel-isms with line numbers, the Symfony-specific design decisions, upstream bugs found |
 | [`../MOBILE-ANALYSIS.md`](../MOBILE-ANALYSIS.md) | Why mobile splits in two, and a correction to an earlier conclusion that was wrong |
-| [`../upstream-patches/README.md`](../upstream-patches/README.md) | Eleven patches. `0002`–`0007` are open as NativePHP/desktop #136–#141; `0008`–`0011` target `mobile-air` and are unsubmitted. Patch `0001` is the manifest change that would make the runtime framework-agnostic and retire the patcher. Five of them the bundle no longer waits on — `RuntimePatcher` carries them into your copy |
+| [`../upstream-patches/README.md`](../upstream-patches/README.md) | Eleven patches. Four have landed in `NativePHP/desktop`'s `main`; `0002`–`0003` are still open there and `0008`–`0011` are open on `mobile-air`. Patch `0001` is the manifest change that would make the runtime framework-agnostic and retire the patcher. None of them the bundle waits on — `RuntimePatcher` carries every fix into your copy, and reports the ones upstream has since fixed itself |
 | [`../spike/README.md`](../spike/README.md) | The reproduction harness — a container with PHP, Node, Electron and Xvfb that boots the runtime headlessly and screenshots it |
 
 ## Historical record
@@ -87,7 +87,7 @@ papered over — the list is kept because *how* each was found is the useful par
 | Test counts contradicted each other across three READMEs | Read from the suites |
 | Nothing implemented `ScreenRendererInterface`, so a `#[NativeScreen]` component needed application glue — the two halves of the native-UI path did not join up | `ComponentScreenRenderer` ships, aliased to the interface; override the alias for a different renderer |
 | The routes import was a manual step, and forgetting it gave an app that boots and shows nothing | `native:install` writes it, and warns rather than guessing when there is no `config/routes/` |
-| Five runtime defects — four filed as NativePHP/desktop #137–#140 and unreviewed, one found here — were left to upstream's release schedule, which on discussion #504 has meant eighteen months of silence | `RuntimePatcher` carries all five into the copy `native:install` writes. Non-strict hunks, so a target that moves (most likely because the fix landed) is reported, not fatal |
+| Five runtime defects — four filed as NativePHP/desktop #137–#140 and unreviewed, one found here — were left to upstream's release schedule, which on discussion #504 has meant eighteen months of silence | `RuntimePatcher` carries all five into the copy `native:install` writes. Non-strict hunks, so a target that moves is reported, not fatal — which is what now happens for #137 and #140, both since merged upstream |
 | An application firewall silently denied the runtime's own callbacks — `access_control: ^/` makes `POST /_native/api/booted` a 401, which the runtime discards, giving a window that opens and does nothing. Laravel is not exposed to this: there the two routes sit outside the app's middleware groups | `RuntimeRoutesAccessMap` decorates `security.access_map` so the paths carry no attributes *inside the runtime only* — a bundle cannot fix it as config, since both `security.firewalls` and `security.access_control` are single-source. Found by diffing our route registration against upstream's `routes/api.php` |
 | `native:build` crashed part-way through on any app containing a self-referential symlink (`public/storage -> ..`), with a `FileNotFoundException` naming a path forty levels deep | The staging walk remembers real directories and refuses to enter one twice |
 | The demo itself did `layout: $parser->parse(...)` on two pages — the very mistake row three above records | Both go through `StyleApplier` now; found by reading a published frame, not by a test |

@@ -69,7 +69,7 @@ Exposed by `preload/index.mts` via `contextBridge`, framework-agnostic:
 
 ---
 
-## 1. Window — 21 endpoints
+## 1. Window — 22 endpoints
 
 `state.windows` is a `Record<developerId, BrowserWindow>`. The `id` in every request
 is the **developer-assigned string id**, not Electron's numeric id. Unknown ids are
@@ -84,6 +84,7 @@ silently ignored (`state.windows[id]?.…`) — no error.
 | POST | `window/maximize` | `{id}` | `200` |
 | POST | `window/unmaximize` | `{id}` | `200` |
 | POST | `window/minimize` | `{id}` | `200` |
+| POST | `window/fullscreen` | `{id, fullscreen: bool}` | `200` |
 | POST | `window/reload` | `{id}` | `200` |
 | POST | `window/resize` | `{id, width, height}` | `200` — `parseInt`'d |
 | POST | `window/position` | `{id, x, y, animate}` | `200` — `parseInt`'d |
@@ -194,14 +195,21 @@ An invalid name throws inside Electron.
 | POST | `system/decrypt` | `{string: base64}` | `{result: string}`, or `400 {error}` |
 | GET | `system/printers` | — | `{printers: PrinterInfo[]}` |
 | POST | `system/print` | `{printer, html, settings?}` | `200` / `500` |
+| POST | `system/print-file` | `{path, printer, settings?}` | `200` / `500 {error}` |
 | POST | `system/print-to-pdf` | `{html, settings?}` | `{result: base64}` / `400 {error}` |
 | GET | `system/theme` | — | `{result: 'system'\|'light'\|'dark'}` |
 | POST | `system/theme` | `{theme}` | `{result: theme}` |
 
 `system/printers` reads from `BrowserWindow.getAllWindows()[0]` — **throws if no
-window exists**. Both print endpoints spin up a hidden `BrowserWindow` and load the
-HTML as a data URL; `print` merges `{silent:true, deviceName:printer}` under the
+window exists**. The HTML print endpoints spin up a hidden `BrowserWindow` and load
+the HTML as a data URL; `print` merges `{silent:true, deviceName:printer}` under the
 caller's `settings`.
+
+`print-file` takes a path on the **runtime's** filesystem, not the PHP process's,
+and is PDF-only: it parses the file's MediaBox to size the page and answers
+`500 {error}` when it cannot read the file or cannot find one. It then waits 1.5s
+after load for PDFium to paint before starting the job, so budget a longer timeout
+than the other calls.
 
 > `print-to-pdf` builds its data URL as `data:text/html;base64;charset=UTF-8,${html}`
 > — a malformed media type (`;base64;` is not a valid parameter and the payload is
@@ -480,7 +488,7 @@ secure-bundle path. A framework-neutral runtime keys this off the manifest's CLI
 
 ---
 
-## 12. Reverse channel — 44 events
+## 12. Reverse channel — 46 events
 
 `POST /_native/api/events` with `{event: string, payload?: array|object}`.
 
@@ -512,6 +520,8 @@ Event names arrive with inconsistent leading backslashes. Normalise before compa
 | `Windows\WindowHidden` | `[id]` | positional |
 | `Windows\WindowClosed` | `[id]` | positional |
 | `Windows\WindowResized` | `[id, width, height]` | positional |
+| `Windows\WindowFullscreened` | `[id]` | positional |
+| `Windows\WindowUnfullscreened` | `[id]` | positional |
 | `App\OpenedFromURL` | `[url]` **or** `{url}` | **both** — `open-url` sends a list, Windows/Linux `second-instance` sends an object |
 | `App\OpenFile` | `[path]` | positional |
 | `Menu\MenuItemClicked` | `{item:{id,label,checked}, combo}` | named |
@@ -669,9 +679,9 @@ faithfully.
 
 | Section | Endpoints |
 |---|---|
-| Window | 21 |
+| Window | 22 |
 | App | 19 |
-| System | 10 |
+| System | 11 |
 | Menu bar | 9 |
 | Menu / dock / context / progress | 12 |
 | Child process | 8 |
@@ -688,7 +698,7 @@ faithfully.
 | Process | 1 |
 | Broadcast | 1 |
 | Debug (dev only) | 1 |
-| **Total** | **116** |
+| **Total** | **118** |
 
-Plus 2 inbound endpoints (`_native/api/{events,booted}`), 44 runtime-pushed event
+Plus 2 inbound endpoints (`_native/api/{events,booted}`), 46 runtime-pushed event
 types, 24 environment variables, and 5 consumed config keys.
