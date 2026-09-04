@@ -53,3 +53,64 @@ jobs:
       - name: Tests
         working-directory: ${{ matrix.suite }}
         run: php vendor/bin/phpunit --no-coverage --fail-on-skipped
+
+  # Both packages are published to Packagist, so the manifests are part of the product
+  # rather than build scaffolding. --strict fails on the warnings Packagist would
+  # otherwise surface after the fact — a stale lock hash, a missing description, a
+  # `version` field that should be a tag.
+  package:
+    name: package manifests
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [bundle, mobile-bundle]
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+        with:
+          php-version: '8.4'
+          extensions: zip
+          coverage: none
+
+      - name: Validate composer.json
+        working-directory: ${{ matrix.suite }}
+        run: composer validate --strict --no-interaction
+
+      # The manifest must resolve on the declared floor, not only on the version the
+      # lock happens to hold. --dry-run so nothing is written and no cache is warmed.
+      - name: Check the dependencies resolve on the declared floor
+        working-directory: ${{ matrix.suite }}
+        run: composer update --prefer-lowest --prefer-stable --dry-run --no-interaction --no-progress
+
+      # A dist archive that carries the test suite is a download every consumer pays
+      # for and nobody unpacks. .gitattributes is the only thing keeping it out, and
+      # nothing else would notice if a path in it stopped matching.
+      #
+      # `HEAD:<suite>` rather than `HEAD`, because that is the tree the split mirror
+      # publishes: the package directory *as* the repository root, which is also what
+      # makes the anchored `/tests` patterns in its .gitattributes match.
+      - name: Check export-ignore keeps the tests out of the dist archive
+        run: |
+          git archive --format=tar "HEAD:${{ matrix.suite }}" > /tmp/dist.tar
+          if tar -tf /tmp/dist.tar | grep -qE '^(tests/|phpunit\.xml\.dist|\.github/)'; then
+            echo '::error::The dist archive still carries development files:'
+            tar -tf /tmp/dist.tar | grep -E '^(tests/|phpunit\.xml\.dist|\.github/)'
+            exit 1
+          fi
+          echo "Dist archive: $(tar -tf /tmp/dist.tar | wc -l) paths, $(stat -c%s /tmp/dist.tar) bytes"
+
+      # src/Testing/ and FakeBridge are shipped API — an application's own test suite
+      # is the only thing that can exercise a runtime that does not exist off a device.
+      # Excluding them would be the easy mistake to make in the step above.
+      - name: Check the testing kit is still shipped
+        run: |
+          case '${{ matrix.suite }}' in
+            bundle)        want='src/Testing/FakeRuntime.php' ;;
+            mobile-bundle) want='src/Bridge/FakeBridge.php'   ;;
+          esac
+          tar -tf /tmp/dist.tar | grep -qx "$want" || {
+            echo "::error::$want is missing from the dist archive — consumers cannot test against the fake."
+            exit 1
+          }
