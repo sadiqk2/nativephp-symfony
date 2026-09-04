@@ -119,18 +119,24 @@ final class CommandPathsTest extends TestCase
         // directory whose name contains a colon and backslashes, so resolving it against the
         // project is the correct answer rather than a compromise.
         yield 'drive letter, on windows' => ['Windows', 'C:\\dev\\electron', 'C:/dev/electron'];
-        yield 'drive letter, on linux' => ['Linux', 'C:\\dev\\electron', '{project}/C:/dev/electron'];
+        // Asserted as far as the project prefix, and no further, on purpose. What this row
+        // is for is that the drive letter is treated as *relative* off Windows, and that is
+        // the whole of `{project}/C:`. What comes after it is what `Path::join()` does with
+        // a backslash inside a POSIX filename, which it rewrote before symfony/filesystem
+        // 7.4 and leaves alone now — a difference this bundle cannot take back from it, and
+        // pathological input either way. Pinning either answer would fail half the range.
+        yield 'drive letter, on linux' => ['Linux', 'C:\\dev\\electron', '{project}/C:'];
         yield 'unc, on windows' => ['Windows', '\\\\server\\share\\electron', '//server/share/electron'];
 
         // A bare drive letter is absolute on Windows; `Path::isAbsolute()` special-cases it.
         yield 'bare drive letter, on windows' => ['Windows', 'C:', 'C:'];
 
-        // Backslashes are normalised in the relative branch as well as the absolute one,
-        // and both of these rows say so. They used to expect the path back verbatim,
-        // which was not a decision — it was `Path::join()`'s behaviour before
-        // symfony/filesystem 7.4, and it changed underneath the expectation. Doing the
-        // normalisation in ProjectPath is what makes these two answers the same on every
-        // version in the declared range.
+        // Normalised because the platform is Windows, where a backslash *is* a separator —
+        // not because it is a backslash. This row used to expect the path back verbatim,
+        // which was never a decision: it was `Path::join()`'s behaviour before
+        // symfony/filesystem 7.4, and it changed underneath the expectation. Doing it in
+        // ProjectPath, and only for Windows, is what makes this answer the same on every
+        // version in the declared range without corrupting a POSIX name.
         yield 'relative, on windows' => ['Windows', 'nativephp\\electron', '{project}/nativephp/electron'];
         yield 'relative, on linux' => ['Linux', 'nativephp/electron', '{project}/nativephp/electron'];
     }
@@ -237,6 +243,25 @@ final class CommandPathsTest extends TestCase
         ] as [$path, $onPosix, $onWindows]) {
             yield ('' === $path ? '(empty)' : $path) => [$path, $onPosix, $onWindows];
         }
+    }
+
+    public function testABackslashInAPosixNameIsPartOfTheNameRatherThanASeparator(): void
+    {
+        // `absolute()` rewrote backslashes on every platform, which is only ever free on
+        // Windows. On POSIX the character is legal in a filename, so the rewrite named a
+        // *different* directory: `--electron-path=/opt/my\dir` reported a directory that
+        // exists as missing. It also contradicted `isAbsolute()` directly below it, whose
+        // whole Linux branch rests on `C:\dev` being one oddly-named directory there.
+        $posix = new ProjectPath($this->project, new Platform('Linux'));
+
+        self::assertSame('/opt/my\\dir', $posix->absolute('/opt/my\\dir'));
+
+        // On Windows the same rewrite costs nothing, because there it *is* a separator and
+        // both spellings name the same directory.
+        $windows = new ProjectPath($this->project, new Platform('Windows'));
+
+        self::assertSame('C:/my/dir', $windows->absolute('C:\\my\\dir'));
+        self::assertSame($this->project.'/my/dir', $windows->absolute('my\\dir'));
     }
 
     public function testAnEmptyOptionIsTheProjectDirectory(): void

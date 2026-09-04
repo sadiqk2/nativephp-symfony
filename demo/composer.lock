@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d8893b32e2d5560a5ae64fcba7c5202",
+    "content-hash": "76b2f2348a6ec1c72c89ea449154dc3d",
     "packages": [
         {
             "name": "monolog/monolog",
@@ -111,11 +111,11 @@
         },
         {
             "name": "native-symfony/desktop-bundle",
-            "version": "0.1.0",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "/bundle",
-                "reference": "82a6cba466db681a70e88d97f4c7446a49789b5f"
+                "reference": "b89169ca952e1ce42cb2daf62d99d92ff5e90673"
             },
             "require": {
                 "php": "^8.3",
@@ -124,15 +124,17 @@
                 "symfony/console": "^7.0|^8.0",
                 "symfony/dependency-injection": "^7.0|^8.0",
                 "symfony/event-dispatcher": "^7.0|^8.0",
+                "symfony/event-dispatcher-contracts": "^2.5|^3",
                 "symfony/filesystem": "^7.0|^8.0",
                 "symfony/http-client": "^7.0|^8.0",
+                "symfony/http-client-contracts": "^3.7",
                 "symfony/http-foundation": "^7.0|^8.0",
                 "symfony/http-kernel": "^7.0|^8.0",
                 "symfony/process": "^7.0|^8.0",
                 "symfony/routing": "^7.0|^8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^11.0|^12.0",
+                "phpunit/phpunit": "^11.5|^12.0",
                 "symfony/framework-bundle": "^7.0|^8.0",
                 "symfony/security-http": "^7.0|^8.0"
             },
@@ -143,6 +145,11 @@
                 "symfony/twig-bundle": "To render the application's UI"
             },
             "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Native\\Symfony\\Desktop\\": "src/"
@@ -156,7 +163,15 @@
             "license": [
                 "MIT"
             ],
+            "authors": [
+                {
+                    "name": "Sadiq Ali Khan",
+                    "homepage": "https://github.com/sadiqk2",
+                    "role": "Developer"
+                }
+            ],
             "description": "Build desktop applications with Symfony and PHP, on the NativePHP Electron runtime",
+            "homepage": "https://github.com/sadiqk2/nativephp-symfony",
             "keywords": [
                 "bundle",
                 "desktop",
@@ -164,6 +179,11 @@
                 "nativephp",
                 "symfony"
             ],
+            "support": {
+                "issues": "https://github.com/sadiqk2/nativephp-symfony/issues",
+                "source": "https://github.com/sadiqk2/nativephp-symfony/tree/main/bundle",
+                "docs": "https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/README.md"
+            },
             "transport-options": {
                 "symlink": true,
                 "relative": false
@@ -171,14 +191,15 @@
         },
         {
             "name": "native-symfony/mobile-bundle",
-            "version": "0.1.0",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "/mobile-bundle",
-                "reference": "e164d8b16d9a3cbe712165661e5daaf42e06c2ef"
+                "reference": "3c53a31cadcf0ed9fcc9507e857c1af14952a102"
             },
             "require": {
                 "php": "^8.3",
+                "psr/container": "^1.1|^2.0",
                 "psr/log": "^2.0|^3.0",
                 "symfony/config": "^7.0|^8.0",
                 "symfony/console": "^7.0|^8.0",
@@ -189,15 +210,25 @@
                 "symfony/http-kernel": "^7.0|^8.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^11.0|^12.0",
+                "phpunit/phpunit": "^11.5|^12.0",
+                "symfony/dotenv": "^7.0|^8.0",
                 "symfony/framework-bundle": "^7.0|^8.0",
+                "symfony/routing": "^7.0|^8.0",
                 "twig/twig": "^3.0"
             },
             "suggest": {
+                "ext-zip": "To package the application archive that native:mobile:build writes; the hosts extract a zip at boot",
+                "symfony/dotenv": "To resolve the packaged application's .env at boot; without it the shims fall back to the host environment",
+                "symfony/routing": "To expose declared native screens as ordinary HTTP routes (NativeScreenRouteLoader), so a screen's URI also works in a browser",
                 "symfony/twig-bundle": "To render the application UI in the WebView path",
                 "twig/twig": "To author native element trees from Twig templates (the native-UI path)"
             },
             "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "0.1.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Native\\Symfony\\Mobile\\": "src/"
@@ -211,7 +242,15 @@
             "license": [
                 "MIT"
             ],
+            "authors": [
+                {
+                    "name": "Sadiq Ali Khan",
+                    "homepage": "https://github.com/sadiqk2",
+                    "role": "Developer"
+                }
+            ],
             "description": "Build iOS and Android applications with Symfony, on NativePHP's mobile runtime",
+            "homepage": "https://github.com/sadiqk2/nativephp-symfony",
             "keywords": [
                 "android",
                 "bundle",
@@ -220,6 +259,11 @@
                 "nativephp",
                 "symfony"
             ],
+            "support": {
+                "issues": "https://github.com/sadiqk2/nativephp-symfony/issues",
+                "source": "https://github.com/sadiqk2/nativephp-symfony/tree/main/mobile-bundle",
+                "docs": "https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/README.md"
+            },
             "transport-options": {
                 "symlink": true,
                 "relative": false
@@ -3622,7 +3666,10 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "native-symfony/desktop-bundle": 20,
+        "native-symfony/mobile-bundle": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
@@ -3631,5 +3678,5 @@
         "ext-iconv": "*"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

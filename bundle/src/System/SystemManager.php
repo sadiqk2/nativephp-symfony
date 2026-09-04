@@ -123,8 +123,10 @@ final class SystemManager
      * The runtime parses the PDF's MediaBox to size the page and refuses anything it
      * cannot measure, so this is for PDFs specifically; print() is the route for HTML.
      *
-     * Bounded for the same reason as print(), and more generously: the runtime waits
-     * 1.5s after load for PDFium to paint before it even starts the job.
+     * Bounded for the same reason as print(), and to the same five minutes: the runtime
+     * waits a further 1.5s after load for PDFium to paint before it even starts the job,
+     * which the bound already absorbs. Raise $timeout for a genuinely large document
+     * rather than assuming the default is more generous here than there.
      *
      * @param string               $printer  A device name from printers()
      * @param array<string, mixed> $settings Electron webContents.print options, merged

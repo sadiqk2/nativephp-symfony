@@ -26,7 +26,7 @@ trying to process the directory as a Jekyll project.
 |---|---|
 | Home | A landing page built from `NAV`, not rendered from a document: hero, four entry points, a copyable quick start, the verified-so-far note, and an index of every page grouped as the sidebar groups it. Nothing on it duplicates a Markdown file, so nothing on it can drift out of step with one |
 | Navigation | Grouped in reading order — *Start here*, *Reference*, *Working with it*, *How it works*, *The packages*, *Contributing*, *Record* — not alphabetically, and not derived from the filesystem |
-| Search | Client-side over a prebuilt 54 KB index; `/` focuses it, arrows and Enter work, hits show the matching heading and a highlighted excerpt |
+| Search | Client-side over a prebuilt 66 KB index; `/` focuses it, arrows and Enter work, hits show the matching heading and a highlighted excerpt |
 | Themes | Light, dark, or follow the system — three states, cycled by the toggle, applied before first paint so nothing flashes |
 | Code | Highlighted at build time by highlight.js, so no script runs in the reader's browser to colour it; every block has a copy button |
 | Reading aids | On-this-page index that tracks the section you are in, previous/next pager, edit-on-GitHub per page |

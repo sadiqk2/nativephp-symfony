@@ -7,9 +7,9 @@ open pull requests, and the eleventh is held deliberately.
 |---|---|---|
 | `0004`, `0005`, `0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | **merged** — `parseZoomFactor()`, the `SHELL_VERBOSITY` report and the package metadata are all in `main` |
 | `0006` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | **resolved** — upstream deleted `CreateSecurityCookieController` outright, so the dead namespace went with it |
-| `0002`, `0003` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | **open PRs [#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
+| `0002`, `0003` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | **open PRs [#138](https://github.com/NativePHP/desktop/pull/138) and [#139](https://github.com/NativePHP/desktop/pull/139)**, awaiting review — the two of the original #136–#141 that are still live |
 | `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | **open PRs [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
-| `0001` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | held until the small ones land — it is the one that needs a maintainer conversation |
+| `0001` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | still held — it is the one that needs a maintainer conversation, and the small fixes it was waiting on have now landed |
 
 The order was deliberate and it worked: small, individually reviewable fixes first, so
 that the manifest patch — the only one that asks upstream to change a design — arrives to

@@ -17,10 +17,10 @@ full API, packaged into a distributable app that has been built *and run*.
 
 | | |
 |---|---|
-| **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 118 runtime endpoints, all 46 events, 581 tests. Verified by a running packaged app. |
-| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 587 tests. Verified by tests, **not** by a device. |
+| **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 118 runtime endpoints, all 46 events, 582 tests. Verified by a running packaged app. |
+| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 588 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
-| [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. **Four have landed in upstream's `main`**; six are open PRs ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2) and [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)), and the manifest patch is the one still held. |
+| [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. **Four have landed in upstream's `main`**; six are open PRs ([#138](https://github.com/NativePHP/desktop/pull/138), [#139](https://github.com/NativePHP/desktop/pull/139), [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)), and the manifest patch is the one still held. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
 | [`RELEASING.md`](RELEASING.md) | How the two packages reach Packagist: Packagist reads a `composer.json` at a repository root, so each directory is subtree-split into a read-only mirror on every push and tag. |
 
@@ -69,6 +69,23 @@ git clone https://github.com/sadiqk2/nativephp-symfony /path/to/nativephp-symfon
     { "type": "path", "url": "/path/to/nativephp-symfony/mobile-bundle", "options": { "symlink": true } }
 ]
 ```
+
+```bash
+composer require native-symfony/desktop-bundle:^0.1@dev   # desktop
+composer require native-symfony/mobile-bundle:^0.1@dev    # iOS and Android
+```
+
+**`@dev` is not optional on this route, and only on this route.** Neither `composer.json`
+carries a `version` field — Composer derives a released version from the git tag, and
+`composer validate --strict` fails on a hardcoded one — so a path repository resolves to
+`dev-main`, aliased by `extra.branch-alias` to `0.1.x-dev`. A plain `^0.1` under the default
+`minimum-stability: stable` therefore answers *"found …[dev-main, 0.1.x-dev] but it does not
+match your minimum-stability"*. The stability flag applies to this constraint alone, so
+nothing else in the application loosens. Once the packages are on Packagist, `^0.1` on its
+own is the constraint to use.
+
+[`demo/composer.json`](demo/composer.json) is a working example of the whole block, flag
+included.
 
 Use `symlink: true`: without it Composer caches a copy and edits to the bundle appear to do
 nothing. Nothing after this step depends on how the package arrived.
@@ -341,9 +358,8 @@ What is left is not code:
    [`upstream-patches/`](upstream-patches/README.md), **four are now in upstream's `main`**
    — the `NaN` zoom factor, the swallowed `notifyLaravel` failures, the stale package
    metadata, and the dead config namespace (which upstream resolved by deleting the
-   controller). Six are still open: two on `NativePHP/desktop`
-   ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2)) and
-   four on `NativePHP/mobile-air`
+   controller). Six are still open: two on `NativePHP/desktop` — [#138](https://github.com/NativePHP/desktop/pull/138) and [#139](https://github.com/NativePHP/desktop/pull/139), the null
+   focused window and the argumentless `json()` — and four on `NativePHP/mobile-air`
    ([#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)),
    each with a regression test in that repo's own idiom. The manifest patch — the one that
    makes the runtime framework-agnostic — was held until the small ones landed, which has

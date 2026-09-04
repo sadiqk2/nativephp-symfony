@@ -63,14 +63,37 @@ final class MobileCommandPathsTest extends TestCase
         // Absolute on Windows only — on Linux `D:\builds` is one oddly-named directory, and
         // resolving it against the project is the right answer there.
         yield 'drive letter, on windows' => ['Windows', 'D:\\builds', 'D:/builds/android'];
-        // Normalised in the relative branch too. It used to come back verbatim here, which
-        // was not a decision but `Path::join()`'s behaviour before symfony/filesystem 7.4 —
-        // and it changed underneath the expectation while the range still claimed both.
-        yield 'drive letter, on linux' => ['Linux', 'D:\\builds', '{project}/D:/builds/android'];
+        // Asserted as far as the project prefix and no further, on purpose. What this row
+        // is for is that the drive letter is treated as *relative* off Windows — so staging
+        // lands under the project rather than at a fabricated root — and that is the whole
+        // of `{project}/D:`. What follows is what `Path::join()` does with a backslash
+        // inside a POSIX filename, which it rewrote before symfony/filesystem 7.4 and
+        // leaves alone now; pinning either answer would fail half the declared range.
+        yield 'drive letter, on linux' => ['Linux', 'D:\\builds', '{project}/D:'];
         yield 'unc, on windows' => ['Windows', '\\\\build\\share', '//build/share/android'];
 
         // The one row that discriminates from a leading-slash test on any platform.
         yield 'stream wrapper, on linux' => ['Linux', 'file:///mnt/builds', 'file:///mnt/builds/android'];
+    }
+
+    public function testABackslashInAPosixNameIsPartOfTheNameRatherThanASeparator(): void
+    {
+        // This one has teeth here that it does not have on the desktop side: `absolute()`
+        // is what staging hands to `mkdir` before copying the whole application into it, so
+        // rewriting a backslash on POSIX does not tidy a message — it writes several
+        // hundred megabytes somewhere other than the directory the user named.
+        // `--stage-dir '/mnt/my\builds'` is a legal POSIX path.
+        $posix = new ProjectPath($this->project, 'Linux');
+
+        self::assertSame('/mnt/my\\builds', $posix->absolute('/mnt/my\\builds'));
+        self::assertSame('/mnt/my\\builds/android', $posix->join('/mnt/my\\builds', 'android'));
+
+        // On Windows the rewrite costs nothing: there the character is a separator, so both
+        // spellings name the same directory.
+        $windows = new ProjectPath($this->project, 'Windows');
+
+        self::assertSame('D:/my/builds', $windows->absolute('D:\\my\\builds'));
+        self::assertSame($this->project.'/my/builds', $windows->absolute('my\\builds'));
     }
 
     public function testAUncPrefixSurvivesTheJoinOnAnyHost(): void
