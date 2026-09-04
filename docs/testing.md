@@ -82,7 +82,7 @@ cannot distinguish a correct fallback from a lost id.
 `Native\Symfony\Desktop\Testing\FakeRuntime` implements `ClientInterface`, records every request, and
 answers with whatever the test scripted. Because only the transport is faked, the real
 `WindowManager` and the real `PendingWindow` build the payload — so what you assert on is the
-wire, not a stub. All 116 endpoints are covered the day they are added, including the ones
+wire, not a stub. All 118 endpoints are covered the day they are added, including the ones
 with no manager.
 
 Overriding the alias by hand still works if you prefer it:
@@ -204,7 +204,7 @@ $expect->assertProcessNotStarted();
 $expect->assertQuitRequested();
 $expect->assertNoQuitRequested();
 
-// 116 endpoints will always outrun the named helpers:
+// 118 endpoints will always outrun the named helpers:
 $expect->assertCalled('settings/theme', ['value' => 'dark']);
 $expect->assertNotCalled('app/relaunch');
 $expect->assertCalledTimes(2, 'window/show');
@@ -337,8 +337,8 @@ handler** — otherwise it is a dead button on a device with no error anywhere.
 ## What these tests cannot tell you
 
 Both bundles carry coverage tests that parse upstream's own sources, so upstream drift becomes
-a failing test rather than a discovery in production: `ContractCoverageTest` (the 116 express
-routes and the 44 event names), `BridgeCoverageTest` (the 62 bridge methods) and
+a failing test rather than a discovery in production: `ContractCoverageTest` (the 118 express
+routes and the 46 event names), `BridgeCoverageTest` (the 62 bridge methods) and
 `UiElementCoverageTest` (the 36 element types, asserted in **both** directions, since a type
 the renderers do not know produces a missing region on the device and no error anywhere).
 Those live in the bundles, not in your app.

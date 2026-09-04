@@ -5,7 +5,7 @@ Build iOS and Android applications with Symfony, on NativePHP's mobile runtime.
 Status: **the WebView render path is implemented, and the native-UI wire format is
 implemented and verified.** All **54 native bridge methods** are wrapped, the SAPI
 shim and persistent runtime are in place, element trees are byte-identical to
-upstream's, and 385 tests cover it.
+upstream's, and 586 tests cover it.
 
 > **Verified by tests, not by a device.** Unlike the desktop bundle — whose claim is
 > backed by a screenshot of a running packaged app — nothing here has run on a phone
@@ -208,7 +208,7 @@ the real design question, since Symfony has nothing Livewire-shaped to borrow.
 composer install && vendor/bin/phpunit
 ```
 
-385 tests. `UiWireFormatTest` byte-compares element trees against upstream's own
+586 tests, 2,094 assertions. `UiWireFormatTest` byte-compares element trees against upstream's own
 collector, and `UiElementCoverageTest` does it per type — which is how two missing
 defaults were found (`ScrollView`'s `overflow=2` and `Circle`'s `border_radius=9999`). `BridgeCoverageTest` parses the upstream sources and fails if a native
 method has no wrapper, so upstream drift breaks the suite. `MobileRuntimeTest` drives

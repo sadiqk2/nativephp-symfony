@@ -1,16 +1,43 @@
-# Upstream patches — ten submitted, one held
+# Upstream patches — four landed, six open, one held
 
-Eleven patches. Ten are **open pull requests**; the eleventh is held deliberately.
+Eleven patches. **Four of the desktop six are now in upstream's `main`**; the rest are
+open pull requests, and the eleventh is held deliberately.
 
-| | repo | base | status |
-|---|---|---|---|
-| `0002`–`0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` | **open PRs [#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
-| `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | `main` @ `bf4fd2a` | **open PRs [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
-| `0001` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | `main` @ `653d186` | held until the small ones land — it is the one that needs a maintainer conversation |
+| | repo | status |
+|---|---|---|
+| `0004`, `0005`, `0007` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | **merged** — `parseZoomFactor()`, the `SHELL_VERBOSITY` report and the package metadata are all in `main` |
+| `0006` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | **resolved** — upstream deleted `CreateSecurityCookieController` outright, so the dead namespace went with it |
+| `0002`, `0003` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | **open PRs [#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
+| `0008`–`0011` | [`NativePHP/mobile-air`](https://github.com/NativePHP/mobile-air) | **open PRs [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)**, awaiting review |
+| `0001` | [`NativePHP/desktop`](https://github.com/NativePHP/desktop) | held until the small ones land — it is the one that needs a maintainer conversation |
 
-The order is deliberate: ten small, individually reviewable fixes first, so that the
-manifest patch — the only one that asks upstream to change a design — arrives to someone
-who has already merged code from the same author.
+The order was deliberate and it worked: small, individually reviewable fixes first, so
+that the manifest patch — the only one that asks upstream to change a design — arrives to
+a maintainer who has already merged code from the same author. Four have now been merged,
+which is the precondition `0001` was waiting on.
+
+Nothing in the bundle depends on which of these have landed. `RuntimePatcher` carries
+every bug fix into the copy `native:install` writes, with non-strict hunks: a target that
+is gone is reported as *"assuming it is fixed upstream"* and the install continues. Run
+against today's `main` it applies nine hunks, recognises `0005` as already applied, and
+reports both `0004` hunks as fixed at the source.
+
+**Reproducing this table.** The patch files are `git diff`s, so upstream's own tree
+answers the question:
+
+```bash
+git clone --depth 1 https://github.com/NativePHP/desktop upstream/np-desktop
+cd upstream/np-desktop
+for p in ../../upstream-patches/*.patch; do
+    git apply --check --reverse "$p" 2>/dev/null && echo "landed  $p" && continue
+    git apply --check          "$p" 2>/dev/null && echo "open    $p" || echo "moved   $p"
+done
+```
+
+`moved` means neither direction applies cleanly — read the file before concluding
+anything, since it covers both "the fix landed with different surrounding lines" and "the
+code has changed underneath the patch". That is how `0004`, `0005` and `0006` were
+classified above.
 
 The `mobile-air` four each carry a regression test in the repo's own Pest idiom, written
 against its real `TailwindParser`, `NativeRouter` and `CallbackRegistry` rather than a
@@ -117,10 +144,10 @@ Each stands alone and is worth submitting on its own merits. None depends on `00
 |---|---|
 | `0002` | `window/current` dereferences `getFocusedWindow()` with no null check. It returns null whenever the app is backgrounded — reachable from any PHP process, e.g. a queue worker calling `Window::current()` — and threw a bare string. Now 404s. |
 | `0003` | `shell/trash-item` answers `res.status(400).json()` with no argument, which express rejects, turning a handled failure into an unhandled one. |
-| `0004` | `window/open` without `zoomFactor` calls `setZoomFactor(parseFloat(undefined))` → `NaN`, rendering the page at an absurd zoom. Invisible from Laravel because `Windows\Window` declares a `1.0` default and always serialises it, so it lands on the first independent client instead. |
-| `0005` | `notifyLaravel` swallows every error in an empty `catch {}`, making a crashed, 500ing or 403ing PHP app indistinguishable from a healthy one. Now reported behind `SHELL_VERBOSITY`. |
-| `0006` | `CreateSecurityCookieController` reads `config('native-php.secret')` — a namespace that does not exist. The guard therefore compared input against `null`, passing only when no secret was sent, then issued a cookie with a `null` value. It is also the one route `PreventRegularBrowserAccess` deliberately lets through unauthenticated. |
-| `0007` | `composer.json`: `homepage` points at the archived `nativephp/laravel`, and the `Updater` alias points at `Native\Electron\Facades\Updater`, a class that moved to `Native\Desktop\Drivers\Electron\Facades\Updater`. |
+| `0004` **(merged)** | `window/open` without `zoomFactor` calls `setZoomFactor(parseFloat(undefined))` → `NaN`, rendering the page at an absurd zoom. Invisible from Laravel because `Windows\Window` declares a `1.0` default and always serialises it, so it lands on the first independent client instead. |
+| `0005` **(merged)** | `notifyLaravel` swallows every error in an empty `catch {}`, making a crashed, 500ing or 403ing PHP app indistinguishable from a healthy one. Now reported behind `SHELL_VERBOSITY`. |
+| `0006` **(resolved by deletion)** | `CreateSecurityCookieController` reads `config('native-php.secret')` — a namespace that does not exist. The guard therefore compared input against `null`, passing only when no secret was sent, then issued a cookie with a `null` value. It is also the one route `PreventRegularBrowserAccess` deliberately lets through unauthenticated. |
+| `0007` **(merged)** | `composer.json`: `homepage` points at the archived `nativephp/laravel`, and the `Updater` alias points at `Native\Electron\Facades\Updater`, a class that moved to `Native\Desktop\Drivers\Electron\Facades\Updater`. |
 
 ## `0008` — a bug in the mobile Tailwind parser
 

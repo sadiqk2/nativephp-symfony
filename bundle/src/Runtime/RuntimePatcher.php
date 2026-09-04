@@ -81,9 +81,10 @@ final class RuntimePatcher
      * Fixes for runtime bugs that bite Symfony apps, carried locally.
      *
      * These are not Laravel-isms — they are defects, four of them filed upstream as
-     * NativePHP/desktop #137–#140 and the fifth found here. Upstream has not
-     * answered discussion #504 in eighteen months, so treating a merge as the
-     * delivery mechanism would mean shipping known-broken behaviour indefinitely.
+     * NativePHP/desktop #137–#140 and the fifth found here. Two have since been
+     * merged, which is the argument for carrying them rather than against it: the
+     * runtime an application actually runs is whichever one it installed, and a
+     * merge upstream does nothing for the copy already in `nativephp/electron`.
      * `native:install --publish` already gives every app its own copy of the
      * runtime, so the fixes can simply be part of what this bundle installs.
      *

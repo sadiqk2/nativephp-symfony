@@ -6,7 +6,7 @@ and so on. If you came from the Laravel version, that is the largest day-to-day 
 `Window::open()` becomes an injected `$this->windows->open()`.
 
 This page shows the shape of each area and flags what behaves surprisingly. For the
-exhaustive list of all 116 endpoints with request and response shapes, read
+exhaustive list of all 118 endpoints with request and response shapes, read
 [`../CONTRACT.md`](../CONTRACT.md); it is the specification, this is the guide.
 
 ## Three things that apply everywhere
@@ -36,7 +36,7 @@ and a `403` (the shared secret did not match).
 
 ## Windows
 
-`Native\Symfony\Desktop\Window\WindowManager` — 21 endpoints.
+`Native\Symfony\Desktop\Window\WindowManager` — 22 endpoints.
 
 ```php
 $windows->open('settings')            // returns PendingWindow; nothing happens until open()
@@ -51,6 +51,7 @@ $windows->title('Unsaved changes');   // current window
 $windows->resize(1200, 800, 'main');
 $windows->position(x: 40, y: 40, animate: true, id: 'main');
 $windows->navigate('/reports', 'main');
+$windows->fullscreen(true, 'main');
 $windows->close('settings');
 ```
 
@@ -82,11 +83,15 @@ $all    = $windows->all();         // list<Window>
   `$windows->current()->id`.
 - **A programmatic resize emits no `WindowResized`.** The runtime listens for Electron's
   `resized`, which fires for user drags but not `setSize()`. `window/resize` succeeds and
-  `window/get` reflects the new size; no event arrives.
+  `window/get` reflects the new size; no event arrives. `fullscreen()` is the opposite and
+  does emit — `enter-full-screen` fires however the change was made — so a layout that
+  reacts to full screen can be driven from the event either way.
 - **`zoomFactor` is effectively required, and the bundle sends it for you.** The runtime
-  does `setZoomFactor(parseFloat(zoomFactor))` on `dom-ready` with no guard, so an absent
-  value is `NaN` and renders the page at an absurd zoom. `PendingWindow::open()` defaults it
-  to `1.0`.
+  used to do `setZoomFactor(parseFloat(zoomFactor))` on `dom-ready` with no guard, so an
+  absent value was `NaN` and rendered the page at an absurd zoom. Upstream has since taken
+  this repository's fix, and a current runtime falls back to `1`. `PendingWindow::open()`
+  still defaults it, because the runtime in your `nativephp/electron` is whichever one you
+  installed.
 - **The document `<title>` never reaches the title bar.** The runtime `preventDefault()`s
   Electron's `page-title-updated`. `$windows->title()` is the only way.
 - Window URLs must be absolute. `UrlResolver` builds them from the current request, so
@@ -341,7 +346,7 @@ Aliases are namespaced `messenger_*` so they cannot collide with your own.
 
 ## Events
 
-The runtime pushes 44 typed events plus any number of caller-named ones. Typed events
+The runtime pushes 46 typed events plus any number of caller-named ones. Typed events
 dispatch under their class name, so a listener is ordinary Symfony:
 
 ```php
@@ -358,7 +363,7 @@ final class WindowListener
 }
 ```
 
-Namespaces under `Native\Symfony\Desktop\Event\`: `Windows\` (9), `App\` (3, including
+Namespaces under `Native\Symfony\Desktop\Event\`: `Windows\` (11), `App\` (3, including
 `ApplicationBooted` which the bundle dispatches itself), `Menu\`, `MenuBar\` (7),
 `Notifications\` (4), `ChildProcess\` (5), `PowerMonitor\` (8), `Settings\`,
 `AutoUpdater\` (7).
@@ -423,7 +428,7 @@ An app ported from Laravel must add this interface to events that previously onl
 |---|---|---|
 | `App\AppManager` | `quit()`, `relaunch()`, `show()`, `hide()`, `isHidden()`, `locale()`, `version()`, `path(AppPath)`, `badgeCount()`, `openAtLogin()`, recent documents, emoji panel | `path()` queries live; prefer `NativePaths` for the ten paths already in the environment |
 | `Support\NativePaths` | `home()`, `userData()`, `documents()`, `downloads()`, `storage()`, `database()`, … | Read from `NATIVEPHP_*_PATH`; **no round-trip**, and every getter is nullable |
-| `System\SystemManager` | TouchID, keychain `encrypt()`/`decrypt()`, `printers()`, `print()`, `printToPdf()`, `theme()`, `setTheme()` | `canEncrypt()` is false without an OS keyring — including most containers |
+| `System\SystemManager` | TouchID, keychain `encrypt()`/`decrypt()`, `printers()`, `print()`, `printFile()`, `printToPdf()`, `theme()`, `setTheme()` | `canEncrypt()` is false without an OS keyring — including most containers. `printFile()` is PDF-only and takes a path on the *runtime's* filesystem |
 | `Screen\ScreenManager` | `displays()`, `primaryDisplay()`, `cursorPosition()`, `activeDisplay()` | The last two return **unwrapped** objects; the wrappers hide that |
 | `Shell\ShellManager` | `showInFolder()`, `openPath()`, `openExternal()`, `trash()` | `openExternal()` can answer 500 |
 | `PowerMonitor\PowerMonitorManager` | `idleState()`, `idleTime()`, `thermalState()`, `onBatteryPower()` | Returns `IdleState` / `ThermalState` enums |

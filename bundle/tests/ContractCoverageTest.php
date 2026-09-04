@@ -38,8 +38,8 @@ final class ContractCoverageTest extends TestCase
         'shell' => 'shell', 'system' => 'system', 'window' => 'window',
     ];
 
-    private const EXPECTED_ENDPOINTS = 116;
-    private const EXPECTED_EVENTS = 44;
+    private const EXPECTED_ENDPOINTS = 118;
+    private const EXPECTED_EVENTS = 46;
 
     #[DataProvider('runtimeEndpoints')]
     public function testEveryRuntimeEndpointIsCalledSomewhere(string $method, string $path): void

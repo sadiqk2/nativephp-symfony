@@ -8,7 +8,7 @@ use Native\Symfony\Desktop\Contract\ClientInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 /**
- * All 21 window endpoints (CONTRACT.md §1).
+ * All 22 window endpoints (CONTRACT.md §1).
  *
  * Every mutation takes an optional $id and falls back to the window the current
  * request came from. Unknown ids are silently ignored by the runtime — it uses
@@ -56,6 +56,23 @@ final class WindowManager
     public function minimize(?string $id = null): void
     {
         $this->client->post('window/minimize', ['id' => $this->resolveId($id)]);
+    }
+
+    /**
+     * Enter or leave full screen.
+     *
+     * Unlike maximize(), this one *does* produce events — the runtime listens for
+     * Electron's `enter-full-screen` and `leave-full-screen`, which fire however the
+     * change was made — so expect a WindowFullscreened or WindowUnfullscreened.
+     *
+     * A window opened with `fullscreenable(false)` ignores this on macOS.
+     */
+    public function fullscreen(bool $fullscreen = true, ?string $id = null): void
+    {
+        $this->client->post('window/fullscreen', [
+            'id' => $this->resolveId($id),
+            'fullscreen' => $fullscreen,
+        ]);
     }
 
     public function reload(?string $id = null): void

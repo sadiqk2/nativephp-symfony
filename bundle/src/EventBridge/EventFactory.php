@@ -41,7 +41,7 @@ final class EventFactory
     /**
      * Runtime event name (the wire protocol, upstream's namespace) => local class.
      *
-     * All 44 events the runtime pushes. Caller-named events — from global
+     * All 46 events the runtime pushes. Caller-named events — from global
      * shortcuts, menu items with an `event`, and notification overrides — are
      * additional to these and have no fixed names; they become NativeEvent.
      *
@@ -58,6 +58,8 @@ final class EventFactory
         'Native\\Desktop\\Events\\Windows\\WindowMaximized' => Windows\WindowMaximized::class,
         'Native\\Desktop\\Events\\Windows\\WindowUnmaximized' => Windows\WindowUnmaximized::class,
         'Native\\Desktop\\Events\\Windows\\WindowResized' => Windows\WindowResized::class,
+        'Native\\Desktop\\Events\\Windows\\WindowFullscreened' => Windows\WindowFullscreened::class,
+        'Native\\Desktop\\Events\\Windows\\WindowUnfullscreened' => Windows\WindowUnfullscreened::class,
 
         // App
         'Native\\Desktop\\Events\\App\\OpenFile' => App\OpenFile::class,

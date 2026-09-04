@@ -18,8 +18,8 @@ DESKTOP                                    MOBILE
 ┌──────────────────────────┐               ┌──────────────────────────────┐
 │ Electron (Node)          │               │ App process (Kotlin / Swift) │
 │  express :4000-5000      │               │                              │
-│  ├── 116 JSON endpoints  │◀──HTTP────┐   │  ┌────────────────────────┐  │
-│  └── pushes 44 events ───┼──HTTP───┐ │   │  │ PHP, compiled in       │  │
+│  ├── 118 JSON endpoints  │◀──HTTP────┐   │  ┌────────────────────────┐  │
+│  └── pushes 46 events ───┼──HTTP───┐ │   │  │ PHP, compiled in       │  │
 │                          │         │ │   │  │                        │  │
 │  spawns: php -S          │         │ │   │  │  nativephp_call()   ───┼──┼─▶ 54 methods
 └──────────────────────────┘         │ │   │  │  nativephp_element_*───┼──┼─▶ element tree
@@ -35,7 +35,7 @@ DESKTOP                                    MOBILE
 |---|---|---|
 | Transport | localhost HTTP + JSON | PHP extension functions |
 | Auth | `X-NativePHP-Secret` on every call | none needed — same process |
-| Surface | 116 endpoints, 44 pushed events | 54 bridge methods |
+| Surface | 118 endpoints, 46 pushed events | 54 bridge methods |
 | PHP lifecycle | `php -S`, one process per request | compiled in; one-shot **or** persistent |
 | Needs a SAPI shim | no (`php -S` + a router script) | **yes** — the host reads stdout as HTTP |
 | UI | WebView, always | WebView **or** native element tree |
