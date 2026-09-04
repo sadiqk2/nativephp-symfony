@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -83,8 +89,8 @@ into it.</strong></p>
 ┌──────────────────────────┐               ┌──────────────────────────────┐
 │ Electron (Node)          │               │ App process (Kotlin / Swift) │
 │  express :4000-5000      │               │                              │
-│  ├── 116 JSON endpoints  │◀──HTTP────┐   │  ┌────────────────────────┐  │
-│  └── pushes 44 events ───┼──HTTP───┐ │   │  │ PHP, compiled in       │  │
+│  ├── 118 JSON endpoints  │◀──HTTP────┐   │  ┌────────────────────────┐  │
+│  └── pushes 46 events ───┼──HTTP───┐ │   │  │ PHP, compiled in       │  │
 │                          │         │ │   │  │                        │  │
 │  spawns: php -S          │         │ │   │  │  nativephp_call()   ───┼──┼─▶ 54 methods
 └──────────────────────────┘         │ │   │  │  nativephp_element_*───┼──┼─▶ element tree
@@ -98,7 +104,7 @@ into it.</strong></p>
 <div class="table-scroll"><table><thead><tr><th></th><th>desktop</th><th>mobile</th></tr></thead><tbody>
 <tr><td>Transport</td><td>localhost HTTP + JSON</td><td>PHP extension functions</td></tr>
 <tr><td>Auth</td><td><code>X-NativePHP-Secret</code> on every call</td><td>none needed — same process</td></tr>
-<tr><td>Surface</td><td>116 endpoints, 44 pushed events</td><td>54 bridge methods</td></tr>
+<tr><td>Surface</td><td>118 endpoints, 46 pushed events</td><td>54 bridge methods</td></tr>
 <tr><td>PHP lifecycle</td><td><code>php -S</code>, one process per request</td><td>compiled in; one-shot <strong>or</strong> persistent</td></tr>
 <tr><td>Needs a SAPI shim</td><td>no (<code>php -S</code> + a router script)</td><td><strong>yes</strong> — the host reads stdout as HTTP</td></tr>
 <tr><td>UI</td><td>WebView, always</td><td>WebView <strong>or</strong> native element tree</td></tr>
@@ -150,7 +156,7 @@ would have made a <code>scroll_view</code> quietly not scroll.</p>
 guesses into diffs.</p>
 <h3 id="3-parse-upstreams-source-as-a-test-both"><a class="anchor" href="#3-parse-upstreams-source-as-a-test-both">3. Parse upstream&#39;s source as a test (both)</a></h3>
 <p><code>ContractCoverageTest</code> reads the runtime&#39;s express routers and fails if an endpoint is
-uncovered. <code>BridgeCoverageTest</code> and <code>UiElementCoverageTest</code> do the same for the 54 bridge
+uncovered. <code>BridgeCoverageTest</code> and <code>UiElementCoverageTest</code> do the same for the 62 bridge
 methods and the 36 element types — the last asserting in <strong>both</strong> directions, since a type
 the renderers do not know produces a missing region on the device with no error anywhere.</p>
 <p>Upstream drift becomes a failing test rather than a discovery.</p>

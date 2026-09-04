@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Releasing · NativePHP for Symfony</title>
+<meta name="description" content="The subtree split, and how Packagist sees it — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item active" href="releasing.html" aria-current="page"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="releasing"><a class="anchor" href="#releasing">Releasing</a></h1>
+<p>Two packages are published from this one repository:</p>
+<div class="table-scroll"><table><thead><tr><th>Package</th><th>Mirror repository</th></tr></thead><tbody>
+<tr><td><code>native-symfony/desktop-bundle</code></td><td><code>sadiqk2/nativephp-symfony-desktop-bundle</code></td></tr>
+<tr><td><code>native-symfony/mobile-bundle</code></td><td><code>sadiqk2/nativephp-symfony-mobile-bundle</code></td></tr>
+</tbody></table></div>
+<h2 id="why-there-are-mirrors-at-all"><a class="anchor" href="#why-there-are-mirrors-at-all">Why there are mirrors at all</a></h2>
+<p><strong>Packagist reads a <code>composer.json</code> at a repository root.</strong> It has no notion of a
+package living in a subdirectory, and no plan to acquire one — so a monorepo
+holding two packages cannot be submitted as it stands. The answer every PHP
+monorepo reaches, Symfony and Laravel included, is a <em>subtree split</em>: each
+package directory is rewritten into its own repository, history and all, and
+those repositories are what Packagist watches.</p>
+<p><code>.github/workflows/split.yml</code> does it on every push to <code>main</code> and every <code>v*</code> tag.
+The mirrors are <strong>read-only</strong>: nothing is ever pushed to them by hand, and each
+carries an issue-template redirect pointing contributors back here.</p>
+<p>This means development is unaffected. <code>bundle/</code> and <code>mobile-bundle/</code> stay where
+they are, one clone holds both, and a change touching both is still one commit
+and one pull request.</p>
+<h2 id="one-time-setup"><a class="anchor" href="#one-time-setup">One-time setup</a></h2>
+<p>Everything below needs a GitHub account with rights over the <code>sadiqk2</code>
+namespace; none of it can be done from a pull request.</p>
+<h3 id="1-create-the-two-mirror-repositories"><a class="anchor" href="#1-create-the-two-mirror-repositories">1. Create the two mirror repositories</a></h3>
+<p>Empty — no README, no licence, no <code>.gitignore</code>. The first split push writes the
+whole history, and an initial commit would collide with it.</p>
+<ul>
+<li><code>sadiqk2/nativephp-symfony-desktop-bundle</code></li>
+<li><code>sadiqk2/nativephp-symfony-mobile-bundle</code></li>
+</ul>
+<p>Give each a description and a link back to this repository, since these are what
+people will land on from Packagist.</p>
+<h3 id="2-create-the-push-token"><a class="anchor" href="#2-create-the-push-token">2. Create the push token</a></h3>
+<p>The workflow&#39;s default <code>GITHUB_TOKEN</code> is scoped to <em>this</em> repository and cannot
+push to another one. Create a <strong>fine-grained personal access token</strong>:</p>
+<ul>
+<li>Resource owner: <code>sadiqk2</code></li>
+<li>Repository access: <strong>only</strong> the two mirrors</li>
+<li>Permissions: <strong>Contents: read and write</strong>, nothing else</li>
+<li>Expiry: set one, and put the renewal in a calendar — an expired token fails the
+split job, which is loud, but only on the next push</li>
+</ul>
+<p>Add it to this repository as <strong>Settings → Secrets and variables → Actions → New
+repository secret</strong>, named <code>SPLIT_TOKEN</code>.</p>
+<h3 id="3-prime-the-mirrors"><a class="anchor" href="#3-prime-the-mirrors">3. Prime the mirrors</a></h3>
+<p>Push to <code>main</code>, or run the split workflow manually from <strong>Actions → split → Run
+workflow</strong>. Both mirrors should end up with the full rewritten history of their
+directory. Check that each mirror&#39;s root contains <code>composer.json</code>, <code>README.md</code>,
+<code>LICENSE</code> and <code>src/</code> — that is what Packagist will read.</p>
+<h3 id="4-submit-to-packagist"><a class="anchor" href="#4-submit-to-packagist">4. Submit to Packagist</a></h3>
+<p>At <a href="https://packagist.org/packages/submit" target="_blank" rel="noopener">packagist.org/packages/submit</a>, submit
+each <strong>mirror</strong> URL — never this repository:</p>
+<figure class="code">
+<figcaption><span class="code-lang">text</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code>https://github.com/sadiqk2/nativephp-symfony-desktop-bundle
+https://github.com/sadiqk2/nativephp-symfony-mobile-bundle</code></pre>
+</figure>
+<p>Packagist reads the package name out of each <code>composer.json</code>, so they register as
+<code>native-symfony/desktop-bundle</code> and <code>native-symfony/mobile-bundle</code>.</p>
+<p>Then enable the <strong>GitHub service hook</strong> on each mirror so Packagist updates on
+push rather than on its crawl schedule: Packagist shows the exact steps on the
+package page after submission. Without it a new tag can take hours to appear.</p>
+<h2 id="cutting-a-release"><a class="anchor" href="#cutting-a-release">Cutting a release</a></h2>
+<ol>
+<li><p><strong>Move the <code>## [Unreleased]</code> entries</strong> in <code>bundle/CHANGELOG.md</code> and
+<code>mobile-bundle/CHANGELOG.md</code> under a new version heading, with the date. Fix
+the two link definitions at the bottom of each file.</p>
+</li>
+<li><p><strong>Check the suites are green on the real upstream sources</strong>, which is not the
+same as green locally on a stale clone:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash"><span class="hljs-built_in">rm</span> -rf upstream
+git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/desktop    upstream/np-desktop
+git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/mobile-air upstream/np-mobile
+tools/test.sh</code></pre>
+</figure>
+<p>The contract tests parse NativePHP&#39;s own express routers, so this is where a
+new upstream endpoint shows up. A failure here is not a release blocker by
+itself — it is a decision to make deliberately, and <code>CONTRACT.md</code> and the
+pinned counts move with it.</p>
+</li>
+<li><p><strong>Validate both manifests</strong>, exactly as CI does:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">(<span class="hljs-built_in">cd</span> bundle        &amp;&amp; composer validate --strict)
+(<span class="hljs-built_in">cd</span> mobile-bundle &amp;&amp; composer validate --strict)</code></pre>
+</figure>
+</li>
+<li><p><strong>Rebuild the documentation site</strong> if any Markdown changed:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">DOCS_ROOT=<span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>&quot;</span> node tools/build-docs.mjs</code></pre>
+</figure>
+</li>
+<li><p><strong>Tag and push.</strong> One tag covers both packages — they are versioned together
+because they are released together, and a consumer requiring one has no way to
+tell that the other moved:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">git tag -a v0.1.0 -m <span class="hljs-string">&#x27;v0.1.0&#x27;</span>
+git push origin main
+git push origin v0.1.0</code></pre>
+</figure>
+</li>
+<li><p><strong>Watch the split job.</strong> Actions → split. Two jobs, one per package. Each ends
+by pushing <code>refs/tags/v0.1.0</code> to its mirror, pointing at the split commit
+rather than at this repository&#39;s commit — the mirror has never seen that one.</p>
+</li>
+<li><p><strong>Confirm on Packagist.</strong> Both packages should show the new version within a
+minute or two if the service hook is enabled. Then, from a scratch directory:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">composer require native-symfony/desktop-bundle:^0.1</code></pre>
+</figure>
+<p>That is the only check that proves the whole chain — tag, split, mirror, hook,
+Packagist, resolver — actually joins up.</p>
+</li>
+<li><p><strong>Delete the three &quot;not yet submitted to Packagist&quot; notes</strong>, which exist so the install
+instructions are not a lie in the meantime:</p>
+<ul>
+<li><code>README.md</code>, under <em>0. Install the packages</em></li>
+<li><code>docs/getting-started-desktop.md</code>, under <em>1. Install the bundle</em></li>
+<li><code>docs/getting-started-mobile.md</code>, under <em>1. Install</em></li>
+</ul>
+<p>Then rebuild the documentation site, since all three are pages on it. Steps 1 to 4 above
+are one-time; this one goes with them.</p>
+</li>
+</ol>
+<h2 id="versioning"><a class="anchor" href="#versioning">Versioning</a></h2>
+<p>Both packages follow <a href="https://semver.org/" target="_blank" rel="noopener">SemVer</a>, with the caveat every <code>0.x</code>
+carries: <strong>the minor number is where breaking changes live</strong> until <code>1.0.0</code>.
+<code>^0.1</code> therefore pins to <code>0.1.*</code>, which is the behaviour to want here rather than
+a limitation to apologise for.</p>
+<p>There is deliberately <strong>no <code>version</code> field</strong> in either <code>composer.json</code>. Composer
+derives the version from the git tag; a hardcoded one goes stale the moment it
+disagrees with a tag, and <code>composer validate</code> warns about it for that reason.</p>
+<p><code>extra.branch-alias</code> maps <code>dev-main</code> to <code>0.1.x-dev</code>, so someone tracking the
+development branch resolves against the same constraint as a released <code>^0.1</code>.</p>
+<h2 id="what-100-would-need"><a class="anchor" href="#what-100-would-need">What <code>1.0.0</code> would need</a></h2>
+<p>Not a decision to take by tagging. The two things standing between here and a
+stable promise:</p>
+<ul>
+<li><strong>Device verification for mobile.</strong> No build produced by
+<code>native:mobile:build</code> has been opened by Xcode or Android Studio, and no screen
+has been rendered on a phone. Everything up to that boundary is tested;
+<code>--stage-only</code> stops exactly there. A <code>1.0.0</code> covering a package in that state
+would be a promise nobody has checked.</li>
+<li><strong>The manifest patch upstream.</strong> <code>upstream-patches/0001</code> is what would make the
+runtime read its paths from <code>nativephp.json</code> instead of assuming Laravel, and
+retire <code>RuntimePatcher</code> entirely. Until it lands, every application patches its
+own copy of the runtime — which works, and is tested, but is not the shape this
+should settle into.</li>
+</ul>
+<p>The vendor name is the other open question: <code>native-symfony</code> is free on Packagist
+and does not claim NativePHP&#39;s brand, but the courtesy conversation with upstream
+comes before <code>1.0.0</code>, not after.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="contributing.html"><span>← Previous</span><strong>Contributing</strong></a>
+            <a class="pager-link next" href="security.html"><span>Next →</span><strong>Security</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/RELEASING.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#why-there-are-mirrors-at-all">Why there are mirrors at all</a></li><li class="lvl2"><a href="#one-time-setup">One-time setup</a></li><li class="lvl3"><a href="#1-create-the-two-mirror-repositories">1. Create the two mirror repositories</a></li><li class="lvl3"><a href="#2-create-the-push-token">2. Create the push token</a></li><li class="lvl3"><a href="#3-prime-the-mirrors">3. Prime the mirrors</a></li><li class="lvl3"><a href="#4-submit-to-packagist">4. Submit to Packagist</a></li><li class="lvl2"><a href="#cutting-a-release">Cutting a release</a></li><li class="lvl2"><a href="#versioning">Versioning</a></li><li class="lvl2"><a href="#what-100-would-need">What 1.0.0 would need</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

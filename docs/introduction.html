@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -92,7 +98,7 @@ idea of idiomatic use. It is newer than these docs; where it disagrees, it is pr
 <p>Current and authoritative. Consult these when a wrapper does not cover what you need, or when
 you are checking a payload shape.</p>
 <div class="table-scroll"><table class="plain"><tbody>
-<tr><td><a href="contract.html"><code>../CONTRACT.md</code></a></td><td>The desktop wire protocol: all 116 endpoints with request and response shapes, all 44 events, the environment contract, and the seven things the runtime requires of any PHP app</td></tr>
+<tr><td><a href="contract.html"><code>../CONTRACT.md</code></a></td><td>The desktop wire protocol: all 118 endpoints with request and response shapes, all 46 events, the environment contract, and the seven things the runtime requires of any PHP app</td></tr>
 <tr><td><a href="native-ui-contract.html"><code>../NATIVE-UI-CONTRACT.md</code></a></td><td>The mobile native-UI wire format: node shapes, content hashes, id derivation, the callback protocol, the style vocabulary</td></tr>
 <tr><td><a href="desktop-bundle.html"><code>../bundle/README.md</code></a></td><td>Desktop package overview</td></tr>
 <tr><td><a href="mobile-bundle.html"><code>../mobile-bundle/README.md</code></a></td><td>Mobile package overview</td></tr>
@@ -110,7 +116,7 @@ these docs were written against the source.</p>
 <tr><td><a href="plan.html"><code>../PLAN.md</code></a></td><td>What NativePHP is, where Laravel leaks, and the milestone roadmap</td></tr>
 <tr><td><a href="analysis.html"><code>../ANALYSIS.md</code></a></td><td>The deep dive: boot sequence, per-directory port map with LOC, the eight Laravel-isms with line numbers, the Symfony-specific design decisions, upstream bugs found</td></tr>
 <tr><td><a href="mobile-analysis.html"><code>../MOBILE-ANALYSIS.md</code></a></td><td>Why mobile splits in two, and a correction to an earlier conclusion that was wrong</td></tr>
-<tr><td><a href="upstream-patches.html"><code>../upstream-patches/README.md</code></a></td><td>Eleven patches. <code>0002</code>–<code>0007</code> are open as NativePHP/desktop #136–#141; <code>0008</code>–<code>0011</code> target <code>mobile-air</code> and are unsubmitted. Patch <code>0001</code> is the manifest change that would make the runtime framework-agnostic and retire the patcher. Five of them the bundle no longer waits on — <code>RuntimePatcher</code> carries them into your copy</td></tr>
+<tr><td><a href="upstream-patches.html"><code>../upstream-patches/README.md</code></a></td><td>Eleven patches. Four have landed in <code>NativePHP/desktop</code>&#39;s <code>main</code>; <code>0002</code>–<code>0003</code> are still open there and <code>0008</code>–<code>0011</code> are open on <code>mobile-air</code>. Patch <code>0001</code> is the manifest change that would make the runtime framework-agnostic and retire the patcher. None of them the bundle waits on — <code>RuntimePatcher</code> carries every fix into your copy, and reports the ones upstream has since fixed itself</td></tr>
 <tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/spike/README.md" target="_blank" rel="noopener"><code>../spike/README.md</code></a></td><td>The reproduction harness — a container with PHP, Node, Electron and Xvfb that boots the runtime headlessly and screenshots it</td></tr>
 </tbody></table></div>
 <h2 id="historical-record"><a class="anchor" href="#historical-record">Historical record</a></h2>
@@ -135,7 +141,7 @@ papered over — the list is kept because <em>how</em> each was found is the use
 <tr><td>Test counts contradicted each other across three READMEs</td><td>Read from the suites</td></tr>
 <tr><td>Nothing implemented <code>ScreenRendererInterface</code>, so a <code>#[NativeScreen]</code> component needed application glue — the two halves of the native-UI path did not join up</td><td><code>ComponentScreenRenderer</code> ships, aliased to the interface; override the alias for a different renderer</td></tr>
 <tr><td>The routes import was a manual step, and forgetting it gave an app that boots and shows nothing</td><td><code>native:install</code> writes it, and warns rather than guessing when there is no <code>config/routes/</code></td></tr>
-<tr><td>Five runtime defects — four filed as NativePHP/desktop #137–#140 and unreviewed, one found here — were left to upstream&#39;s release schedule, which on discussion #504 has meant eighteen months of silence</td><td><code>RuntimePatcher</code> carries all five into the copy <code>native:install</code> writes. Non-strict hunks, so a target that moves (most likely because the fix landed) is reported, not fatal</td></tr>
+<tr><td>Five runtime defects — four filed as NativePHP/desktop #137–#140 and unreviewed, one found here — were left to upstream&#39;s release schedule, which on discussion #504 has meant eighteen months of silence</td><td><code>RuntimePatcher</code> carries all five into the copy <code>native:install</code> writes. Non-strict hunks, so a target that moves is reported, not fatal — which is what now happens for #137 and #140, both since merged upstream</td></tr>
 <tr><td>An application firewall silently denied the runtime&#39;s own callbacks — <code>access_control: ^/</code> makes <code>POST /_native/api/booted</code> a 401, which the runtime discards, giving a window that opens and does nothing. Laravel is not exposed to this: there the two routes sit outside the app&#39;s middleware groups</td><td><code>RuntimeRoutesAccessMap</code> decorates <code>security.access_map</code> so the paths carry no attributes <em>inside the runtime only</em> — a bundle cannot fix it as config, since both <code>security.firewalls</code> and <code>security.access_control</code> are single-source. Found by diffing our route registration against upstream&#39;s <code>routes/api.php</code></td></tr>
 <tr><td><code>native:build</code> crashed part-way through on any app containing a self-referential symlink (<code>public/storage -&gt; ..</code>), with a <code>FileNotFoundException</code> naming a path forty levels deep</td><td>The staging walk remembers real directories and refuses to enter one twice</td></tr>
 <tr><td>The demo itself did <code>layout: $parser-&gt;parse(...)</code> on two pages — the very mistake row three above records</td><td>Both go through <code>StyleApplier</code> now; found by reading a published frame, not by a test</td></tr>

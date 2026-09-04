@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contributing · NativePHP for Symfony</title>
+<meta name="description" content="The dev loop, and what a change needs — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
+<link rel="stylesheet" href="assets/site.css">
+<script>
+// Before first paint, so a chosen theme never flashes the other one.
+try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="topbar">
+    <button class="burger" type="button" aria-label="Open navigation" aria-expanded="false" aria-controls="sidebar"><span></span><span></span><span></span></button>
+    <a class="brand" href="index.html"><span class="logo" aria-hidden="true"></span><span class="brand-name">NativePHP <span>for Symfony</span></span></a>
+    <div class="actions">
+        <div class="search">
+            <label class="sr" for="search">Search documentation</label>
+            <input type="search" id="search" placeholder="Search documentation" autocomplete="off" spellcheck="false">
+            <kbd>/</kbd>
+            <div class="search-panel" id="search-panel" hidden></div>
+        </div>
+        <button class="icon-button theme" type="button" aria-label="Switch between light and dark"></button>
+        <a class="icon-button gh" href="https://github.com/sadiqk2/nativephp-symfony" target="_blank" rel="noopener" aria-label="Source on GitHub">GitHub</a>
+    </div>
+</header>
+
+<div class="shell">
+    <aside class="sidebar" id="sidebar">
+        <nav aria-label="Documentation">
+<p class="nav-group">Start here</p>
+<a class="nav-item" href="index.html"><span class="nav-name">Home</span><span class="nav-hint">Symfony as a desktop, iOS and Android application</span></a>
+<a class="nav-item" href="introduction.html"><span class="nav-name">Introduction</span><span class="nav-hint">What is here, what is authoritative, and what has drifted</span></a>
+<a class="nav-item" href="desktop.html"><span class="nav-name">Desktop</span><span class="nav-hint">composer require to a window on screen</span></a>
+<a class="nav-item" href="mobile.html"><span class="nav-name">Mobile</span><span class="nav-hint">iOS and Android, and what a build needs</span></a>
+<p class="nav-group">Reference</p>
+<a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
+<a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
+<a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
+<p class="nav-group">Working with it</p>
+<a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
+<a class="nav-item" href="testing.html"><span class="nav-name">Testing</span><span class="nav-hint">FakeRuntime, expectations, event simulation</span></a>
+<a class="nav-item" href="troubleshooting.html"><span class="nav-name">Troubleshooting</span><span class="nav-hint">Symptom → cause → fix</span></a>
+<p class="nav-group">How it works</p>
+<a class="nav-item" href="architecture.html"><span class="nav-name">Architecture</span><span class="nav-hint">Desktop vs mobile, and the shared traps</span></a>
+<a class="nav-item" href="analysis.html"><span class="nav-name">Deep dive</span><span class="nav-hint">Boot sequence, port map, the Laravel-isms</span></a>
+<a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
+<a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
+<p class="nav-group">The packages</p>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item active" href="contributing.html" aria-current="page"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
+<p class="nav-group">Record</p>
+<a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
+<a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
+<a class="nav-item" href="m3-results.html"><span class="nav-name">M3 — the build</span><span class="nav-hint">Packaging, and what it got wrong first</span></a>
+        </nav>
+        <p class="sidebar-note">Desktop is verified by a packaged app that has been built and run. Mobile is verified by tests, not yet by a device.</p>
+    </aside>
+
+    <main id="main">
+        <article class="prose">
+<h1 id="contributing"><a class="anchor" href="#contributing">Contributing</a></h1>
+<p>Two packages live here, and they share no code:</p>
+<div class="table-scroll"><table class="plain"><tbody>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/bundle/" target="_blank" rel="noopener"><code>bundle/</code></a></td><td><code>native-symfony/desktop-bundle</code></td></tr>
+<tr><td><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/mobile-bundle/" target="_blank" rel="noopener"><code>mobile-bundle/</code></a></td><td><code>native-symfony/mobile-bundle</code></td></tr>
+</tbody></table></div>
+<p>They are published from this repository by an automatic subtree split — the
+<code>native-symfony/*</code> repositories on GitHub are <strong>read-only mirrors</strong>. Every change,
+issue and pull request belongs here. See <a href="releasing.html">RELEASING.md</a> for how the
+mirrors are produced.</p>
+<h2 id="the-thing-to-know-before-anything-else"><a class="anchor" href="#the-thing-to-know-before-anything-else">The thing to know before anything else</a></h2>
+<p>This runtime&#39;s failure mode is <strong>silence</strong>, not an error. A missing route, a
+firewall rule, a stray <code>echo</code> during console boot — each of them produces an
+application that starts, opens a window, and then does nothing forever, with the
+explanation somewhere nobody would look. Almost every design decision in this
+repository is downstream of that, which is why:</p>
+<ul>
+<li><code>native:doctor</code> asks the router directly and exits non-zero.</li>
+<li>The contract tests parse NativePHP&#39;s <em>own</em> TypeScript rather than a snapshot.</li>
+<li>Counts are pinned exactly rather than as floors.</li>
+</ul>
+<p>If a change makes a failure quieter, it is going the wrong way.</p>
+<h2 id="running-the-suites"><a class="anchor" href="#running-the-suites">Running the suites</a></h2>
+<p>You need PHP 8.3+ with <code>ext-zip</code>, and Composer.</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/desktop    upstream/np-desktop
+git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/mobile-air upstream/np-mobile
+
+(<span class="hljs-built_in">cd</span> bundle        &amp;&amp; composer install)
+(<span class="hljs-built_in">cd</span> mobile-bundle &amp;&amp; composer install)
+
+tools/test.sh                      <span class="hljs-comment"># both suites</span>
+tools/test.sh mobile-bundle        <span class="hljs-comment"># one</span>
+EXTRA_ARGS=<span class="hljs-string">&quot;--filter Contract&quot;</span> tools/test.sh bundle</code></pre>
+</figure>
+<p><strong>The upstream clones are not optional.</strong> The contract tests read the real
+runtime sources; without them their data providers yield nothing and the desktop
+suite silently shrinks by around 115 tests while still reporting OK. CI clones
+them for the same reason. <code>tools/test.sh</code> falls back to Docker when the local PHP
+has no <code>ext-zip</code>.</p>
+<p>Run them unprivileged. A handful of tests assert that an unwritable file is an
+error, and root ignores file permissions, so as root they skip instead of
+running — which is why CI passes <code>--fail-on-skipped</code> and why the one skip you
+will see locally as root is expected.</p>
+<h2 id="what-a-change-needs"><a class="anchor" href="#what-a-change-needs">What a change needs</a></h2>
+<p><strong>A test that fails before it.</strong> Not as ceremony — several of the bugs recorded
+in the milestone write-ups were found by writing the test first and watching it
+pass, which meant it was testing the code rather than the fix.</p>
+<p><strong>The pinned counts updated deliberately.</strong> <code>ContractCoverageTest</code>,
+<code>EventPayloadShapeTest</code> and <code>PayloadKeyContractTest</code> all assert exact counts, and
+they are exact on purpose: a parser that stops recognising something has to land
+somewhere visible. When one of them fails, read the new upstream code and decide
+— do not bump the number to make it green. The commit that bumps it should say
+what moved and why.</p>
+<p><strong><code>CONTRACT.md</code> updated when the wire changes.</strong> It is the specification the
+tests check the implementation against; a new endpoint that is not in it is a new
+endpoint nobody can review.</p>
+<h2 id="documentation"><a class="anchor" href="#documentation">Documentation</a></h2>
+<p>Every Markdown file in this repository is also a page of the static site in
+<code>docs/</code>. Change a document, rebuild:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">npm install marked highlight.js
+DOCS_ROOT=<span class="hljs-string">&quot;<span class="hljs-variable">$PWD</span>&quot;</span> node tools/build-docs.mjs
+php -S 127.0.0.1:8000 -t docs</code></pre>
+</figure>
+<p><a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/tools/README.md" target="_blank" rel="noopener"><code>tools/README.md</code></a> has the link checker worth running after a
+build, and the design decisions behind the site.</p>
+<p>Where the documents disagree with each other, <a href="introduction.html"><code>docs/README.md</code></a>
+sorts them into current reference, historical record, and
+for-people-working-on-the-port. Do not update the historical ones: <code>SPIKE-</code>,
+<code>M2-</code> and <code>M3-RESULTS.md</code> are a journal, accurate about what was true when they
+were written, and their value is the reasoning rather than the API.</p>
+<h2 id="upstream-patches"><a class="anchor" href="#upstream-patches">Upstream patches</a></h2>
+<p><a href="upstream-patches.html"><code>upstream-patches/</code></a> holds fixes against
+<code>NativePHP/desktop</code> and <code>NativePHP/mobile-air</code>. If you find a runtime bug:</p>
+<ol>
+<li>Fix it upstream, as a patch file here with a regression test in <em>that</em> repo&#39;s
+idiom — Pest for <code>mobile-air</code>.</li>
+<li>Check the test against unpatched <code>main</code> first. A regression test that passes
+before the fix is testing the code, not the fix.</li>
+<li>Carry it in <code>RuntimePatcher</code> as a <strong>non-strict</strong> hunk if Symfony applications
+need it now. A target that has moved — usually because the fix landed —
+should be reported, never fatal.</li>
+</ol>
+<h2 id="the-most-valuable-contribution"><a class="anchor" href="#the-most-valuable-contribution">The most valuable contribution</a></h2>
+<p>Device verification for mobile. <code>native:mobile:build</code> stages, cleans and archives
+an application and then hands off to Gradle or Xcode, and neither toolchain
+exists in the environment this was built in. <strong>No build produced by these
+commands has been opened by one, and no screen has been rendered on a phone.</strong>
+Everything up to that boundary is tested; <code>--stage-only</code> stops exactly there.</p>
+<p>If you have a Mac or an Android SDK, running <code>native:mobile:build</code> on the demo
+and reporting what happens is worth more than any amount of additional test
+coverage.</p>
+<h2 id="code-style"><a class="anchor" href="#code-style">Code style</a></h2>
+<p>Match what is around you. <code>declare(strict_types=1)</code> everywhere, <code>final</code> by
+default, constructor property promotion, readonly where it holds.</p>
+<p>Comments explain <em>why</em>, and specifically why something non-obvious is the way it
+is — a runtime quirk, an upstream bug, a decision that looks wrong until you know
+what it prevents. There are a lot of them in this codebase because there are a
+lot of those. Do not add comments that restate the code.</p>
+
+        </article>
+
+        <nav class="pager" aria-label="Pagination">
+            <a class="pager-link" href="upstream-patches.html"><span>← Previous</span><strong>Upstream patches</strong></a>
+            <a class="pager-link next" href="releasing.html"><span>Next →</span><strong>Releasing</strong></a>
+        </nav>
+
+        <footer class="footer">
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/CONTRIBUTING.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+        </footer>
+    </main>
+
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#the-thing-to-know-before-anything-else">The thing to know before anything else</a></li><li class="lvl2"><a href="#running-the-suites">Running the suites</a></li><li class="lvl2"><a href="#what-a-change-needs">What a change needs</a></li><li class="lvl2"><a href="#documentation">Documentation</a></li><li class="lvl2"><a href="#upstream-patches">Upstream patches</a></li><li class="lvl2"><a href="#the-most-valuable-contribution">The most valuable contribution</a></li><li class="lvl2"><a href="#code-style">Code style</a></li></ul></nav>
+</div>
+
+<script src="assets/site.js" defer></script>
+</body>
+</html>

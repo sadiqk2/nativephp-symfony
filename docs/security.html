@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Not found · NativePHP for Symfony</title>
-<meta name="description" content="That page does not exist — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<title>Security · NativePHP for Symfony</title>
+<meta name="description" content="The trust boundary, and how to report — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
@@ -61,7 +61,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Contributing</p>
 <a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
 <a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
-<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item active" href="security.html" aria-current="page"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
 <a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
 <a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
@@ -74,24 +74,79 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 
     <main id="main">
         <article class="prose">
-<h1>Not found</h1>
-<p>That page is not part of this documentation. Try the <a href="index.html">introduction</a>, the
-<a href="desktop.html">desktop guide</a>, or <a href="troubleshooting.html">troubleshooting</a> if
-something is broken.</p>
+<h1 id="security-policy"><a class="anchor" href="#security-policy">Security policy</a></h1>
+<h2 id="supported-versions"><a class="anchor" href="#supported-versions">Supported versions</a></h2>
+<div class="table-scroll"><table><thead><tr><th>Version</th><th>Supported</th></tr></thead><tbody>
+<tr><td><code>0.1.x</code></td><td>✅</td></tr>
+</tbody></table></div>
+<p>This is a <code>0.x</code> project. Fixes land on the latest minor; there is no backport
+branch yet.</p>
+<h2 id="reporting-a-vulnerability"><a class="anchor" href="#reporting-a-vulnerability">Reporting a vulnerability</a></h2>
+<p><strong>Do not open a public issue.</strong> Use GitHub&#39;s private reporting —
+<a href="https://github.com/sadiqk2/nativephp-symfony/security/advisories/new" target="_blank" rel="noopener">Security → Report a vulnerability</a>
+on this repository.</p>
+<p>Please include the bundle and version, what an attacker gains, and the smallest
+reproduction you have. You will get an acknowledgement within a few days, and an
+assessment with a fix or an explanation of why it is not one.</p>
+<p>If the vulnerability is in NativePHP&#39;s own Electron runtime, the mobile hosts, or
+Electron itself rather than in these bundles, report it to
+<a href="https://github.com/NativePHP/desktop/security" target="_blank" rel="noopener">NativePHP</a> as well — this project
+patches a copy of that runtime but does not maintain it.</p>
+<h2 id="the-trust-boundary-so-a-report-can-be-aimed-correctly"><a class="anchor" href="#the-trust-boundary-so-a-report-can-be-aimed-correctly">The trust boundary, so a report can be aimed correctly</a></h2>
+<p><strong>Desktop.</strong> PHP and the runtime talk over <strong>localhost HTTP</strong> with a shared
+secret in an <code>X-NativePHP-Secret</code> header. That secret is generated per run and
+passed to the PHP process in its environment. Anything else on the machine that
+can reach <code>127.0.0.1</code> and learn the secret can drive the whole runtime API — so
+the secret is the boundary, and a leak of it is a serious report.</p>
+<p>Two consequences worth knowing before filing:</p>
+<ul>
+<li><strong><code>EventFactory</code> does not instantiate arbitrary classes.</strong> Upstream&#39;s Laravel
+controller does <code>class_exists($event) ? new $event(...$payload)</code> on the request
+body, which turns a leaked secret into arbitrary object construction with
+attacker-chosen arguments. This port constructs only its known event map and
+explicitly allowlisted namespaces; everything else becomes an inert
+<code>NativeEvent</code>. Same behaviour for legitimate traffic, no gadget chain.</li>
+<li><strong><code>WindowManager::get()</code> encodes the window id into the path</strong>, because that id
+can arrive from outside the application — <code>detectId()</code> reads <code>_windowId</code> out of
+the <code>Referer</code>. Without encoding, <code>../app/quit</code> would address a different
+endpoint.</li>
+</ul>
+<p><strong>Mobile.</strong> There is no port and no secret: the mobile path is one process with
+PHP compiled into it, and <code>nativephp_call()</code> is a direct call into the host. The
+attack surface is whatever the application itself exposes.</p>
+<p><strong>The runtime endpoints are unauthenticated by design, and gated by the secret.</strong>
+<code>RuntimeRoutesAccessMap</code> deliberately keeps an application&#39;s own <code>access_control</code>
+off <code>/_native/api/</code> while that gate is enforcing — a firewall in front of those
+two routes breaks the runtime&#39;s own callbacks rather than protecting anything.
+That is a considered trade, not an oversight; if you think the gate is
+insufficient, that is a report worth making, and please say what you can do with
+it rather than that it exists.</p>
+<h2 id="out-of-scope"><a class="anchor" href="#out-of-scope">Out of scope</a></h2>
+<ul>
+<li><strong>Anything requiring an attacker who already has code execution as the user.</strong>
+A desktop application runs as its user; a local attacker with that privilege
+does not need this software.</li>
+<li><strong>The <code>demo/</code> application.</strong> It is an integration test and a worked example,
+not a hardened application, and it is not published as a package.</li>
+<li><strong><code>spike/</code></strong>, which is a reproduction harness that runs Electron under Xvfb
+with <code>ELECTRON_DISABLE_SANDBOX=1</code>, deliberately — there are no user namespaces
+in the container it was built for.</li>
+</ul>
+
         </article>
 
         <nav class="pager" aria-label="Pagination">
-            <span></span>
-            <span></span>
+            <a class="pager-link" href="releasing.html"><span>← Previous</span><strong>Releasing</strong></a>
+            <a class="pager-link next" href="desktop-changelog.html"><span>Next →</span><strong>Desktop changelog</strong></a>
         </nav>
 
         <footer class="footer">
-            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/docs/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
+            <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/SECURITY.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
             <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
 
-    <div class="toc-space"></div>
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#supported-versions">Supported versions</a></li><li class="lvl2"><a href="#reporting-a-vulnerability">Reporting a vulnerability</a></li><li class="lvl2"><a href="#the-trust-boundary-so-a-report-can-be-aimed-correctly">The trust boundary, so a report can be aimed correctly</a></li><li class="lvl2"><a href="#out-of-scope">Out of scope</a></li></ul></nav>
 </div>
 
 <script src="assets/site.js" defer></script>

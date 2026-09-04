@@ -136,6 +136,16 @@ package page after submission. Without it a new tag can take hours to appear.
    That is the only check that proves the whole chain — tag, split, mirror, hook,
    Packagist, resolver — actually joins up.
 
+8. **Delete the three "not yet submitted to Packagist" notes**, which exist so the install
+   instructions are not a lie in the meantime:
+
+   - `README.md`, under *0. Install the packages*
+   - `docs/getting-started-desktop.md`, under *1. Install the bundle*
+   - `docs/getting-started-mobile.md`, under *1. Install*
+
+   Then rebuild the documentation site, since all three are pages on it. Steps 1 to 4 above
+   are one-time; this one goes with them.
+
 ## Versioning
 
 Both packages follow [SemVer](https://semver.org/), with the caveat every `0.x`

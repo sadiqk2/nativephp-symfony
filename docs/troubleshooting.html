@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -95,7 +101,7 @@ would swallow: a missing bootstrapper, a non-JSON response, a failed broadcast.<
 <hr>
 <h2 id="desktop--boot"><a class="anchor" href="#desktop--boot">Desktop — boot</a></h2>
 <h3 id="my-app-boots-to-a-blank-window-or-to-no-window-at-all"><a class="anchor" href="#my-app-boots-to-a-blank-window-or-to-no-window-at-all">My app boots to a blank window, or to no window at all</a></h3>
-<p>Five distinct causes. <code>native:doctor</code> checks for the first — and the second is handled for
+<p>Six distinct causes. <code>native:doctor</code> checks for the first two — and the third is handled for
 you by default:</p>
 <figure class="code">
 <figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
@@ -111,6 +117,28 @@ you by default:</p>
 </figure>
 <p>If they are missing, add the import shown in
 <a href="desktop.html#2-import-the-bundles-routes">getting started</a>.</p>
+<p><strong>The routes are imported, but something of yours answers them first.</strong> Routes match in
+declaration order and the first match wins — the same rule as firewalls, below. A front-end
+catch-all, which is how every SPA is wired, covers <code>/_native/api/booted</code> as readily as
+anything else:</p>
+<figure class="code">
+<figcaption><span class="code-lang">yaml</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-yaml"><span class="hljs-comment"># config/routes.yaml — the wrong way round</span>
+<span class="hljs-attr">app_spa:</span>
+    <span class="hljs-attr">path:</span> <span class="hljs-string">/{path}</span>
+    <span class="hljs-attr">controller:</span> <span class="hljs-string">App\Controller\SpaController</span>
+    <span class="hljs-attr">requirements:</span> { <span class="hljs-attr">path:</span> <span class="hljs-string">&#x27;.*&#x27;</span> }
+
+<span class="hljs-attr">native_desktop:</span>
+    <span class="hljs-attr">resource:</span> <span class="hljs-string">&#x27;@NativeDesktopBundle/src/Resources/config/routes.php&#x27;</span>
+    <span class="hljs-attr">type:</span> <span class="hljs-string">php</span></code></pre>
+</figure>
+<p><code>debug:router</code> still lists both runtime routes, so it looks fine; the runtime&#39;s POST reaches
+your controller, which answers 200 with your index page, and <code>boot()</code> never runs. Import the
+bundle&#39;s routes <em>before</em> any catch-all of your own. The same happens if a route of yours
+reuses the names <code>native_desktop_booted</code> or <code>native_desktop_events</code>, since a later route of
+the same name replaces the earlier one silently. <code>native:doctor</code> compares the controller each
+path actually resolves to, not merely that it resolves.</p>
 <p><strong>Your firewall covers the runtime&#39;s own endpoints.</strong> <strong>The bundle handles this for you by
 default</strong> — but it is worth knowing about, because the symptom is indistinguishable from the
 one above and the cause is in a file you wrote.</p>

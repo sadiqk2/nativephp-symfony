@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Upstream patches · NativePHP for Symfony</title>
-<meta name="description" content="Eleven fixes, ten of them open PRs — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="description" content="Eleven fixes: four landed, six open — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
@@ -42,7 +42,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <p class="nav-group">Reference</p>
 <a class="nav-item" href="desktop-api.html"><span class="nav-name">Desktop API</span><span class="nav-hint">Windows, menus, dialogs, processes, events</span></a>
 <a class="nav-item" href="mobile-api.html"><span class="nav-name">Mobile API</span><span class="nav-hint">54 bridge methods and the native-UI layers</span></a>
-<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 116 endpoints and 44 events, exactly</span></a>
+<a class="nav-item" href="contract.html"><span class="nav-name">Wire protocol</span><span class="nav-hint">All 118 endpoints and 46 events, exactly</span></a>
 <a class="nav-item" href="native-ui-contract.html"><span class="nav-name">Native-UI format</span><span class="nav-hint">What SwiftUI and Compose consume</span></a>
 <p class="nav-group">Working with it</p>
 <a class="nav-item" href="recipes.html"><span class="nav-name">Recipes</span><span class="nav-hint">Multi-window, workers, native screens, packaging</span></a>
@@ -57,7 +57,13 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
 <a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
-<a class="nav-item active" href="upstream-patches.html" aria-current="page"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes, ten of them open PRs</span></a>
+<a class="nav-item active" href="upstream-patches.html" aria-current="page"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
+<p class="nav-group">Contributing</p>
+<a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
+<a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
+<a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -68,16 +74,40 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 
     <main id="main">
         <article class="prose">
-<h1 id="upstream-patches--ten-submitted-one-held"><a class="anchor" href="#upstream-patches--ten-submitted-one-held">Upstream patches — ten submitted, one held</a></h1>
-<p>Eleven patches. Ten are <strong>open pull requests</strong>; the eleventh is held deliberately.</p>
-<div class="table-scroll"><table><thead><tr><th></th><th>repo</th><th>base</th><th>status</th></tr></thead><tbody>
-<tr><td><code>0002</code>–<code>0007</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td><code>main</code> @ <code>653d186</code></td><td><strong>open PRs <a href="https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2" target="_blank" rel="noopener">#136–#141</a></strong>, awaiting review</td></tr>
-<tr><td><code>0008</code>–<code>0011</code></td><td><a href="https://github.com/NativePHP/mobile-air" target="_blank" rel="noopener"><code>NativePHP/mobile-air</code></a></td><td><code>main</code> @ <code>bf4fd2a</code></td><td><strong>open PRs <a href="https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2" target="_blank" rel="noopener">#349–#352</a></strong>, awaiting review</td></tr>
-<tr><td><code>0001</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td><code>main</code> @ <code>653d186</code></td><td>held until the small ones land — it is the one that needs a maintainer conversation</td></tr>
+<h1 id="upstream-patches--four-landed-six-open-one-held"><a class="anchor" href="#upstream-patches--four-landed-six-open-one-held">Upstream patches — four landed, six open, one held</a></h1>
+<p>Eleven patches. <strong>Four of the desktop six are now in upstream&#39;s <code>main</code></strong>; the rest are
+open pull requests, and the eleventh is held deliberately.</p>
+<div class="table-scroll"><table><thead><tr><th></th><th>repo</th><th>status</th></tr></thead><tbody>
+<tr><td><code>0004</code>, <code>0005</code>, <code>0007</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td><strong>merged</strong> — <code>parseZoomFactor()</code>, the <code>SHELL_VERBOSITY</code> report and the package metadata are all in <code>main</code></td></tr>
+<tr><td><code>0006</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td><strong>resolved</strong> — upstream deleted <code>CreateSecurityCookieController</code> outright, so the dead namespace went with it</td></tr>
+<tr><td><code>0002</code>, <code>0003</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td><strong>open PRs <a href="https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2" target="_blank" rel="noopener">#136–#141</a></strong>, awaiting review</td></tr>
+<tr><td><code>0008</code>–<code>0011</code></td><td><a href="https://github.com/NativePHP/mobile-air" target="_blank" rel="noopener"><code>NativePHP/mobile-air</code></a></td><td><strong>open PRs <a href="https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2" target="_blank" rel="noopener">#349–#352</a></strong>, awaiting review</td></tr>
+<tr><td><code>0001</code></td><td><a href="https://github.com/NativePHP/desktop" target="_blank" rel="noopener"><code>NativePHP/desktop</code></a></td><td>held until the small ones land — it is the one that needs a maintainer conversation</td></tr>
 </tbody></table></div>
-<p>The order is deliberate: ten small, individually reviewable fixes first, so that the
-manifest patch — the only one that asks upstream to change a design — arrives to someone
-who has already merged code from the same author.</p>
+<p>The order was deliberate and it worked: small, individually reviewable fixes first, so
+that the manifest patch — the only one that asks upstream to change a design — arrives to
+a maintainer who has already merged code from the same author. Four have now been merged,
+which is the precondition <code>0001</code> was waiting on.</p>
+<p>Nothing in the bundle depends on which of these have landed. <code>RuntimePatcher</code> carries
+every bug fix into the copy <code>native:install</code> writes, with non-strict hunks: a target that
+is gone is reported as <em>&quot;assuming it is fixed upstream&quot;</em> and the install continues. Run
+against today&#39;s <code>main</code> it applies nine hunks, recognises <code>0005</code> as already applied, and
+reports both <code>0004</code> hunks as fixed at the source.</p>
+<p><strong>Reproducing this table.</strong> The patch files are <code>git diff</code>s, so upstream&#39;s own tree
+answers the question:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/desktop upstream/np-desktop
+<span class="hljs-built_in">cd</span> upstream/np-desktop
+<span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> ../../upstream-patches/*.patch; <span class="hljs-keyword">do</span>
+    git apply --check --reverse <span class="hljs-string">&quot;<span class="hljs-variable">$p</span>&quot;</span> 2&gt;/dev/null &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;landed  <span class="hljs-variable">$p</span>&quot;</span> &amp;&amp; <span class="hljs-built_in">continue</span>
+    git apply --check          <span class="hljs-string">&quot;<span class="hljs-variable">$p</span>&quot;</span> 2&gt;/dev/null &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;open    <span class="hljs-variable">$p</span>&quot;</span> || <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;moved   <span class="hljs-variable">$p</span>&quot;</span>
+<span class="hljs-keyword">done</span></code></pre>
+</figure>
+<p><code>moved</code> means neither direction applies cleanly — read the file before concluding
+anything, since it covers both &quot;the fix landed with different surrounding lines&quot; and &quot;the
+code has changed underneath the patch&quot;. That is how <code>0004</code>, <code>0005</code> and <code>0006</code> were
+classified above.</p>
 <p>The <code>mobile-air</code> four each carry a regression test in the repo&#39;s own Pest idiom, written
 against its real <code>TailwindParser</code>, <code>NativeRouter</code> and <code>CallbackRegistry</code> rather than a
 stub. Every test was checked against unpatched <code>main</code> first: 3 of 3, 4 of 6, 3 of 6 and 1
@@ -166,10 +196,10 @@ regardless; the manifest is what makes them expressible rather than special-case
 <div class="table-scroll"><table><thead><tr><th>Patch</th><th>Fixes</th></tr></thead><tbody>
 <tr><td><code>0002</code></td><td><code>window/current</code> dereferences <code>getFocusedWindow()</code> with no null check. It returns null whenever the app is backgrounded — reachable from any PHP process, e.g. a queue worker calling <code>Window::current()</code> — and threw a bare string. Now 404s.</td></tr>
 <tr><td><code>0003</code></td><td><code>shell/trash-item</code> answers <code>res.status(400).json()</code> with no argument, which express rejects, turning a handled failure into an unhandled one.</td></tr>
-<tr><td><code>0004</code></td><td><code>window/open</code> without <code>zoomFactor</code> calls <code>setZoomFactor(parseFloat(undefined))</code> → <code>NaN</code>, rendering the page at an absurd zoom. Invisible from Laravel because <code>Windows\Window</code> declares a <code>1.0</code> default and always serialises it, so it lands on the first independent client instead.</td></tr>
-<tr><td><code>0005</code></td><td><code>notifyLaravel</code> swallows every error in an empty <code>catch {}</code>, making a crashed, 500ing or 403ing PHP app indistinguishable from a healthy one. Now reported behind <code>SHELL_VERBOSITY</code>.</td></tr>
-<tr><td><code>0006</code></td><td><code>CreateSecurityCookieController</code> reads <code>config(&#39;native-php.secret&#39;)</code> — a namespace that does not exist. The guard therefore compared input against <code>null</code>, passing only when no secret was sent, then issued a cookie with a <code>null</code> value. It is also the one route <code>PreventRegularBrowserAccess</code> deliberately lets through unauthenticated.</td></tr>
-<tr><td><code>0007</code></td><td><code>composer.json</code>: <code>homepage</code> points at the archived <code>nativephp/laravel</code>, and the <code>Updater</code> alias points at <code>Native\Electron\Facades\Updater</code>, a class that moved to <code>Native\Desktop\Drivers\Electron\Facades\Updater</code>.</td></tr>
+<tr><td><code>0004</code> <strong>(merged)</strong></td><td><code>window/open</code> without <code>zoomFactor</code> calls <code>setZoomFactor(parseFloat(undefined))</code> → <code>NaN</code>, rendering the page at an absurd zoom. Invisible from Laravel because <code>Windows\Window</code> declares a <code>1.0</code> default and always serialises it, so it lands on the first independent client instead.</td></tr>
+<tr><td><code>0005</code> <strong>(merged)</strong></td><td><code>notifyLaravel</code> swallows every error in an empty <code>catch {}</code>, making a crashed, 500ing or 403ing PHP app indistinguishable from a healthy one. Now reported behind <code>SHELL_VERBOSITY</code>.</td></tr>
+<tr><td><code>0006</code> <strong>(resolved by deletion)</strong></td><td><code>CreateSecurityCookieController</code> reads <code>config(&#39;native-php.secret&#39;)</code> — a namespace that does not exist. The guard therefore compared input against <code>null</code>, passing only when no secret was sent, then issued a cookie with a <code>null</code> value. It is also the one route <code>PreventRegularBrowserAccess</code> deliberately lets through unauthenticated.</td></tr>
+<tr><td><code>0007</code> <strong>(merged)</strong></td><td><code>composer.json</code>: <code>homepage</code> points at the archived <code>nativephp/laravel</code>, and the <code>Updater</code> alias points at <code>Native\Electron\Facades\Updater</code>, a class that moved to <code>Native\Desktop\Drivers\Electron\Facades\Updater</code>.</td></tr>
 </tbody></table></div>
 <h2 id="0008--a-bug-in-the-mobile-tailwind-parser"><a class="anchor" href="#0008--a-bug-in-the-mobile-tailwind-parser"><code>0008</code> — a bug in the mobile Tailwind parser</a></h2>
 <p><code>parseThemeBorder()</code> emits <code>borderWidth: 1</code> unconditionally, and since classes merge in
@@ -279,7 +309,7 @@ letters; <code>0006</code> came out of grepping for a config key that turned out
 
         <nav class="pager" aria-label="Pagination">
             <a class="pager-link" href="demo.html"><span>← Previous</span><strong>The demo app</strong></a>
-            <a class="pager-link next" href="spike-results.html"><span>Next →</span><strong>M1 — the spike</strong></a>
+            <a class="pager-link next" href="contributing.html"><span>Next →</span><strong>Contributing</strong></a>
         </nav>
 
         <footer class="footer">
