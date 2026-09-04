@@ -12,8 +12,8 @@ full API, packaged into a distributable app that has been built *and run*.
 
 | | |
 |---|---|
-| **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 118 runtime endpoints, all 46 events, 579 tests. Verified by a running packaged app. |
-| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 586 tests. Verified by tests, **not** by a device. |
+| **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 118 runtime endpoints, all 46 events, 581 tests. Verified by a running packaged app. |
+| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 587 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
 | [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. **Four have landed in upstream's `main`**; six are open PRs ([#136–#141](https://github.com/NativePHP/desktop/pulls?q=is%3Apr+author%3Asadiqk2) and [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)), and the manifest patch is the one still held. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
