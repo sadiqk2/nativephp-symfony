@@ -20,6 +20,13 @@ those repositories are what Packagist watches.
 The mirrors are **read-only**: nothing is ever pushed to them by hand, and each
 carries an issue-template redirect pointing contributors back here.
 
+**Until the setup below is done, the workflow splits and skips the push**, with a
+note on the run summary saying so, so an unconfigured repository keeps a green
+default branch. A `v*` tag or a manual run fails outright instead — a release
+that silently never reaches Packagist is worse than a red tick. An *expired*
+token stays loud either way: the secret is still set, so the push gets a 403 and
+the job fails.
+
 This means development is unaffected. `bundle/` and `mobile-bundle/` stay where
 they are, one clone holds both, and a change touching both is still one commit
 and one pull request.
@@ -56,10 +63,14 @@ repository secret**, named `SPLIT_TOKEN`.
 
 ### 3. Prime the mirrors
 
-Push to `main`, or run the split workflow manually from **Actions → split → Run
-workflow**. Both mirrors should end up with the full rewritten history of their
+Run the split workflow from **Actions → split → Run workflow**, or push to
+`main`. Both mirrors should end up with the full rewritten history of their
 directory. Check that each mirror's root contains `composer.json`, `README.md`,
 `LICENSE` and `src/` — that is what Packagist will read.
+
+If the run reports *"Not mirrored"* on its summary, step 2 has not taken effect:
+the secret is missing or misnamed. A manual run is the better check of the two
+for exactly this reason — it fails on a missing token rather than skipping.
 
 ### 4. Submit to Packagist
 

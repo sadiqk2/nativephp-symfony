@@ -14,6 +14,10 @@ name: split
 # write on both mirror repositories. The default GITHUB_TOKEN is scoped to this
 # repository alone and cannot push across, which is the one thing an Action cannot
 # grant itself.
+#
+# Without that secret the split still runs and the push is skipped, so a repository that
+# has not been through RELEASING.md's one-time setup keeps a green default branch — but
+# a tag push or a manual run fails outright instead. See "Is publishing configured?".
 
 on:
   push:
@@ -60,16 +64,53 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Check the token is present
+      # A missing token is fatal on a tag and on a manual run, and a skip on a routine
+      # push to a branch. The asymmetry is the point. A release that silently fails to
+      # reach Packagist is the worst thing this workflow can do, and a manual run that
+      # quietly does nothing is the second worst — both have to fail. But a push to main
+      # before the mirrors exist is just the state this repository is in until
+      # RELEASING.md's one-time setup has been done, and failing every one of those
+      # would paint the default branch red for a condition nobody has reached yet.
+      #
+      # An *expired* token is not this case and stays loud: the secret is still set, the
+      # push gets a 403, the job fails. Only deleting the secret outright is quiet, which
+      # is why the skip writes a run-summary entry rather than only a log line.
+      #
+      # Computed in a step because the `secrets` context cannot be read from an `if:`.
+      - name: Is publishing configured?
+        id: guard
         env:
           SPLIT_TOKEN: ${{ secrets.SPLIT_TOKEN }}
         run: |
-          if [ -z "$SPLIT_TOKEN" ]; then
-            echo "::error::SPLIT_TOKEN is not set. See RELEASING.md — the mirrors cannot be" \
-                 "pushed to with the default GITHUB_TOKEN, which is scoped to this repository."
+          if [ -n "$SPLIT_TOKEN" ]; then
+            echo 'configured=true' >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo 'configured=false' >> "$GITHUB_OUTPUT"
+
+          if [ "${GITHUB_REF_TYPE}" = 'tag' ] || [ "${GITHUB_EVENT_NAME}" = 'workflow_dispatch' ]; then
+            echo "::error::SPLIT_TOKEN is not set, so ${GITHUB_REF_NAME} cannot reach" \
+                 "${{ matrix.mirror }}. The default GITHUB_TOKEN is scoped to this repository" \
+                 "and cannot push across. See RELEASING.md — one-time setup."
             exit 1
           fi
 
+          echo "::notice::SPLIT_TOKEN is not set, so nothing was mirrored — expected until RELEASING.md's one-time setup is done."
+          {
+            echo '### Not mirrored'
+            echo
+            echo 'There is no `SPLIT_TOKEN` secret, so `${{ matrix.package }}/` was split but not'
+            echo 'pushed to `${{ matrix.mirror }}`. That is the expected state until the one-time'
+            echo 'setup in [RELEASING.md](https://github.com/${{ github.repository }}/blob/main/RELEASING.md#one-time-setup)'
+            echo 'has been done — create the two mirror repositories, then add the token.'
+            echo
+            echo 'A tag push or a manual run fails instead of skipping, because a release that'
+            echo 'silently never reaches Packagist is worse than a red tick.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Run even with no token: it costs a second, and it is the only thing that proves
+      # the split itself works before anyone has wired the publishing up.
       - name: Split ${{ matrix.package }}/
         id: split
         run: |
@@ -84,6 +125,7 @@ jobs:
       # split commit rather than at this repository's commit, which the mirror has never
       # seen. Pushing main as well keeps `dev-main` resolvable between releases.
       - name: Push to the mirror
+        if: steps.guard.outputs.configured == 'true'
         env:
           SPLIT_TOKEN: ${{ secrets.SPLIT_TOKEN }}
           MIRROR: https://x-access-token:${{ secrets.SPLIT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.mirror }}.git

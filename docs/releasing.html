@@ -90,6 +90,12 @@ those repositories are what Packagist watches.</p>
 <p><code>.github/workflows/split.yml</code> does it on every push to <code>main</code> and every <code>v*</code> tag.
 The mirrors are <strong>read-only</strong>: nothing is ever pushed to them by hand, and each
 carries an issue-template redirect pointing contributors back here.</p>
+<p><strong>Until the setup below is done, the workflow splits and skips the push</strong>, with a
+note on the run summary saying so, so an unconfigured repository keeps a green
+default branch. A <code>v*</code> tag or a manual run fails outright instead — a release
+that silently never reaches Packagist is worse than a red tick. An <em>expired</em>
+token stays loud either way: the secret is still set, so the push gets a 403 and
+the job fails.</p>
 <p>This means development is unaffected. <code>bundle/</code> and <code>mobile-bundle/</code> stay where
 they are, one clone holds both, and a change touching both is still one commit
 and one pull request.</p>
@@ -118,10 +124,13 @@ split job, which is loud, but only on the next push</li>
 <p>Add it to this repository as <strong>Settings → Secrets and variables → Actions → New
 repository secret</strong>, named <code>SPLIT_TOKEN</code>.</p>
 <h3 id="3-prime-the-mirrors"><a class="anchor" href="#3-prime-the-mirrors">3. Prime the mirrors</a></h3>
-<p>Push to <code>main</code>, or run the split workflow manually from <strong>Actions → split → Run
-workflow</strong>. Both mirrors should end up with the full rewritten history of their
+<p>Run the split workflow from <strong>Actions → split → Run workflow</strong>, or push to
+<code>main</code>. Both mirrors should end up with the full rewritten history of their
 directory. Check that each mirror&#39;s root contains <code>composer.json</code>, <code>README.md</code>,
 <code>LICENSE</code> and <code>src/</code> — that is what Packagist will read.</p>
+<p>If the run reports <em>&quot;Not mirrored&quot;</em> on its summary, step 2 has not taken effect:
+the secret is missing or misnamed. A manual run is the better check of the two
+for exactly this reason — it fails on a missing token rather than skipping.</p>
 <h3 id="4-submit-to-packagist"><a class="anchor" href="#4-submit-to-packagist">4. Submit to Packagist</a></h3>
 <p>At <a href="https://packagist.org/packages/submit" target="_blank" rel="noopener">packagist.org/packages/submit</a>, submit
 each <strong>mirror</strong> URL — never this repository:</p>
