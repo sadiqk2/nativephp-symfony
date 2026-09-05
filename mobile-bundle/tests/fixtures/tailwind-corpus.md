@@ -217,7 +217,7 @@ Two conditions on the recommendation:
 ## Reproducing
 
 ```
-docker run --rm -v /home/sadiq/nativephp-symfony:/np -v /tmp/m6:/m6 -w /m6 \
+docker run --rm -v /path/to/nativephp-symfony:/np -v /tmp/m6:/m6 -w /m6 \
   np-symfony-spike php fixture.php
 ```
 
