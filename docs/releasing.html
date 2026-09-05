@@ -146,9 +146,15 @@ push rather than on its crawl schedule: Packagist shows the exact steps on the
 package page after submission. Without it a new tag can take hours to appear.</p>
 <h2 id="cutting-a-release"><a class="anchor" href="#cutting-a-release">Cutting a release</a></h2>
 <ol>
-<li><p><strong>Move the <code>## [Unreleased]</code> entries</strong> in <code>bundle/CHANGELOG.md</code> and
-<code>mobile-bundle/CHANGELOG.md</code> under a new version heading, with the date. Fix
-the two link definitions at the bottom of each file.</p>
+<li><p><strong>Settle the changelogs.</strong> In <code>bundle/CHANGELOG.md</code> and
+<code>mobile-bundle/CHANGELOG.md</code>, move whatever is under <code>## [Unreleased]</code> beneath
+a new version heading with today&#39;s date, and fix the two link definitions at
+the bottom of each file.</p>
+<p>For <code>0.1.0</code> this is already done — both files carry a dated <code>## [0.1.0]</code> and an
+empty <code>## [Unreleased]</code>, so the only thing to do is <strong>check the date is still
+right</strong>. It was written on 2026-09-05, and the release is gated on setup that
+may have taken a while; a first release dated before the tag that carries it is
+the one thing here nobody will notice and everybody can see.</p>
 </li>
 <li><p><strong>Check the suites are green on the real upstream sources</strong>, which is not the
 same as green locally on a stale clone:</p>

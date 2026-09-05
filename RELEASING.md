@@ -91,9 +91,16 @@ package page after submission. Without it a new tag can take hours to appear.
 
 ## Cutting a release
 
-1. **Move the `## [Unreleased]` entries** in `bundle/CHANGELOG.md` and
-   `mobile-bundle/CHANGELOG.md` under a new version heading, with the date. Fix
-   the two link definitions at the bottom of each file.
+1. **Settle the changelogs.** In `bundle/CHANGELOG.md` and
+   `mobile-bundle/CHANGELOG.md`, move whatever is under `## [Unreleased]` beneath
+   a new version heading with today's date, and fix the two link definitions at
+   the bottom of each file.
+
+   For `0.1.0` this is already done — both files carry a dated `## [0.1.0]` and an
+   empty `## [Unreleased]`, so the only thing to do is **check the date is still
+   right**. It was written on 2026-09-05, and the release is gated on setup that
+   may have taken a while; a first release dated before the tag that carries it is
+   the one thing here nobody will notice and everybody can see.
 
 2. **Check the suites are green on the real upstream sources**, which is not the
    same as green locally on a stale clone:
