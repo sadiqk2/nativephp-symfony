@@ -60,7 +60,7 @@ jobs:
       # The whole history: `git subtree split` rewrites every commit that touched the
       # prefix, so a shallow clone would produce a mirror whose history begins at an
       # arbitrary point and whose commit shas change on the next run.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
