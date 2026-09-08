@@ -82,7 +82,9 @@ jobs:
         env:
           SPLIT_TOKEN: ${{ secrets.SPLIT_TOKEN }}
         run: |
-          if [ -n "$SPLIT_TOKEN" ]; then
+          # Trimmed before the emptiness test, so a secret holding only whitespace counts
+          # as unset rather than as configured-but-broken.
+          if [ -n "$(printf '%s' "$SPLIT_TOKEN" | tr -d '[:space:]')" ]; then
             echo 'configured=true' >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -128,9 +130,19 @@ jobs:
         if: steps.guard.outputs.configured == 'true'
         env:
           SPLIT_TOKEN: ${{ secrets.SPLIT_TOKEN }}
-          MIRROR: https://x-access-token:${{ secrets.SPLIT_TOKEN }}@github.com/${{ github.repository_owner }}/${{ matrix.mirror }}.git
+          MIRROR_REPO: ${{ github.repository_owner }}/${{ matrix.mirror }}
           SHA: ${{ steps.split.outputs.sha }}
         run: |
+          # The URL is assembled here rather than in `env:` so the token can be trimmed
+          # first. A secret carrying a trailing newline — which is what `gh secret set`
+          # stores if it is fed `gh auth token` straight from a pipe — makes git fail with
+          # `credential url cannot be parsed`, and since the token is masked the log prints
+          # that message wrapped around a row of `***` and explains nothing. A pasted PAT
+          # can pick up stray whitespace just as easily. Trimming costs nothing and turns
+          # an unreadable failure into no failure at all.
+          token="$(printf '%s' "$SPLIT_TOKEN" | tr -d '[:space:]')"
+          MIRROR="https://x-access-token:${token}@github.com/${MIRROR_REPO}.git"
+
           if [ "${GITHUB_REF_TYPE}" = 'tag' ]; then
             echo "Tagging ${GITHUB_REF_NAME} at ${SHA} on ${{ matrix.mirror }}"
             git tag -f "${GITHUB_REF_NAME}" "${SHA}"
