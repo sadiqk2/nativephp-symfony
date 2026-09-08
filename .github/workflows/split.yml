@@ -143,15 +143,26 @@ jobs:
           MIRROR_REPO: ${{ github.repository_owner }}/${{ matrix.mirror }}
           SHA: ${{ steps.split.outputs.sha }}
         run: |
-          # The URL is assembled here rather than in `env:` so the token can be trimmed
-          # first. A secret carrying a trailing newline — which is what `gh secret set`
-          # stores if it is fed `gh auth token` straight from a pipe — makes git fail with
-          # `credential url cannot be parsed`, and since the token is masked the log prints
-          # that message wrapped around a row of `***` and explains nothing. A pasted PAT
-          # can pick up stray whitespace just as easily. Trimming costs nothing and turns
-          # an unreadable failure into no failure at all.
-          token="$(printf '%s' "$SPLIT_TOKEN" | tr -d '[:space:]')"
-          MIRROR="https://x-access-token:${token}@github.com/${MIRROR_REPO}.git"
+          # The token is handed to git through `gh`'s credential helper rather than
+          # embedded in the remote URL, for two reasons found the hard way on the first
+          # run that ever actually pushed.
+          #
+          # 1. `https://x-access-token:${token}@github.com/…` is the form for a GitHub App
+          #    *installation* token — which is what GITHUB_TOKEN is, and GITHUB_TOKEN is
+          #    the one token that cannot reach another repository. A fine-grained PAT is
+          #    accepted in that form too, but an OAuth user token is refused with
+          #    `Invalid username or token`, naming neither the username nor the secret.
+          #    `gh auth git-credential` derives the right basic-auth form from whatever
+          #    token it is given, so this works for either kind.
+          # 2. A credential in a URL has to survive shell quoting and URL parsing. A secret
+          #    holding a trailing newline — which is what `gh secret set` stores if fed
+          #    `gh auth token` straight from a pipe — makes git abort with `credential url
+          #    cannot be parsed`, printed around a row of `***` because the token is
+          #    masked. Trimming still happens below, since `gh` should not be handed
+          #    whitespace either, but the URL no longer carries the secret at all.
+          export GH_TOKEN="$(printf '%s' "$SPLIT_TOKEN" | tr -d '[:space:]')"
+          git config --global credential.helper '!gh auth git-credential'
+          MIRROR="https://github.com/${MIRROR_REPO}.git"
 
           if [ "${GITHUB_REF_TYPE}" = 'tag' ]; then
             echo "Tagging ${GITHUB_REF_NAME} at ${SHA} on ${{ matrix.mirror }}"
