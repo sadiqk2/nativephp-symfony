@@ -100,6 +100,28 @@ the job fails.</p>
 they are, one clone holds both, and a change touching both is still one commit
 and one pull request.</p>
 <h2 id="one-time-setup"><a class="anchor" href="#one-time-setup">One-time setup</a></h2>
+<p><strong>Done on 2026-09-08, with one part still outstanding.</strong> This repository is public,
+both mirrors exist and carry the full split history, and <code>v0.1.0</code> is tagged on all
+three. What follows is the record of what was configured — read it if a mirror has to
+be rebuilt, if the token expires, or if the same shape is wanted for a third package.</p>
+<p><strong>The automatic push is not working yet, and step 2 is why.</strong> <code>0.1.0</code>&#39;s mirror
+branches and tags were pushed by hand from a clone, which is safe to do because
+<code>git subtree split</code> is deterministic: the same history over the same prefix produces
+the same commit sha every time, so a local split and the workflow&#39;s split cannot
+disagree. It was verified — the shas the workflow computed, <code>f36b592</code> and <code>c8b66a6</code>,
+are the shas that were pushed. But it is a manual step, and the next release should
+not need it. Until a valid token is in place the <code>split</code> job will <strong>fail on every
+push</strong>, because the secret currently set is not a token at all (see step 2), so the
+guard reads it as configured and then cannot authenticate.</p>
+<p>By hand, for the record, from a clone of this repository:</p>
+<figure class="code">
+<figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
+<pre><code class="language-bash">git push https://github.com/sadiqk2/nativephp-symfony-desktop-bundle.git \
+  <span class="hljs-string">&quot;<span class="hljs-subst">$(git subtree split --prefix=bundle HEAD)</span>&quot;</span>:refs/heads/main</code></pre>
+</figure>
+<p>and the same for <code>mobile-bundle</code>. For a tag, push that split sha to
+<code>refs/tags/vX.Y.Z</code> on the mirror rather than pushing this repository&#39;s tag, which
+points at a commit the mirror has never seen.</p>
 <p>Everything below needs a GitHub account with rights over the <code>sadiqk2</code>
 namespace; none of it can be done from a pull request.</p>
 <h3 id="1-create-the-two-mirror-repositories"><a class="anchor" href="#1-create-the-two-mirror-repositories">1. Create the two mirror repositories</a></h3>
@@ -123,6 +145,27 @@ split job, which is loud, but only on the next push</li>
 </ul>
 <p>Add it to this repository as <strong>Settings → Secrets and variables → Actions → New
 repository secret</strong>, named <code>SPLIT_TOKEN</code>.</p>
+<p><strong>The <code>SPLIT_TOKEN</code> currently set is not a token — delete it and follow the above.</strong>
+It was meant to be the <code>gh</code> CLI&#39;s own OAuth token, to save a browser detour. But the
+<code>gh</code> on the machine it was taken from is 2.4.0, which has no <code>gh auth token</code>
+subcommand: the command exited 1 and wrote its error text to stdout, and
+<code>gh secret set</code>, which validates nothing, stored <em>that</em> as the secret. Three
+consecutive <code>split</code> failures came out of it, each with a different and misleading
+message — <code>credential url cannot be parsed</code> (the error text contained newlines),
+then <code>Permission ... denied to github-actions[bot]</code> (a real second bug, fixed by
+<code>persist-credentials: false</code>), then <code>Invalid username or token</code>. Two lessons worth
+keeping:</p>
+<ul>
+<li><strong>A secret store accepts anything.</strong> <code>gh secret set</code> will happily store a usage
+message. If a credential is piped in, check the producing command&#39;s exit status
+first — <code>set -o pipefail</code> would have caught this at the source.</li>
+<li><strong>A green <code>split</code> tick never meant publishing worked.</strong> For three days the job
+skipped the push for want of a token, and a skipped step cannot fail. The first run
+that ever attempted a push was the first run that told the truth. This is the same
+asymmetry the workflow&#39;s own comments warn about for tags, one level up.</li>
+</ul>
+<p>A fine-grained token as described above is also <em>less</em> privilege than the OAuth one
+would have been, which carries <code>repo</code> across every repository this account owns.</p>
 <h3 id="3-prime-the-mirrors"><a class="anchor" href="#3-prime-the-mirrors">3. Prime the mirrors</a></h3>
 <p>Run the split workflow from <strong>Actions → split → Run workflow</strong>, or push to
 <code>main</code>. Both mirrors should end up with the full rewritten history of their
@@ -150,11 +193,10 @@ package page after submission. Without it a new tag can take hours to appear.</p
 <code>mobile-bundle/CHANGELOG.md</code>, move whatever is under <code>## [Unreleased]</code> beneath
 a new version heading with today&#39;s date, and fix the two link definitions at
 the bottom of each file.</p>
-<p>For <code>0.1.0</code> this is already done — both files carry a dated <code>## [0.1.0]</code> and an
-empty <code>## [Unreleased]</code>, so the only thing to do is <strong>check the date is still
-right</strong>. It was written on 2026-09-05, and the release is gated on setup that
-may have taken a while; a first release dated before the tag that carries it is
-the one thing here nobody will notice and everybody can see.</p>
+<p><strong>Write the date on the day you tag, not the day you draft.</strong> A release dated
+before the tag that carries it is the one thing here nobody will notice and
+everybody can see. <code>0.1.0</code> was drafted 2026-09-05 and dated 2026-09-08 for
+exactly that reason — the release was gated on the setup above, which took days.</p>
 </li>
 <li><p><strong>Check the suites are green on the real upstream sources</strong>, which is not the
 same as green locally on a stale clone:</p>

@@ -33,10 +33,31 @@ and one pull request.
 
 ## One-time setup
 
-**Done on 2026-09-08.** Both mirrors exist, `SPLIT_TOKEN` is set, and this
-repository is public. What follows is kept as the record of what was configured —
-read it if a mirror has to be rebuilt, if the token expires, or if the same shape
-is wanted for a third package. It is not a queue of pending work.
+**Done on 2026-09-08, with one part still outstanding.** This repository is public,
+both mirrors exist and carry the full split history, and `v0.1.0` is tagged on all
+three. What follows is the record of what was configured — read it if a mirror has to
+be rebuilt, if the token expires, or if the same shape is wanted for a third package.
+
+**The automatic push is not working yet, and step 2 is why.** `0.1.0`'s mirror
+branches and tags were pushed by hand from a clone, which is safe to do because
+`git subtree split` is deterministic: the same history over the same prefix produces
+the same commit sha every time, so a local split and the workflow's split cannot
+disagree. It was verified — the shas the workflow computed, `f36b592` and `c8b66a6`,
+are the shas that were pushed. But it is a manual step, and the next release should
+not need it. Until a valid token is in place the `split` job will **fail on every
+push**, because the secret currently set is not a token at all (see step 2), so the
+guard reads it as configured and then cannot authenticate.
+
+By hand, for the record, from a clone of this repository:
+
+```bash
+git push https://github.com/sadiqk2/nativephp-symfony-desktop-bundle.git \
+  "$(git subtree split --prefix=bundle HEAD)":refs/heads/main
+```
+
+and the same for `mobile-bundle`. For a tag, push that split sha to
+`refs/tags/vX.Y.Z` on the mirror rather than pushing this repository's tag, which
+points at a commit the mirror has never seen.
 
 Everything below needs a GitHub account with rights over the `sadiqk2`
 namespace; none of it can be done from a pull request.
@@ -66,14 +87,27 @@ push to another one. Create a **fine-grained personal access token**:
 Add it to this repository as **Settings → Secrets and variables → Actions → New
 repository secret**, named `SPLIT_TOKEN`.
 
-**What is actually installed is not that.** The `SPLIT_TOKEN` set on 2026-09-08 is
-the `gh` CLI's own OAuth token, which carries `repo` and `workflow` across *every*
-repository this account owns — chosen to get `0.1.0` out without a browser detour.
-It works, and it is more privilege than this job needs: a public repository's
-Actions secret is not readable by a fork's pull request, but any workflow change
-merged here can read it. Replacing it with the fine-grained token above is a
-drop-in swap — same secret name, no workflow change — and is worth doing before
-this repository takes contributions from anyone else.
+**The `SPLIT_TOKEN` currently set is not a token — delete it and follow the above.**
+It was meant to be the `gh` CLI's own OAuth token, to save a browser detour. But the
+`gh` on the machine it was taken from is 2.4.0, which has no `gh auth token`
+subcommand: the command exited 1 and wrote its error text to stdout, and
+`gh secret set`, which validates nothing, stored *that* as the secret. Three
+consecutive `split` failures came out of it, each with a different and misleading
+message — `credential url cannot be parsed` (the error text contained newlines),
+then `Permission ... denied to github-actions[bot]` (a real second bug, fixed by
+`persist-credentials: false`), then `Invalid username or token`. Two lessons worth
+keeping:
+
+- **A secret store accepts anything.** `gh secret set` will happily store a usage
+  message. If a credential is piped in, check the producing command's exit status
+  first — `set -o pipefail` would have caught this at the source.
+- **A green `split` tick never meant publishing worked.** For three days the job
+  skipped the push for want of a token, and a skipped step cannot fail. The first run
+  that ever attempted a push was the first run that told the truth. This is the same
+  asymmetry the workflow's own comments warn about for tags, one level up.
+
+A fine-grained token as described above is also *less* privilege than the OAuth one
+would have been, which carries `repo` across every repository this account owns.
 
 ### 3. Prime the mirrors
 
