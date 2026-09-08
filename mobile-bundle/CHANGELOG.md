@@ -9,7 +9,7 @@ until `1.0.0`.
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-09-05
+## [0.1.0] - 2026-09-08
 
 First public release. Read the caveat under **Not verified** before shipping
 anything with it.

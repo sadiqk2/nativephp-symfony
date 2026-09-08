@@ -9,7 +9,7 @@ until `1.0.0`.
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-09-05
+## [0.1.0] - 2026-09-08
 
 First public release. The desktop half of the port is complete and has been
 verified by a packaged application that was built *and run*, not only by tests.

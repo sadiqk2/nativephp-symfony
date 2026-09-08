@@ -33,6 +33,11 @@ and one pull request.
 
 ## One-time setup
 
+**Done on 2026-09-08.** Both mirrors exist, `SPLIT_TOKEN` is set, and this
+repository is public. What follows is kept as the record of what was configured —
+read it if a mirror has to be rebuilt, if the token expires, or if the same shape
+is wanted for a third package. It is not a queue of pending work.
+
 Everything below needs a GitHub account with rights over the `sadiqk2`
 namespace; none of it can be done from a pull request.
 
@@ -60,6 +65,15 @@ push to another one. Create a **fine-grained personal access token**:
 
 Add it to this repository as **Settings → Secrets and variables → Actions → New
 repository secret**, named `SPLIT_TOKEN`.
+
+**What is actually installed is not that.** The `SPLIT_TOKEN` set on 2026-09-08 is
+the `gh` CLI's own OAuth token, which carries `repo` and `workflow` across *every*
+repository this account owns — chosen to get `0.1.0` out without a browser detour.
+It works, and it is more privilege than this job needs: a public repository's
+Actions secret is not readable by a fork's pull request, but any workflow change
+merged here can read it. Replacing it with the fine-grained token above is a
+drop-in swap — same secret name, no workflow change — and is worth doing before
+this repository takes contributions from anyone else.
 
 ### 3. Prime the mirrors
 
@@ -96,11 +110,10 @@ package page after submission. Without it a new tag can take hours to appear.
    a new version heading with today's date, and fix the two link definitions at
    the bottom of each file.
 
-   For `0.1.0` this is already done — both files carry a dated `## [0.1.0]` and an
-   empty `## [Unreleased]`, so the only thing to do is **check the date is still
-   right**. It was written on 2026-09-05, and the release is gated on setup that
-   may have taken a while; a first release dated before the tag that carries it is
-   the one thing here nobody will notice and everybody can see.
+   **Write the date on the day you tag, not the day you draft.** A release dated
+   before the tag that carries it is the one thing here nobody will notice and
+   everybody can see. `0.1.0` was drafted 2026-09-05 and dated 2026-09-08 for
+   exactly that reason — the release was gated on the setup above, which took days.
 
 2. **Check the suites are green on the real upstream sources**, which is not the
    same as green locally on a stale clone:
