@@ -60,9 +60,19 @@ jobs:
       # The whole history: `git subtree split` rewrites every commit that touched the
       # prefix, so a shallow clone would produce a mirror whose history begins at an
       # arbitrary point and whose commit shas change on the next run.
+      #
+      # `persist-credentials: false` because checkout otherwise writes the job's
+      # GITHUB_TOKEN into this repository's git config as
+      # `http.https://github.com/.extraheader`, and that header applies to every
+      # github.com request the job makes — outranking the credentials in the mirror URL
+      # below. The push would then authenticate as github-actions[bot], which is scoped
+      # to this repository alone, and be refused with a 403 that names the bot rather
+      # than anything about SPLIT_TOKEN. The split is a local history rewrite and needs
+      # no credential of its own, so dropping the persisted one costs nothing.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       # A missing token is fatal on a tag and on a manual run, and a skip on a routine
       # push to a branch. The asymmetry is the point. A release that silently fails to
