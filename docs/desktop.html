@@ -88,11 +88,6 @@ at it.</p>
 </figure>
 <p><code>^0.1</code> pins to <code>0.1.*</code> deliberately: this is a <code>0.x</code> project, so under SemVer the minor
 number is where breaking changes live.</p>
-<blockquote>
-<p><strong>Not yet submitted to Packagist</strong>, so this resolves once the one-time publishing setup in
-<a href="releasing.html#one-time-setup">RELEASING.md</a> has been done. Until then, use the checkout
-route below. Delete this note when the package resolves.</p>
-</blockquote>
 <p>To work against a checkout instead — to try an unreleased fix, or because you are changing
 the bundle — clone this repository and add a path repository pointing at <code>bundle/</code>, with
 <code>&quot;symlink&quot;: true</code>; without it Composer caches a copy and edits to the bundle appear to do

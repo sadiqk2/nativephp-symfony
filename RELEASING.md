@@ -226,24 +226,23 @@ package page after submission. Without it a new tag can take hours to appear.
    That is the only check that proves the whole chain — tag, split, mirror, hook,
    Packagist, resolver — actually joins up.
 
-8. **Delete the three "not yet submitted to Packagist" notes**, which exist so the install
-   instructions are not a lie in the meantime:
+8. **Say that the packages resolve — done here.** Three notes existed so that the install
+   instructions were not a lie in the meantime, one on each page that carries a
+   `composer require`, and this commit removes all three:
 
    - `README.md`, under *0. Install the packages*
    - `docs/getting-started-desktop.md`, under *1. Install the bundle*
    - `docs/getting-started-mobile.md`, under *1. Install*
 
-   Then rebuild the documentation site, since all three are pages on it. Steps 1 to 4 above
-   are one-time; this one goes with them.
+   The same commit adds the two Packagist version badges to the README's badge row, which
+   deliberately carried none before. The documentation site is rebuilt, since all three are
+   pages on it.
 
-   Same edit, same reason: the README's badge row deliberately carries no Packagist badges
-   yet, because a badge for a package that does not exist renders as a broken image. Add
-   them once the packages resolve:
-
-   ```markdown
-   [![desktop-bundle](https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-desktop-bundle)](https://packagist.org/packages/sadiqk2/nativephp-symfony-desktop-bundle)
-   [![mobile-bundle](https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-mobile-bundle)](https://packagist.org/packages/sadiqk2/nativephp-symfony-mobile-bundle)
-   ```
+   **This is why the change is one commit and merges last.** A version badge for a package
+   Packagist does not serve renders as a broken image, and a deleted caveat is a claim: both
+   are wrong in exactly the window between writing them and step 7 passing. Merging this
+   before `composer require` actually resolves puts a lie on the front page — which is what
+   the first attempt did, under a vendor name Packagist went on to block.
 
 ## Versioning
 
