@@ -1,8 +1,8 @@
 # Deskpad — the demo application
 
 A small notes app, built with Symfony 8, running in a native window on NativePHP's
-Electron runtime. It installs **both** bundles — `native-symfony/desktop-bundle` and
-`native-symfony/mobile-bundle` — and it doubles as their integration test: everything
+Electron runtime. It installs **both** bundles — `sadiqk2/nativephp-symfony-desktop-bundle` and
+`sadiqk2/nativephp-symfony-mobile-bundle` — and it doubles as their integration test: everything
 below was captured by booting the real runtime headlessly and driving it.
 
 ![The dashboard, and a second window](shot-dashboard.png)

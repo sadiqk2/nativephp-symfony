@@ -129,7 +129,8 @@ knowable from the open-source client. Still needs @simonhamp.
 ### 4. A composer path repo copied rather than symlinked into the build
 
 The demo consumes the bundle through a path repo with `symlink: true`, so I expected the
-staged `vendor/native-symfony/desktop-bundle` to be a dangling symlink in the artifact.
+staged `vendor/sadiqk2/nativephp-symfony-desktop-bundle` to be a dangling symlink in
+the artifact.
 It came out as a real directory — `composer install --no-dev` in the build directory
 materialised it. Convenient, but not something to rely on: a real distribution should
 install the bundle from a registry, and anyone building from a path repo should check the

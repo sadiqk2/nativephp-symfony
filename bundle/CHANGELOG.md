@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `native-symfony/desktop-bundle`.
+All notable changes to `sadiqk2/nativephp-symfony-desktop-bundle`.
 
 The format is [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) — with
@@ -8,6 +8,20 @@ the caveat every `0.x` carries: the minor number is where breaking changes live
 until `1.0.0`.
 
 ## [Unreleased]
+
+## [0.1.1] - 2026-09-09
+
+The package is renamed. `native-symfony/desktop-bundle` was never published:
+Packagist blocks vendor names carrying a framework's trademark, so `0.1.0` could
+not be submitted under it. This release is `0.1.0`'s code under a name that can be.
+
+### Changed
+
+- **Renamed to `sadiqk2/nativephp-symfony-desktop-bundle`** from
+  `native-symfony/desktop-bundle`. No class, service id, configuration key or
+  console command changed — a Composer vendor name and a PHP namespace are
+  separate things, and `Native\Symfony\Desktop\` is untouched. Nobody can be
+  installing the old name, because it was never on Packagist.
 
 ## [0.1.0] - 2026-09-08
 
@@ -56,5 +70,6 @@ verified by a packaged application that was built *and run*, not only by tests.
   runs them before its API server exists and `JSON.parse`s their stdout, so
   anything an application echoes during console boot breaks the parse silently.
 
-[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.1
 [0.1.0]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.0

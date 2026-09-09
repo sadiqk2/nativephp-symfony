@@ -53,7 +53,7 @@ Consequently there is no dev-server loop like `native:run`. What replaces it is
 ## 1. Install
 
 ```bash
-composer require native-symfony/mobile-bundle:^0.1
+composer require sadiqk2/nativephp-symfony-mobile-bundle:^0.1
 ```
 
 > **Not yet submitted to Packagist**, so this resolves once the one-time publishing setup in
@@ -76,7 +76,7 @@ the bundle appear to do nothing. [`demo/composer.json`](../demo/composer.json) i
 example. On that route the constraint has to carry a stability flag:
 
 ```bash
-composer require native-symfony/mobile-bundle:^0.1@dev
+composer require sadiqk2/nativephp-symfony-mobile-bundle:^0.1@dev
 ```
 
 The manifest deliberately has no `version` field — Composer takes a released version from the

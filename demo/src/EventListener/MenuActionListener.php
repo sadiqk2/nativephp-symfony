@@ -79,7 +79,7 @@ final class MenuActionListener
         // user action in a window, where blocking is what the user asked for.
         $this->notifications->create()
             ->title('Deskpad')
-            ->body('A demo app for native-symfony/desktop-bundle')
+            ->body('A demo app for sadiqk2/nativephp-symfony-desktop-bundle')
             ->show();
     }
 

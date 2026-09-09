@@ -12,7 +12,7 @@ at it.
 ## 1. Install the bundle
 
 ```bash
-composer require native-symfony/desktop-bundle:^0.1
+composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1
 ```
 
 `^0.1` pins to `0.1.*` deliberately: this is a `0.x` project, so under SemVer the minor
@@ -31,7 +31,7 @@ this step is unaffected by how the package arrived.
 On that route the constraint has to carry a stability flag:
 
 ```bash
-composer require native-symfony/desktop-bundle:^0.1@dev
+composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1@dev
 ```
 
 The manifest deliberately has no `version` field — Composer takes a released version from the

@@ -17,8 +17,8 @@ full API, packaged into a distributable app that has been built *and run*.
 
 | | |
 |---|---|
-| **[`bundle/`](bundle/README.md)** | `native-symfony/desktop-bundle` — desktop. All 118 runtime endpoints, all 46 events, 582 tests. Verified by a running packaged app. |
-| **[`mobile-bundle/`](mobile-bundle/README.md)** | `native-symfony/mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 588 tests. Verified by tests, **not** by a device. |
+| **[`bundle/`](bundle/README.md)** | `sadiqk2/nativephp-symfony-desktop-bundle` — desktop. All 118 runtime endpoints, all 46 events, 582 tests. Verified by a running packaged app. |
+| **[`mobile-bundle/`](mobile-bundle/README.md)** | `sadiqk2/nativephp-symfony-mobile-bundle` — iOS and Android. All 54 bridge methods, the SAPI shim, the persistent runtime, and the full native-UI path — element trees, style parser, routing and components — byte-identical to upstream. 588 tests. Verified by tests, **not** by a device. |
 | [`spike/`](spike/README.md) | The reproduction harness: a container with PHP 8.4 + Node 22 + Electron, the runtime patch, and headless runners that screenshot the result. |
 | [`upstream-patches/`](upstream-patches/README.md) | Eleven patches: seven against `NativePHP/desktop`, four against `NativePHP/mobile-air`. **Four have landed in upstream's `main`**; six are open PRs ([#138](https://github.com/NativePHP/desktop/pull/138), [#139](https://github.com/NativePHP/desktop/pull/139), [#349–#352](https://github.com/NativePHP/mobile-air/pulls?q=is%3Apr+author%3Asadiqk2)), and the manifest patch is the one still held. |
 | `upstream/` | Shallow reference clones of `NativePHP/desktop` and `NativePHP/mobile-air` (gitignored; clone on demand). |
@@ -35,8 +35,8 @@ You need PHP 8.3+, Symfony 7 or 8, and (for desktop) Node 20+ and `git`.
 ### 0. Install the packages
 
 ```bash
-composer require native-symfony/desktop-bundle:^0.1   # desktop
-composer require native-symfony/mobile-bundle:^0.1    # iOS and Android
+composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1   # desktop
+composer require sadiqk2/nativephp-symfony-mobile-bundle:^0.1    # iOS and Android
 ```
 
 Take one or both — they share no code and neither requires the other. `^0.1` pins to `0.1.*`
@@ -47,11 +47,13 @@ Both are published from this repository by subtree split, so the Packagist entri
 read-only mirrors and everything — issues, pull requests, the history — lives here. See
 [RELEASING.md](RELEASING.md).
 
-> **Not yet submitted to Packagist.** Everything needed to publish is in place — the mirrors
-> are produced automatically on push and tag — but creating the two mirror repositories, the
-> push token and the Packagist entries needs an account, not a commit. See
-> [RELEASING.md § one-time setup](RELEASING.md#one-time-setup); until it is done, use the
-> checkout route below. Delete this note when the packages resolve.
+> **Not yet on Packagist.** The mirrors exist and carry the full history, but the first
+> submission was refused: Packagist blocks any vendor name carrying a framework's
+> trademark, and `native-symfony/*` — the name up to `0.1.0` — is one. The packages are
+> renamed to `sadiqk2/*` here, which needs a fresh tag, because Packagist reads
+> `composer.json` out of each tag and every `v0.1.0` tree still says the old name. See
+> [RELEASING.md § one-time setup](RELEASING.md#one-time-setup); until `v0.1.1` is
+> submitted, use the checkout route below. Delete this note when the packages resolve.
 
 <details>
 <summary>Working against a checkout instead</summary>
@@ -71,8 +73,8 @@ git clone https://github.com/sadiqk2/nativephp-symfony /path/to/nativephp-symfon
 ```
 
 ```bash
-composer require native-symfony/desktop-bundle:^0.1@dev   # desktop
-composer require native-symfony/mobile-bundle:^0.1@dev    # iOS and Android
+composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1@dev   # desktop
+composer require sadiqk2/nativephp-symfony-mobile-bundle:^0.1@dev    # iOS and Android
 ```
 
 **`@dev` is not optional on this route, and only on this route.** Neither `composer.json`
@@ -388,7 +390,8 @@ an Android SDK, running `native:mobile:build` on the demo and
 MIT, matching `nativephp/desktop`. Changelogs: [desktop](bundle/CHANGELOG.md),
 [mobile](mobile-bundle/CHANGELOG.md).
 
-The `native-symfony` vendor name is deliberate rather than a placeholder: `nativephp/*` is
-someone else's brand and this does not claim it. The courtesy conversation with upstream is
-still owed, and it comes before `1.0.0` rather than before publishing under a name nobody
-else is using.
+The packages are published under `sadiqk2/*` because that is a namespace nobody else has a
+claim on. `nativephp/*` is someone else's brand and this does not claim it, and
+`native-symfony/*` — the name used up to 0.1.0 — is blocked by Packagist, which rejects any
+vendor name carrying a framework's trademark. The courtesy conversation with upstream is
+still owed, and it comes before `1.0.0`.

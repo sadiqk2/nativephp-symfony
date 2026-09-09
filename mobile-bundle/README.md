@@ -1,4 +1,4 @@
-# native-symfony/mobile-bundle
+# sadiqk2/nativephp-symfony-mobile-bundle
 
 Build iOS and Android applications with Symfony, on NativePHP's mobile runtime.
 
@@ -60,7 +60,7 @@ Sixteen autowired API services: `Biometric`, `Browser`, `Camera`, `Device`, `Dia
 ## Install
 
 ```bash
-composer require native-symfony/mobile-bundle
+composer require sadiqk2/nativephp-symfony-mobile-bundle
 
 git clone --depth 1 https://github.com/NativePHP/mobile-air /tmp/np-mobile
 bin/console native:mobile:install --source=/tmp/np-mobile/resources

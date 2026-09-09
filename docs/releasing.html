@@ -54,16 +54,16 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
 <a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
 <p class="nav-group">The packages</p>
-<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
-<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in sadiqk2/nativephp-symfony-desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in sadiqk2/nativephp-symfony-mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
 <a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
 <p class="nav-group">Contributing</p>
 <a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
 <a class="nav-item active" href="releasing.html" aria-current="page"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
 <a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
-<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
-<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">sadiqk2/nativephp-symfony-desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">sadiqk2/nativephp-symfony-mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -76,10 +76,12 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
         <article class="prose">
 <h1 id="releasing"><a class="anchor" href="#releasing">Releasing</a></h1>
 <p>Two packages are published from this one repository:</p>
-<div class="table-scroll"><table><thead><tr><th>Package</th><th>Mirror repository</th></tr></thead><tbody>
-<tr><td><code>native-symfony/desktop-bundle</code></td><td><code>sadiqk2/nativephp-symfony-desktop-bundle</code></td></tr>
-<tr><td><code>native-symfony/mobile-bundle</code></td><td><code>sadiqk2/nativephp-symfony-mobile-bundle</code></td></tr>
+<div class="table-scroll"><table><thead><tr><th>Directory</th><th>Package, and the mirror repository it is published from</th></tr></thead><tbody>
+<tr><td><code>bundle/</code></td><td><code>sadiqk2/nativephp-symfony-desktop-bundle</code></td></tr>
+<tr><td><code>mobile-bundle/</code></td><td><code>sadiqk2/nativephp-symfony-mobile-bundle</code></td></tr>
 </tbody></table></div>
+<p>The package name and the mirror repository name are the same on purpose: whoever
+lands on one from Packagist should not have to work out which repository it is.</p>
 <h2 id="why-there-are-mirrors-at-all"><a class="anchor" href="#why-there-are-mirrors-at-all">Why there are mirrors at all</a></h2>
 <p><strong>Packagist reads a <code>composer.json</code> at a repository root.</strong> It has no notion of a
 package living in a subdirectory, and no plan to acquire one — so a monorepo
@@ -100,10 +102,18 @@ the job fails.</p>
 they are, one clone holds both, and a change touching both is still one commit
 and one pull request.</p>
 <h2 id="one-time-setup"><a class="anchor" href="#one-time-setup">One-time setup</a></h2>
-<p><strong>Done on 2026-09-08, with one part still outstanding.</strong> This repository is public,
+<p><strong>Done on 2026-09-08, with two parts still outstanding.</strong> This repository is public,
 both mirrors exist and carry the full split history, and <code>v0.1.0</code> is tagged on all
 three. What follows is the record of what was configured — read it if a mirror has to
 be rebuilt, if the token expires, or if the same shape is wanted for a third package.</p>
+<p><strong><code>v0.1.0</code> cannot be published, under any name.</strong> Packagist reads <code>composer.json</code>
+out of each <em>tag</em>, not only out of the default branch, and every <code>v0.1.0</code> tree says
+<code>native-symfony/*</code> — the blocked name. A tag whose package name does not match the
+registered package is discarded, silently, as one absent version rather than as an
+error. So the rename needs a new tag: <code>v0.1.1</code> is the first version any of this can
+serve, and <code>v0.1.0</code> stays in the history as the release that existed but never
+shipped. Force-moving the old tag across three repositories was the alternative and
+is worse — it rewrites a published ref to mean something else.</p>
 <p><strong>The automatic push is not working yet, and step 2 is why.</strong> <code>0.1.0</code>&#39;s mirror
 branches and tags were pushed by hand from a clone, which is safe to do because
 <code>git subtree split</code> is deterministic: the same history over the same prefix produces
@@ -183,7 +193,19 @@ each <strong>mirror</strong> URL — never this repository:</p>
 https://github.com/sadiqk2/nativephp-symfony-mobile-bundle</code></pre>
 </figure>
 <p>Packagist reads the package name out of each <code>composer.json</code>, so they register as
-<code>native-symfony/desktop-bundle</code> and <code>native-symfony/mobile-bundle</code>.</p>
+<code>sadiqk2/nativephp-symfony-desktop-bundle</code> and <code>sadiqk2/nativephp-symfony-mobile-bundle</code>.</p>
+<p><strong>Submitting is also where a vendor name is accepted or refused</strong>, which is how the
+first attempt ended:</p>
+<blockquote>
+<p>The vendor name native-symfony is blocked, if you think this is a mistake please
+get in touch with us.</p>
+</blockquote>
+<p>Packagist keeps a blocklist of vendor names carrying a framework&#39;s trademark. The
+vendor half of a package name is the part that says <em>who publishes this</em>, so
+<code>native-symfony/*</code> reads as Symfony publishing it — which is exactly what a
+blocklist exists to prevent, and no amount of good faith in the package changes how
+the name reads to someone typing <code>composer require</code>. There was nothing to appeal.
+An account namespace, <code>sadiqk2/*</code>, is the one thing no policy can withdraw.</p>
 <p>Then enable the <strong>GitHub service hook</strong> on each mirror so Packagist updates on
 push rather than on its crawl schedule: Packagist shows the exact steps on the
 package page after submission. Without it a new tag can take hours to appear.</p>
@@ -243,7 +265,7 @@ rather than at this repository&#39;s commit — the mirror has never seen that o
 minute or two if the service hook is enabled. Then, from a scratch directory:</p>
 <figure class="code">
 <figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
-<pre><code class="language-bash">composer require native-symfony/desktop-bundle:^0.1</code></pre>
+<pre><code class="language-bash">composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1</code></pre>
 </figure>
 <p>That is the only check that proves the whole chain — tag, split, mirror, hook,
 Packagist, resolver — actually joins up.</p>
@@ -262,8 +284,8 @@ yet, because a badge for a package that does not exist renders as a broken image
 them once the packages resolve:</p>
 <figure class="code">
 <figcaption><span class="code-lang">markdown</span><button class="copy" type="button">Copy</button></figcaption>
-<pre><code class="language-markdown">[<span class="hljs-string">![desktop-bundle</span>](<span class="hljs-link">https://img.shields.io/packagist/v/native-symfony/desktop-bundle</span>)](<span class="hljs-link">https://packagist.org/packages/native-symfony/desktop-bundle</span>)
-[<span class="hljs-string">![mobile-bundle</span>](<span class="hljs-link">https://img.shields.io/packagist/v/native-symfony/mobile-bundle</span>)](<span class="hljs-link">https://packagist.org/packages/native-symfony/mobile-bundle</span>)</code></pre>
+<pre><code class="language-markdown">[<span class="hljs-string">![desktop-bundle</span>](<span class="hljs-link">https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-desktop-bundle</span>)](<span class="hljs-link">https://packagist.org/packages/sadiqk2/nativephp-symfony-desktop-bundle</span>)
+[<span class="hljs-string">![mobile-bundle</span>](<span class="hljs-link">https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-mobile-bundle</span>)](<span class="hljs-link">https://packagist.org/packages/sadiqk2/nativephp-symfony-mobile-bundle</span>)</code></pre>
 </figure>
 </li>
 </ol>
@@ -300,9 +322,15 @@ retire <code>RuntimePatcher</code> entirely. Until it lands, every application p
 own copy of the runtime — which works, and is tested, but is not the shape this
 should settle into.</li>
 </ul>
-<p>The vendor name is the other open question: <code>native-symfony</code> is free on Packagist
-and does not claim NativePHP&#39;s brand, but the courtesy conversation with upstream
-comes before <code>1.0.0</code>, not after.</p>
+<p>The vendor name is settled, the hard way. <code>native-symfony</code> was the name up to
+0.1.0, and Packagist refused it: <strong>the vendor name native-symfony is blocked.</strong>
+Packagist blocks vendor names carrying a framework&#39;s trademark, because the vendor
+half of a package name is what says who publishes it, and <code>native-symfony/*</code> reads
+as Symfony publishing it. Nothing about the code had to change — a Composer vendor
+and a PHP namespace are separate things, and <code>Native\Symfony\...</code> stays as it is,
+since Packagist has no say over namespaces. Only the two <code>composer.json</code> names
+moved, to <code>sadiqk2/*</code>, an account namespace no policy can take away.</p>
+<p>The courtesy conversation with upstream is still owed, and comes before <code>1.0.0</code>.</p>
 
         </article>
 
@@ -313,7 +341,7 @@ comes before <code>1.0.0</code>, not after.</p>
 
         <footer class="footer">
             <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/RELEASING.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+            <p>MIT. Published under <code>sadiqk2/*</code> — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
 

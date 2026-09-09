@@ -4,12 +4,12 @@ Two packages live here, and they share no code:
 
 | | |
 |---|---|
-| [`bundle/`](bundle/) | `native-symfony/desktop-bundle` |
-| [`mobile-bundle/`](mobile-bundle/) | `native-symfony/mobile-bundle` |
+| [`bundle/`](bundle/) | `sadiqk2/nativephp-symfony-desktop-bundle` |
+| [`mobile-bundle/`](mobile-bundle/) | `sadiqk2/nativephp-symfony-mobile-bundle` |
 
-They are published from this repository by an automatic subtree split — the
-`native-symfony/*` repositories on GitHub are **read-only mirrors**. Every change,
-issue and pull request belongs here. See [RELEASING.md](RELEASING.md) for how the
+They are published from this repository by an automatic subtree split — the two
+mirror repositories on GitHub are **read-only**. Every change, issue and pull
+request belongs here. See [RELEASING.md](RELEASING.md) for how the
 mirrors are produced.
 
 ## The thing to know before anything else

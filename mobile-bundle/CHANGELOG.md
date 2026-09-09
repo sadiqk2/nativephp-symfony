@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to `native-symfony/mobile-bundle`.
+All notable changes to `sadiqk2/nativephp-symfony-mobile-bundle`.
 
 The format is [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this
 project follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html) — with
@@ -8,6 +8,24 @@ the caveat every `0.x` carries: the minor number is where breaking changes live
 until `1.0.0`.
 
 ## [Unreleased]
+
+## [0.1.1] - 2026-09-09
+
+The package is renamed. `native-symfony/mobile-bundle` was never published:
+Packagist blocks vendor names carrying a framework's trademark, so `0.1.0` could
+not be submitted under it. This release is `0.1.0`'s code under a name that can be.
+
+### Changed
+
+- **Renamed to `sadiqk2/nativephp-symfony-mobile-bundle`** from
+  `native-symfony/mobile-bundle`. No class, service id, configuration key or
+  console command changed — a Composer vendor name and a PHP namespace are
+  separate things, and `Native\Symfony\Mobile\` is untouched. Nobody can be
+  installing the old name, because it was never on Packagist.
+- **`MobileRuntimePatcher::SHIM_DIR`** now points at
+  `vendor/sadiqk2/nativephp-symfony-mobile-bundle/src/Resources/bootstrap`. The
+  constant holds an install path, so it had to follow the package name; a stale
+  value would leave `native:mobile:install` unable to find the SAPI shim it copies.
 
 ## [0.1.0] - 2026-09-08
 
@@ -54,5 +72,6 @@ single most valuable contribution anyone with a Mac or an Android SDK can make.
   Mobile is sold as a product, though the `mobile-air` repository itself is MIT.
   Read its terms rather than either summary.
 
-[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.1
 [0.1.0]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.0

@@ -39,7 +39,7 @@ namespace Native\Symfony\Mobile\Runtime;
 final class MobileRuntimePatcher
 {
     /** Where our shim lives, relative to the app root. */
-    public const SHIM_DIR = 'vendor/native-symfony/mobile-bundle/src/Resources/bootstrap';
+    public const SHIM_DIR = 'vendor/sadiqk2/nativephp-symfony-mobile-bundle/src/Resources/bootstrap';
 
     /**
      * The PHP the hosts evaluate, and what it has to become.

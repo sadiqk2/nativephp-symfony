@@ -1,4 +1,4 @@
-# native-symfony/desktop-bundle
+# sadiqk2/nativephp-symfony-desktop-bundle
 
 Build desktop applications with Symfony, on NativePHP's Electron runtime.
 
@@ -47,7 +47,7 @@ Autowired services, no facades: `WindowManager`, `AppManager`, `NativePaths`,
 ## Install
 
 ```bash
-composer require native-symfony/desktop-bundle
+composer require sadiqk2/nativephp-symfony-desktop-bundle
 
 # The runtime lives in your project, not in vendor/ — see "Why patch?" below.
 git clone --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop

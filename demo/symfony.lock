@@ -1,8 +1,8 @@
 {
-    "native-symfony/desktop-bundle": {
+    "sadiqk2/nativephp-symfony-desktop-bundle": {
         "version": "0.1.0"
     },
-    "native-symfony/mobile-bundle": {
+    "sadiqk2/nativephp-symfony-mobile-bundle": {
         "version": "0.1.0"
     },
     "symfony/console": {
