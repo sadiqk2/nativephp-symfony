@@ -1,6 +1,6 @@
 <!--
 Both packages are published from this repository by subtree split; the
-native-symfony/* repositories are read-only mirrors. Pull requests belong here.
+mirror repositories are read-only. Pull requests belong here.
 -->
 
 ## What this changes

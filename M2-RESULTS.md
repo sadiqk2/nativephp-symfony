@@ -1,7 +1,7 @@
 # M2 — the bundle
 
-A real Symfony bundle, `native-symfony/desktop-bundle`, replacing the spike's inline
-classes.
+A real Symfony bundle, `sadiqk2/nativephp-symfony-desktop-bundle`, replacing the
+spike's inline classes.
 
 **Phase 2 is complete: all 116 runtime endpoints and all 44 events are implemented**,
 verified by a test that parses the runtime's own express routers. 222 tests, 400

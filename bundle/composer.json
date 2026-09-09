@@ -1,5 +1,5 @@
 {
-    "name": "native-symfony/desktop-bundle",
+    "name": "sadiqk2/nativephp-symfony-desktop-bundle",
     "description": "Build desktop applications with Symfony and PHP, on the NativePHP Electron runtime",
     "keywords": [
         "symfony",

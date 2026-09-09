@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Desktop bundle · NativePHP for Symfony</title>
-<meta name="description" content="What ships in native-symfony/desktop-bundle — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="description" content="What ships in sadiqk2/nativephp-symfony-desktop-bundle — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
@@ -54,16 +54,16 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
 <a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
 <p class="nav-group">The packages</p>
-<a class="nav-item active" href="desktop-bundle.html" aria-current="page"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
-<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item active" href="desktop-bundle.html" aria-current="page"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in sadiqk2/nativephp-symfony-desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in sadiqk2/nativephp-symfony-mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
 <a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
 <p class="nav-group">Contributing</p>
 <a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
 <a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
 <a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
-<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
-<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">sadiqk2/nativephp-symfony-desktop-bundle, by version</span></a>
+<a class="nav-item" href="mobile-changelog.html"><span class="nav-name">Mobile changelog</span><span class="nav-hint">sadiqk2/nativephp-symfony-mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -74,7 +74,7 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 
     <main id="main">
         <article class="prose">
-<h1 id="native-symfonydesktop-bundle"><a class="anchor" href="#native-symfonydesktop-bundle">native-symfony/desktop-bundle</a></h1>
+<h1 id="sadiqk2nativephp-symfony-desktop-bundle"><a class="anchor" href="#sadiqk2nativephp-symfony-desktop-bundle">sadiqk2/nativephp-symfony-desktop-bundle</a></h1>
 <p>Build desktop applications with Symfony, on NativePHP&#39;s Electron runtime.</p>
 <p>Status: <strong>M3 complete.</strong> All <strong>118 runtime endpoints</strong> and all <strong>46 events</strong> are
 implemented, and <code>native:build</code> produces a distributable app that has been <strong>built and
@@ -116,7 +116,7 @@ comes before claiming it.</p>
 <h2 id="install"><a class="anchor" href="#install">Install</a></h2>
 <figure class="code">
 <figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
-<pre><code class="language-bash">composer require native-symfony/desktop-bundle
+<pre><code class="language-bash">composer require sadiqk2/nativephp-symfony-desktop-bundle
 
 <span class="hljs-comment"># The runtime lives in your project, not in vendor/ — see &quot;Why patch?&quot; below.</span>
 git <span class="hljs-built_in">clone</span> --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop
@@ -245,7 +245,7 @@ dialog cannot mean &quot;yes&quot;, and that the dock is a no-op off macOS.</p>
 
         <footer class="footer">
             <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/bundle/README.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+            <p>MIT. Published under <code>sadiqk2/*</code> — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
 

@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  * Everything `src/` imports has to be a package this bundle declares.
  *
  * The failure this catches is invisible at install time and total at run time:
- * `composer require native-symfony/desktop-bundle` succeeds, the class is there because
+ * `composer require sadiqk2/nativephp-symfony-desktop-bundle` succeeds, the class is there because
  * something else in the tree happened to pull the component in, and the feature dies with
  * a class-not-found the first time anyone reaches it. That is the shape the undeclared
  * `ext-zip` had, and the shape `symfony/routing` had in the mobile bundle, where an install

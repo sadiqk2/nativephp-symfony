@@ -61,8 +61,8 @@ const NAV = [
     { src: 'PLAN.md', slug: 'plan', title: 'Plan', blurb: 'The milestones, and where each one landed' },
 
     { group: 'The packages' },
-    { src: 'bundle/README.md', slug: 'desktop-bundle', title: 'Desktop bundle', blurb: 'What ships in native-symfony/desktop-bundle' },
-    { src: 'mobile-bundle/README.md', slug: 'mobile-bundle', title: 'Mobile bundle', blurb: 'What ships in native-symfony/mobile-bundle' },
+    { src: 'bundle/README.md', slug: 'desktop-bundle', title: 'Desktop bundle', blurb: 'What ships in sadiqk2/nativephp-symfony-desktop-bundle' },
+    { src: 'mobile-bundle/README.md', slug: 'mobile-bundle', title: 'Mobile bundle', blurb: 'What ships in sadiqk2/nativephp-symfony-mobile-bundle' },
     { src: 'demo/README.md', slug: 'demo', title: 'The demo app', blurb: 'Deskpad: both bundles, driven end to end' },
     { src: 'upstream-patches/README.md', slug: 'upstream-patches', title: 'Upstream patches', blurb: 'Eleven fixes: four landed, six open' },
 
@@ -70,8 +70,8 @@ const NAV = [
     { src: 'CONTRIBUTING.md', slug: 'contributing', title: 'Contributing', blurb: 'The dev loop, and what a change needs' },
     { src: 'RELEASING.md', slug: 'releasing', title: 'Releasing', blurb: 'The subtree split, and how Packagist sees it' },
     { src: 'SECURITY.md', slug: 'security', title: 'Security', blurb: 'The trust boundary, and how to report' },
-    { src: 'bundle/CHANGELOG.md', slug: 'desktop-changelog', title: 'Desktop changelog', blurb: 'native-symfony/desktop-bundle, by version' },
-    { src: 'mobile-bundle/CHANGELOG.md', slug: 'mobile-changelog', title: 'Mobile changelog', blurb: 'native-symfony/mobile-bundle, by version' },
+    { src: 'bundle/CHANGELOG.md', slug: 'desktop-changelog', title: 'Desktop changelog', blurb: 'sadiqk2/nativephp-symfony-desktop-bundle, by version' },
+    { src: 'mobile-bundle/CHANGELOG.md', slug: 'mobile-changelog', title: 'Mobile changelog', blurb: 'sadiqk2/nativephp-symfony-mobile-bundle, by version' },
 
     { group: 'Record' },
     { src: 'SPIKE-RESULTS.md', slug: 'spike-results', title: 'M1 — the spike', blurb: 'Proving it possible at all' },
@@ -284,7 +284,7 @@ ${body}
 
         <footer class="footer">
             <a href="${BLOB}/${page.src}" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+            <p>MIT. Published under <code>sadiqk2/*</code> — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
 
@@ -356,7 +356,7 @@ const HERO = `<section class="hero">
     <p class="quickstart-head">Desktop, from nothing</p>
     <figure class="code"><figcaption><span class="code-lang">bash</span><button class="copy" type="button">Copy</button></figcaption>
 <pre><code class="language-bash">${highlight(
-    `composer require native-symfony/desktop-bundle:^0.1
+    `composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1
 
 # bring the Electron runtime into the project and retarget it at Symfony
 git clone --depth 1 https://github.com/NativePHP/desktop /tmp/np-desktop

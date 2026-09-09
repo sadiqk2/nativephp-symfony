@@ -2,10 +2,13 @@
 
 Two packages are published from this one repository:
 
-| Package | Mirror repository |
+| Directory | Package, and the mirror repository it is published from |
 |---|---|
-| `native-symfony/desktop-bundle` | `sadiqk2/nativephp-symfony-desktop-bundle` |
-| `native-symfony/mobile-bundle` | `sadiqk2/nativephp-symfony-mobile-bundle` |
+| `bundle/` | `sadiqk2/nativephp-symfony-desktop-bundle` |
+| `mobile-bundle/` | `sadiqk2/nativephp-symfony-mobile-bundle` |
+
+The package name and the mirror repository name are the same on purpose: whoever
+lands on one from Packagist should not have to work out which repository it is.
 
 ## Why there are mirrors at all
 
@@ -33,10 +36,19 @@ and one pull request.
 
 ## One-time setup
 
-**Done on 2026-09-08, with one part still outstanding.** This repository is public,
+**Done on 2026-09-08, with two parts still outstanding.** This repository is public,
 both mirrors exist and carry the full split history, and `v0.1.0` is tagged on all
 three. What follows is the record of what was configured — read it if a mirror has to
 be rebuilt, if the token expires, or if the same shape is wanted for a third package.
+
+**`v0.1.0` cannot be published, under any name.** Packagist reads `composer.json`
+out of each *tag*, not only out of the default branch, and every `v0.1.0` tree says
+`native-symfony/*` — the blocked name. A tag whose package name does not match the
+registered package is discarded, silently, as one absent version rather than as an
+error. So the rename needs a new tag: `v0.1.1` is the first version any of this can
+serve, and `v0.1.0` stays in the history as the release that existed but never
+shipped. Force-moving the old tag across three repositories was the alternative and
+is worse — it rewrites a published ref to mean something else.
 
 **The automatic push is not working yet, and step 2 is why.** `0.1.0`'s mirror
 branches and tags were pushed by hand from a clone, which is safe to do because
@@ -131,7 +143,20 @@ https://github.com/sadiqk2/nativephp-symfony-mobile-bundle
 ```
 
 Packagist reads the package name out of each `composer.json`, so they register as
-`native-symfony/desktop-bundle` and `native-symfony/mobile-bundle`.
+`sadiqk2/nativephp-symfony-desktop-bundle` and `sadiqk2/nativephp-symfony-mobile-bundle`.
+
+**Submitting is also where a vendor name is accepted or refused**, which is how the
+first attempt ended:
+
+> The vendor name native-symfony is blocked, if you think this is a mistake please
+> get in touch with us.
+
+Packagist keeps a blocklist of vendor names carrying a framework's trademark. The
+vendor half of a package name is the part that says *who publishes this*, so
+`native-symfony/*` reads as Symfony publishing it — which is exactly what a
+blocklist exists to prevent, and no amount of good faith in the package changes how
+the name reads to someone typing `composer require`. There was nothing to appeal.
+An account namespace, `sadiqk2/*`, is the one thing no policy can withdraw.
 
 Then enable the **GitHub service hook** on each mirror so Packagist updates on
 push rather than on its crawl schedule: Packagist shows the exact steps on the
@@ -195,7 +220,7 @@ package page after submission. Without it a new tag can take hours to appear.
    minute or two if the service hook is enabled. Then, from a scratch directory:
 
    ```bash
-   composer require native-symfony/desktop-bundle:^0.1
+   composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1
    ```
 
    That is the only check that proves the whole chain — tag, split, mirror, hook,
@@ -216,8 +241,8 @@ package page after submission. Without it a new tag can take hours to appear.
    them once the packages resolve:
 
    ```markdown
-   [![desktop-bundle](https://img.shields.io/packagist/v/native-symfony/desktop-bundle)](https://packagist.org/packages/native-symfony/desktop-bundle)
-   [![mobile-bundle](https://img.shields.io/packagist/v/native-symfony/mobile-bundle)](https://packagist.org/packages/native-symfony/mobile-bundle)
+   [![desktop-bundle](https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-desktop-bundle)](https://packagist.org/packages/sadiqk2/nativephp-symfony-desktop-bundle)
+   [![mobile-bundle](https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-mobile-bundle)](https://packagist.org/packages/sadiqk2/nativephp-symfony-mobile-bundle)
    ```
 
 ## Versioning
@@ -259,6 +284,13 @@ stable promise:
   own copy of the runtime — which works, and is tested, but is not the shape this
   should settle into.
 
-The vendor name is the other open question: `native-symfony` is free on Packagist
-and does not claim NativePHP's brand, but the courtesy conversation with upstream
-comes before `1.0.0`, not after.
+The vendor name is settled, the hard way. `native-symfony` was the name up to
+0.1.0, and Packagist refused it: **the vendor name native-symfony is blocked.**
+Packagist blocks vendor names carrying a framework's trademark, because the vendor
+half of a package name is what says who publishes it, and `native-symfony/*` reads
+as Symfony publishing it. Nothing about the code had to change — a Composer vendor
+and a PHP namespace are separate things, and `Native\Symfony\...` stays as it is,
+since Packagist has no say over namespaces. Only the two `composer.json` names
+moved, to `sadiqk2/*`, an account namespace no policy can take away.
+
+The courtesy conversation with upstream is still owed, and comes before `1.0.0`.

@@ -1,5 +1,5 @@
 {
-    "name": "native-symfony/mobile-bundle",
+    "name": "sadiqk2/nativephp-symfony-mobile-bundle",
     "description": "Build iOS and Android applications with Symfony, on NativePHP's mobile runtime",
     "keywords": [
         "symfony",

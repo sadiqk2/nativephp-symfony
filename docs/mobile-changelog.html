@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mobile changelog · NativePHP for Symfony</title>
-<meta name="description" content="native-symfony/mobile-bundle, by version — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
+<meta name="description" content="sadiqk2/nativephp-symfony-mobile-bundle, by version — NativePHP for Symfony: desktop, iOS and Android applications built with Symfony and PHP.">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%233B475E%22%2F%3E%3Cpath%20d%3D%22M8.5%2023V9h3.2l8.6%208.8V9h3.2v14h-3.2l-8.6-8.8V23z%22%20fill%3D%22%234CABAD%22%2F%3E%3C%2Fsvg%3E">
 <link rel="stylesheet" href="assets/site.css">
@@ -54,16 +54,16 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
 <a class="nav-item" href="mobile-analysis.html"><span class="nav-name">Mobile analysis</span><span class="nav-hint">Both render paths, and a corrected conclusion</span></a>
 <a class="nav-item" href="plan.html"><span class="nav-name">Plan</span><span class="nav-hint">The milestones, and where each one landed</span></a>
 <p class="nav-group">The packages</p>
-<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in native-symfony/desktop-bundle</span></a>
-<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in native-symfony/mobile-bundle</span></a>
+<a class="nav-item" href="desktop-bundle.html"><span class="nav-name">Desktop bundle</span><span class="nav-hint">What ships in sadiqk2/nativephp-symfony-desktop-bundle</span></a>
+<a class="nav-item" href="mobile-bundle.html"><span class="nav-name">Mobile bundle</span><span class="nav-hint">What ships in sadiqk2/nativephp-symfony-mobile-bundle</span></a>
 <a class="nav-item" href="demo.html"><span class="nav-name">The demo app</span><span class="nav-hint">Deskpad: both bundles, driven end to end</span></a>
 <a class="nav-item" href="upstream-patches.html"><span class="nav-name">Upstream patches</span><span class="nav-hint">Eleven fixes: four landed, six open</span></a>
 <p class="nav-group">Contributing</p>
 <a class="nav-item" href="contributing.html"><span class="nav-name">Contributing</span><span class="nav-hint">The dev loop, and what a change needs</span></a>
 <a class="nav-item" href="releasing.html"><span class="nav-name">Releasing</span><span class="nav-hint">The subtree split, and how Packagist sees it</span></a>
 <a class="nav-item" href="security.html"><span class="nav-name">Security</span><span class="nav-hint">The trust boundary, and how to report</span></a>
-<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">native-symfony/desktop-bundle, by version</span></a>
-<a class="nav-item active" href="mobile-changelog.html" aria-current="page"><span class="nav-name">Mobile changelog</span><span class="nav-hint">native-symfony/mobile-bundle, by version</span></a>
+<a class="nav-item" href="desktop-changelog.html"><span class="nav-name">Desktop changelog</span><span class="nav-hint">sadiqk2/nativephp-symfony-desktop-bundle, by version</span></a>
+<a class="nav-item active" href="mobile-changelog.html" aria-current="page"><span class="nav-name">Mobile changelog</span><span class="nav-hint">sadiqk2/nativephp-symfony-mobile-bundle, by version</span></a>
 <p class="nav-group">Record</p>
 <a class="nav-item" href="spike-results.html"><span class="nav-name">M1 — the spike</span><span class="nav-hint">Proving it possible at all</span></a>
 <a class="nav-item" href="m2-results.html"><span class="nav-name">M2 — the bundle</span><span class="nav-hint">The 116-endpoint surface</span></a>
@@ -75,12 +75,28 @@ try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dat
     <main id="main">
         <article class="prose">
 <h1 id="changelog"><a class="anchor" href="#changelog">Changelog</a></h1>
-<p>All notable changes to <code>native-symfony/mobile-bundle</code>.</p>
+<p>All notable changes to <code>sadiqk2/nativephp-symfony-mobile-bundle</code>.</p>
 <p>The format is <a href="https://keepachangelog.com/en/1.1.0/" target="_blank" rel="noopener">Keep a Changelog</a> and this
 project follows <a href="https://semver.org/spec/v2.0.0.html" target="_blank" rel="noopener">Semantic Versioning</a> — with
 the caveat every <code>0.x</code> carries: the minor number is where breaking changes live
 until <code>1.0.0</code>.</p>
 <h2 id="unreleased"><a class="anchor" href="#unreleased">[Unreleased]</a></h2>
+<h2 id="011---2026-09-09"><a class="anchor" href="#011---2026-09-09">[0.1.1] - 2026-09-09</a></h2>
+<p>The package is renamed. <code>native-symfony/mobile-bundle</code> was never published:
+Packagist blocks vendor names carrying a framework&#39;s trademark, so <code>0.1.0</code> could
+not be submitted under it. This release is <code>0.1.0</code>&#39;s code under a name that can be.</p>
+<h3 id="changed"><a class="anchor" href="#changed">Changed</a></h3>
+<ul>
+<li><strong>Renamed to <code>sadiqk2/nativephp-symfony-mobile-bundle</code></strong> from
+<code>native-symfony/mobile-bundle</code>. No class, service id, configuration key or
+console command changed — a Composer vendor name and a PHP namespace are
+separate things, and <code>Native\Symfony\Mobile\</code> is untouched. Nobody can be
+installing the old name, because it was never on Packagist.</li>
+<li><strong><code>MobileRuntimePatcher::SHIM_DIR</code></strong> now points at
+<code>vendor/sadiqk2/nativephp-symfony-mobile-bundle/src/Resources/bootstrap</code>. The
+constant holds an install path, so it had to follow the package name; a stale
+value would leave <code>native:mobile:install</code> unable to find the SAPI shim it copies.</li>
+</ul>
 <h2 id="010---2026-09-08"><a class="anchor" href="#010---2026-09-08">[0.1.0] - 2026-09-08</a></h2>
 <p>First public release. Read the caveat under <strong>Not verified</strong> before shipping
 anything with it.</p>
@@ -132,11 +148,11 @@ Read its terms rather than either summary.</li>
 
         <footer class="footer">
             <a href="https://github.com/sadiqk2/nativephp-symfony/blob/main/mobile-bundle/CHANGELOG.md" target="_blank" rel="noopener">Edit this page on GitHub ↗</a>
-            <p>MIT. <code>native-symfony</code> is a provisional vendor name — <code>nativephp/*</code> belongs to someone else.</p>
+            <p>MIT. Published under <code>sadiqk2/*</code> — <code>nativephp/*</code> belongs to someone else.</p>
         </footer>
     </main>
 
-    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#unreleased">[Unreleased]</a></li><li class="lvl2"><a href="#010---2026-09-08">[0.1.0] - 2026-09-08</a></li><li class="lvl3"><a href="#added">Added</a></li><li class="lvl3"><a href="#not-verified">Not verified</a></li><li class="lvl3"><a href="#notes">Notes</a></li></ul></nav>
+    <nav class="toc" aria-label="On this page"><p class="toc-head">On this page</p><ul><li class="lvl2"><a href="#unreleased">[Unreleased]</a></li><li class="lvl2"><a href="#011---2026-09-09">[0.1.1] - 2026-09-09</a></li><li class="lvl3"><a href="#changed">Changed</a></li><li class="lvl2"><a href="#010---2026-09-08">[0.1.0] - 2026-09-08</a></li><li class="lvl3"><a href="#added">Added</a></li><li class="lvl3"><a href="#not-verified">Not verified</a></li><li class="lvl3"><a href="#notes">Notes</a></li></ul></nav>
 </div>
 
 <script src="assets/site.js" defer></script>
