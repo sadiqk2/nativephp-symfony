@@ -18,10 +18,6 @@ composer require sadiqk2/nativephp-symfony-desktop-bundle:^0.1
 `^0.1` pins to `0.1.*` deliberately: this is a `0.x` project, so under SemVer the minor
 number is where breaking changes live.
 
-> **Not yet submitted to Packagist**, so this resolves once the one-time publishing setup in
-> [RELEASING.md](../RELEASING.md#one-time-setup) has been done. Until then, use the checkout
-> route below. Delete this note when the package resolves.
-
 To work against a checkout instead — to try an unreleased fix, or because you are changing
 the bundle — clone this repository and add a path repository pointing at `bundle/`, with
 `"symlink": true`; without it Composer caches a copy and edits to the bundle appear to do

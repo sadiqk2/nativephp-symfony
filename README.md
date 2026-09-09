@@ -1,6 +1,8 @@
 # NativePHP for Symfony
 
 [![tests](https://github.com/sadiqk2/nativephp-symfony/actions/workflows/tests.yml/badge.svg)](https://github.com/sadiqk2/nativephp-symfony/actions/workflows/tests.yml)
+[![desktop-bundle](https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-desktop-bundle?label=desktop-bundle)](https://packagist.org/packages/sadiqk2/nativephp-symfony-desktop-bundle)
+[![mobile-bundle](https://img.shields.io/packagist/v/sadiqk2/nativephp-symfony-mobile-bundle?label=mobile-bundle)](https://packagist.org/packages/sadiqk2/nativephp-symfony-mobile-bundle)
 [![PHP 8.3+](https://img.shields.io/badge/php-8.3%2B-777bb4)](https://www.php.net/)
 [![Symfony 7 | 8](https://img.shields.io/badge/symfony-7%20%7C%208-000000)](https://symfony.com/)
 [![licence MIT](https://img.shields.io/badge/licence-MIT-blue)](LICENSE)
@@ -46,14 +48,6 @@ changes live until `1.0.0`.
 Both are published from this repository by subtree split, so the Packagist entries point at
 read-only mirrors and everything — issues, pull requests, the history — lives here. See
 [RELEASING.md](RELEASING.md).
-
-> **Not yet on Packagist.** The mirrors exist and carry the full history, but the first
-> submission was refused: Packagist blocks any vendor name carrying a framework's
-> trademark, and `native-symfony/*` — the name up to `0.1.0` — is one. The packages are
-> renamed to `sadiqk2/*` here, which needs a fresh tag, because Packagist reads
-> `composer.json` out of each tag and every `v0.1.0` tree still says the old name. See
-> [RELEASING.md § one-time setup](RELEASING.md#one-time-setup); until `v0.1.1` is
-> submitted, use the checkout route below. Delete this note when the packages resolve.
 
 <details>
 <summary>Working against a checkout instead</summary>

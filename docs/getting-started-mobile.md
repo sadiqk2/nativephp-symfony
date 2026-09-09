@@ -56,10 +56,6 @@ Consequently there is no dev-server loop like `native:run`. What replaces it is
 composer require sadiqk2/nativephp-symfony-mobile-bundle:^0.1
 ```
 
-> **Not yet submitted to Packagist**, so this resolves once the one-time publishing setup in
-> [RELEASING.md](../RELEASING.md#one-time-setup) has been done. Until then, use the checkout
-> route below. Delete this note when the package resolves.
-
 Flex registers the bundle for you. Without it, add it yourself:
 
 ```php
