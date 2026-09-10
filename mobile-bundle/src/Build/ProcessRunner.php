@@ -74,7 +74,14 @@ final class ProcessRunner implements CommandRunnerInterface
                     continue;
                 }
 
-                if (feof($pipes[$fd])) {
+                // `false` is not "no data yet" — a healthy non-blocking pipe with nothing
+                // to read returns '', verified against a real proc_open pipe. `false` is
+                // reserved for the stream itself failing to be read, and feof() is not
+                // guaranteed to follow: without this, an fd that starts erroring never
+                // leaves $open, and with $command->timeout null — the default, and what a
+                // cold Gradle build actually runs with — that is this method hanging
+                // forever rather than returning an exit code.
+                if (feof($pipes[$fd]) || false === $chunk) {
                     fclose($pipes[$fd]);
                     unset($open[$fd]);
                 }

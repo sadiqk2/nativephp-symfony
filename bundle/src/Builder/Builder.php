@@ -172,6 +172,19 @@ final class Builder
      * Walking up the ancestors also catches mutual cycles (a -> b, b -> a), which a
      * simple "is my target my own parent" test does not: the repeated directory
      * always reappears as an ancestor of itself somewhere along the path.
+     *
+     * The walk goes all the way to the filesystem root, not just up to the source
+     * directory. It used to stop at `dirname(sourcePath())`, on the assumption that a
+     * cycle could only be formed by a link pointing back *inside* the tree being
+     * staged — but a link is just as capable of pointing at the source directory's
+     * own parent, or higher, and the parent of the source directory still contains
+     * the source directory. `sub/back -> $sourcePath/..` — one directory outside the
+     * tree, not inside it — walked forever under the old bound, because the ancestor
+     * that would have matched it was excluded from the comparison by being the
+     * boundary itself. Found by reasoning about what the bound was actually for, then
+     * confirmed by running it: `mkdir()` failed on a path several thousand characters
+     * long, built entirely out of repeated `build/app/sub/back` segments, rather than
+     * the loop even reaching the point of exhausting a path-length limit cleanly.
      */
     private function closesASymlinkCycle(string $path): bool
     {
@@ -182,9 +195,8 @@ final class Builder
         }
 
         $ancestor = \dirname($path);
-        $stop = \dirname($this->sourcePath());
 
-        while ($ancestor !== $stop && '/' !== $ancestor && '.' !== $ancestor) {
+        while (true) {
             if (realpath($ancestor) === $real) {
                 return true;
             }
@@ -192,13 +204,12 @@ final class Builder
             $parent = \dirname($ancestor);
 
             if ($parent === $ancestor) {
-                break;
+                // Reached the filesystem root: nothing further up to compare.
+                return false;
             }
 
             $ancestor = $parent;
         }
-
-        return false;
     }
 
     /**

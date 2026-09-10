@@ -464,6 +464,30 @@ final class BuilderTest extends TestCase
         self::assertSame(4, $copied);
     }
 
+    public function testASymlinkPointingAboveTheSourceRootStillTerminates(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // `sourcePath()` here is `$root/app`, and this points at `$root` — one
+        // directory *outside* the tree being staged, not at anything inside it. The
+        // cycle guard's ancestor walk used to stop at dirname(sourcePath()) and
+        // exclude that boundary from the comparison, so a link landing exactly there
+        // — or anywhere further up — was never recognised as looping, even though
+        // $root contains both app/ and build/ and so leads straight back into the
+        // tree being copied. Confirmed hanging before the fix: mkdir() failed on a
+        // path several thousand characters long, built out of repeated
+        // build/app/sub/back segments, rather than the walk ever reaching a base case.
+        $this->write('sub/marker.txt', 'x');
+        symlink(\dirname($this->source), $this->source.'/sub/back');
+
+        $copied = $this->builder([])->stageApplication();
+
+        self::assertSame(1, $copied);
+        self::assertFileExists($this->builder([])->appPath('sub/marker.txt'));
+    }
+
     public function testADanglingSymlinkIsSkippedRatherThanAbortingTheBuild(): void
     {
         if ('Windows' === \PHP_OS_FAMILY) {

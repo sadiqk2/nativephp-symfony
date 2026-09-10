@@ -559,6 +559,13 @@ final class MobileBuilder
      *
      * Duplicated from the desktop builder rather than shared: the two bundles depend on
      * nothing of each other's, and a consumer takes either one alone.
+     *
+     * The ancestor walk used to stop at `dirname(sourcePath())` and exclude that boundary
+     * from the comparison, so a link landing exactly there — or anywhere further up the
+     * filesystem — was never recognised as looping, even though that directory necessarily
+     * contains the entire tree being staged (source and destination alike). The desktop
+     * builder had the identical bug from the identical bound, found there first and fixed
+     * the same way here: walk all the way to the filesystem root instead of stopping short.
      */
     private function closesASymlinkCycle(string $path): bool
     {
@@ -569,9 +576,8 @@ final class MobileBuilder
         }
 
         $ancestor = \dirname($path);
-        $stop = \dirname($this->sourcePath());
 
-        while ($ancestor !== $stop && '/' !== $ancestor && '.' !== $ancestor) {
+        while (true) {
             if (realpath($ancestor) === $real) {
                 return true;
             }
@@ -579,13 +585,12 @@ final class MobileBuilder
             $parent = \dirname($ancestor);
 
             if ($parent === $ancestor) {
-                break;
+                // Reached the filesystem root: nothing further up to compare.
+                return false;
             }
 
             $ancestor = $parent;
         }
-
-        return false;
     }
 
     private function relative(string $absolute): string

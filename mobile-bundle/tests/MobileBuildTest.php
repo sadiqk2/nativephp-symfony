@@ -332,6 +332,48 @@ final class MobileBuildTest extends TestCase
         self::assertSame(4, $copied);
     }
 
+    public function testASymlinkPointingAboveTheSourceRootStillTerminates(): void
+    {
+        if ('Windows' === \PHP_OS_FAMILY) {
+            self::markTestSkipped('POSIX symlinks only.');
+        }
+
+        // A root and stage of its own, nested under $this->projectDir so tearDown()
+        // still reaches them, rather than reusing $this->projectDir as the source: the
+        // point of this link is to land on dirname(sourcePath()), and that needs to be
+        // a directory this test controls rather than the shared system temp root.
+        $root = $this->projectDir.'/nested';
+        $source = $root.'/app';
+        $this->fs->dumpFile($source.'/sub/marker.txt', 'x');
+        symlink($root, $source.'/sub/back');
+
+        // The cycle guard's ancestor walk used to stop at dirname(sourcePath()) and
+        // exclude that boundary from the comparison, so a link landing exactly there —
+        // or anywhere further up — was never recognised as looping, even though $root
+        // contains both app/ and the stage directory and so leads straight back into
+        // the tree being copied. The desktop builder had the identical bug from the
+        // identical bound; this is its mobile twin.
+        //
+        // Asserting `sub/back` was never staged, not just that the count came out
+        // right, is the point of this test. Under the old bound the recursion did
+        // enter `back` — it just didn't run forever: stage/ is reachable through it
+        // too, and copying into stage/ while walking through a link that leads back to
+        // it grows the path every level, until realpath() itself starts failing past
+        // ~4096 characters and the (accidental) dangling-symlink branch halts it. That
+        // took over a second and created hundreds of nested directories under
+        // `sub/back` before returning the *same* copied count and file this test
+        // checks for — so a test that only checked those would still be green on the
+        // bug.
+        $builder = new MobileBuilder($source, $root.'/stage');
+        $start = microtime(true);
+        $copied = $builder->stageApplication();
+
+        self::assertLessThan(1.0, microtime(true) - $start, 'Staging took a suspiciously long time for two files.');
+        self::assertSame(1, $copied);
+        self::assertFileExists($builder->stagePath('sub/marker.txt'));
+        self::assertDirectoryDoesNotExist($builder->stagePath('sub/back'));
+    }
+
     public function testADanglingSymlinkIsSkippedRatherThanAbortingTheBuild(): void
     {
         if ('Windows' === \PHP_OS_FAMILY) {
