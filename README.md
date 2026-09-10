@@ -262,7 +262,8 @@ See [getting started — mobile](docs/getting-started-mobile.md#can-you-build-an
   they do not, so any service that calls the runtime from a console-boot path throws.
 
 A complete working example of all of the above — both bundles, two windows, a native menu, a
-native-UI screen — is [`demo/`](demo/README.md), and it is also the integration test.
+native-UI screen — is [`demo/`](demo/README.md), and it is also the integration test. For just
+the steps above with nothing else added, see [`demo-quickstart/`](demo-quickstart/README.md).
 
 Every step above was run against a **fresh `symfony/skeleton` (Symfony 8.1)** rather than
 written from the code: `composer require` through the path repositories, both config files,

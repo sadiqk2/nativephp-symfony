@@ -1,0 +1,4 @@
+native_desktop:
+    name: 'Quickstart'
+    app_id: com.example.quickstart
+    version: '1.0.0'

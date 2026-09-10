@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quickstart</title>
+    <style>
+        body { font-family: sans-serif; margin: 3rem; color: #222; }
+        .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.85rem; }
+        .connected { background: #d7f3df; color: #14532d; }
+        .plain { background: #fde8e8; color: #7a1f1f; }
+    </style>
+</head>
+<body>
+    <h1>It works.</h1>
+
+    {% if runtimeConnected %}
+        <p><span class="badge connected">runtime connected</span> — this window is the
+        NativePHP Electron runtime, and this page came from <code>Bootstrapper::boot()</code>
+        opening it.</p>
+    {% else %}
+        <p><span class="badge plain">plain browser</span> — the same route, the same
+        controller, no runtime attached. A native app you cannot open in a browser is a
+        native app you cannot develop.</p>
+    {% endif %}
+
+    <p>This is the smallest app the <a href="https://github.com/sadiqk2/nativephp-symfony">
+    project README</a> describes: one config file, one bootstrapper, one route. See
+    <a href="../demo/README.md">../demo</a> for a fuller example — both bundles, several
+    screens, a native menu.</p>
+</body>
+</html>
