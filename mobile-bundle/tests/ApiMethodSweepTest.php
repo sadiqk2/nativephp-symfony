@@ -38,6 +38,8 @@ final class ApiMethodSweepTest extends TestCase
         'PushNotifications::isAuthorised' => 'PushNotification.CheckPermission',
         'SecureStorage::has' => 'SecureStorage.Get',
         'System::isDarkMode' => 'System.GetAppearance',
+        'System::isPortrait' => 'System.GetOrientation',
+        'System::isLandscape' => 'System.GetOrientation',
     ];
 
     /** @param class-string $class */

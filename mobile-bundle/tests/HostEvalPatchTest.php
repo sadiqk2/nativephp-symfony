@@ -106,7 +106,7 @@ final class HostEvalPatchTest extends TestCase
 
         if (str_contains($source, 'BRIDGE_DISPATCH_EVAL')) {
             self::assertStringContainsString(
-                '\\Native\\Symfony\\Mobile\\Runtime\\BridgeDispatcher::handle(',
+                '\\\\Native\\\\Symfony\\\\Mobile\\\\Runtime\\\\BridgeDispatcher::handle(',
                 $source,
             );
             self::assertStringNotContainsString(

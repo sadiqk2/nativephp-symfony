@@ -75,7 +75,17 @@ final class BridgeDispatcher
         string $body = '',
     ): string {
         try {
-            [$head, $content] = self::serve($platform, $lane, $method, $uri, $scriptPath, $cookie, $contentType, $headers, $body);
+            [$head, $content] = self::serve(
+                $platform,
+                $lane,
+                self::decode('method', $method),
+                self::decode('uri', $uri),
+                self::decode('scriptPath', $scriptPath),
+                self::decode('cookie', $cookie),
+                self::decode('contentType', $contentType),
+                self::decode('headers', $headers),
+                $body,
+            );
         } catch (\Throwable $e) {
             [$head, $content] = self::errorResponse($lane, $e);
         }
@@ -156,9 +166,16 @@ final class BridgeDispatcher
 
         [$request] = ServerRequestFactory::fromServer($_SERVER, $body);
 
+        $obLevel = ob_get_level();
         ob_start();
-        $response = MobileRuntime::dispatch($request);
-        $stray = (string) ob_get_clean();
+        try {
+            $response = MobileRuntime::dispatch($request);
+            $stray = (string) ob_get_clean();
+        } finally {
+            while (ob_get_level() > $obLevel) {
+                ob_end_clean();
+            }
+        }
 
         $content = $stray.(string) $response->getContent();
         $head = self::formatHead($response, \strlen($content));
