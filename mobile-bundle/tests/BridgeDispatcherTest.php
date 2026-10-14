@@ -41,7 +41,7 @@ final class BridgeDispatcherTest extends TestCase
 
         self::assertStringStartsWith("HTTP/1.1 200 OK\r\n", $response);
         self::assertStringContainsString("content-type: text/plain\r\n", $response);
-        self::assertStringContainsString("content-length: 22\r\n", $response);
+        self::assertStringContainsString("content-length: 21\r\n", $response);
         self::assertStringEndsWith("\r\n\r\nHello from /api/hello", $response);
     }
 
