@@ -18,27 +18,19 @@ final class BridgeCoverageTest extends TestCase
 {
     use ParsesNativeCalls;
 
-    private const int EXPECTED_METHODS = 62;
+    private const int EXPECTED_METHODS = 66;
 
     /**
      * Upstream methods with no wrapper here, named rather than left to a count that
      * happens to agree.
      *
-     * This list has now been wrong twice for the same reason, and both times the parser
-     * was the cause rather than the port. It first held Dialog.Alert, Scanner.Scan and
-     * PushNotification.RequestPermission, called as `nativephp_call(\n    'Method',` with
-     * the argument on its own line: the parser required the quote immediately after the
-     * parenthesis, so none was discovered, the count read 54, and a test called "every
-     * upstream bridge method is wrapped" passed while three were not. Those three now
-     * have wrappers.
-     *
-     * It then held the five Geolocation methods that start or locate a position, invisible
-     * one step further on: upstream computes their names above the call site rather than
-     * writing them at it, so the count read 57. Those are wrapped too now, which is why
-     * this is empty — `Api\Geolocation` could stop and drain a watch it had no way to
-     * begin, half a lifecycle.
+     * AsyncTask methods belong to upstream's background PHP task pool, which relies
+     * on Laravel's console command runner and task transport.
      */
-    private const array UNWRAPPED = [];
+    private const array UNWRAPPED = [
+        'AsyncTask.Complete',
+        'AsyncTask.Dispatch',
+    ];
 
     public function testTheOnlyUnwrappedBridgeMethodsAreTheOnesNamedHere(): void
     {

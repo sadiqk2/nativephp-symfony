@@ -51,6 +51,10 @@ final class MobileRuntimePatcher
      * @var array<string, string>
      */
     private const HOST_EVAL_REPLACEMENTS = [
+        // Upstream >= 4.0 uses BridgeDispatcher for persistent and webview dispatch
+        "'Native\\\\\\\\Mobile\\\\\\\\Http\\\\\\\\Bridge\\\\\\\\BridgeDispatcher'" => "'Native\\\\\\\\Symfony\\\\\\\\Mobile\\\\\\\\Runtime\\\\\\\\BridgeDispatcher'",
+        '\\\\Native\\\\Mobile\\\\Http\\\\Bridge\\\\BridgeDispatcher' => '\\\\Native\\\\Symfony\\\\Mobile\\\\Runtime\\\\BridgeDispatcher',
+
         // Request::capture() reads the superglobals the host's own preamble filled in;
         // this reads the same ones, through the factory the shims use.
         '\\\\Illuminate\\\\Http\\\\Request::capture()' => '\\\\Native\\\\Symfony\\\\Mobile\\\\Runtime\\\\ServerRequestFactory::fromServer($_SERVER)[0]',
@@ -82,6 +86,7 @@ final class MobileRuntimePatcher
         'Bridge/PersistentPHPRuntime.swift' => true,
         'Bridge/WebviewPHPRuntime.swift' => true,
         'Bridge/PHPQueueWorker.swift' => true,
+        'Bridge/AsyncTaskExecutor.swift' => true,
         'AppUpdateManager.swift' => false,
     ];
 
@@ -201,6 +206,8 @@ final class MobileRuntimePatcher
 
             if (str_contains($source, '\\\\Native\\\\Mobile\\\\Runtime')
                 || str_contains($source, "'Native\\\\\\\\Mobile\\\\\\\\Runtime'")
+                || str_contains($source, '\\\\Native\\\\Mobile\\\\Http\\\\Bridge')
+                || str_contains($source, "'Native\\\\\\\\Mobile\\\\\\\\Http\\\\\\\\Bridge")
                 || str_contains($source, '\\\\Illuminate\\\\')
             ) {
                 return false;
@@ -251,7 +258,7 @@ final class MobileRuntimePatcher
             }
 
             if (0 === $sites) {
-                if (str_contains($original, 'MobileRuntime::dispatch')) {
+                if (str_contains($original, 'MobileRuntime::dispatch') || str_contains($original, 'BridgeDispatcher::handle')) {
                     $applied[] = sprintf('%s %s: host dispatch — already applied', $platform, basename($path));
                 }
 
@@ -262,6 +269,8 @@ final class MobileRuntimePatcher
             // there is one, explaining what a failed boot looks like — is not a call site.
             if (str_contains($text, '\\\\Native\\\\Mobile\\\\Runtime')
                 || str_contains($text, "'Native\\\\\\\\Mobile\\\\\\\\Runtime'")
+                || str_contains($text, '\\\\Native\\\\Mobile\\\\Http\\\\Bridge')
+                || str_contains($text, "'Native\\\\\\\\Mobile\\\\\\\\Http\\\\\\\\Bridge")
                 || str_contains($text, '\\\\Illuminate\\\\')
             ) {
                 throw MobilePatchFailed::laravelEvalSurvived($path);

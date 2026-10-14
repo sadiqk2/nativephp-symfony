@@ -86,13 +86,13 @@ kind of problem with the same kind of solution: three hardcoded paths in the nat
 
 ### 2b. The native bridge
 
-`nativephp_call($method, $jsonPayload)` — a PHP extension function. **62 distinct methods**
+`nativephp_call($method, $jsonPayload)` — a PHP extension function. **66 distinct methods**
 in the current PHP surface:
 
 | Group | Methods |
 |---|---|
 | Camera | GetPhoto, PickMedia, RecordVideo |
-| Device | GetInfo, GetId, GetBatteryInfo, Vibrate, ToggleFlashlight |
+| Device | GetInfo, GetId, GetBatteryInfo, Vibrate, ToggleFlashlight, GetThermalState |
 | Microphone | Start, Stop, Pause, Resume, GetStatus, GetRecording |
 | Geolocation | GetCurrentPosition, CheckPermissions, RequestPermissions, WatchPosition, ClearWatch, StartBackgroundWatch, StopBackgroundWatch, BackgroundWatchStatus, DrainWatchBuffer, TrimWatchBuffer |
 | SecureStorage | Get, Set, Delete |
@@ -100,7 +100,7 @@ in the current PHP surface:
 | Browser | Open, OpenInApp, OpenAuth |
 | Share | Url, File |
 | MobileWallet | IsAvailable, CreatePaymentIntent, ConfirmPayment, PresentPaymentSheet, GetPaymentStatus |
-| System | GetAppearance, MinimizeApp, OpenAppSettings |
+| System | GetAppearance, MinimizeApp, OpenAppSettings, GetOrientation |
 | Biometric | Prompt |
 | Dialog | Toast, Alert |
 | Scanner | Scan |
@@ -108,16 +108,13 @@ in the current PHP surface:
 | Network | Status |
 | UI / NativeUI | SetBackground, Transition.Set |
 | Perf | 8 instrumentation methods |
+| AsyncTask | Complete, Dispatch (background pool; unwrapped) |
 
 **The bridge itself is entirely framework-agnostic** — a function name and a JSON string. The
 PHP wrappers around it are the same mechanical work as desktop's endpoint wrappers, and there
-are fewer of them (62 vs 116). All 62 have a wrapper. The last five to get one were the
-Geolocation methods that start or locate a position — `GetCurrentPosition`,
-`CheckPermissions`, `RequestPermissions`, `WatchPosition` and `StartBackgroundWatch` —
-which left `Api\Geolocation` able to stop and drain a watch it had no way to begin. The
-count read 57 until `BridgeCoverageTest` learned to read a method name computed above its
-call site, which is where all five were hiding; its `UNWRAPPED` list is empty and asserted
-to stay that way.
+are fewer of them (66 vs 116). All 64 portable methods have a wrapper (Device's `GetThermalState`
+and System's `GetOrientation` are wrapped; the two `AsyncTask.*` methods belong to the Laravel-specific
+task runner and are tracked in `UNWRAPPED`).
 
 ---
 

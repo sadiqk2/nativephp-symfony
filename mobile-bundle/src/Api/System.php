@@ -42,4 +42,24 @@ final class System
     {
         return $this->bridge->dispatch('UI.SetBackground', ['color' => $color]);
     }
+
+    /** 'portrait' or 'landscape'. Falls back to portrait when unknown or unavailable. */
+    public function orientation(): string
+    {
+        $result = $this->bridge->call('System.GetOrientation');
+
+        return \in_array($result['orientation'] ?? null, ['portrait', 'landscape'], true)
+            ? $result['orientation']
+            : 'portrait';
+    }
+
+    public function isPortrait(): bool
+    {
+        return 'portrait' === $this->orientation();
+    }
+
+    public function isLandscape(): bool
+    {
+        return 'landscape' === $this->orientation();
+    }
 }

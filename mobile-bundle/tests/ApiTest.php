@@ -100,6 +100,43 @@ final class ApiTest extends TestCase
         self::assertTrue((new Api\System($bridge))->isDarkMode());
     }
 
+    public function testSystemOrientationDefaultsToPortrait(): void
+    {
+        $bridge = new FakeBridge();
+
+        self::assertSame('portrait', (new Api\System($bridge))->orientation());
+        self::assertTrue((new Api\System($bridge))->isPortrait());
+        self::assertFalse((new Api\System($bridge))->isLandscape());
+    }
+
+    public function testSystemOrientationReadsLandscape(): void
+    {
+        $bridge = new FakeBridge();
+        $bridge->willReturn('System.GetOrientation', ['orientation' => 'landscape']);
+
+        $system = new Api\System($bridge);
+        self::assertSame('landscape', $system->orientation());
+        self::assertFalse($system->isPortrait());
+        self::assertTrue($system->isLandscape());
+    }
+
+    public function testDeviceThermalStateReturnsState(): void
+    {
+        $bridge = new FakeBridge();
+        $bridge->willReturn('Device.GetThermalState', ['state' => 'nominal']);
+
+        $device = new Api\Device($bridge);
+        self::assertSame('nominal', $device->thermalState());
+    }
+
+    public function testDeviceThermalStateReturnsNullWhenUnavailable(): void
+    {
+        $bridge = new FakeBridge();
+
+        $device = new Api\Device($bridge);
+        self::assertNull($device->thermalState());
+    }
+
     public function testGeolocationWatchPositionHandsBackTheIdEverythingElseAddresses(): void
     {
         // The half of the lifecycle this class did not have: every other method here

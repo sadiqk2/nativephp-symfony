@@ -102,17 +102,31 @@ final class HostEvalPatchTest extends TestCase
     public function testTheDispatchReachesTheSymfonyRuntime(): void
     {
         [$path] = $this->patchAndroid();
+        $source = (string) file_get_contents($path);
 
-        $php = implode("\n", array_map(static fn (array $block): string => $block[1], $this->evalBlocks((string) file_get_contents($path))));
+        if (str_contains($source, 'BRIDGE_DISPATCH_EVAL')) {
+            self::assertStringContainsString(
+                '\\Native\\Symfony\\Mobile\\Runtime\\BridgeDispatcher::handle(',
+                $source,
+            );
+            self::assertStringNotContainsString(
+                'Native\\\\Mobile\\\\Http\\\\Bridge\\\\BridgeDispatcher',
+                $source,
+            );
+            self::assertTrue(class_exists(\Native\Symfony\Mobile\Runtime\BridgeDispatcher::class));
+            self::assertTrue(method_exists(\Native\Symfony\Mobile\Runtime\BridgeDispatcher::class, 'handle'));
+        } else {
+            $php = implode("\n", array_map(static fn (array $block): string => $block[1], $this->evalBlocks($source)));
 
-        self::assertStringContainsString(
-            '$__response = \Native\Symfony\Mobile\Runtime\MobileRuntime::dispatch(',
-            $php,
-        );
-        self::assertStringContainsString(
-            '\Native\Symfony\Mobile\Runtime\ServerRequestFactory::fromServer($_SERVER)[0]',
-            $php,
-        );
+            self::assertStringContainsString(
+                '$__response = \Native\Symfony\Mobile\Runtime\MobileRuntime::dispatch(',
+                $php,
+            );
+            self::assertStringContainsString(
+                '\Native\Symfony\Mobile\Runtime\ServerRequestFactory::fromServer($_SERVER)[0]',
+                $php,
+            );
+        }
 
         // Every symbol the rewritten preamble names has to exist on our side, or this
         // trades one missing class for another.
@@ -136,10 +150,14 @@ final class HostEvalPatchTest extends TestCase
 
         self::assertStringNotContainsString('\\\\Native\\\\Mobile\\\\Runtime', $patched);
         self::assertStringNotContainsString('Illuminate', $patched);
+        self::assertStringNotContainsString('\\\\Native\\\\Mobile\\\\Http\\\\Bridge', $patched);
+        self::assertStringNotContainsString("'Native\\\\\\\\Mobile\\\\\\\\Http\\\\\\\\Bridge", $patched);
         self::assertSame(
             $before,
             substr_count($patched, 'Native\\\\Symfony\\\\Mobile\\\\Runtime\\\\MobileRuntime')
                 + substr_count($patched, 'Native\\\\\\\\Symfony\\\\\\\\Mobile\\\\\\\\Runtime\\\\\\\\MobileRuntime')
+                + substr_count($patched, 'Native\\\\Symfony\\\\Mobile\\\\Runtime\\\\BridgeDispatcher')
+                + substr_count($patched, 'Native\\\\\\\\Symfony\\\\\\\\Mobile\\\\\\\\Runtime\\\\\\\\BridgeDispatcher')
                 + substr_count($patched, 'ServerRequestFactory'),
             'Every Laravel reference should have become exactly one Symfony reference.',
         );
@@ -190,6 +208,8 @@ final class HostEvalPatchTest extends TestCase
     {
         return substr_count($source, '\\\\Native\\\\Mobile\\\\Runtime')
             + substr_count($source, "'Native\\\\\\\\Mobile\\\\\\\\Runtime'")
+            + substr_count($source, '\\\\Native\\\\Mobile\\\\Http\\\\Bridge\\\\BridgeDispatcher')
+            + substr_count($source, "'Native\\\\\\\\Mobile\\\\\\\\Http\\\\\\\\Bridge\\\\\\\\BridgeDispatcher'")
             + substr_count($source, '\\\\Illuminate\\\\Http\\\\Request::capture()');
     }
 

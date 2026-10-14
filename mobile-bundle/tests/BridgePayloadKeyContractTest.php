@@ -35,11 +35,11 @@ final class BridgePayloadKeyContractTest extends TestCase
     /**
      * How many methods this bundle calls, all of which the wrapper comparison covers.
      * Named rather than floored so a discovery regression fails loudly instead of
-     * passing with less. All 62 of upstream's bridge now, since the five Geolocation
-     * methods that start or locate a position got wrappers; BridgeCoverageTest owns the
+     * passing with less. All 64 of upstream's wrapped bridge methods now, including
+     * Device.GetThermalState and System.GetOrientation; BridgeCoverageTest owns the
      * question of whether anything is left unwrapped.
      */
-    private const METHODS_WE_CALL = 62;
+    private const METHODS_WE_CALL = 64;
 
     /**
      * Methods whose upstream payload merges a caller-supplied options array, so its key

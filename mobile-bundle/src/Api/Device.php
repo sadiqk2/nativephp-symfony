@@ -61,4 +61,15 @@ final class Device
     {
         return $this->bridge->dispatch('Device.ToggleFlashlight');
     }
+
+    /**
+     * The OS-reported thermal state: 'nominal', 'fair', 'serious', 'critical',
+     * or null if unknown or unavailable.
+     */
+    public function thermalState(): ?string
+    {
+        $result = $this->bridge->call('Device.GetThermalState');
+
+        return isset($result['state']) && \is_string($result['state']) ? $result['state'] : null;
+    }
 }
