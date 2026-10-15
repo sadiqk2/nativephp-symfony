@@ -124,12 +124,16 @@ final class RuntimePatcher
 
         $original = (string) file_get_contents($path);
         $text = $original;
+        $hasCrlf = str_contains($text, "\r\n");
         $applied = [];
 
         foreach ($hunks as $hunk) {
-            if (str_contains($text, $hunk['from'])) {
-                $count = substr_count($text, $hunk['from']);
-                $text = str_replace($hunk['from'], $hunk['to'], $text);
+            $from = $hasCrlf ? str_replace("\n", "\r\n", str_replace("\r\n", "\n", $hunk['from'])) : $hunk['from'];
+            $to = $hasCrlf ? str_replace("\n", "\r\n", str_replace("\r\n", "\n", $hunk['to'])) : $hunk['to'];
+
+            if (str_contains($text, $from)) {
+                $count = substr_count($text, $from);
+                $text = str_replace($from, $to, $text);
                 $applied[] = 1 === $count
                     ? $hunk['name']
                     : sprintf('%s (%d sites)', $hunk['name'], $count);
