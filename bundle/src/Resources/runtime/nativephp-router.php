@@ -31,6 +31,13 @@ if ('/' !== $uri && false !== $real && str_starts_with($real, $publicDir.\DIRECT
     return false;
 }
 
+foreach (['NATIVEPHP_SECRET', 'NATIVEPHP_API_URL', 'NATIVEPHP_RUNNING', 'APP_ENV', 'APP_DEBUG'] as $envKey) {
+    if (false !== ($val = getenv($envKey))) {
+        $_SERVER[$envKey] ??= $val;
+        $_ENV[$envKey] ??= $val;
+    }
+}
+
 $_SERVER['SCRIPT_NAME'] = '/index.php';
 $_SERVER['SCRIPT_FILENAME'] = $publicDir.'/index.php';
 

@@ -209,6 +209,23 @@ final class RunCommand extends Command
             $fs->chmod($target, 0o755);
         }
 
+        if (\PHP_OS_FAMILY === 'Windows') {
+            $phpDir = \dirname($php);
+            $sourceIni = $phpDir.'/php.ini';
+            $targetIni = $buildPath.'/php/php.ini';
+            if (is_file($sourceIni) && (!is_file($targetIni) || filemtime($targetIni) < filemtime($sourceIni))) {
+                $iniContent = file_get_contents($sourceIni);
+                if (false !== $iniContent) {
+                    // Ensure variables_order includes 'E' so environment variables reach $_ENV
+                    $iniContent = preg_replace('/^variables_order\s*=\s*["\']?(.*?)["\']?$/m', 'variables_order = "EGPCS"', $iniContent);
+                    // Ensure extension_dir points to absolute host ext dir if relative
+                    $extDir = str_replace('\\', '/', $phpDir.'/ext');
+                    $iniContent = preg_replace('/^extension_dir\s*=\s*["\']?ext["\']?$/m', 'extension_dir = "'.$extDir.'"', $iniContent);
+                    file_put_contents($targetIni, $iniContent);
+                }
+            }
+        }
+
         return Command::SUCCESS;
     }
 
