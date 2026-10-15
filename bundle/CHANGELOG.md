@@ -9,6 +9,13 @@ until `1.0.0`.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-15
+
+### Fixed
+
+- **Matrix CI compatibility**: verified and green across PHP 8.3 & 8.4 on lowest, locked, and highest dependency versions.
+- **Subtree publishing**: restored automatic split and push to `sadiqk2/nativephp-symfony-desktop-bundle`.
+
 ## [0.1.1] - 2026-09-09
 
 The package is renamed. `native-symfony/desktop-bundle` was never published:
@@ -70,6 +77,7 @@ verified by a packaged application that was built *and run*, not only by tests.
   runs them before its API server exists and `JSON.parse`s their stdout, so
   anything an application echoes during console boot breaks the parse silently.
 
-[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.2
 [0.1.1]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.1
 [0.1.0]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.0

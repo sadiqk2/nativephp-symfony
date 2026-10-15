@@ -9,6 +9,21 @@ until `1.0.0`.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-10-15
+
+### Added
+
+- **`BridgeDispatcher`**: implemented `Native\Symfony\Mobile\Runtime\BridgeDispatcher` with base64 parameter decoding, safe error formatting, and unbooted runtime error catching with output buffer protection. Added class alias for upstream `Native\Mobile\Http\Bridge\BridgeDispatcher`.
+- **`Device::thermalState()`**: query device thermal status (`nominal`, `fair`, `serious`, `critical`).
+- **`System` orientation**: added `System::orientation()`, `System::isPortrait()`, and `System::isLandscape()`.
+- **`MobileRuntimePatcher` updates**: added support for iOS `Bridge/AsyncTaskExecutor.swift` and retargeting of host `BridgeDispatcher` invocations in C bridge sources.
+
+### Fixed
+
+- **Output buffer leak in persistent runtime**: isolated `ob_start()` in `BridgeDispatcher::serve()` inside a `try ... finally` block, preventing buffer leakage when exceptions occur.
+- **Base64 parameter decoding in `BridgeDispatcher::dispatch()`**: properly decodes request parameters prior to kernel dispatch, fixing URI and body handling.
+- **Subtree publishing**: restored automatic split and push to `sadiqk2/nativephp-symfony-mobile-bundle`.
+
 ## [0.1.1] - 2026-09-09
 
 The package is renamed. `native-symfony/mobile-bundle` was never published:
@@ -72,6 +87,7 @@ single most valuable contribution anyone with a Mac or an Android SDK can make.
   Mobile is sold as a product, though the `mobile-air` repository itself is MIT.
   Read its terms rather than either summary.
 
-[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/sadiqk2/nativephp-symfony/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.2
 [0.1.1]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.1
 [0.1.0]: https://github.com/sadiqk2/nativephp-symfony/releases/tag/v0.1.0
