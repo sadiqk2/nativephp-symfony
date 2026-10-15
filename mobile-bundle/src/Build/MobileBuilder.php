@@ -530,7 +530,7 @@ final class MobileBuilder
     public function cacheWarmupCommand(): PlannedCommand
     {
         return new PlannedCommand(
-            ['php', 'bin/console', 'cache:warmup', '--env=prod', '--no-debug'],
+            [\PHP_BINARY, 'bin/console', 'cache:warmup', '--env=prod', '--no-debug'],
             $this->stagePath(),
             'Warm the production cache',
             timeout: 600,

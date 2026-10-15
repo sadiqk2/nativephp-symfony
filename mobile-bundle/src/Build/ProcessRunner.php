@@ -31,8 +31,9 @@ final class ProcessRunner implements CommandRunnerInterface
 
     public function run(PlannedCommand $command, ?callable $onOutput = null): int
     {
+        $nullDevice = \PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
         $descriptors = [
-            0 => ['file', '/dev/null', 'r'],
+            0 => ['file', $nullDevice, 'r'],
             1 => ['pipe', 'w'],
             2 => ['pipe', 'w'],
         ];
