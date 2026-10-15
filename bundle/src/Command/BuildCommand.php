@@ -236,6 +236,7 @@ final class BuildCommand extends Command
             'NATIVEPHP_UPDATER_CONFIG' => json_encode($publishTarget?->builderOptions() ?? [], \JSON_THROW_ON_ERROR),
             'NATIVEPHP_NSIS_DELETE_APP_DATA' => ($this->config['nsis']['delete_app_data_on_uninstall'] ?? false) ? 'true' : 'false',
             'APP_URL' => (string) ($this->config['base_url'] ?? ''),
+            'CSC_IDENTITY_AUTO_DISCOVERY' => 'false',
             // GH_TOKEN, AWS_* or DO_* — whatever the chosen provider uploads with.
             ...$publishTarget?->environmentVariables() ?? [],
         ];
