@@ -9,6 +9,15 @@ until `1.0.0`.
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-10-15
+
+### Fixed
+
+- **Windows CRLF Patching**: `RuntimePatcher` normalizes `\r\n` line endings so `native:install` succeeds cleanly on Windows.
+- **Windows PHP Environment**: `RunCommand` automatically detects host `php.ini`, copies it to the build path with absolute `extension_dir`, and sets `variables_order = "EGPCS"`.
+- **SAPI Environment Propagation**: `nativephp-router.php` ensures `NATIVEPHP_SECRET`, `NATIVEPHP_API_URL`, and `NATIVEPHP_RUNNING` propagate into `$_SERVER` and `$_ENV` across built-in server requests.
+- **Windows Distribution Packaging**: `BuildCommand` sets `CSC_IDENTITY_AUTO_DISCOVERY: 'false'` to prevent `winCodeSign` symlink extraction failures on unsigned builds.
+
 ## [0.1.2] - 2026-10-15
 
 ### Fixed
