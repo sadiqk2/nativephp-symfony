@@ -215,19 +215,20 @@ final class UiStyledNodeParityTest extends TestCase
         // apply to.
         if (isset($node['style']['border_width']) && !isset($node['style']['border_color'])) {
             unset($node['style']['border_width']);
-            if ([] !== $node['style']) {
-                $node['style']['border_color'] = '#00000000';
-            }
+        }
+
+        // Upstream collector's withDefaultBorderColor adds a transparent border_color
+        // (#00000000) to any styled node without an authored border. Strip it so the
+        // comparison checks authored styling rather than upstream's default fill.
+        if (isset($node['style']['border_color']) && '#00000000' === $node['style']['border_color']) {
+            unset($node['style']['border_color']);
         }
 
         // Directional borders (border-t, border-b, etc.): upstream's collector maps
         // the first directional side to a uniform border_width, whereas our parser
         // deliberately drops directional borders rather than faking uniform borders.
         if (preg_match('/\bborder-[tblr]\b/', $classes)) {
-            unset($node['style']['border_width']);
-            if (isset($node['style']['border_color'])) {
-                $node['style']['border_color'] = '#00000000';
-            }
+            unset($node['style']['border_width'], $node['style']['border_color']);
         }
 
         // Per-corner radii. Ours are built exactly as upstream's
