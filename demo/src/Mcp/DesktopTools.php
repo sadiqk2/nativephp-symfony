@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Mcp;
 
+use App\Mcp\Dto\DiagnosisResult;
+use App\Mcp\Prompt\TwigPromptRenderer;
 use Mcp\Capability\Attribute\McpPrompt;
 use Mcp\Capability\Attribute\McpResource;
 use Mcp\Capability\Attribute\McpTool;
@@ -26,6 +28,7 @@ final class DesktopTools
         private readonly ClientInterface $nativeClient,
         private readonly RouterInterface $router,
         private readonly KernelInterface $kernel,
+        private readonly TwigPromptRenderer $prompts,
     ) {
     }
 
@@ -87,7 +90,6 @@ final class DesktopTools
                 return '' !== $text ? $text : '[Clipboard is empty]';
             }
 
-            // Windows PowerShell fallback
             if (\PHP_OS_FAMILY === 'Windows') {
                 $content = @\shell_exec('powershell -NoProfile -Command "Get-Clipboard"');
                 return null !== $content && '' !== \trim($content) ? \trim($content) : '[Clipboard is empty]';
@@ -194,6 +196,39 @@ final class DesktopTools
     }
 
     /**
+     * Performs structured diagnosis of an error (inspired by Prism PHP structured outputs).
+     */
+    #[McpTool(
+        name: 'audit_symfony_error',
+        title: 'Structured Symfony Error Diagnosis',
+        description: 'Parses an error message or stack trace and returns a structured diagnosis object.'
+    )]
+    public function auditSymfonyError(string $errorMessage): string
+    {
+        $isMissingKey = \str_contains($errorMessage, 'Undefined array key');
+        $isRouteNotFound = \str_contains($errorMessage, 'NotFound') || \str_contains($errorMessage, '404');
+
+        $severity = ($isMissingKey || $isRouteNotFound) ? 'MEDIUM' : 'HIGH';
+        $summary = $isMissingKey ? 'Array key access without null-coalescing' : 'Symfony runtime exception';
+        $rootCause = $isMissingKey
+            ? 'Accessing an uninitialized index in array. PHP 8.4 enforces strict undefined key notices.'
+            : 'Uncaught exception during kernel request dispatch.';
+        $proposedFix = $isMissingKey
+            ? 'Use $array[$key] ?? $default or array_key_exists() check before accessing.'
+            : 'Add a try-catch block or verify dependency injection configurations in services.yaml.';
+
+        $result = new DiagnosisResult(
+            severity: $severity,
+            summary: $summary,
+            rootCause: $rootCause,
+            proposedFix: $proposedFix,
+            suggestedCommands: ['cache:clear', 'debug:router']
+        );
+
+        return (string) \json_encode($result->toArray(), \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES);
+    }
+
+    /**
      * Resource listing all routes in this application.
      */
     #[McpResource(
@@ -244,24 +279,36 @@ final class DesktopTools
     }
 
     /**
-     * Prompt template to assist developers in debugging Symfony errors.
+     * Prompt template rendered via Twig (inspired by Prism PHP's Blade prompt templates).
      */
     #[McpPrompt(
         name: 'diagnose_symfony_error',
-        title: 'Diagnose Symfony Error',
-        description: 'Guides an LLM agent to analyze a Symfony stack trace, inspect routes, and propose a fix.'
+        title: 'Diagnose Symfony Error (Twig Template)',
+        description: 'Renders a rich diagnostic prompt for LLM agents using Twig templating.'
     )]
     public function diagnoseExceptionPrompt(string $error): array
     {
+        $routes = [];
+        foreach ($this->router->getRouteCollection()->all() as $name => $route) {
+            $routes[] = ['name' => $name, 'path' => $route->getPath(), 'methods' => $route->getMethods()];
+        }
+
+        $renderedPrompt = $this->prompts->render('diagnose_error', [
+            'error' => $error,
+            'routes' => $routes,
+            'status' => [
+                'php_version' => \PHP_VERSION,
+                'os' => \PHP_OS_FAMILY,
+                'environment' => $this->kernel->getEnvironment(),
+            ],
+        ]);
+
         return [
             [
                 'role' => 'user',
                 'content' => [
                     'type' => 'text',
-                    'text' => \sprintf(
-                        "I am developing a desktop app using Symfony 8 and NativePHP. An error occurred:\n\n```\n%s\n```\n\nPlease:\n1. Explain the probable root cause.\n2. Use the available `run_symfony_command` or inspect routes if needed.\n3. Propose a clean PHP 8.4 fix.\n4. When you are done, invoke `system_notify` to alert me and `write_clipboard` with the fix.",
-                        $error
-                    ),
+                    'text' => $renderedPrompt,
                 ],
             ],
         ];
