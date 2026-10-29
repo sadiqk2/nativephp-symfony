@@ -1,7 +1,7 @@
 {
     "type": "project",
     "license": "proprietary",
-    "minimum-stability": "stable",
+    "minimum-stability": "beta",
     "prefer-stable": true,
     "require": {
         "php": ">=8.4",
@@ -15,10 +15,14 @@
         "symfony/flex": "^2",
         "symfony/framework-bundle": "8.1.*",
         "symfony/http-client": "8.1.*",
-        "symfony/monolog-bundle": "^4.0",
+        "symfony/monolog-bundle": "^4.1",
         "symfony/runtime": "8.1.*",
         "symfony/twig-bundle": "8.1.*",
-        "symfony/yaml": "8.1.*"
+        "symfony/yaml": "8.1.*",
+        "symfony/mcp-bundle": "^1.0@beta",
+        "symfony/ai-bundle": "^1.0@beta",
+        "symfony/ai-hugging-face-platform": "^1.0@beta",
+        "symfony/ai-anthropic-platform": "^1.0@beta"
     },
     "config": {
         "allow-plugins": {
@@ -75,14 +79,14 @@
     "repositories": [{
         "name": "mobile-bundle",
         "type": "path",
-        "url": "/mobile-bundle",
+        "url": "../mobile-bundle",
         "options": {
             "symlink": true
         }
     },{
         "name": "desktop-bundle",
         "type": "path",
-        "url": "/bundle",
+        "url": "../bundle",
         "options": {
             "symlink": true
         }

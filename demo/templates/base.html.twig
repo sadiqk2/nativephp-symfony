@@ -19,6 +19,7 @@
         </span>
     </div>
     <a href="{{ path('dashboard') }}" class="{{ app.request.pathInfo == '/' ? 'on' : '' }}">Dashboard</a>
+    <a href="{{ path('mcp_dashboard') }}" class="{{ app.request.pathInfo starts with '/ai-mcp' ? 'on' : '' }}">AI & MCP</a>
     <a href="{{ path('notes') }}" class="{{ app.request.pathInfo starts with '/notes' ? 'on' : '' }}">Notes</a>
     <a href="{{ path('jobs') }}" class="{{ app.request.pathInfo starts with '/jobs' ? 'on' : '' }}">Jobs</a>
     <a href="{{ path('mobile') }}" class="{{ app.request.pathInfo starts with '/mobile' ? 'on' : '' }}">Mobile</a>

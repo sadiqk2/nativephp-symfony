@@ -6,4 +6,6 @@ return [
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     Native\Symfony\Desktop\NativeDesktopBundle::class => ['all' => true],
     Native\Symfony\Mobile\NativeMobileBundle::class => ['all' => true],
+    Symfony\AI\AiBundle\AiBundle::class => ['all' => true],
+    Symfony\AI\McpBundle\McpBundle::class => ['all' => true],
 ];

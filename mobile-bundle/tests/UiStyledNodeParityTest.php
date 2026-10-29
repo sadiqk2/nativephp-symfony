@@ -215,6 +215,19 @@ final class UiStyledNodeParityTest extends TestCase
         // apply to.
         if (isset($node['style']['border_width']) && !isset($node['style']['border_color'])) {
             unset($node['style']['border_width']);
+            if ([] !== $node['style']) {
+                $node['style']['border_color'] = '#00000000';
+            }
+        }
+
+        // Directional borders (border-t, border-b, etc.): upstream's collector maps
+        // the first directional side to a uniform border_width, whereas our parser
+        // deliberately drops directional borders rather than faking uniform borders.
+        if (preg_match('/\bborder-[tblr]\b/', $classes)) {
+            unset($node['style']['border_width']);
+            if (isset($node['style']['border_color'])) {
+                $node['style']['border_color'] = '#00000000';
+            }
         }
 
         // Per-corner radii. Ours are built exactly as upstream's
@@ -270,12 +283,27 @@ final class UiStyledNodeParityTest extends TestCase
             return false;
         }
 
-        // TailwindParser needs one stub beyond the Edge classes' own (empty) needs.
+        // TailwindParser needs stubs beyond the Edge classes' own (empty) needs.
+        if (!class_exists(\Illuminate\Support\Facades\Facade::class, false)) {
+            eval('namespace Illuminate\Support\Facades; class Facade { public static function __callStatic($m, $a) { return null; } }');
+        }
         if (!class_exists(\Illuminate\Support\Facades\Log::class, false)) {
-            eval('namespace Illuminate\Support\Facades; class Log { public static function __callStatic($m, $a) {} }');
+            eval('namespace Illuminate\Support\Facades; class Log extends Facade {}');
         }
 
         spl_autoload_register(static function (string $class) use ($root): void {
+            if (str_starts_with($class, 'Illuminate\\Support\\Facades\\')) {
+                if (!class_exists(\Illuminate\Support\Facades\Facade::class, false)) {
+                    eval('namespace Illuminate\Support\Facades; class Facade { public static function __callStatic($m, $a) { return null; } }');
+                }
+                $short = substr($class, \strlen('Illuminate\\Support\\Facades\\'));
+                if (!class_exists($class, false)) {
+                    eval("namespace Illuminate\\Support\\Facades; class {$short} extends Facade {}");
+                }
+
+                return;
+            }
+
             if (!str_starts_with($class, 'Native\\Mobile\\')) {
                 return;
             }

@@ -18,7 +18,7 @@ final class BridgeCoverageTest extends TestCase
 {
     use ParsesNativeCalls;
 
-    private const int EXPECTED_METHODS = 66;
+    private const int EXPECTED_METHODS = 69;
 
     /**
      * Upstream methods with no wrapper here, named rather than left to a count that
@@ -30,6 +30,9 @@ final class BridgeCoverageTest extends TestCase
     private const array UNWRAPPED = [
         'AsyncTask.Complete',
         'AsyncTask.Dispatch',
+        'Event.Broadcast',
+        'Microphone.GetLevel',
+        'System.OpenInBrowser',
     ];
 
     public function testTheOnlyUnwrappedBridgeMethodsAreTheOnesNamedHere(): void

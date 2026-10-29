@@ -63,6 +63,7 @@ final class Bootstrapper implements AppBootstrapper
         // as a caller-named event, exactly like a menu item, so one listener can
         // serve both.
         $this->shortcuts->register('CommandOrControl+Shift+N', Event\MenuAction::NewNote->value);
+        $this->shortcuts->register('CommandOrControl+Shift+M', Event\MenuAction::OpenMcp->value);
     }
 
     /**
@@ -90,6 +91,7 @@ final class Bootstrapper implements AppBootstrapper
                 ->label('Seed three notes', event: Event\MenuAction::Seed->value))
             ->submenu('Window', Menu::new()
                 ->label('Open inspector', event: Event\MenuAction::OpenInspector->value, accelerator: 'CommandOrControl+I')
+                ->label('AI & MCP Studio', event: Event\MenuAction::OpenMcp->value, accelerator: 'CommandOrControl+Shift+M')
                 ->label('Show the mobile screens', event: Event\MenuAction::MobileScreens->value)
                 ->separator()
                 ->role(MenuRole::Minimize)

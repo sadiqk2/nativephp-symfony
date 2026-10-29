@@ -24,5 +24,6 @@ enum MenuAction: string
     case CopyLatest = 'App\Menu\CopyLatest';
     case Seed = 'App\Menu\Seed';
     case OpenInspector = 'App\Menu\OpenInspector';
+    case OpenMcp = 'App\Menu\OpenMcp';
     case MobileScreens = 'App\Menu\MobileScreens';
 }
