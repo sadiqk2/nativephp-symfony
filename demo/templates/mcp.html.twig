@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Deskpad — AI & MCP Studio{% endblock %}
+{% block hint %}Claude Desktop · PHP MCP SDK · Symfony AI{% endblock %}
+
+{% block body %}
+    <h1>AI & Model Context Protocol</h1>
+    <p class="lede">
+        Empowering external AI assistants (like Claude Desktop, Cursor, and IDE agents) to interact
+        directly with your desktop host operating system and Symfony backend via the official PHP MCP SDK.
+    </p>
+
+    {% for message in app.flashes('mcp_result') %}
+        <div class="card" style="margin-bottom: 1.2rem; border-left: 4px solid #10b981; background: #064e3b22;">
+            <strong style="color: #10b981;">⚡ Tool Execution Output:</strong>
+            <pre style="margin-top: .6rem; white-space: pre-wrap; font-size: .85rem;">{{ message }}</pre>
+        </div>
+    {% endfor %}
+
+    <div class="grid">
+        <div class="card">
+            <h2>MCP Server Capabilities</h2>
+            <table>
+                <tr>
+                    <td class="k">STDIO Server</td>
+                    <td><code>bin/console mcp:server</code> <span class="dim">(Active)</span></td>
+                </tr>
+                <tr>
+                    <td class="k">Protocol Spec</td>
+                    <td><code>2024-11-05</code></td>
+                </tr>
+                <tr>
+                    <td class="k">SDK</td>
+                    <td><code>mcp/sdk ^0.9</code> + <code>symfony/mcp-bundle</code></td>
+                </tr>
+                <tr>
+                    <td class="k">Desktop Bridge</td>
+                    <td><code>sadiqk2/nativephp-symfony-desktop-bundle</code></td>
+                </tr>
+                <tr>
+                    <td class="k">Registered Tools</td>
+                    <td><code>system_notify</code>, <code>read_clipboard</code>, <code>write_clipboard</code>, <code>open_native_window</code>, <code>run_symfony_command</code></td>
+                </tr>
+                <tr>
+                    <td class="k">Registered Resources</td>
+                    <td><code>symfony://app/routes</code>, <code>symfony://app/status</code></td>
+                </tr>
+                <tr>
+                    <td class="k">Registered Prompts</td>
+                    <td><code>diagnose_symfony_error</code></td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 1.2rem; font-size: .95rem;">Test Desktop Tools Interactively</h3>
+            <div class="row" style="margin-top: .6rem; gap: .5rem; flex-wrap: wrap;">
+                <form method="post" action="{{ path('mcp_test_tool') }}" style="display:inline">
+                    <input type="hidden" name="tool" value="notify">
+                    <button class="primary" type="submit">🔔 Trigger OS Notification</button>
+                </form>
+
+                <form method="post" action="{{ path('mcp_test_tool') }}" style="display:inline">
+                    <input type="hidden" name="tool" value="clipboard">
+                    <button type="submit">📋 Copy Code to Clipboard</button>
+                </form>
+
+                <form method="post" action="{{ path('mcp_test_tool') }}" style="display:inline">
+                    <input type="hidden" name="tool" value="command">
+                    <button type="submit">⚡ Run 'about' Command</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Connect Claude Desktop</h2>
+            <p class="dim" style="font-size: .85rem;">
+                Add this block to your <code>claude_desktop_config.json</code> to give Claude direct access to this Symfony application:
+            </p>
+            <pre style="background: #1e1e2e; padding: .8rem; border-radius: 6px; font-size: .8rem; overflow-x: auto;"><code>{
+  "mcpServers": {
+    "symfony-desktop": {
+      "command": "php",
+      "args": [
+        "{{ status.project_dir|replace({'\\': '/'}) }}/bin/console",
+        "mcp:server"
+      ]
+    }
+  }
+}</code></pre>
+
+            <h3 style="margin-top: 1.2rem; font-size: .95rem;">What Claude Can Now Do:</h3>
+            <ul style="font-size: .85rem; padding-left: 1.2rem; line-height: 1.6;" class="dim">
+                <li>Ring native system notifications when asynchronous tasks finish.</li>
+                <li>Read and paste code directly into your OS clipboard.</li>
+                <li>Launch dedicated preview windows on your desktop.</li>
+                <li>Safely execute Symfony console commands and inspect routes.</li>
+            </ul>
+        </div>
+    </div>
+{% endblock %}
