@@ -194,8 +194,14 @@ final class UiElementCoverageTest extends TestCase
         }
 
         spl_autoload_register(static function (string $class) use ($root): void {
-            if ('Illuminate\Support\Facades\Log' === $class) {
-                eval('namespace Illuminate\Support\Facades; class Log { public static function __callStatic($m, $a) {} }');
+            if (str_starts_with($class, 'Illuminate\\Support\\Facades\\')) {
+                if (!class_exists(\Illuminate\Support\Facades\Facade::class, false)) {
+                    eval('namespace Illuminate\Support\Facades; class Facade { public static function __callStatic($m, $a) { return null; } }');
+                }
+                $short = substr($class, \strlen('Illuminate\\Support\\Facades\\'));
+                if (!class_exists($class, false)) {
+                    eval("namespace Illuminate\\Support\\Facades; class {$short} extends Facade {}");
+                }
 
                 return;
             }
