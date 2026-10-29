@@ -35,6 +35,6 @@ final class Circle extends Element
 
     protected function styleDefaults(): array
     {
-        return ['border_radius' => 9999];
+        return ['border_radius' => 9999, 'border_color' => '#00000000'];
     }
 }

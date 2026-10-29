@@ -194,13 +194,7 @@ abstract class Element
     /** @return array<string, mixed> */
     protected function resolvedStyle(): array
     {
-        $style = array_merge($this->styleDefaults(), $this->style);
-
-        if ([] !== $style && !isset($style['border_color']) && !isset($style['border_width'])) {
-            $style['border_color'] = '#00000000';
-        }
-
-        return $style;
+        return array_merge($this->styleDefaults(), $this->style);
     }
 
     /**
