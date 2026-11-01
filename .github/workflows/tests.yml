@@ -36,7 +36,7 @@ jobs:
 
       # Runs unprivileged, unlike a container job: the tests that assert an unwritable
       # file is an error can only be provoked as a normal user, and root skips them.
-      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2.40.0
         with:
           php-version: ${{ matrix.php }}
           extensions: zip
@@ -83,7 +83,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2.37.2
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # v2.40.0
         with:
           php-version: '8.4'
           extensions: zip
